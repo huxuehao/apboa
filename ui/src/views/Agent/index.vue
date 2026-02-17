@@ -1,0 +1,331 @@
+/**
+ * 智能体管理主页面
+ *
+ * @author huxuehao
+ */
+<script setup lang="ts">
+/* eslint-disable vue/multi-word-component-names */
+import { onMounted, ref, onUnmounted, computed, h } from 'vue'
+import { Modal } from 'ant-design-vue'
+import { SearchOutlined } from '@ant-design/icons-vue'
+import { useAgentStore } from '@/stores'
+import { storeToRefs } from 'pinia'
+import * as agentApi from '@/api/agent'
+import type { AgentDefinitionVO } from '@/types'
+import AgentCard from '@/components/agent/AgentCard.vue'
+import CreateCard from '@/components/agent/CreateCard.vue'
+import AgentForm from '@/components/agent/AgentForm.vue'
+
+const store = useAgentStore()
+const { list, tags, selectedAgentType, selectedTag, keyword, loading, hasMore } = storeToRefs(store)
+
+const formVisible = ref<boolean>(false)
+const currentData = ref<AgentDefinitionVO | undefined>(undefined)
+const scrollContainer = ref<HTMLElement>()
+const loadMoreObserver = ref<IntersectionObserver>()
+
+/**
+ * 智能体类型选项
+ */
+const agentTypeOptions = [
+  { label: '智能体', value: 'AGENT' },
+  { label: '智能体协同', value: 'MULTI' }
+]
+
+/**
+ * 标签选项列表
+ */
+const tagOptions = computed(() => {
+  const options = tags.value.map((tag: string) => ({
+    label: tag,
+    value: tag
+  }))
+  return [
+    { label: '全部', value: null },
+    ...options
+  ]
+})
+
+/**
+ * 处理新增
+ */
+function handleCreate() {
+  currentData.value = undefined
+  formVisible.value = true
+}
+
+/**
+ * 处理查看
+ */
+async function handleView(id: string) {
+  const response = await agentApi.detail(id)
+  const data = response.data.data
+
+  Modal.info({
+    title: '智能体详情',
+    closable: true,
+    icon: null,
+    footer: null,
+    style: {top: '50px'},
+    width: 800,
+    content: h('div', { style: { maxHeight: '800px', overflowY: 'auto' } }, [
+      h('p', {}, [h('strong', '主智能体: '), data.used?.length ? data.used.join('、') : '无']),
+      h('p', {}, [h('strong', '名称: '), data.name]),
+      h('p', {}, [h('strong', '智能体编号: '), data.agentCode]),
+      h('p', {}, [h('strong', '描述: '), data.description]),
+      ...(data.tag ? [h('p', {}, [h('strong', '标签: '), data.tag])] : []),
+      h('p', {}, [h('strong', '模型配置ID: '), data.modelConfigId]),
+      h('p', {}, [h('strong', '系统提示词模板ID: '), data.systemPromptTemplateId]),
+      h('p', {}, [h('strong', '随模板变化: '), data.followTemplate ? '是' : '否']),
+      h('p', {}, [h('strong', '工具选择策略: '), data.toolChoiceStrategy]),
+      h('p', {}, [h('strong', '工具数量: '), data.tool.length]),
+      h('p', {}, [h('strong', '技能包数量: '), data.skill.length]),
+      h('p', {}, [h('strong', '知识库数量: '), data.knowledgeBase.length]),
+      h('p', {}, [h('strong', 'MCP数量: '), data.mcp.length]),
+      h('p', {}, [h('strong', '子智能体数量: '), data.subAgent.length]),
+      h('p', {}, [h('strong', '启用敏感词: '), data.sensitiveFilterEnabled ? '是' : '否']),
+      h('p', {}, [h('strong', '启用计划: '), data.enablePlanning ? '是' : '否']),
+      h('p', {}, [h('strong', '启用记忆: '), data.enableMemory ? '是' : '否']),
+      h('p', {}, [h('strong', '结构化输出: '), data.structuredOutputEnabled ? '是' : '否'])
+    ])
+  })
+}
+
+/**
+ * 处理编辑
+ */
+async function handleEdit(id: string) {
+  const response = await agentApi.detail(id)
+  currentData.value = response.data.data
+  formVisible.value = true
+}
+
+/**
+ * 处理删除
+ */
+async function handleDelete(id: string) {
+  const used = await store.checkUsedWithAgent(id)
+  if (used.length > 0) {
+    Modal.confirm({
+      title: '二次确认',
+      content: `该智能体正在被 [ ${used.join('、')} ] 智能体引用，删除后可能会影响上述智能体的正常使用！`,
+      okText: '确认并继续删除',
+      onOk: async () => {
+        await store.deleteConfig(id)
+        store.resetAndFetch()
+      }
+    })
+    return
+  }
+
+  Modal.confirm({
+    title: '确认删除',
+    content: '删除后无法恢复,是否继续?',
+    onOk: async () => {
+      await store.deleteConfig(id)
+      store.resetAndFetch()
+    }
+  })
+}
+
+/**
+ * 处理表单提交成功
+ */
+function handleFormSuccess() {
+  store.resetAndFetch()
+  store.fetchTags()
+}
+
+/**
+ * 处理智能体类型切换
+ */
+function handleAgentTypeChange(value: string | null) {
+  store.setAgentType(value)
+}
+
+/**
+ * 处理标签切换
+ */
+function handleTagChange(value: string | null) {
+  store.setTag(value)
+}
+
+/**
+ * 处理搜索
+ */
+function handleSearch() {
+  store.setKeyword(keyword.value)
+}
+
+/**
+ * 访问智能体对话（新开页）
+ */
+function handleGoVisit(id: string) {
+  const hash = `#/chat/${encodeURIComponent(id)}`
+  const url = `${window.location.origin}${window.location.pathname}${hash}`
+  window.open(url, '_blank')
+}
+
+/**
+ * 智能体对话历史（新开页）
+ */
+function handleAccessLog(id: string) {
+  const hash = `#/chat/history/${encodeURIComponent(id)}`
+  const url = `${window.location.origin}${window.location.pathname}${hash}`
+  window.open(url, '_blank')
+}
+
+/**
+ * 处理状态
+ */
+async function handleEnable(id: string) {
+  const response = await agentApi.detail(id)
+  const { enabled } = response.data.data
+
+  const used = await store.checkUsedWithAgent(id)
+  if (used.length > 0 && enabled) {
+    Modal.confirm({
+      title: '二次确认',
+      content: `该智能体正在被 [ ${used.join('、')} ] 智能体引用，禁用后可能会影响上述智能体的正常使用！`,
+      okText: '确认并继续',
+      onOk: async () => {
+        await store.toggleEnabled(id, !enabled)
+      }
+    })
+    return
+  }
+
+  await store.toggleEnabled(id, !enabled)
+}
+
+/**
+ * 初始化无限滚动观察器
+ */
+function initIntersectionObserver() {
+  if (!scrollContainer.value) return
+
+  const sentinel = document.createElement('div')
+  sentinel.className = 'scroll-sentinel'
+  scrollContainer.value.appendChild(sentinel)
+
+  loadMoreObserver.value = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0]
+      if (entry && entry.isIntersecting && hasMore.value && !loading.value) {
+        store.loadMore()
+      }
+    },
+    { threshold: 0.1 }
+  )
+
+  loadMoreObserver.value.observe(sentinel)
+}
+
+onMounted(() => {
+  store.fetchTags()
+  store.fetchPage(1)
+  setTimeout(() => {
+    initIntersectionObserver()
+  }, 100)
+})
+
+onUnmounted(() => {
+  loadMoreObserver.value?.disconnect()
+})
+</script>
+
+<template>
+  <div class="agent-page">
+    <section class="intro-section">
+      <h3 class="intro-title">智能体管理</h3>
+      <p class="intro-desc text-secondary">
+        智能体是AI系统的核心组件,通过配置模型、工具、提示词、敏感词、技能包、MCP和知识库等多个维度,
+        赋予智能体强大的感知、推理和执行能力。精心设计的智能体能够理解复杂需求、制定执行计划、
+        调用外部工具、访问知识库,并以结构化的方式输出结果,真正实现从"对话助手"到"智能伙伴"的跨越。
+      </p>
+    </section>
+
+    <section class="filter-section flex justify-between items-center">
+      <div class="filter-left">
+        <ASegmented
+          v-model:value="selectedAgentType"
+          :options="agentTypeOptions"
+          @change="handleAgentTypeChange"
+        />
+      </div>
+
+      <div class="filter-right flex items-center gap-md">
+        <ASelect
+          v-model:value="selectedTag"
+          placeholder="选择标签"
+          style="width: 200px; border: rgba(14,14,14,0.1) solid 1px !important; border-radius: 6px;"
+          @change="handleTagChange"
+        >
+          <ASelectOption v-for="opt in tagOptions" :key="opt.value" :value="opt.value">
+            {{ opt.label }}
+          </ASelectOption>
+        </ASelect>
+
+        <AInput
+          v-model:value="keyword"
+          placeholder="搜索智能体名称"
+          style="width: 300px; border: rgba(14,14,14,0.1) solid 1px !important;"
+          @pressEnter="handleSearch"
+        >
+          <template #suffix>
+            <AButton type="text" size="small" @click="handleSearch">
+              <SearchOutlined />
+            </AButton>
+          </template>
+        </AInput>
+      </div>
+    </section>
+
+    <section ref="scrollContainer" class="card-section" v-show="selectedAgentType === 'AGENT'">
+      <div class="card-grid">
+        <CreateCard @click="handleCreate" v-permission="['EDIT','ADMIN']" />
+
+        <AgentCard
+          v-for="item in list"
+          :key="item.id"
+          :data="item"
+          @view="handleView"
+          @edit="handleEdit"
+          @enable="handleEnable"
+          @delete="handleDelete"
+          @go-visit="handleGoVisit"
+          @access-log="handleAccessLog"
+        />
+      </div>
+
+      <div v-if="loading" class="load-indicator mt-md">
+        <ASpin />
+        <span class="ml-sm text-secondary">加载中...</span>
+      </div>
+
+      <div v-if="!hasMore && list.length > 0" class="no-more-indicator text-secondary mt-md">
+        没有更多数据了
+      </div>
+
+      <div v-if="!loading && list.length === 0" class="empty-indicator mt-lg">
+        <AEmpty description="暂无数据" />
+      </div>
+    </section>
+    <section v-show="selectedAgentType === 'MULTI'">
+      <div style="text-align: center" class="text-placeholder">
+        未来将会支持通过编排智能体实现多智能体协同，同时会将 Agent As Tool 移动到该模块中
+      </div>
+    </section>
+
+    <AgentForm
+      v-model:visible="formVisible"
+      :data="currentData"
+      :tags="tags"
+      @success="handleFormSuccess"
+    />
+  </div>
+</template>
+
+<style scoped lang="scss">
+@use '@/styles/agent/index.scss' as *;
+</style>

@@ -1,0 +1,24 @@
+/**
+ * UserSection组件样式
+ *
+ * @author huxuehao
+ */
+
+.user-section {
+  .user-info {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+
+    .username {
+      font-size: 14px;
+      color: #262626;
+      white-space: nowrap;
+    }
+  }
+}

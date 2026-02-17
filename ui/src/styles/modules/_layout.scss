@@ -1,0 +1,66 @@
+/**
+ * 布局样式
+ *
+ * @author huxuehao
+ */
+
+.app-layout {
+  min-height: 100vh;
+
+  .layout-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 55px;
+    background-color: var(--color-bg);
+    border-bottom: 1px solid #e8e8e8;
+    z-index: 100;
+  }
+
+  .layout-content {
+    margin-top: 55px;
+    min-height: calc(100vh - 55px - 105px);
+  }
+
+  .layout-footer {
+    height: 105px;
+  }
+}
+
+/* Slide-right 动画 */
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-right-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.slide-right-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+/* 或者如果你想保持当前位置 */
+.slide-right-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.slide-right-enter-to {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.slide-right-leave-from {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.slide-right-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}

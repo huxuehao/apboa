@@ -1,0 +1,29 @@
+/**
+ * AppMenu组件样式
+ *
+ * @author huxuehao
+ */
+
+.app-menu {
+  :deep(.ant-segmented) {
+    font-size: 14px;
+    color: var(--color-text-primary);
+
+  }
+
+  :deep(.ant-segmented-item-selected) {
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  :deep(.menu-item-label) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  :deep(.menu-item-icon) {
+    font-size: 16px;
+  }
+}

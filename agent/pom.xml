@@ -1,0 +1,53 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.hxh.apboa</groupId>
+        <artifactId>apboa</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>agent</artifactId>
+    <packaging>jar</packaging>
+
+    <name>agent</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>hook</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>knowledge</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>mcp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>prompt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>sensitive</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>skill</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>tool</artifactId>
+        </dependency>
+    </dependencies>
+</project>

@@ -1,0 +1,203 @@
+/* 字体 */
+@font-face {
+  font-family: 'AlimamaFangYuan';
+  src: url("@/assets/fonts/AlimamaFangYuanTiVF-Thin.woff");
+}
+
+/* CSS 变量定义 */
+:root {
+  /* 背景颜色 */
+  --color-bg: #f5f6f8;
+  /* 颜色系统 */
+  --color-primary: #0f74ff;
+  --color-success: #67c23a;
+  --color-warning: #e6a23c;
+  --color-danger: #f56c6c;
+  --color-error: #f56c6c;
+  --color-info: #909399;
+
+  /* 文本颜色 */
+  --color-text-primary: #303133;
+  --color-text-regular: #606266;
+  --color-text-secondary: rgb(182, 185, 190);
+  --color-text-placeholder: #a8abb2;
+
+  /* 边框颜色 */
+  --color-border-base: rgb(220, 223, 230);
+  --color-border-light: #e4e7ed;
+  --color-border-lighter: #ebeef5;
+  --color-border-extra-light: #f2f6fc;
+
+  /* 背景颜色 */
+  --color-bg-base: rgba(237, 237, 237, 0);
+  --color-bg-light: #fafafa;
+  --color-bg-white: #ffffff;
+
+  /* 字体家族 */
+  --font-family-base: 'AlimamaFangYuan', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono',
+    Consolas, 'Courier New', monospace;
+
+  /* 字体大小 */
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+
+  /* 行高 */
+  --line-height-base: 1.5;
+  --line-height-tight: 1.25;
+  --line-height-relaxed: 1.75;
+
+  /* 间距 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-base: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+
+  /* 圆角 */
+  --border-radius-sm: 2px;
+  --border-radius-base: 4px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 8px;
+  --border-radius-xl: 12px;
+  --border-radius-round: 50%;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* 过渡动画 */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* z-index */
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+}
+
+/* CSS Reset 和基础样式 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  line-height: var(--line-height-base);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  font-size: var(--font-size-base);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-base), serif;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 标题样式 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+}
+
+h1 {
+  font-size: var(--font-size-3xl);
+}
+
+h2 {
+  font-size: var(--font-size-2xl);
+}
+
+h3 {
+  font-size: var(--font-size-xl);
+}
+
+h4 {
+  font-size: var(--font-size-lg);
+}
+
+h5 {
+  font-size: var(--font-size-base);
+}
+
+h6 {
+  font-size: var(--font-size-sm);
+}
+
+/* 链接样式 */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  background-color: transparent;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary);
+  opacity: 0.8;
+}
+
+a:active {
+  opacity: 0.9;
+}
+
+/* 列表样式 */
+ul,
+ol {
+  list-style: none;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--color-bg-base);
+  border-radius: var(--border-radius-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-base);
+  border-radius: var(--border-radius-base);
+  transition: background-color var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-text-secondary);
+}

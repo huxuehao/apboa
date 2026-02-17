@@ -1,0 +1,132 @@
+
+:root {
+  /* 定义 filled 模式的变量 */
+  --ant-filled-bg: #F2F4F7;
+  --ant-filled-hover-bg: #e6e6e6;
+  --ant-filled-focus-bg: #ffffff;
+  --ant-filled-disabled-bg: #F2F4F7;
+  --ant-filled-border: #d9d9d9;
+  --ant-filled-hover-border: #1890ff;
+  --ant-filled-focus-border: #5c7272;
+  --ant-filled-shadow: rgba(24, 144, 255, 0.2);
+  --ant-filled-radius: 6px;
+  --ant-filled-disabled-color: rgba(0, 0, 0, 0.25);
+  --ant-filled-placeholder-color: #8c8c8c;
+}
+
+/* 应用到所有表单控件 */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-select-selector,
+.ant-picker,
+.ant-cascader-picker,
+.ant-tree-select-selector {
+  /* 基础样式 */
+  background-color: var(--ant-filled-bg) !important;
+  border-color: var(--ant-filled-border) !important;
+  border-radius: var(--ant-filled-radius) !important;
+  border: none !important;
+
+  /* 占位符颜色 */
+  &::placeholder {
+    color: var(--ant-filled-placeholder-color) !important;
+  }
+
+  /* 悬停状态 */
+  /*&:hover:not(:disabled):not(.ant-input-disabled):not(.ant-input-affix-wrapper-disabled) {*/
+  /*  background-color: var(--ant-filled-hover-bg) !important;*/
+  /*  border-color: var(--ant-filled-hover-border) !important;*/
+  /*}*/
+
+  /* 聚焦状态 */
+  &:focus,
+  &.ant-input-focused,
+  &.ant-input-affix-wrapper-focused,
+  &.ant-picker-focused,
+  .ant-select-focused & {
+    background-color: var(--ant-filled-focus-bg) !important;
+    /*border-color: var(--ant-filled-focus-border) !important;*/
+    /*box-shadow: 0 0 0 2px var(--ant-filled-shadow) !important;*/
+    border-color: transparent !important;
+    box-shadow: 0 0 0 1px rgba(14,14,14,0.1) !important;
+  }
+
+  /* 禁用状态 */
+  &:disabled,
+  &.ant-input-disabled,
+  &.ant-input-affix-wrapper-disabled {
+    background-color: var(--ant-filled-disabled-bg) !important;
+    color: var(--ant-filled-disabled-color) !important;
+    border-color: var(--ant-filled-border) !important;
+  }
+}
+
+/* 针对不同组件的特殊调整 */
+.ant-select-dropdown {
+  /* 下拉菜单也稍微调整 */
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background-color: #f5f5f5 !important;
+  }
+}
+
+/* 鼠标手型 */
+.ant-input-affix-wrapper:hover,
+.ant-select:hover .ant-select-selector,
+.ant-picker:hover {
+  cursor: pointer;
+}
+
+.ant-segmented {
+  background-color: transparent;
+}
+
+.ant-modal-mask {
+  /* 1. 现代浏览器标准属性（带webkit前缀，适配Safari/Chrome） */
+  -webkit-backdrop-filter: blur(10px); /* Safari/Chrome 旧版 */
+  backdrop-filter: blur(10px); /* 标准属性 */
+  /* 2. 降级方案：对不支持backdrop-filter的浏览器，用filter+伪元素模拟 */
+  background-color: rgba(255, 255, 255, 0.2) !important; /* 半透明底色增强模糊效果 */
+}
+
+.ant-modal-confirm-title,
+.ant-modal-title {
+  color: var(--color-primary) !important;
+}
+
+.ant-segmented-item-selected {
+  color: var(--color-primary) !important;
+}
+
+.ant-switch {
+  border-radius: 6px;
+  .ant-switch-handle::before {
+    border-radius: 4px;
+  }
+}
+
+.full-modal {
+  .ant-modal {
+    max-width: 100%;
+    top: 0;
+    padding-bottom: 0;
+    margin: 0;
+    width: 100vw !important;
+  }
+  .ant-modal-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh);
+  }
+  .ant-modal-body {
+    flex: 1;
+  }
+}
+
+.ant-tag {
+  display: inline-block;
+  max-width: 120px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

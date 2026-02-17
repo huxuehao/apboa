@@ -1,0 +1,99 @@
+/**
+ * 模型供应商模块样式
+ *
+ * @author huxuehao
+ */
+
+.model-provider-page {
+  padding: var(--spacing-lg);
+  min-height: 100vh;
+
+  .intro-section {
+    margin-bottom: var(--spacing-lg);
+
+    .intro-title {
+      font-size: var(--font-size-2xl);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .intro-desc {
+      font-size: var(--font-size-base);
+      line-height: 1.6;
+      max-width: 800px;
+    }
+  }
+
+  .filter-section {
+    margin-bottom: var(--spacing-lg);
+    gap: var(--spacing-md);
+    position: sticky;
+    top: 55px;
+    background-color: var(--color-bg);
+    padding: var(--spacing-base) 0;
+    z-index: 10;
+
+    .filter-left {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .filter-right {
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
+
+      .filter-left {
+        width: 100%;
+      }
+
+      .filter-right {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+
+        .ant-input {
+          width: 100% !important;
+        }
+      }
+    }
+  }
+
+  .card-section {
+    position: relative;
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--spacing-md);
+
+      @media (max-width: 768px) {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      }
+
+      @media (min-width: 769px) and (max-width: 1024px) {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      }
+
+      @media (min-width: 1025px) {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      }
+    }
+
+    .scroll-sentinel {
+      height: 1px;
+      margin-top: var(--spacing-md);
+    }
+
+    .load-indicator,
+    .no-more-indicator,
+    .empty-indicator {
+      padding: var(--spacing-lg) 0;
+      text-align: center
+    }
+  }
+}

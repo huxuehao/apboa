@@ -1,0 +1,19 @@
+/**
+ * AppLogo组件样式
+ *
+ * @author huxuehao
+ */
+
+.app-logo {
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .project-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #262626;
+    white-space: nowrap;
+  }
+}

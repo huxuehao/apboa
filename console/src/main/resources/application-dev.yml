@@ -1,0 +1,60 @@
+server:
+  port: 3060
+
+agentscope:
+  agui:
+    path-prefix: /apboa/agui
+    cors-enabled: true
+    server-side-memory: false  # 启用服务端会话保持
+
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: "Redis@dhcc123.com"
+      database: 7
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/apboa?useSSL=false&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+    username: root
+    password: root123123
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      validation-query: SELECT 1
+      test-on-borrow: false
+      test-on-return: false
+      test-while-idle: true
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+
+jwt:
+  secret: ${JWT_SECRET:ZJr8c2xF0y5b7yM+1H9v9cGZq6nZ5e0k5r3Cw7H8vJQ=}
+
+mybatis-plus:
+  mapper-locations: classpath*:com/hxh/apboa/**/mapper/**/*.xml
+  type-aliases-package: com.hxh.apboa.**.entity
+  global-config:
+    db-config:
+      id-type: assign_id
+      update-strategy: not_null
+      insert-strategy: not_null
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # org.apache.ibatis.logging.nologging.NoLoggingImpl
+    map-underscore-to-camel-case: true
+    call-setters-on-nulls: true
+
