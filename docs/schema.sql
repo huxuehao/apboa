@@ -22,6 +22,8 @@ UNIQUE INDEX `uk_username`(`username` ASC) USING BTREE,
 INDEX `idx_enabled`(`enabled` ASC) USING BTREE
 ) COMMENT = '账号';
 
+INSERT INTO `account` (`id`, `nickname`, `email`, `username`, `password`, `enabled`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES (1111111111111111111, '管理员', 'admin@gmail.com', 'admin', '277fc0217db5d364b3b886a9672ea9d3', 1, '2026-02-07 18:50:51', '2026-02-12 22:26:50', NULL, 1111111111111111111);
+
 -- ----------------------------
 -- Table structure for account_role
 -- ----------------------------
@@ -35,6 +37,8 @@ UNIQUE INDEX `uk_account_role`(`account_id` ASC, `role` ASC) USING BTREE,
 INDEX `idx_account_id`(`account_id` ASC) USING BTREE,
 INDEX `idx_role`(`role` ASC) USING BTREE
 ) COMMENT = '账号与Role关联表';
+
+INSERT INTO `account_role` (`id`, `account_id`, `role`) VALUES (1111111111111111111, 1111111111111111111, 'ADMIN');
 
 -- ----------------------------
 -- Table structure for agent_definition
