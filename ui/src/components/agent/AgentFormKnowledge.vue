@@ -5,6 +5,7 @@
  */
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { RoutePaths } from '@/router/constants.ts'
 import * as knowledgeApi from '@/api/knowledge'
 import * as mcpApi from '@/api/mcp'
 import * as agentApi from '@/api/agent'
@@ -174,7 +175,7 @@ defineExpose({
   <ASpin :spinning="loading">
     <AForm ref="formRef" :model="formData" layout="vertical">
       <AFormItem label="知识库">
-        <ACollapse v-if="knowledgeBaseTypes.length > 0">
+        <ACollapse v-if="knowledgeBaseTypes?.length > 0">
           <ACollapsePanel
             v-for="type in knowledgeBaseTypes"
             :key="type"
@@ -196,11 +197,15 @@ defineExpose({
             </div>
           </ACollapsePanel>
         </ACollapse>
-        <AEmpty v-else description="暂无知识库" />
+        <div v-else class="text-placeholder mt-xs">
+          <AButton type="text">未配置知识库？</AButton>
+          <AButton type="link" :href="`/#/${RoutePaths.KNOWLEDGE}`" target="_blank">去配置</AButton>
+          <AButton type="link" @click="loadAllKnowledgeBases">刷新</AButton>
+        </div>
       </AFormItem>
 
       <AFormItem label="MCP服务器">
-        <ACollapse v-if="mcpProtocols.length > 0">
+        <ACollapse v-if="mcpProtocols?.length > 0">
           <ACollapsePanel
             v-for="protocol in mcpProtocols"
             :key="protocol"
@@ -222,27 +227,38 @@ defineExpose({
             </div>
           </ACollapsePanel>
         </ACollapse>
-        <AEmpty v-else description="暂无MCP服务器" />
+        <div v-else class="text-placeholder mt-xs">
+          <AButton type="text">未配置MCP服务？</AButton>
+          <AButton type="link" :href="`/#/${RoutePaths.MCP}`" target="_blank">去配置</AButton>
+          <AButton type="link" @click="loadAllMcpServers">刷新</AButton>
+        </div>
       </AFormItem>
 
       <AFormItem label="子智能体">
-        <ACheckboxGroup v-model:value="formData.subAgent">
-          <div class="checkbox-grid">
-            <ACheckbox
-              v-for="agent in availableAgents"
-              :key="agent.id"
-              :value="agent.id"
-              class="checkbox-item"
-            >
-              <div class="item-info">
-                <div class="item-name text-ellipsis" :title="agent.name">{{ agent.name }}</div>
-                <div class="item-desc text-placeholder text-xs text-ellipsis" :title="agent.description">{{ agent.description }}</div>
-              </div>
-            </ACheckbox>
+        <template v-if="availableAgents?.length > 0">
+          <ACheckboxGroup v-model:value="formData.subAgent">
+            <div class="checkbox-grid">
+              <ACheckbox
+                v-for="agent in availableAgents"
+                :key="agent.id"
+                :value="agent.id"
+                class="checkbox-item"
+              >
+                <div class="item-info">
+                  <div class="item-name text-ellipsis" :title="agent.name">{{ agent.name }}</div>
+                  <div class="item-desc text-placeholder text-xs text-ellipsis" :title="agent.description">{{ agent.description }}</div>
+                </div>
+              </ACheckbox>
+            </div>
+          </ACheckboxGroup>
+          <div class="text-placeholder text-xs mt-sm">
+            选择子智能体后,当前智能体将成为多智能体系统
           </div>
-        </ACheckboxGroup>
-        <div class="text-placeholder text-xs mt-sm">
-          选择子智能体后,当前智能体将成为多智能体系统
+        </template>
+        <div v-else class="text-placeholder mt-xs">
+          <AButton type="text">未添加子智能体？</AButton>
+          <AButton type="link" :href="`/#/${RoutePaths.AGENT}`" target="_blank">去添加</AButton>
+          <AButton type="link" @click="loadAllAgents">刷新</AButton>
         </div>
       </AFormItem>
     </AForm>

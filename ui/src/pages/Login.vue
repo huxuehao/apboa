@@ -14,6 +14,7 @@ import { AuthContainer } from '@/components/auth'
 import { useAccountStore } from '@/stores'
 import { useWebSocket } from '@/composables/useWebSocket';
 import { md5 } from 'js-md5'
+import { RoutePaths } from '@/router/constants.ts'
 
 const { initWS } = useWebSocket();
 
@@ -59,8 +60,8 @@ const handleLogin = async () => {
       localStorage.removeItem('remember')
       localStorage.removeItem('username')
     }
-    initWS()
-    await router.push('/agent')
+    await initWS()
+    await router.push(RoutePaths.AGENT)
   } catch (error) {
     console.error('登录失败:', error)
   } finally {
@@ -69,11 +70,11 @@ const handleLogin = async () => {
 }
 
 const goToRegister = () => {
-  router.push('/register')
+  router.push(RoutePaths.REGISTER)
 }
 
 const goToForgotPassword = () => {
-  router.push('/forgot-password')
+  router.push(RoutePaths.FORGOT_PASSWORD)
 }
 </script>
 

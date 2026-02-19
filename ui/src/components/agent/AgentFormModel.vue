@@ -5,12 +5,11 @@
  */
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import { message } from 'ant-design-vue'
+import { RoutePaths } from '@/router/constants.ts'
 import SmartCodeEditor from '@/components/editor/SmartCodeEditor.vue'
 import * as modelApi from '@/api/model'
 import * as promptApi from '@/api/prompt'
 import type { ModelProviderVO, ModelConfigVO, SystemPromptTemplateVO } from '@/types'
-
 /**
  * Props定义
  */
@@ -276,39 +275,53 @@ defineExpose({
   <ASpin :spinning="loading">
     <AForm ref="formRef" :model="formData" :rules="rules" layout="vertical">
       <AFormItem label="模型配置" name="modelConfigId" required>
-        <div class="mb-md">
-          <ASegmented
-            v-model:value="selectedProviderId"
-            :options="providerOptions"
-            style="margin-bottom: 12px; background-color: var(--color-bg)"
-          />
-        </div>
-        <ARadioGroup v-model:value="formData.modelConfigId" style="width: 100%">
-          <div class="model-grid">
-            <ARadio
-              v-for="model in currentModels"
-              :key="model.id"
-              :value="model.id"
-              class="model-radio"
-              @change="handleModelChange(model.id)"
-            >
-              <div class="model-info">
-                <div class="model-name">{{ model.name }}</div>
-                <div class="model-desc text-placeholder text-xs">{{ model.description }}</div>
-              </div>
-            </ARadio>
+        <template v-if="providerOptions?.length > 0">
+          <div class="mb-md">
+            <ASegmented
+              v-model:value="selectedProviderId"
+              :options="providerOptions"
+              style="margin-bottom: 12px; background-color: var(--color-bg)"
+            />
           </div>
-        </ARadioGroup>
+          <ARadioGroup v-model:value="formData.modelConfigId" style="width: 100%">
+            <div class="model-grid" v-if="currentModels?.length > 0">
+              <ARadio
+                v-for="model in currentModels"
+                :key="model.id"
+                :value="model.id"
+                class="model-radio"
+                @change="handleModelChange(model.id)"
+              >
+                <div class="model-info">
+                  <div class="model-name">{{ model.name }}</div>
+                  <div class="model-desc text-placeholder text-xs">{{ model.description }}</div>
+                </div>
+              </ARadio>
+            </div>
+            <div v-else class="text-placeholder mt-xs">
+              <AButton type="text">未配置模型？</AButton>
+              <AButton type="link" :href="`/#/${RoutePaths.MODEL}`" target="_blank">去配置</AButton>
+              <AButton type="link" @click="loadModelProviders();loadAllModels()">刷新</AButton>
+            </div>
+          </ARadioGroup>
+        </template>
+        <template v-else>
+          <div class="text-placeholder mt-xs">
+            <AButton type="text">未添加模型提供商？</AButton>
+            <AButton type="link" :href="`/#/${RoutePaths.MODEL}`" target="_blank">去添加</AButton>
+            <AButton type="link" @click="loadModelProviders();loadAllModels()">刷新</AButton>
+          </div>
+        </template>
       </AFormItem>
 
-      <AFormItem label="覆盖模型参数">
+      <AFormItem label="覆盖模型参数" v-if="formData.modelConfigId">
         <ASwitch
           :checked="showModelParamsOverride"
           @change="handleOverrideToggle"
         />
       </AFormItem>
 
-      <div v-if="showModelParamsOverride" class="params-override-section">
+      <div v-if="formData.modelConfigId && showModelParamsOverride" class="params-override-section">
         <ARow :gutter="16" :key="showModelParamsOverride">
           <ACol :span="12">
             <AFormItem label="Temperature">
@@ -381,32 +394,46 @@ defineExpose({
       </div>
 
       <AFormItem label="系统提示词模板" name="systemPromptTemplateId" required>
-        <div class="mb-md">
-          <ASegmented
-            v-model:value="selectedPromptCategory"
-            :options="promptCategoryOptions"
-            style="margin-bottom: 12px; background-color: var(--color-bg)"
-          />
-        </div>
-        <ARadioGroup v-model:value="formData.systemPromptTemplateId" style="width: 100%">
-          <div class="prompt-grid">
-            <ARadio
-              v-for="prompt in currentPrompts"
-              :key="prompt.id"
-              :value="prompt.id"
-              class="prompt-radio"
-              @change="handlePromptChange(prompt.id)"
-            >
-              <div class="prompt-info">
-                <div class="prompt-name">{{ prompt.name }}</div>
-                <div class="prompt-desc text-placeholder text-xs">{{ prompt.description }}</div>
-              </div>
-            </ARadio>
+        <template v-if="promptCategoryOptions?.length > 0">
+          <div class="mb-md">
+            <ASegmented
+              v-model:value="selectedPromptCategory"
+              :options="promptCategoryOptions"
+              style="margin-bottom: 12px; background-color: var(--color-bg)"
+            />
           </div>
-        </ARadioGroup>
+          <ARadioGroup v-model:value="formData.systemPromptTemplateId" style="width: 100%">
+            <div class="prompt-grid" v-if="currentPrompts?.length > 0">
+              <ARadio
+                v-for="prompt in currentPrompts"
+                :key="prompt.id"
+                :value="prompt.id"
+                class="prompt-radio"
+                @change="handlePromptChange(prompt.id)"
+              >
+                <div class="prompt-info">
+                  <div class="prompt-name">{{ prompt.name }}</div>
+                  <div class="prompt-desc text-placeholder text-xs">{{ prompt.description }}</div>
+                </div>
+              </ARadio>
+            </div>
+            <div v-else class="text-placeholder mt-xs">
+              <AButton type="text">没有有效的提示模板？</AButton>
+              <AButton type="link" :href="`/#/${RoutePaths.PROMPT}`" target="_blank">去设置</AButton>
+              <AButton type="link" @click="loadPromptCategories();loadAllPrompts()">刷新</AButton>
+            </div>
+          </ARadioGroup>
+        </template>
+        <template v-else>
+          <div class="text-placeholder mt-xs">
+            <AButton type="text">未添系统提示词模板？</AButton>
+            <AButton type="link" :href="`/#/${RoutePaths.PROMPT}`" target="_blank">去添加</AButton>
+            <AButton type="link" @click="loadPromptCategories();loadAllPrompts()">刷新</AButton>
+          </div>
+        </template>
       </AFormItem>
 
-      <AFormItem label="随模板变化">
+      <AFormItem label="随模板变化" v-if="formData.systemPromptTemplateId">
         <ASwitch
           v-model:checked="formData.followTemplate"
           @change="handleFollowTemplateToggle"
@@ -416,7 +443,7 @@ defineExpose({
         </div>
       </AFormItem>
 
-      <AFormItem v-show="!formData.followTemplate"  label="系统提示词">
+      <AFormItem v-if="formData.systemPromptTemplateId && !formData.followTemplate" label="系统提示词">
         <SmartCodeEditor
           v-model="formData.systemPrompt"
           v-if="!formData.followTemplate"

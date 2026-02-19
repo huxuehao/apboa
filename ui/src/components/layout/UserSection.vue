@@ -6,6 +6,7 @@
  */
 import { computed, h, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { RoutePaths } from '@/router/constants.ts'
 import { useAccountStore } from '@/stores'
 import { UndoOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons-vue'
 import { Modal } from "ant-design-vue";
@@ -66,7 +67,7 @@ const handleMenuClick = async ({ key }: { key: string }) => {
       onOk: async () => {
         await logout()
         disconnectWS()
-        router.push('/login')
+        await router.push(RoutePaths.LOGIN)
       }
     })
   } else if (key === 'profile') {

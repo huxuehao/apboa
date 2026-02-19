@@ -5,6 +5,7 @@
  */
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { RoutePaths } from '@/router/constants.ts'
 import * as toolApi from '@/api/tool'
 import * as skillApi from '@/api/skill'
 import * as sensitiveApi from '@/api/sensitive'
@@ -81,7 +82,7 @@ const toolsByCategory = computed(() => {
 const hooksByType = computed(() => {
   const builtin = allHooks.value.filter(h => h.hookType === 'BUILTIN')
   const custom = allHooks.value.filter(h => h.hookType === 'CUSTOM')
-  return { 内置: builtin, 自定义: custom } as Record<string, HookConfigVO[]>
+  return { '内置': builtin, '自定义': custom } as Record<string, HookConfigVO[]>
 })
 
 /**
@@ -279,12 +280,8 @@ defineExpose({
         </ACollapse>
       </AFormItem>
 
-      <AFormItem label="工具选择策略">
-        <ARadioGroup v-model:value="formData.toolChoiceStrategy" :options="strategyOptions" />
-      </AFormItem>
-
       <AFormItem label="工具集">
-        <ACollapse>
+        <ACollapse v-if="toolCategories?.length > 0">
           <ACollapsePanel
             v-for="category in toolCategories"
             :key="category"
@@ -306,6 +303,14 @@ defineExpose({
             </div>
           </ACollapsePanel>
         </ACollapse>
+        <div v-else class="text-placeholder mt-xs">
+          <AButton type="text">未配置工具？</AButton>
+          <AButton type="link" :href="`/#/${RoutePaths.TOOL}`" target="_blank">去配置</AButton>
+          <AButton type="link" @click="loadToolCategories();loadAllTools()">刷新</AButton>
+        </div>
+      </AFormItem>
+      <AFormItem label="工具选择策略" v-if="formData.tool?.length > 0">
+        <ARadioGroup v-model:value="formData.toolChoiceStrategy" :options="strategyOptions" />
       </AFormItem>
 
       <AFormItem v-if="showSpecificTool" label="指定工具">
@@ -320,7 +325,7 @@ defineExpose({
       </AFormItem>
 
       <AFormItem label="技能包">
-        <ACollapse>
+        <ACollapse v-if="skillCategories?.length > 0">
           <ACollapsePanel
             v-for="category in skillCategories"
             :key="category"
@@ -342,10 +347,15 @@ defineExpose({
             </div>
           </ACollapsePanel>
         </ACollapse>
+        <div v-else class="text-placeholder mt-xs">
+          <AButton type="text">未配置技能包？</AButton>
+          <AButton type="link" :href="`/#/${RoutePaths.SKILL}`" target="_blank">去配置</AButton>
+          <AButton type="link" @click="loadSkillCategories();loadAllSkills()">刷新</AButton>
+        </div>
       </AFormItem>
 
       <AFormItem label="敏感词配置">
-        <ACollapse>
+        <ACollapse v-if="sensitiveCategories?.length > 0">
           <ACollapsePanel
             v-for="category in sensitiveCategories"
             :key="category"
@@ -367,6 +377,11 @@ defineExpose({
             </div>
           </ACollapsePanel>
         </ACollapse>
+        <div v-else class="text-placeholder mt-xs">
+          <AButton type="text">未配置敏感词？</AButton>
+          <AButton type="link" :href="`/#/${RoutePaths.SENSITIVE}`" target="_blank">去配置</AButton>
+          <AButton type="link" @click="loadSensitiveCategories();loadAllSensitives()">刷新</AButton>
+        </div>
       </AFormItem>
 
       <AFormItem label="启用敏感词过滤" v-if="formData.sensitiveWordConfigId && formData.sensitiveWordConfigId !== '-1'">
