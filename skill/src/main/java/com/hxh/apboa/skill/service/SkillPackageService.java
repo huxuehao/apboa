@@ -19,4 +19,6 @@ public interface SkillPackageService extends IService<SkillPackage> {
      * @return 分类列表
      */
     List<String> listCategories();
+
+    boolean deleteByIds(List<Long> ids);
 }

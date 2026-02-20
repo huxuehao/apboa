@@ -78,7 +78,8 @@ public class ToolkitFactory {
         }
 
         // 注册MCP
-        mcpClientFactory.getMcpClient(agentDefinition).forEach(toolkit::registerMcpClient);
+        mcpClientFactory.getMcpClient(agentDefinition).forEach(
+                (mcpClient) -> toolkit.registerMcpClient(mcpClient).block());
 
         // 注册 Agent as Tool
         List<Long> subAgentIds = agentSubAgentService.getSubAgentIds(agentDefinition.getId());

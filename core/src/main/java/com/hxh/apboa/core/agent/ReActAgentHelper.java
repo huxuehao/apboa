@@ -114,7 +114,6 @@ public class ReActAgentHelper {
         if (knowledgeWrapper != null) {
             builder.knowledge(knowledgeWrapper.getKnowledge());
             builder.ragMode(knowledgeWrapper.getRagMode());
-            // builder.enableOnlyForUserQueries(true); // TODO
             builder.retrieveConfig(
                     RetrieveConfig.builder()
                             .limit(5)

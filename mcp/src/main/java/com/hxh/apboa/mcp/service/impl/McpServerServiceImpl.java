@@ -1,6 +1,8 @@
 package com.hxh.apboa.mcp.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.common.entity.AgentMcpServer;
 import com.hxh.apboa.common.entity.McpServer;
 import com.hxh.apboa.mcp.mapper.McpServerMapper;
 import com.hxh.apboa.mcp.service.AgentMcpServerService;
@@ -9,6 +11,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +36,13 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
         });
 
         return names;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteByIds(List<Long> ids) {
+        removeByIds(ids);
+        return agentMcpServerService.remove(new LambdaQueryWrapper<AgentMcpServer>().in(AgentMcpServer::getMcpServerId, ids));
     }
 
     private List<AgentDefinition> getAgentDefinitions(List<Long> agentIds) {

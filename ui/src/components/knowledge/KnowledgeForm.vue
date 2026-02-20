@@ -504,7 +504,7 @@ function removeMetadataCondition(index: number) {
       </AFormItem>
 
       <AFormItem label="RAG模式" name="ragMode" :rules="[{ required: true, message: '请选择RAG模式' }]">
-        <ASelect v-model:value="formData.ragMode" placeholder="请选择RAG模式" :disabled="isEdit">
+        <ASelect v-model:value="formData.ragMode" placeholder="请选择RAG模式">
           <ASelectOption value="GENERIC">Generic（在每个推理步骤之前自动检索和注入知识）</ASelectOption>
           <ASelectOption value="AGENTIC">Agentic（Agent 使用工具决定何时检索）</ASelectOption>
         </ASelect>

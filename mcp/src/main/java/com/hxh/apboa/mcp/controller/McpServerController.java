@@ -73,7 +73,7 @@ public class McpServerController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.status(mcpServerService.removeByIds(ids));
+        return R.status(mcpServerService.deleteByIds(ids));
     }
 
     /**

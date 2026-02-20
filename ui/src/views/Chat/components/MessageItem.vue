@@ -17,7 +17,9 @@ const isTool = computed(() => props.role === 'tool')
   <div class="chat-message" :class="[isUser ? 'chat-message-user' : 'chat-message-assistant']">
     <div class="chat-message-bubble">
       <template v-if="isUser">
-        <span class="chat-message-user-content" v-html="content.replace(/\n/g, '<br>')"></span>
+        <span class="chat-message-user-content">
+          {{ content }}
+        </span>
       </template>
       <template v-else-if="isAssistant">
         <div v-if="!content && isStreaming" class="chat-loading-dots">

@@ -1,6 +1,8 @@
 package com.hxh.apboa.tool.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.common.entity.AgentTool;
 import com.hxh.apboa.common.entity.SensitiveWordConfig;
 import com.hxh.apboa.common.entity.ToolConfig;
 import com.hxh.apboa.common.enums.ToolType;
@@ -30,14 +32,16 @@ public class ToolServiceImpl extends ServiceImpl<ToolMapper, ToolConfig> impleme
     private final JdbcTemplate jdbcTemplate;
     private final AgentToolService agentToolService;
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteTools(List<Long> ids) {
         listByIds(ids).forEach(toolConfig -> {
             if (toolConfig.getToolType() != ToolType.BUILTIN) {
                 removeById(toolConfig.getId());
             }
         });
+
+        agentToolService.remove(new LambdaQueryWrapper<AgentTool>().in(AgentTool::getToolId, ids));
 
         return true;
     }

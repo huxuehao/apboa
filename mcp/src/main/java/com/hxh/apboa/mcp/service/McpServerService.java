@@ -12,4 +12,5 @@ import java.util.List;
  */
 public interface McpServerService extends IService<McpServer> {
     List<Object> usedWithAgent(List<Long> ids);
+    boolean deleteByIds(List<Long> ids);
 }

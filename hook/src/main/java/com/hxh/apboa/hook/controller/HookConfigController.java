@@ -73,7 +73,7 @@ public class HookConfigController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.status(hookConfigService.removeByIds(ids));
+        return R.status(hookConfigService.deleteByIds(ids));
     }
 
     /**

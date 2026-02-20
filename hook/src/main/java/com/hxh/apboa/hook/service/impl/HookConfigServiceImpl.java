@@ -1,6 +1,8 @@
 package com.hxh.apboa.hook.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.common.entity.AgentHook;
 import com.hxh.apboa.common.entity.HookConfig;
 import com.hxh.apboa.common.enums.HookType;
 import com.hxh.apboa.common.wrapper.HookConfigWrapper;
@@ -12,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +70,13 @@ public class HookConfigServiceImpl extends ServiceImpl<HookConfigMapper, HookCon
         });
 
         return names;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteByIds(List<Long> ids) {
+        removeByIds(ids);
+        return agentHookService.remove(new LambdaQueryWrapper<AgentHook>().in(AgentHook::getHookConfigId, ids));
     }
 
     private List<AgentDefinition> getAgentDefinitions(List<Long> agentIds) {

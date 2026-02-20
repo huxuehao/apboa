@@ -73,7 +73,7 @@ public class SkillPackageController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.status(skillPackageService.removeByIds(ids));
+        return R.status(skillPackageService.deleteByIds(ids));
     }
 
     /**

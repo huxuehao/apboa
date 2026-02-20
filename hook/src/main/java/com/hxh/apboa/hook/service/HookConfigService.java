@@ -14,4 +14,5 @@ import java.util.List;
 public interface HookConfigService extends IService<HookConfig> {
     void SyncConfigToDatabase(List<HookConfigWrapper> configWrappers);
     List<Object> usedWithAgent(List<Long> ids);
+    boolean deleteByIds(List<Long> ids);
 }

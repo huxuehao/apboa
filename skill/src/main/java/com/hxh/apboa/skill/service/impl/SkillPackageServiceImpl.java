@@ -1,6 +1,8 @@
 package com.hxh.apboa.skill.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.common.entity.AgentSkillPackage;
 import com.hxh.apboa.common.entity.SensitiveWordConfig;
 import com.hxh.apboa.common.entity.SkillPackage;
 import com.hxh.apboa.skill.mapper.SkillPackageMapper;
@@ -10,6 +12,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +50,13 @@ public class SkillPackageServiceImpl extends ServiceImpl<SkillPackageMapper, Ski
                 .map(SkillPackage::getCategory)
                 .filter(category -> category != null && !category.isEmpty())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteByIds(List<Long> ids) {
+        removeByIds(ids);
+        return agentSkillPackageService.remove(new LambdaQueryWrapper<AgentSkillPackage>().in(AgentSkillPackage::getSkillPackageId, ids));
     }
 
     private List<AgentDefinition> getAgentDefinitions(List<Long> agentIds) {

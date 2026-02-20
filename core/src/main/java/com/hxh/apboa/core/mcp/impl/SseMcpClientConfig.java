@@ -4,8 +4,6 @@ import com.hxh.apboa.common.entity.McpServer;
 import com.hxh.apboa.common.enums.McpMode;
 import com.hxh.apboa.common.enums.McpProtocol;
 import com.hxh.apboa.common.key.McpSseKey;
-import com.hxh.apboa.common.key.McpStdIOKey;
-import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.core.mcp.McpClientConfig;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.agentscope.core.tool.mcp.McpClientBuilder;
@@ -27,10 +25,10 @@ public class SseMcpClientConfig implements McpClientConfig {
         }
 
         // 解析配置
-        JsonNode config = JsonUtils.toJsonNode(mcpServer.getProtocolConfig());
+        JsonNode config = mcpServer.getProtocolConfig();
 
         // 构建MCP客户端
-        McpClientBuilder builder = McpClientBuilder.create(config.get(McpStdIOKey.name).asText())
+        McpClientBuilder builder = McpClientBuilder.create(mcpServer.getName())
                 .sseTransport(config.get(McpSseKey.url).asText())
                 .queryParams(getQueryParams(config))
                 .headers(getHeaders(config))

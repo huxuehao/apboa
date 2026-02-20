@@ -95,16 +95,19 @@ const handleShowArgs = () => {
       <template v-if="loading">正在调用工具 {{ name }}</template>
       <template v-if="needConfirm && !doing" >
         <div class="chat-tool-call-actions">
-          <AButton type="link" size="small" @click="handleShowArgs">
+          <AButton v-if="args && args !== '{}'"
+                   type="link"
+                   size="small"
+                   @click="handleShowArgs">
             {{ `${foldArgs ? '展开参数' : '折叠参数'}` }}
           </AButton>
-          <AButton type="primary" size="small" @click="handleConfirm(id, name, args)">确认</AButton>
-          <AButton size="small" @click="handleCancel(id, name, args)">取消</AButton>
+          <AButton type="primary" size="small" @click="handleConfirm(id, name, args)">允许</AButton>
+          <AButton size="small" @click="handleCancel(id, name, args)">禁止</AButton>
         </div>
       </template>
     </span>
     </div>
-    <div class="chat-tool-call" v-if="args && !foldArgs && !doing">
+    <div class="chat-tool-call" v-if="args && args !== '{}' && !foldArgs && !doing">
       {{ args && args !== '{}' ? args : '无参数' }}
     </div>
   </div>

@@ -1,6 +1,8 @@
 package com.hxh.apboa.knowledge.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.common.entity.AgentKnowledgeBase;
 import com.hxh.apboa.common.entity.KnowledgeBaseConfig;
 import com.hxh.apboa.knowledge.mapper.KnowledgeBaseConfigMapper;
 import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
@@ -8,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +51,13 @@ public class KnowledgeBaseConfigServiceImpl extends ServiceImpl<KnowledgeBaseCon
         }
 
         return knowledgeBaseConfigs.getFirst();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteByIds(List<Long> ids) {
+        removeByIds(ids);
+        return agentKnowledgeBaseService.remove(new LambdaQueryWrapper<AgentKnowledgeBase>().in(AgentKnowledgeBase::getKnowledgeBaseConfigId, ids));
     }
 
     private List<AgentDefinition> getAgentDefinitions(List<Long> agentIds) {
