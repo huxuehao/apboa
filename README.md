@@ -14,7 +14,7 @@
 </p>
 <p align="center">
   基于 AgentScope 构建的可视化智能体平台  
-  支持多模型接入 · RAG · MCP · Human-in-the-Loop · Agent 互调
+  支持敏感词 · 多模型接入 · Tool · Skill · MCP · RAG · Human-in-the-Loop · Agent-as-Tool · AGUI
 </p>
 
 
