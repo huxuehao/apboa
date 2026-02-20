@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/Java-21-blue.svg" />
   <img src="https://img.shields.io/badge/Spring%20Boot-3.4.9-brightgreen.svg" />
   <img src="https://img.shields.io/badge/Vue-3.5-4FC08D.svg" />
-  <img src="https://img.shields.io/badge/AgentScope-1.0.8-orange.svg" />
+  <img src="https://img.shields.io/badge/AgentScope-1.0.9-orange.svg" />
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" />
 </p>
 <p align="center">
