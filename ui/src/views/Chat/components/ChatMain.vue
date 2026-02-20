@@ -135,7 +135,7 @@ defineExpose({
             @send="$emit('send')"
             @abort="$emit('abort')"
           />
-          <div style="font-size: 12px;text-align: center; margin: 5px 0; color: #a9a9a9">内容由AI生成，请仔细甄别</div>
+          <div style="font-size: 12px;text-align: center; margin: 5px 0; color: #a9a9a9">内容由AI生成，仅供参考</div>
         </div>
       </div>
     </template>
