@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" />
 </p>
 <p align="center">
-  基于 AgentScope 构建的可视化智能体平台  
+  基于 AgentScope 构建的可视化智能体平台<br/>
   支持敏感词 · 多模型接入 · Tool · Skill · MCP · RAG · Human-in-the-Loop · Agent-as-Tool · AGUI
 </p>
 
