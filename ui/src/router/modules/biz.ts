@@ -29,7 +29,7 @@ const bizRoutes: AppRouteRecordRaw[] = [
         name: RouteNames.PROMPT,
         component: () => import('@/views/Prompt/index.vue'),
         meta: {
-          title: '系统提示词',
+          title: '系统提示词模版',
           hidden: false
         },
       },

@@ -125,7 +125,7 @@ function handleConfigClick() {
   <div class="provider-card">
     <div class="card-header flex items-center gap-sm">
       <div class="card-avatar flex-center" :class="{ disabled: !data.enabled }"><ApiOutlined /></div>
-      <div class="card-name flex-1 truncate" :title="data.name" @click="emit('view', data.id)">{{ data.name }}</div>
+      <div class="card-name flex-1 truncate" :title="data.name" @click="emit('edit', data.id)">{{ data.name }}</div>
       <ADropdown :trigger="['hover']">
         <AButton type="text" size="small">
           <EllipsisOutlined />
