@@ -112,7 +112,7 @@ function handleMenuClick({ key }: { key: string }) {
       <div  class="card-avatar flex-center" :class="{ disabled: !data.enabled }">
         <RobotOutlined />
       </div>
-      <div class="card-name flex-1 truncate" :title="data.name" @click="emit('edit', data.id)">
+      <div class="card-name flex-1 truncate" :title="data.name" @click="emit('view', data.id)">
         {{ data.name }}
       </div>
       <ADropdown :trigger="['hover']">

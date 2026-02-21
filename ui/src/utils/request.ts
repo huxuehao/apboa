@@ -81,7 +81,7 @@ instance.interceptors.response.use(
       AMessage.info(msg).then(() => {})
       return response;
     } else if(code === 401) {
-      router.push("/login").then(() => {});
+      window.location.href = "/#/login";
       return Promise.reject(msg);
     } else {
       AMessage.error(msg).then(() => {})

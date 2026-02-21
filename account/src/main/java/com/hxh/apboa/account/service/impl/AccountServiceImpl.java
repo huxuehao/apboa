@@ -13,6 +13,7 @@ import com.hxh.apboa.common.enums.Role;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hxh.apboa.common.enums.WsMessageType;
+import com.hxh.apboa.common.exception.NotAuthException;
 import com.hxh.apboa.common.message.AccountRoleChangeMessage;
 import com.hxh.apboa.common.util.*;
 import com.hxh.apboa.ws.config.ApboaWebSocketSessionManager;
@@ -140,7 +141,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
             // 生成新的token
             return generateTokenResponse(account);
         } catch (Exception e) {
-            throw new RuntimeException("refreshToken无效或已过期");
+            throw new NotAuthException("refreshToken无效或已过期");
         }
     }
 
