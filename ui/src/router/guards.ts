@@ -62,7 +62,7 @@ export function setupRouterGuard(router: Router): void {
           } catch (error) {
             // 获取用户信息失败，清除token并重定向到登录页
             await accountStore.logout()
-            next({ path: '/login', query: { redirect: to.fullPath } })
+            next({ path: '/login' })
             NProgress.done()
           }
         }
@@ -74,7 +74,7 @@ export function setupRouterGuard(router: Router): void {
         next()
       } else {
         // 不在白名单中，重定向到登录页
-        next({ path: '/login', query: { redirect: to.fullPath } })
+        next({ path: '/login' })
         NProgress.done()
       }
     }

@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import setting from "@/config/setting";
 import type { ApiResponse } from '@/types'
 import type {
   LoginRequest,
@@ -29,8 +30,10 @@ export function register(data: RegisterRequest) {
  * POST /auth/refresh-token
  */
 export function refreshToken(refreshToken: string) {
-  return request.post<ApiResponse<LoginResponse>>('/api/auth/refresh-token', {
-    refreshToken
+  return request.post<ApiResponse<LoginResponse>>('/api/auth/refresh-token', { refreshToken }, {
+    headers: {
+      [setting.refreshTokenRequest]: true
+    }
   })
 }
 
