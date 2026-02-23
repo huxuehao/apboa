@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class ChatMessageVO implements SerializableEnable {
-    private Long id;
+    private Integer id;
     private Long sessionId;
     private String role;
     private String content;
-    private Long parentId;
+    private Integer parentId;
     private String path;
     private Integer depth;
     private LocalDateTime createdAt;

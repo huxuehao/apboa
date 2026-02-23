@@ -86,6 +86,16 @@ const displayMessages = computed<DisplayMessage[]>(() => {
       content: streamingContent.value,
       isStreaming: true,
     })
+  } else {
+    // 响应加载动画
+    if (list[list.length -1]?.role === 'user') {
+      list.push({
+        id: '',
+        role: 'assistant',
+        content: '',
+        isStreaming: true,
+      })
+    }
   }
   return list
 })

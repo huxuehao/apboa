@@ -49,7 +49,7 @@ public interface ChatSessionService extends IService<ChatSession> {
      * @param sessionId 会话 ID
      * @param messageId 目标消息 ID
      */
-    void switchCurrentMessage(Long sessionId, Long messageId);
+    void switchCurrentMessage(Long sessionId, Integer messageId);
 
     /**
      * 回显当前完整对话：根据 current_message_id 取 path，按 path 的 id 列表查询并按 depth 排序

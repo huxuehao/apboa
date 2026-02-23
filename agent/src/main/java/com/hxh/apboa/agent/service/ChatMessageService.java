@@ -18,5 +18,5 @@ public interface ChatMessageService extends IService<ChatMessage> {
      * @param ids 路径拆分出的消息 id 列表
      * @return 按深度排序的消息列表
      */
-    List<ChatMessage> listByIdsOrderByDepth(List<Long> ids);
+    List<ChatMessage> listByIdsOrderByDepth(List<Integer> ids);
 }

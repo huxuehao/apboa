@@ -37,7 +37,7 @@ public class ChatSession implements SerializableEnable {
     /**
      * 当前消息ID，指向当前查看/继续对话的叶子节点
      */
-    private Long currentMessageId;
+    private Integer currentMessageId;
 
     /**
      * 会话标题

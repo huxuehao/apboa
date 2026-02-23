@@ -18,7 +18,7 @@ import java.util.List;
 public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatMessage> implements ChatMessageService {
 
     @Override
-    public List<ChatMessage> listByIdsOrderByDepth(List<Long> ids) {
+    public List<ChatMessage> listByIdsOrderByDepth(List<Integer> ids) {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyList();
         }

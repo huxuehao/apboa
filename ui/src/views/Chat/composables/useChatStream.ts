@@ -123,7 +123,7 @@ export function useChatStream(options: {
       else {
         await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'assistant', content: streamingContent.value })
       }
-      
+
       toolCallsInProgress.value = []
       streamingContent.value = ''
       streamingMessageId.value = null
@@ -131,7 +131,7 @@ export function useChatStream(options: {
 
       onMessageSaved?.()
     }
-    
+
   }
 
   // 发送消息

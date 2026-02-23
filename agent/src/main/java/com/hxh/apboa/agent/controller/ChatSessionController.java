@@ -52,7 +52,7 @@ public class ChatSessionController {
      * 切换历史分支（仅更新 current_message_id）
      */
     @PutMapping("/{sessionId}/current")
-    public R<Void> switchCurrentMessage(@PathVariable("sessionId") Long sessionId, @RequestParam("messageId") Long messageId) {
+    public R<Void> switchCurrentMessage(@PathVariable("sessionId") Long sessionId, @RequestParam("messageId") Integer messageId) {
         chatSessionService.switchCurrentMessage(sessionId, messageId);
         return R.success("操作成功");
     }

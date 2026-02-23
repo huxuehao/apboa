@@ -21,8 +21,8 @@ import java.time.LocalDateTime;
 @TableName("chat_message")
 public class ChatMessage implements SerializableEnable {
 
-    @TableId(type = IdType.ASSIGN_ID)
-    private Long id;
+    @TableId(type = IdType.AUTO)
+    private Integer id;
 
     /**
      * 会话ID，关联 chat_session 表
@@ -42,7 +42,7 @@ public class ChatMessage implements SerializableEnable {
     /**
      * 父消息ID，NULL 表示根消息
      */
-    private Long parentId;
+    private Integer parentId;
 
     /**
      * 消息路径，格式如 /1/2/3/，用于快速查询消息链

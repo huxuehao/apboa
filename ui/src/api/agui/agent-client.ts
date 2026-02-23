@@ -150,6 +150,7 @@ export class AgentClient {
               const refreshToken = getRefreshToken()
               if (!refreshToken) {
                 window.location.href = "/#/login";
+                window.location.reload();
                 return
               }
 
@@ -178,15 +179,19 @@ export class AgentClient {
                 return
               } else {
                 window.location.href = "/#/login";
+                window.location.reload();
               }
             } catch (refreshError) {
               console.error('Token refresh failed:', refreshError)
               removeToken()
               removeRefreshToken()
+              window.location.href = "/#/login";
+              window.location.reload();
               return
             }
           } else {
             window.location.href = "/#/login";
+            window.location.reload();
             return
           }
         }

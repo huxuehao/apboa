@@ -85,7 +85,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void switchCurrentMessage(Long sessionId, Long messageId) {
+    public void switchCurrentMessage(Long sessionId, Integer messageId) {
         ChatSession session = getAndCheckSession(sessionId);
         ChatMessage message = chatMessageService.getById(messageId);
         if (message == null || !message.getSessionId().equals(sessionId)) {
@@ -101,7 +101,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         if (session == null) {
             return new ArrayList<>();
         }
-        Long curId = session.getCurrentMessageId();
+        Integer curId = session.getCurrentMessageId();
         if (curId == null) {
             return new ArrayList<>();
         }
@@ -113,9 +113,9 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         if (path == null || path.isEmpty()) {
             return new ArrayList<>();
         }
-        List<Long> ids = Arrays.stream(path.split("/"))
+        List<Integer> ids = Arrays.stream(path.split("/"))
                 .filter(s -> !s.isEmpty())
-                .map(Long::parseLong)
+                .map(Integer::parseInt)
                 .collect(Collectors.toList());
         if (ids.isEmpty()) {
             ids.add(curId);
@@ -158,7 +158,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         return session;
     }
 
-    private ChatMessage getMessageBy(Long messageId, Long sessionId) {
+    private ChatMessage getMessageBy(Integer messageId, Long sessionId) {
         ChatMessage msg = chatMessageService.getById(messageId);
         if (msg == null || !msg.getSessionId().equals(sessionId)) {
             throw new RuntimeException("当前消息不存在或不属于该会话");
