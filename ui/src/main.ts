@@ -23,7 +23,7 @@ message.config({
 
 // 自定义权限指令
 app.directive('permission', {
-  async mounted(el, binding) {
+  async beforeMount(el, binding, vnode) {
     const requiredRoles = binding.value;
     if (!requiredRoles || requiredRoles.length === 0) {
       return;
@@ -32,7 +32,11 @@ app.directive('permission', {
     const accountStore = useAccountStore()
     const hasPermission = accountStore.roles.some(role => requiredRoles.includes(role));
     if (!hasPermission) {
-      el.parentNode?.removeChild(el);
+      el.style.display = 'none';
+      el.style.visibility = 'hidden';
+      el.style.height = '0';
+      el.style.width = '0';
+      el.style.overflow = 'hidden';
     }
   }
 });
