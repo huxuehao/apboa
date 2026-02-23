@@ -121,7 +121,7 @@ public class DynamicAgentTool implements AgentTool {
 
         if (input != null && !input.isEmpty() && inputSchema != null && !inputSchema.isEmpty()) {
             inputSchema.forEach(jsonNode -> {
-                if (jsonNode.has("name") && !jsonNode.get("name").isEmpty()) {
+                if (jsonNode.has("name") && !jsonNode.get("name").asText().trim().isEmpty()) {
                     String name = jsonNode.get("name").textValue();
                     args.add(input.getOrDefault(name, null));
                 }

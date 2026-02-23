@@ -47,7 +47,7 @@ public class SkillBoxFactory {
 
             // 添加资源
             JsonNode references = skillPackage.getReferences();
-            if (skillPackage.getReferences() != null && !skillPackage.getReferences().isEmpty()) {
+            if (references != null && !references.isEmpty()) {
                 references.forEach(resource -> {
                     String prefix = resource.get(SkillReferencesKey.prefix).asText();
                     String name = resource.get(SkillReferencesKey.name).asText();
@@ -58,7 +58,7 @@ public class SkillBoxFactory {
 
             // 添加示例
             JsonNode examples = skillPackage.getExamples();
-            if (skillPackage.getExamples() != null && !skillPackage.getExamples().isEmpty()) {
+            if (examples != null && !examples.isEmpty()) {
                 examples.forEach(resource -> {
                     String prefix = resource.get(SkillExampleKey.prefix).asText();
                     String name = resource.get(SkillExampleKey.name).asText();
@@ -69,7 +69,7 @@ public class SkillBoxFactory {
 
             // 添加脚本
             JsonNode scripts = skillPackage.getScripts();
-            if (skillPackage.getScripts() != null && !skillPackage.getScripts().isEmpty()) {
+            if (scripts != null && !scripts.isEmpty()) {
                 scripts.forEach(resource -> {
                     String prefix = resource.get(SkillScriptKey.prefix).asText();
                     String name = resource.get(SkillScriptKey.name).asText();
