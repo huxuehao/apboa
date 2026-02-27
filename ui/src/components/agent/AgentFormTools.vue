@@ -4,7 +4,9 @@
  * @author huxuehao
  */
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import Sortable from 'sortablejs'
+import { HolderOutlined } from '@ant-design/icons-vue'
 import { RoutePaths } from '@/router/constants.ts'
 import * as toolApi from '@/api/tool'
 import * as skillApi from '@/api/skill'
@@ -113,6 +115,54 @@ const sensitivesByCategory = computed(() => {
 const selectedTools = computed(() => {
   return allTools.value.filter(t => formData.value.tool.includes(t.id))
 })
+
+/**
+ * 已选择的钩子列表（保持选择顺序，用于拖拽排序展示）
+ */
+const selectedHooks = computed(() => {
+  const idToHook = new Map(allHooks.value.map(h => [h.id, h]))
+  return formData.value.hook
+    .map(id => idToHook.get(id))
+    .filter((h): h is HookConfigVO => !!h)
+})
+
+const selectedHooksListRef = ref<HTMLElement | null>(null)
+let sortableInstance: ReturnType<typeof Sortable.create> | null = null
+
+/**
+ * 初始化钩子列表拖拽排序
+ */
+function initHookSortable() {
+  if (!selectedHooksListRef.value || selectedHooks.value.length === 0) return
+  if (sortableInstance) return
+
+  sortableInstance = Sortable.create(selectedHooksListRef.value, {
+    animation: 150,
+    handle: '.hook-drag-handle',
+    ghostClass: 'hook-sortable-ghost',
+    chosenClass: 'hook-sortable-chosen',
+    dragClass: 'hook-sortable-drag',
+    onEnd(evt: { oldIndex?: number; newIndex?: number }) {
+      const { oldIndex, newIndex } = evt
+      if (oldIndex == null || newIndex == null || oldIndex === newIndex) return
+      const newOrder = [...formData.value.hook]
+      const [item] = newOrder.splice(oldIndex, 1)
+      if (item === undefined) return
+      newOrder.splice(newIndex, 0, item)
+      formData.value = { ...formData.value, hook: newOrder }
+    }
+  })
+}
+
+/**
+ * 销毁拖拽实例
+ */
+function destroyHookSortable() {
+  if (sortableInstance) {
+    sortableInstance.destroy()
+    sortableInstance = null
+  }
+}
 
 /**
  * 是否显示特定工具选择
@@ -237,7 +287,18 @@ const handleHookChange = (hookId: string, checked: boolean) => {
   }
 };
 
-onMounted(() => {
+watch(
+  () => selectedHooks.value.length,
+  async (len) => {
+    destroyHookSortable()
+    if (len > 0) {
+      await nextTick()
+      initHookSortable()
+    }
+  }
+)
+
+onMounted(async () => {
   loadToolCategories()
   loadAllTools()
   loadAllHooks()
@@ -245,6 +306,14 @@ onMounted(() => {
   loadAllSkills()
   loadSensitiveCategories()
   loadAllSensitives()
+  if (selectedHooks.value.length > 0) {
+    await nextTick()
+    initHookSortable()
+  }
+})
+
+onUnmounted(() => {
+  destroyHookSortable()
 })
 
 defineExpose({
@@ -278,6 +347,29 @@ defineExpose({
             </div>
           </ACollapsePanel>
         </ACollapse>
+
+        <div v-if="selectedHooks.length > 0" class="selected-hooks-section mt-md">
+          <div class="selected-hooks-label text-secondary text-sm mb-sm">
+            已选钩子（共 {{ selectedHooks.length }} 个，拖拽调整执行顺序）
+          </div>
+          <div ref="selectedHooksListRef" class="selected-hooks-list">
+            <div
+              v-for="hook in selectedHooks"
+              :key="hook.id"
+              class="selected-hook-item"
+            >
+              <span class="hook-drag-handle" title="拖拽排序">
+                <HolderOutlined />
+              </span>
+              <div class="selected-hook-info">
+                <span class="selected-hook-name" :title="hook.name">{{ hook.name }}</span>
+                <span class="selected-hook-type" :class="hook.hookType === 'BUILTIN' ? 'type-builtin' : 'type-custom'">
+                  {{ hook.hookType === 'BUILTIN' ? '内置' : '自定义' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </AFormItem>
 
       <AFormItem label="工具集">
@@ -434,5 +526,97 @@ defineExpose({
   white-space: nowrap;
   text-overflow: ellipsis;
   width:250px;
+}
+
+.selected-hooks-section {
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-light);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border-base);
+}
+
+.selected-hooks-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.selected-hook-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border-base);
+  border-radius: var(--border-radius-md);
+  transition: all var(--transition-base);
+  cursor: default;
+
+  &:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-bg-light);
+  }
+}
+
+.hook-drag-handle {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  cursor: grab;
+  padding: 2px;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &:hover {
+    color: var(--color-primary);
+  }
+}
+
+.selected-hook-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.selected-hook-name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selected-hook-type {
+  flex-shrink: 0;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: var(--border-radius-sm);
+
+  &.type-builtin {
+    background-color: #e3f2fd;
+    color: #1976d2;
+  }
+
+  &.type-custom {
+    background-color: #fde6f6;
+    color: #db2781;
+  }
+}
+
+.hook-sortable-ghost {
+  opacity: 0.4;
+  background-color: var(--color-bg-light);
+}
+
+.hook-sortable-chosen {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.hook-sortable-drag {
+  opacity: 1;
 }
 </style>
