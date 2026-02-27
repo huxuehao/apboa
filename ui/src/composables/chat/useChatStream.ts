@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import { message } from 'ant-design-vue'
 import { useAgentClient } from '@/composables/useAgentClient'
 import * as chatSessionApi from '@/api/chatSession'
-import { buildToolCallsContent } from '../utils/format'
+import { buildToolCallsContent } from '@/utils/chat/format'
 import type { ChatMessageVO } from '@/types'
 
 export function useChatStream(options: {

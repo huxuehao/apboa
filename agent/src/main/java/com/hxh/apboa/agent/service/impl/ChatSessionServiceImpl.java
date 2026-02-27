@@ -1,5 +1,6 @@
 package com.hxh.apboa.agent.service.impl;
 
+import com.hxh.apboa.agent.mapper.AgentScopeSessionMapper;
 import com.hxh.apboa.agent.mapper.ChatSessionMapper;
 import com.hxh.apboa.agent.service.ChatMessageService;
 import com.hxh.apboa.agent.service.ChatSessionService;
@@ -13,6 +14,7 @@ import com.hxh.apboa.common.util.UserUtils;
 import com.hxh.apboa.common.vo.ChatMessageVO;
 import com.hxh.apboa.common.vo.ChatSessionVO;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.agentscope.spring.boot.agui.common.ThreadSessionManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,8 @@ import java.util.stream.Collectors;
 public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatSession> implements ChatSessionService {
 
     private final ChatMessageService chatMessageService;
+    private final ThreadSessionManager sessionManager;
+    private final AgentScopeSessionMapper agentScopeSessionMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -227,6 +231,13 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         ChatSession session = getAndCheckSession(id);
         chatMessageService.lambdaUpdate().eq(ChatMessage::getSessionId, session.getId()).remove();
         removeById(id);
+
+        agentScopeSessionMapper.deleteById(String.valueOf(session.getId()));
+
+        // 删除 agentscope session
+        if (sessionManager != null) {
+            sessionManager.removeSession(String.valueOf(session.getId()));
+        }
     }
 
     private ChatSessionVO toSessionVO(ChatSession session) {

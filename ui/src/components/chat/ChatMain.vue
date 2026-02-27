@@ -3,7 +3,7 @@ import { ref, nextTick, watch, onMounted } from 'vue'
 import MessageList from './MessageList.vue'
 import ChatInput from './ChatInput.vue'
 import Welcome from './Welcome.vue'
-import type { DisplayMessage } from '../types'
+import type { DisplayMessage } from '@/types'
 
 const props = defineProps<{
   title: string

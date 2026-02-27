@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { renderMarkdown } from '@/views/Chat/utils/markdown'
+import { renderMarkdown } from '@/utils/chat/markdown'
 
 const props = defineProps<{
   role: 'user' | 'assistant' | 'system' | 'tool'

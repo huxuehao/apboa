@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import MessageItem from './MessageItem.vue'
 import ToolCallItem from './ToolCallItem.vue'
-import type { DisplayMessage } from '../types'
+import type { DisplayMessage } from '@/types'
 
 defineProps<{
   messages: DisplayMessage[]

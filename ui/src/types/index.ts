@@ -24,3 +24,6 @@ export * from './dto'
 
 // AGUI 协议类型
 export * from './agui'
+
+// Chat 累成
+export * from './chat'

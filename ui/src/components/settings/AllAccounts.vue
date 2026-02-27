@@ -6,13 +6,19 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { message, Modal } from 'ant-design-vue'
-import { SearchOutlined, CheckOutlined } from '@ant-design/icons-vue'
+import { SearchOutlined, CheckOutlined, UserOutlined } from '@ant-design/icons-vue'
 import { useAccountStore } from '@/stores'
 import * as accountApi from '@/api/account'
 import * as authApi from '@/api/auth'
 import type {AccountVO, RegisterRequest, Role} from '@/types'
 import {md5} from "js-md5";
 const accountStore = useAccountStore()
+
+const tagColor = {
+  ADMIN: 'blue',
+  EDIT: 'cyan',
+  READ_ONLY: 'default',
+}
 
 /**
  * 当前用户信息
@@ -315,11 +321,12 @@ onMounted(() => {
             <ATag
               v-for="role in account.roles"
               :key="role"
+              :color="tagColor[role]"
               :bordered="false"
             >
-              {{ getRoleLabel(role) }}
+              <UserOutlined />{{ getRoleLabel(role) }}
             </ATag>
-            <ATag :bordered="false" :color="account.enabled ? 'success' : 'default'">
+            <ATag :bordered="false" :color="account.enabled ? 'success' : 'error'">
               {{ account.enabled ? '正常' : '禁用' }}
             </ATag>
           </div>

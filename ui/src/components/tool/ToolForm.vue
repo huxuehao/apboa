@@ -409,7 +409,7 @@ const addItem = (e: Event) => {
               <PlusOutlined />
               添加参数
             </AButton>
-            <div v-if="formData.inputSchema.length > 1" class="text-placeholder">输入参数的循序需要和代码中接受顺序保持一致</div>
+            <div v-if="formData.inputSchema.length > 1" class="text-placeholder">注意：参数顺序需要和代码中接收顺序保持一致</div>
           </div>
         </AFormItem>
 

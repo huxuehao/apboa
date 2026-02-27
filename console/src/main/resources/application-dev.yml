@@ -6,6 +6,7 @@ agentscope:
     path-prefix: /apboa/agui
     cors-enabled: true
     server-side-memory: false  # 启用服务端会话保持
+    max-thread-sessions: 500
 
 spring:
   data:

@@ -2,12 +2,12 @@
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { Modal } from 'ant-design-vue'
-import { useAgentDetail } from '@/views/Chat/composables/useAgentDetail'
-import { useSessions } from '@/views/Chat/composables/useSessions'
-import { useCurrentSession } from '@/views/Chat/composables/useCurrentSession'
-import ChatSidebar from './components/ChatSidebar.vue'
-import ChatMain from './components/ChatMain.vue'
-import type { DisplayMessage } from './types'
+import { useAgentDetail } from '@/composables/chat/useAgentDetail'
+import { useSessions } from '@/composables/chat/useSessions'
+import { useCurrentSession } from '@/composables/chat/useCurrentSession'
+import ChatSidebar from '@/components/chatHistory/ChatSidebar.vue'
+import ChatMain from '@/components/chatHistory/ChatMain.vue'
+import type { DisplayMessage } from '@/types'
 
 const route = useRoute()
 
