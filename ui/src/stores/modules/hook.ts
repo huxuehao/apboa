@@ -113,6 +113,17 @@ export const useHookStore = defineStore('hook', () => {
   }
 
   /**
+   * 删除配置
+   *
+   * @param id 配置ID
+   */
+  async function deleteConfig(id: string) {
+    await hookApi.remove([id])
+    message.success('删除成功')
+    resetAndFetch()
+  }
+
+  /**
    * 检查是否被智能体使用
    *
    * @param id 配置ID
@@ -135,6 +146,7 @@ export const useHookStore = defineStore('hook', () => {
     setKeyword,
     resetAndFetch,
     toggleEnabled,
+    deleteConfig,
     checkUsedWithAgent
   }
 })

@@ -5,14 +5,17 @@
  */
 <script setup lang="ts">
 /* eslint-disable vue/multi-word-component-names */
-import { onMounted, ref, onUnmounted, h } from 'vue'
+import { onMounted, ref, onUnmounted, computed, h } from 'vue'
 import { Modal } from 'ant-design-vue'
 import { SearchOutlined } from '@ant-design/icons-vue'
 import { useHookStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as hookApi from '@/api/hook'
+import type { HookConfigVO } from '@/types'
 import { HookType } from '@/types'
 import HookCard from '@/components/hook/HookCard.vue'
+import HookCreateCard from '@/components/hook/HookCreateCard.vue'
+import HookForm from '@/components/hook/HookForm.vue'
 
 const store = useHookStore()
 const {
@@ -23,16 +26,76 @@ const {
   hasMore
 } = storeToRefs(store)
 
+const formVisible = ref<boolean>(false)
+const currentData = ref<HookConfigVO | undefined>(undefined)
 const scrollContainer = ref<HTMLElement>()
 const loadMoreObserver = ref<IntersectionObserver>()
 
 /**
- * 钩子类型选项（全部、内置）
+ * 钩子类型选项（全部、内置、自定义）
  */
 const hookTypeOptions = [
   { label: '全部', value: null },
-  { label: '内置', value: HookType.BUILTIN }
+  { label: '内置', value: HookType.BUILTIN },
+  { label: '自定义', value: HookType.CUSTOM }
 ]
+
+/**
+ * 是否显示新增卡片
+ */
+const showCreateCard = computed(() => {
+  return selectedHookType.value !== HookType.BUILTIN
+})
+
+/**
+ * 处理新增
+ */
+function handleCreate() {
+  currentData.value = undefined
+  formVisible.value = true
+}
+
+/**
+ * 处理编辑
+ */
+async function handleEdit(id: string) {
+  const response = await hookApi.detail(id)
+  currentData.value = response.data.data
+  formVisible.value = true
+}
+
+/**
+ * 处理删除
+ */
+async function handleDelete(id: string) {
+  const used = await store.checkUsedWithAgent(id)
+  if (used.length > 0) {
+    Modal.confirm({
+      title: '二次确认',
+      content: `该钩子正在被 [ ${used.join('、')} ] 智能体引用，删除后可能会影响上述智能体的正常使用！`,
+      okText: '确认并继续删除',
+      onOk: async () => {
+        await store.deleteConfig(id)
+      }
+    })
+    return
+  }
+
+  Modal.confirm({
+    title: '确认删除',
+    content: '删除后无法恢复，是否继续？',
+    onOk: async () => {
+      await store.deleteConfig(id)
+    }
+  })
+}
+
+/**
+ * 处理表单提交成功
+ */
+function handleFormSuccess() {
+  store.resetAndFetch()
+}
 
 /**
  * 处理查看详情
@@ -182,12 +245,16 @@ onUnmounted(() => {
 
     <section ref="scrollContainer" class="card-section">
       <div class="card-grid">
+        <HookCreateCard v-if="showCreateCard" @click="handleCreate" v-permission="['EDIT','ADMIN']" />
+
         <HookCard
           v-for="item in list"
           :key="item.id"
           :data="item"
           @view="handleView"
+          @edit="handleEdit"
           @enable="handleEnable"
+          @delete="handleDelete"
         />
       </div>
 
@@ -204,6 +271,12 @@ onUnmounted(() => {
         <AEmpty description="暂无数据" />
       </div>
     </section>
+
+    <HookForm
+      v-model:visible="formVisible"
+      :data="currentData"
+      @success="handleFormSuccess"
+    />
   </div>
 </template>
 

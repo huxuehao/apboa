@@ -114,7 +114,7 @@ import org.springframework.stereotype.Component;
  * 支持使用 @Autowired 载入 Springboot 管理的 Bean
  **/
 @Component
-public class Demo implements IDynamicAgentTool {
+public class CustomTool implements IDynamicAgentTool {
 
     @Override
     public Object execute(Object... args) {

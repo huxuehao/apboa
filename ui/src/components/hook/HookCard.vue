@@ -7,7 +7,13 @@
 import { computed } from 'vue'
 import { EllipsisOutlined, LoginOutlined } from '@ant-design/icons-vue'
 import type { HookConfigVO } from '@/types'
-import { createViewItem, createEnableItem } from '@/composables/useCardMenuItems'
+import {
+  createViewItem,
+  createEditItem,
+  createEnableItem,
+  createDeleteItem,
+  createDivider,
+} from '@/composables/useCardMenuItems'
 
 /**
  * Props定义
@@ -21,16 +27,26 @@ const props = defineProps<{
  */
 const emit = defineEmits<{
   view: [id: string]
+  edit: [id: string]
   enable: [id: string]
+  delete: [id: string]
 }>()
 
 /**
  * 操作菜单项
  */
-const menuItems = computed(() => [
-  createViewItem(),
-  createEnableItem(props.data.enabled),
-])
+const menuItems = computed(() => {
+  const items = [
+    createViewItem(),
+    createEnableItem(props.data.enabled),
+  ]
+  if (props.data.hookType === 'CUSTOM') {
+    items.push(createEditItem())
+    items.push(createDivider())
+    items.push(createDeleteItem())
+  }
+  return items
+})
 
 /**
  * 格式化更新时间
@@ -62,8 +78,14 @@ function handleMenuClick({ key }: { key: string }) {
     case 'view':
       emit('view', props.data.id)
       break
+    case 'edit':
+      emit('edit', props.data.id)
+      break
     case 'enable':
       emit('enable', props.data.id)
+      break
+    case 'delete':
+      emit('delete', props.data.id)
       break
   }
 }
