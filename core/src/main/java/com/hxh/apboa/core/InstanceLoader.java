@@ -1,16 +1,13 @@
-package com.hxh.apboa.core.tool.dynamices.loader;
+package com.hxh.apboa.core;
 
 import com.hxh.apboa.common.enums.CodeLanguage;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.util.FuncUtils;
-import com.hxh.apboa.core.tool.dynamices.IDynamicAgentTool;
-import com.hxh.apboa.core.tool.dynamices.InstanceLoader;
-import groovy.lang.GroovyClassLoader;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -19,59 +16,32 @@ import java.lang.reflect.Modifier;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
- * 描述：Groovy实例加载器
+ * 描述：
  *
  * @author huxuehao
  **/
-@Component
-public class GroovyInstanceLoader implements InstanceLoader {
-    private final GroovyClassLoader groovyClassLoader = new GroovyClassLoader();
-    private final ConcurrentMap<String, IDynamicAgentTool> TOOL_OBJ_CACHE = new ConcurrentHashMap<>();
+public interface InstanceLoader<T> extends SmartInitializingSingleton {
+    /**
+     * 加载实例
+     * @param codeSource 源代码
+     * @return 实例
+     */
+    T loadInstance(String codeSource);
 
     /**
-     * 根据源码加载实例
-     *
-     * @param codeSource 源码
+     * 获取语言
+     * @return 语言
      */
-    @Override
-    public IDynamicAgentTool loadInstance(String codeSource) {
-        if (!FuncUtils.isEmpty(codeSource)) {
-            if (TOOL_OBJ_CACHE.containsKey(codeIdentity(codeSource))) {
-                return TOOL_OBJ_CACHE.get(codeIdentity(codeSource));
-            }
-
-            // 基于源码获取Class
-            Class<?> clazz = groovyClassLoader.parseClass(codeSource);;
-            if (clazz == null) {
-                throw new IllegalArgumentException("loadNewInstance 执行失败, Glue 脚本为空");
-            }
-
-            Object instance = getObject(clazz);
-            if (!(instance instanceof IDynamicAgentTool)) {
-                throw new IllegalArgumentException("loadNewInstance 执行失败, Glue 脚本类需要继承 " + IDynamicAgentTool.class.getName());
-            }
-
-            //依赖注入
-            dependencyInjection(instance);
-
-            TOOL_OBJ_CACHE.putIfAbsent(codeIdentity(codeSource), (IDynamicAgentTool) instance);
-
-            return (IDynamicAgentTool) instance;
-        }
-
-        throw new IllegalArgumentException("loadNewInstance 执行失败, Glue 脚本为空");
-    }
+    CodeLanguage getLanguage();
 
     /**
      * 获取对象实例
      * @param clazz 类
      * @return 对象实例
      */
-    private static Object getObject(Class<?> clazz) {
+    default Object getObject(Class<?> clazz) {
         Object instance;
         try {
             // 获取无参构造方法
@@ -97,7 +67,7 @@ public class GroovyInstanceLoader implements InstanceLoader {
      * 获取代码的identity
      * @param codeSource 代码源
      */
-    private String codeIdentity(String codeSource){
+    default String codeIdentity(String codeSource){
         byte[] md5;
         try {
             md5 = MessageDigest.getInstance("MD5").digest(codeSource.getBytes());
@@ -112,7 +82,7 @@ public class GroovyInstanceLoader implements InstanceLoader {
      *
      * @param instance Glue对象实例
      */
-    private void dependencyInjection(Object instance) {
+    default void dependencyInjection(Object instance) {
         if (instance == null) {
             return;
         }
@@ -169,9 +139,4 @@ public class GroovyInstanceLoader implements InstanceLoader {
         }
     }
 
-
-    @Override
-    public CodeLanguage getLanguage() {
-        return CodeLanguage.JAVA;
-    }
 }

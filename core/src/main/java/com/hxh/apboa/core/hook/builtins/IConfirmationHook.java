@@ -1,4 +1,4 @@
-package com.hxh.apboa.core.hook.impl;
+package com.hxh.apboa.core.hook.builtins;
 
 import com.hxh.apboa.core.hook.IAgentHook;
 import io.agentscope.core.hook.HookEvent;
@@ -55,9 +55,6 @@ public class IConfirmationHook implements IAgentHook {
 
             // 如果有需要确认的工具
             if (!toolsNeedConfirm.isEmpty()) {
-                // TODO 发送工具确认事件
-                // ...
-
                 // 暂停 Agent 执行，等待用户确认
                 postReasoning.stopAgent();
             }

@@ -96,6 +96,9 @@ const typeOptions = [
 const codeTemplate = `import java.util.*;
 import com.hxh.apboa.core.tool.dynamices.IDynamicAgentTool;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 /**
  * 内置方法:
  * 1. 将对象转成字符串
@@ -110,6 +113,7 @@ import com.hxh.apboa.core.tool.dynamices.IDynamicAgentTool;
  *
  * 支持使用 @Autowired 载入 Springboot 管理的 Bean
  **/
+@Component
 public class Demo implements IDynamicAgentTool {
 
     @Override

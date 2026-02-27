@@ -2,6 +2,9 @@ package com.hxh.apboa.core.hook;
 
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.HookConfig;
+import com.hxh.apboa.common.enums.CodeLanguage;
+import com.hxh.apboa.common.enums.HookType;
+import com.hxh.apboa.core.hook.dynamices.HookInstanceLoadFactory;
 import com.hxh.apboa.hook.service.AgentHookService;
 import com.hxh.apboa.hook.service.HookConfigService;
 import io.agentscope.core.hook.Hook;
@@ -34,7 +37,14 @@ public class HooksFactory {
                 .stream()
                 .filter(HookConfig::getEnabled)
                 .forEach(hookConfig -> {
-                    hooks.add(HooksRegister.getHook(hookConfig.getClassPath()));
+                    Hook hook;
+                    if (hookConfig.getHookType() == HookType.BUILTIN) {
+                        hook = HooksRegister.getHook(hookConfig.getClassPath());
+                    } else {
+                        hook = HookInstanceLoadFactory.getInstanceLoader(CodeLanguage.JAVA)
+                                .loadInstance(hookConfig.getCode());
+                    }
+                    hooks.add(hook);
                 });
 
         return hooks;

@@ -7,7 +7,7 @@ import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.core.tool.IAgentTool;
 import com.hxh.apboa.core.tool.ToolsRegister;
 import com.hxh.apboa.core.tool.dynamices.IDynamicAgentTool;
-import com.hxh.apboa.core.tool.dynamices.InstanceLoadFactory;
+import com.hxh.apboa.core.tool.dynamices.ToolInstanceLoadFactory;
 import com.hxh.apboa.tool.service.ToolService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 描述：
@@ -44,7 +43,7 @@ public class EndPoint {
             return R.data(result);
         } else {
             // 拿到动态工具的实例
-            IDynamicAgentTool dynamicAgentTool = InstanceLoadFactory
+            IDynamicAgentTool dynamicAgentTool = ToolInstanceLoadFactory
                     .getInstanceLoader(toolConfig.getLanguage()).loadInstance(toolConfig.getCode());
 
             List<Object> args_ = new LinkedList<>();

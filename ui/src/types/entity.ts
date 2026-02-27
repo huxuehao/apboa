@@ -133,7 +133,7 @@ export interface HookConfig extends BaseEntity {
   hookType: HookType
   description: string
   classPath: string
-  hookContent: string
+  code: string
   priority: number
 }
 

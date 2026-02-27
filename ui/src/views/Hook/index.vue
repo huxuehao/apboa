@@ -55,7 +55,7 @@ async function handleView(id: string) {
       h('p', {}, [h('strong', '类路径: '), data.classPath || '暂无']),
       h('p', {}, [h('strong', '优先级: '), String(data.priority)]),
       h('p', {}, [h('strong', '状态: '), data.enabled ? '启用' : '禁用']),
-      ...(data.hookContent
+      ...(data.code
         ? [
             h('p', {}, h('strong', '钩子内容:')),
             h('pre', {
@@ -67,7 +67,7 @@ async function handleView(id: string) {
                 overflowY: 'auto',
                 fontSize: '12px'
               }
-            }, data.hookContent)
+            }, data.code)
           ]
         : [])
     ])

@@ -10,25 +10,25 @@ import java.util.Map;
  *
  * @author huxuehao
  **/
-public class InstanceLoadFactory {
-    private static final Map<CodeLanguage, InstanceLoader> loaders = new HashMap<>();
+public class ToolInstanceLoadFactory {
+    private static final Map<CodeLanguage, ToolInstanceLoader> loaders = new HashMap<>();
 
     /**
      * 注册加载器
      */
-    public static void registerLoader(InstanceLoader loader) {
+    public static void registerLoader(ToolInstanceLoader loader) {
         loaders.put(loader.getLanguage(), loader);
     }
 
     /**
      * 获取加载器
      */
-    public static InstanceLoader getInstanceLoader(CodeLanguage language) {
-        InstanceLoader instanceLoader = loaders.get(language);
-        if (instanceLoader == null) {
+    public static ToolInstanceLoader getInstanceLoader(CodeLanguage language) {
+        ToolInstanceLoader toolInstanceLoader = loaders.get(language);
+        if (toolInstanceLoader == null) {
             throw new RuntimeException("No loader found for language " + language);
         } else {
-            return instanceLoader;
+            return toolInstanceLoader;
         }
     }
 }

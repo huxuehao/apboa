@@ -87,7 +87,7 @@ public class DynamicAgentTool implements AgentTool {
                 List<Object> args = getObjects(param);
 
                 // 拿到动态工具的实例
-                IDynamicAgentTool dynamicAgentTool = InstanceLoadFactory
+                IDynamicAgentTool dynamicAgentTool = ToolInstanceLoadFactory
                         .getInstanceLoader(toolConfig.getLanguage()).loadInstance(toolConfig.getCode());
 
                 // 执行动态工具

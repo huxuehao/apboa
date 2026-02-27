@@ -38,7 +38,7 @@ public class HookConfig extends BaseEntity {
     /**
      * hook内容（tool_type为CUSTOM时使用）
      */
-    private String hookContent;
+    private String code;
 
     /**
      * 执行优先级

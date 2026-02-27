@@ -21,7 +21,7 @@ public class HookConfigVO implements SerializableEnable {
     private HookType hookType;
     private String description;
     private String classPath;
-    private String hookContent;
+    private String code;
     private Integer priority;
     private Boolean enabled;
     private LocalDateTime createdAt;

@@ -87,7 +87,7 @@ export interface HookConfigVO {
   hookType: HookType
   description: string
   classPath: string
-  hookContent: string
+  code: string
   priority: number
   enabled: boolean
   createdAt: string
