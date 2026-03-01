@@ -28,7 +28,6 @@ const protocolOptions = [
 
 const allDataList = ref<StorageProtocol[]>([])
 const loading = ref(false)
-const page = reactive({ current: 1, size: 20 })
 const searchKeyword = ref('')
 
 /** 前端过滤：按名称、备注、协议匹配 */
@@ -41,16 +40,6 @@ const filteredList = computed(() => {
       item.remark?.toLowerCase().includes(kw) ||
       item.protocol?.toLowerCase().includes(kw)
   )
-})
-
-/** 当前页展示的数据 */
-const displayList = computed(() => {
-  const start = (page.current - 1) * page.size
-  return filteredList.value.slice(start, start + page.size)
-})
-
-watch(searchKeyword, () => {
-  page.current = 1
 })
 
 const formVisible = ref(false)
@@ -164,7 +153,7 @@ async function handleFormSubmit() {
       message.success('保存成功')
     }
     formVisible.value = false
-    load()
+    await load()
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'errorFields' in error) return
   } finally {
@@ -181,7 +170,7 @@ async function handleToggleValid(item: StorageProtocol) {
   await storageApi.validSuccess(item.id)
   message.success('已启用')
   item.valid = 1
-  load()
+  await load()
 }
 
 /**
@@ -211,7 +200,7 @@ async function handleSaveProtocolConfig() {
     })
     message.success('保存成功')
     protocolModalVisible.value = false
-    load()
+    await load()
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'errorFields' in error) return
   } finally {
@@ -228,7 +217,7 @@ function handleDelete(item: StorageProtocol) {
       try {
         await storageApi.remove([item.id])
         message.success('删除成功')
-        load()
+        await load()
       } catch {
         console.error('删除失败')
       }
@@ -265,7 +254,7 @@ onMounted(() => {
     <ASpin :spinning="loading">
       <div class="storage-list">
         <div
-          v-for="item in displayList"
+          v-for="item in filteredList"
           :key="item.id"
           class="storage-list-item"
         >
@@ -315,17 +304,6 @@ onMounted(() => {
       </div>
 
       <AEmpty v-if="!loading && filteredList.length === 0" description="暂无存储配置" />
-
-      <div v-if="filteredList.length > page.size" class="storage-pagination">
-        <APagination
-          v-model:current="page.current"
-          v-model:page-size="page.size"
-          :total="filteredList.length"
-          show-size-changer
-          :page-size-options="['10', '20', '30', '50']"
-          @showSizeChange="() => { page.current = 1 }"
-        />
-      </div>
     </ASpin>
 
     <!-- 新增/编辑表单弹窗 -->
@@ -421,7 +399,7 @@ onMounted(() => {
 .storage-list {
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 220px);
+  max-height: calc(100vh - 200px);
   overflow-y: auto;
 }
 

@@ -158,9 +158,6 @@ onMounted(() => {
           v-model:current="page.current"
           v-model:page-size="page.size"
           :total="page.total"
-          show-size-changer
-          :page-size-options="['20', '30', '40', '50', '60']"
-          size="small"
           @change="load"
         />
       </div>
@@ -190,7 +187,7 @@ onMounted(() => {
 .file-list {
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 250px);
+  max-height: calc(100vh - 260px);
   overflow-y: auto;
 }
 
@@ -288,17 +285,7 @@ onMounted(() => {
   margin-top: var(--spacing-lg);
   padding: var(--spacing-md) 0;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
-
-  :deep(.ant-pagination) {
-    .ant-pagination-total-text {
-      color: var(--color-text-secondary);
-      font-size: var(--font-size-sm);
-    }
-    .ant-pagination-options {
-      margin-left: 12px;
-    }
-  }
 }
 </style>

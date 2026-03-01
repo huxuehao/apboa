@@ -186,3 +186,13 @@
     transform: rotate(360deg);
   }
 }
+
+.ant-pagination {
+  .ant-pagination-item-active {
+    border-color: transparent;
+
+    &:hover {
+      border-color: transparent;
+    }
+  }
+}
