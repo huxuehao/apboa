@@ -74,7 +74,7 @@ const authTypeOptions = [
  */
 function getDefaultBaseUrl(type: ModelProviderType): string {
   const baseUrlMap: Record<ModelProviderType, string> = {
-    [ModelProviderType.DASH_SCOPE]: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+    [ModelProviderType.DASH_SCOPE]: 'https://dashscope.aliyuncs.com',
     [ModelProviderType.OPEN_AI]: 'https://api.openai.com/v1',
     [ModelProviderType.ANTHROPIC]: 'https://api.anthropic.com',
     [ModelProviderType.OLLAMA]: 'http://localhost:11434/api',
