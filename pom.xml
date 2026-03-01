@@ -4,7 +4,7 @@
 
   <groupId>com.hxh.apboa</groupId>
   <artifactId>apboa</artifactId>
-  <version>${apboa.version}</version>
+  <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
     <module>model</module>
@@ -28,7 +28,6 @@
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <apboa.version>1.0-SNAPSHOT</apboa.version>
     <spring-boot.version>3.4.9</spring-boot.version>
     <agentscope.version>1.0.9</agentscope.version>
     <mybatis-plus.version>3.5.7</mybatis-plus.version>
@@ -39,6 +38,9 @@
     <guava.version>31.1-jre</guava.version>
     <jjwt.version>0.13.0</jjwt.version>
     <commons-net.version>3.9.0</commons-net.version>
+    <aws.version>1.11.543</aws.version>
+    <commons-net.version>3.6</commons-net.version>
+    <hutool.version>5.8.4</hutool.version>
     <junit.version>3.8.1</junit.version>
   </properties>
 
@@ -97,12 +99,29 @@
         <artifactId>jjwt</artifactId>
         <version>${jjwt.version}</version>
       </dependency>
+      <!-- aws -->
+      <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-java-sdk-s3</artifactId>
+        <version>${aws.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-net</groupId>
+        <artifactId>commons-net</artifactId>
+        <version>${commons-net.version}</version>
+      </dependency>
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>cn.hutool</groupId>
+        <artifactId>hutool-all</artifactId>
+        <version>${hutool.version}</version>
+      </dependency>
+
       <!--项目模块-->
       <dependency>
         <groupId>com.hxh.apboa</groupId>
@@ -171,7 +190,7 @@
       </dependency>
       <dependency>
         <groupId>com.hxh.apboa</groupId>
-        <artifactId>agui</artifactId>
+        <artifactId>resource</artifactId>
         <version>1.0-SNAPSHOT</version>
       </dependency>
     </dependencies>

@@ -21,6 +21,10 @@
             <groupId>com.hxh.apboa</groupId>
             <artifactId>agent</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>resource</artifactId>
+        </dependency>
 
         <!--模型依赖-->
         <dependency>
