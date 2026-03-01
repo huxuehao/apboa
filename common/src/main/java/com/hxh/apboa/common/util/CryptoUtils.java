@@ -54,9 +54,13 @@ public class CryptoUtils {
      * @return 加密后的字符串。
      */
     public static String encryptRot13(String str) {
+        if (str == null) {
+            return null;
+        }
         try {
-            String encode = encode(str);
-            return rot13(encode);
+            // 先 Base64 编码，再 ROT13
+            String base64Encoded = encode(str);
+            return rot13(base64Encoded);
         } catch (Exception e) {
             return str;
         }
@@ -69,9 +73,13 @@ public class CryptoUtils {
      * @return 解密后的字符串
      */
     public static String decryptRot13(String encrypted) {
+        if (encrypted == null) {
+            return null;
+        }
         try {
-            String encrypt = rot13(encrypted.replaceFirst("^\"", "").replaceAll("\"$", ""));
-            return decode(encrypt);
+            // 先 ROT13 还原，再 Base64 解码
+            String rot13Decoded = rot13(encrypted);
+            return decode(rot13Decoded);
         } catch (Exception e) {
             return encrypted;
         }
