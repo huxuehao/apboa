@@ -1,6 +1,5 @@
 package com.hxh.apboa.resource.service;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.file.FileNameUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -58,8 +57,8 @@ public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> impleme
             /*
              * NOTE:获取文件存储服务，并删除真实存储的文件，请结合实际，自行决定是否删除真实存储的文件
              */
-            FileStorageService storageService = storageProtocolService.getStorageService();
-            storageService.delete(genStoragePath(attach));
+//            FileStorageService storageService = storageProtocolService.getStorageService();
+//            storageService.delete(genStoragePath(attach));
 
             attachHandelLog(attach, AttachOptType.DELETE);
         }
@@ -145,7 +144,7 @@ public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> impleme
                 return new Attach();
             }
             // 保存附件信息
-            String storePath = DateUtil.format(new Date(), "yyyy/MM/dd");
+            String storePath = new SimpleDateFormat("yyyy/MM/dd").format(new Date());
             Attach attach = saveAttachInfo(fileName, extension, totalSize, storageService.getProtocol(), storePath);
 
             // 合并分片上传

@@ -49,13 +49,13 @@ public class StorageProtocolController {
     }
 
     @GetMapping(value = "/selectOne", name = "根据ID唯一获取")
-    public R<StorageProtocol> selectOne(@RequestParam Long id) {
+    public R<StorageProtocol> selectOne(@RequestParam("id") Long id) {
         return R.data(storageProtocolService.getById(id));
     }
 
     @RoleNeed({Role.ADMIN, Role.EDIT})
     @GetMapping(value = "/validSuccess", name = "设置有效")
-    public R<Boolean> validSuccess(@RequestParam Long id) {
+    public R<Boolean> validSuccess(@RequestParam("id") Long id) {
         return R.data(storageProtocolService.validSuccess(id));
     }
 

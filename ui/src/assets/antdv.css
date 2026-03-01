@@ -130,3 +130,59 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+
+/* 隐藏默认的点元素 */
+.ant-spin-dot-item {
+  display: none !important;
+}
+
+/* 自定义加载动画容器 - 相对于父容器定位 */
+.ant-spin-dot {
+  position: absolute !important;  /* 改为 absolute */
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  width: 35px !important;
+  height: 35px !important;
+}
+
+/* 添加自定义环形加载器 */
+.ant-spin-dot::after {
+  content: '';
+  display: block;
+  width: 35px;
+  height: 35px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #409EFF;
+  border-radius: 50%;
+  animation: spin 0.5s linear infinite;
+  box-sizing: border-box;
+}
+
+/* 确保父容器有正确的定位上下文 */
+.ant-spin-nested-loading {
+  position: relative !important;
+}
+
+.ant-spin-nested-loading .ant-spin {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  background-color: rgba(255, 255, 255, 0.5);
+  display: block !important;
+  z-index: 1000;
+}
+
+/* 动画效果：旋转 */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

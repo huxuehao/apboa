@@ -77,6 +77,13 @@ export function createConfigItem(): CardMenuItem {
 }
 
 /**
+ * 创建「协议配置」菜单项
+ */
+export function createProtocolConfigItem(): CardMenuItem {
+  return { key: 'protocolConfig', label: '协议配置', icon: () => h(SettingOutlined) }
+}
+
+/**
  * 创建分隔线
  */
 export function createDivider(): CardMenuItem {

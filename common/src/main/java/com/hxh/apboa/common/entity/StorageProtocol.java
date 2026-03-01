@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hxh.apboa.common.config.SerializableEnable;
+import com.hxh.apboa.common.mp.annotation.QueryDefine;
+import com.hxh.apboa.common.mp.support.QueryCondition;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,11 +27,13 @@ public class StorageProtocol implements SerializableEnable {
     /**
      * 名称
      */
+    @QueryDefine(condition = QueryCondition.LIKE)
     private String name;
 
     /**
      * 存储协议
      */
+    @QueryDefine(condition = QueryCondition.EQ)
     private String protocol;
 
     /**
@@ -65,5 +69,6 @@ public class StorageProtocol implements SerializableEnable {
     /**
      * 是否有效
      */
+    @QueryDefine(condition = QueryCondition.EQ)
     private Integer valid;
 }

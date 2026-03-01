@@ -31,17 +31,30 @@ const currentData = ref<HookConfigVO | undefined>(undefined)
 const scrollContainer = ref<HTMLElement>()
 const loadMoreObserver = ref<IntersectionObserver>()
 
+/** 全部类型的占位值（用于 Segmented，避免 null 绑定问题） */
+const HOOK_TYPE_ALL = 'ALL'
+
 /**
  * 钩子类型选项（全部、内置、自定义）
  */
 const hookTypeOptions = [
-  { label: '全部', value: null },
+  { label: '全部', value: HOOK_TYPE_ALL },
   { label: '内置', value: HookType.BUILTIN },
   { label: '自定义', value: HookType.CUSTOM }
 ]
 
 /**
- * 是否显示新增卡片
+ * 当前选中的钩子类型（用于 Segmented 显示，ALL 表示全部）
+ */
+const selectedHookTypeDisplay = computed({
+  get: () => (selectedHookType.value === null ? HOOK_TYPE_ALL : selectedHookType.value),
+  set: (val: string | HookType) => {
+    store.setHookType(val === HOOK_TYPE_ALL ? null : (val as HookType))
+  }
+})
+
+/**
+ * 是否显示新增卡片（全部或自定义时显示）
  */
 const showCreateCard = computed(() => {
   return selectedHookType.value !== HookType.BUILTIN
@@ -161,13 +174,6 @@ async function handleEnable(id: string) {
 }
 
 /**
- * 处理钩子类型切换
- */
-function handleHookTypeChange(value: HookType | null) {
-  store.setHookType(value)
-}
-
-/**
  * 处理搜索
  */
 function handleSearch() {
@@ -221,9 +227,8 @@ onUnmounted(() => {
     <section class="filter-section flex justify-between items-center">
       <div class="filter-left">
         <ASegmented
-          v-model:value="selectedHookType"
+          v-model:value="selectedHookTypeDisplay"
           :options="hookTypeOptions"
-          @change="handleHookTypeChange"
         />
       </div>
 
@@ -259,7 +264,6 @@ onUnmounted(() => {
       </div>
 
       <div v-if="loading" class="load-indicator mt-md">
-        <ASpin />
         <span class="ml-sm text-secondary">加载中...</span>
       </div>
 

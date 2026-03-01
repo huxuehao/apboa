@@ -40,7 +40,7 @@ public class AttachController {
     @GetMapping(value = "/page", name = "分页")
     public R<IPage<Attach>> page(Attach attach, PageParams pageParams) {
         QueryWrapper<Attach> qw = MP.getQueryWrapper(attach);
-        qw.last("ORDER BY create_time DESC");
+        qw.last("ORDER BY create_at DESC");
         return R.data(attachService.page(MP.getPage(pageParams), qw));
     }
 
@@ -58,7 +58,7 @@ public class AttachController {
     }
 
     @GetMapping(value = "/selectOne", name = "根据ID唯一获取")
-    public R<Attach> selectOne(@RequestParam Long id) {
+    public R<Attach> selectOne(@RequestParam("id") Long id) {
         return R.data(attachService.getById(id));
     }
 

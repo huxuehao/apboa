@@ -365,7 +365,6 @@ onUnmounted(() => {
       </div>
 
       <div v-if="loading" class="load-indicator mt-md">
-        <ASpin />
         <span class="ml-sm text-secondary">加载中...</span>
       </div>
 

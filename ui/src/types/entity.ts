@@ -287,3 +287,56 @@ export interface ChatMessage {
   depth: number
   createdAt: string
 }
+
+/**
+ * 附件
+ */
+export interface Attach {
+  id: string
+  fileId: string
+  link: string
+  domain: string
+  name: string
+  originalName: string
+  extension: string
+  attachSize: number
+  path: string
+  createBy: string
+  createAt: string
+  updateBy: string
+  updateAt: string
+  protocol: string
+  status: number
+}
+
+/**
+ * 附件操作日志
+ */
+export interface AttachLog {
+  id: string
+  fileId: string
+  originalName: string
+  extension: string
+  attachSize: number
+  optUser: string
+  optUserName: string
+  optTime: string
+  optIp: string
+  optType: string
+}
+
+/**
+ * 文件存储协议配置
+ */
+export interface StorageProtocol {
+  id: string
+  name: string
+  protocol: string
+  protocolConfig: string
+  createBy: string
+  createAt: string
+  updateBy: string
+  updateAt: string
+  remark: string
+  valid: number
+}

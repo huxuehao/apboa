@@ -27,7 +27,6 @@ public class StorageProtocolServiceImpl extends ServiceImpl<StorageProtocolMappe
         if(body.getValid() == 1) {
             QueryWrapper<StorageProtocol> qw = new QueryWrapper<>();
             qw.eq("valid", 1);
-            qw.eq("del_flag", 0);
             qw.ne("id", body.getId());
             List<StorageProtocol> validList = list(qw);
             if(!FuncUtils.isEmpty(validList)) {
@@ -42,7 +41,6 @@ public class StorageProtocolServiceImpl extends ServiceImpl<StorageProtocolMappe
         if(body.getValid() == 1) {
             QueryWrapper<StorageProtocol> qw = new QueryWrapper<>();
             qw.eq("valid", 1);
-            qw.eq("del_flag", 0);
             qw.ne("id", body.getId());
             List<StorageProtocol> validList = list(qw);
             if(!FuncUtils.isEmpty(validList)) {

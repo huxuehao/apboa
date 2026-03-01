@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hxh.apboa.common.config.SerializableEnable;
+import com.hxh.apboa.common.mp.annotation.QueryDefine;
+import com.hxh.apboa.common.mp.support.QueryCondition;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,16 +27,19 @@ public class AttachLog implements SerializableEnable {
     /**
      * 文件id
      */
+    @QueryDefine(condition = QueryCondition.EQ)
     private Long fileId;
 
     /**
      * 附件原名
      */
+    @QueryDefine(condition = QueryCondition.LIKE)
     private String originalName;
 
     /**
      * 附件拓展名
      */
+    @QueryDefine(condition = QueryCondition.LIKE)
     private String extension;
 
     /**
@@ -65,5 +70,6 @@ public class AttachLog implements SerializableEnable {
     /**
      * 操作类型
      */
+    @QueryDefine(condition = QueryCondition.EQ)
     private String optType;
 }

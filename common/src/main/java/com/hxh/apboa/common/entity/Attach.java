@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hxh.apboa.common.config.SerializableEnable;
+import com.hxh.apboa.common.mp.annotation.QueryDefine;
+import com.hxh.apboa.common.mp.support.QueryCondition;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,31 +27,37 @@ public class Attach implements SerializableEnable {
     /**
      * 文件id
      */
+    @QueryDefine(condition = QueryCondition.EQ)
     private Long fileId;
 
     /**
      * 附件地址
      */
+    @QueryDefine(condition = QueryCondition.LIKE)
     private String link;
 
     /**
      * 附件域名
      */
+    @QueryDefine(condition = QueryCondition.LIKE)
     private String domain;
 
     /**
      * 附件名称
      */
+    @QueryDefine(condition = QueryCondition.LIKE)
     private String name;
 
     /**
      * 附件原名
      */
+    @QueryDefine(condition = QueryCondition.LIKE)
     private String originalName;
 
     /**
      * 附件拓展名
      */
+    @QueryDefine(condition = QueryCondition.LIKE)
     private String extension;
 
     /**

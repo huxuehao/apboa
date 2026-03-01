@@ -29,8 +29,8 @@ export const useHookStore = defineStore('hook', () => {
 
     loading.value = true
     try {
-      const query: HookConfigDTO = {
-        page,
+      const query: HookConfigDTO & { current?: number } = {
+        current: page,
         size: pageSize.value,
         hookType: selectedHookType.value ?? undefined,
         name: keyword.value || undefined

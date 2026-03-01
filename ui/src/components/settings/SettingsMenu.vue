@@ -5,7 +5,7 @@
  */
 <script setup lang="ts">
 import { computed } from 'vue'
-import { UserOutlined, TeamOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
+import { UserOutlined, TeamOutlined, InfoCircleOutlined, DatabaseOutlined, FolderOutlined, ClockCircleOutlined } from '@ant-design/icons-vue'
 import { useAccountStore } from '@/stores'
 
 /**
@@ -45,15 +45,30 @@ const menuItems = computed(() => {
       icon: InfoCircleOutlined
     }
   ]
-  
+
   if (isAdmin.value) {
     items.splice(1, 0, {
       key: 'allAccounts',
       label: '全部账户',
       icon: TeamOutlined
     })
+    items.splice(2, 0, {
+      key: 'storageConfig',
+      label: '存储配置',
+      icon: DatabaseOutlined
+    })
+    items.splice(3, 0, {
+      key: 'fileManager',
+      label: '文件管理',
+      icon: FolderOutlined
+    })
+    items.splice(4, 0, {
+      key: 'fileLog',
+      label: '文件日志',
+      icon: ClockCircleOutlined
+    })
   }
-  
+
   return items
 })
 
