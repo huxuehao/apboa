@@ -1,6 +1,7 @@
 package com.hxh.apboa.resource.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.hxh.apboa.common.config.auth.RoleNeed;
 import com.hxh.apboa.common.entity.Attach;
 import com.hxh.apboa.common.entity.AttachLog;
@@ -12,6 +13,7 @@ import com.hxh.apboa.common.util.FuncUtils;
 import com.hxh.apboa.resource.service.AttachLogService;
 import com.hxh.apboa.resource.service.AttachService;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -30,24 +32,20 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping("/attach")
+@RequiredArgsConstructor
 public class AttachController {
     private final AttachService attachService;
     private final AttachLogService attachLogService;
 
-    public AttachController(AttachService attachService, AttachLogService attachLogService) {
-        this.attachService = attachService;
-        this.attachLogService = attachLogService;
-    }
-
     @GetMapping(value = "/page", name = "分页")
-    public R<?> page(Attach attach, PageParams pageParams) {
+    public R<IPage<Attach>> page(Attach attach, PageParams pageParams) {
         QueryWrapper<Attach> qw = MP.getQueryWrapper(attach);
         qw.last("ORDER BY create_time DESC");
         return R.data(attachService.page(MP.getPage(pageParams), qw));
     }
 
     @GetMapping(value = "/log/page", name = "日志:分页")
-    public R<?> LogPage(AttachLog attachLog, PageParams pageParams) {
+    public R<IPage<AttachLog>> LogPage(AttachLog attachLog, PageParams pageParams) {
         QueryWrapper<AttachLog> qw = MP.getQueryWrapper(attachLog);
         qw.last("ORDER BY opt_time DESC");
         return R.data(attachLogService.page(MP.getPage(pageParams), qw));
@@ -55,17 +53,17 @@ public class AttachController {
 
     @RoleNeed({Role.ADMIN, Role.EDIT})
     @PostMapping(value = "/delete", name = "删除")
-    public R<?> delete(@RequestBody List<Long> ids) {
+    public R<Boolean> delete(@RequestBody List<Long> ids) {
         return R.data(attachService.batchDeleteV2(ids));
     }
 
     @GetMapping(value = "/selectOne", name = "根据ID唯一获取")
-    public R<?> selectOne(@RequestParam Long id) {
+    public R<Attach> selectOne(@RequestParam Long id) {
         return R.data(attachService.getById(id));
     }
 
     @PostMapping(value = "/list", name = "列表")
-    public R<?> selectList(@RequestBody List<Long> ids) {
+    public R<List<Attach>> selectList(@RequestBody List<Long> ids) {
         return R.data(attachService.listByIds(ids));
     }
 
@@ -73,7 +71,7 @@ public class AttachController {
      * 上传
      */
     @PostMapping(value = "/upload", name = "上传")
-    public R<?> upload(@RequestParam("file") MultipartFile file) {
+    public R<String> upload(@RequestParam("file") MultipartFile file) {
         final Attach attach = attachService.upload(file, file.getOriginalFilename());
         return R.data(String.valueOf(attach.getId()));
     }
@@ -82,7 +80,7 @@ public class AttachController {
      * 分片串行上传
      */
     @PostMapping(value = "/chunk-upload", name = "分片串行上传")
-    public R<?> uploadChunk(@RequestParam("file") MultipartFile file,
+    public R<String> uploadChunk(@RequestParam("file") MultipartFile file,
                               @RequestParam("hash") String hash,
                               @RequestParam("totalSize") int totalSize,
                               @RequestParam("index") int index,

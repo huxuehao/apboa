@@ -17,6 +17,7 @@ import com.hxh.apboa.common.util.WebUtils;
 import com.hxh.apboa.resource.mapper.AttachChunkMapper;
 import com.hxh.apboa.resource.mapper.AttachMapper;
 import com.hxh.apboa.resource.storage.core.FileStorageService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,18 +40,13 @@ import java.util.zip.ZipOutputStream;
  * @author huxuehao
  **/
 @Service
+@RequiredArgsConstructor
 public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> implements AttachService {
     private static final List<String> ALLOW_UPLOAD_FILE_TYPE = List.of("jpg","jpeg","jpe","jfif","png","gif","mp4","m4v","mp3","wav");
 
     private final StorageProtocolService storageProtocolService;
     private final AttachLogService attachLogService;
     private final AttachChunkMapper attachChunkMapper;
-
-    public AttachServiceImpl(StorageProtocolService storageProtocolService, AttachLogService attachLogService, AttachChunkMapper attachChunkMapper) {
-        this.storageProtocolService = storageProtocolService;
-        this.attachLogService = attachLogService;
-        this.attachChunkMapper = attachChunkMapper;
-    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
