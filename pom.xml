@@ -106,11 +106,6 @@
         <artifactId>aws-java-sdk-s3</artifactId>
         <version>${aws.version}</version>
       </dependency>
-      <dependency>
-        <groupId>commons-net</groupId>
-        <artifactId>commons-net</artifactId>
-        <version>${commons-net.version}</version>
-      </dependency>
       <!--hutool-->
       <dependency>
         <groupId>cn.hutool</groupId>
@@ -119,7 +114,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
