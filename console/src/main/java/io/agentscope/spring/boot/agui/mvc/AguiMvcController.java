@@ -1,5 +1,6 @@
 package io.agentscope.spring.boot.agui.mvc;
 
+import com.hxh.apboa.core.agui.AgentContext;
 import io.agentscope.core.agui.AguiException;
 import io.agentscope.core.agui.adapter.AguiAdapterConfig;
 import io.agentscope.core.agui.encoder.AguiEventEncoder;
@@ -101,6 +102,7 @@ public class AguiMvcController {
                         emitter.onCompletion(
                                 () -> {
                                     logger.debug("SSE connection completed for run {}", runId);
+                                    AgentContext.clean();
                                     result.agent().interrupt();
                                     emitter.complete();
                                 });
@@ -110,6 +112,7 @@ public class AguiMvcController {
                                             "SSE connection timed out for run {}, interrupting"
                                                     + " agent",
                                             runId);
+                                    AgentContext.clean();
                                     result.agent().interrupt();
                                 });
                         emitter.onError(
@@ -119,6 +122,7 @@ public class AguiMvcController {
                                                     + " agent",
                                             runId,
                                             ex.getMessage());
+                                    AgentContext.clean();
                                     result.agent().interrupt();
                                 });
 
@@ -131,6 +135,7 @@ public class AguiMvcController {
                                                     logger.error(
                                                             "Error during AG-UI run: {}",
                                                             error.getMessage());
+                                                    AgentContext.clean();
                                                     sendErrorAndComplete(
                                                             emitter,
                                                             threadId,
@@ -144,14 +149,18 @@ public class AguiMvcController {
                                                         logger.debug(
                                                                 "Error completing emitter: {}",
                                                                 e.getMessage());
+                                                    } finally {
+                                                        AgentContext.clean();
                                                     }
                                                 });
 
                     } catch (AguiException.AgentNotFoundException e) {
                         logger.error("Agent not found: {}", e.getMessage());
+                        AgentContext.clean();
                         sendErrorAndComplete(emitter, threadId, runId, e.getMessage());
                     } catch (Exception e) {
                         logger.error("Error processing AG-UI request: {}", e.getMessage());
+                        AgentContext.clean();
                         sendErrorAndComplete(emitter, threadId, runId, e.getMessage());
                     }
                 });

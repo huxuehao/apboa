@@ -1,6 +1,7 @@
 package com.hxh.apboa.core.agent;
 
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.core.agui.AgentContext;
 import io.agentscope.core.ReActAgent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,19 +17,35 @@ public class ReActAgentFactory {
     private final ReActAgentHelper reActAgentHelper;
 
     public ReActAgent getReActAgent(Long agentId) {
-        return reActAgentHelper.getReActAgent(agentId);
+        try {
+            return reActAgentHelper.getReActAgent(agentId);
+        } finally {
+            AgentContext.clean();
+        }
     }
 
 
     public ReActAgent getReActAgent(AgentDefinition definition) {
-        return reActAgentHelper.getReActAgent(definition);
+        try {
+            return reActAgentHelper.getReActAgent(definition);
+        } finally {
+            AgentContext.clean();
+        }
     }
 
     public ReActAgent.Builder getReActAgentBuilder(Long agentId) {
-        return reActAgentHelper.getReActAgentBuilder(agentId);
+        try {
+            return reActAgentHelper.getReActAgentBuilder(agentId);
+        } finally {
+            AgentContext.clean();
+        }
     }
 
     public ReActAgent.Builder getReActAgentBuilder(AgentDefinition definition) {
-        return reActAgentHelper.getReActAgentBuilder(definition);
+        try {
+            return reActAgentHelper.getReActAgentBuilder(definition);
+        } finally {
+            AgentContext.clean();
+        }
     }
 }

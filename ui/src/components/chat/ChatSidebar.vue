@@ -35,8 +35,7 @@ defineEmits<{
     <div class="chat-sidebar-body">
       <div v-show="!collapsed" class="chat-sidebar-new-wrap">
         <button type="button" class="chat-sidebar-new-btn" :disabled="isRunning" title="开启新对话" @click="$emit('newSession')">
-          <MessageOutlined />
-          <span>开启新对话</span>
+          <MessageOutlined /><span>开启新对话</span>
         </button>
       </div>
       <div v-show="collapsed" class="chat-sidebar-new-wrap chat-sidebar-new-wrap-collapsed">
@@ -47,7 +46,7 @@ defineEmits<{
           title="新对话"
           @click="$emit('newSession')"
         >
-          <MessageOutlined/>
+          <MessageOutlined />
         </AButton>
       </div>
       <div v-show="!collapsed" class="chat-history-section">

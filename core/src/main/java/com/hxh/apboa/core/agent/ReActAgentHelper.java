@@ -6,6 +6,7 @@ import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.util.FuncUtils;
 import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.common.wrapper.KnowledgeWrapper;
+import com.hxh.apboa.core.agui.AgentContext;
 import com.hxh.apboa.core.hook.HooksFactory;
 import com.hxh.apboa.core.knowledge.KnowledgeFactory;
 import com.hxh.apboa.core.model.ChatModelFactory;
@@ -121,7 +122,8 @@ public class ReActAgentHelper {
                             .build());
         }
 
-        if (definition.getEnablePlanning()) {
+        Boolean isPlanActive = AgentContext.getIfExists().map(AgentContext::isPlanActive).orElse(false);
+        if (definition.getEnablePlanning() && isPlanActive) {
             PlanNotebook planNotebook = PlanNotebook.builder()
                     .maxSubtasks(definition.getMaxSubtasks())
                     .needUserConfirm(definition.getRequirePlanConfirmation())
@@ -134,7 +136,8 @@ public class ReActAgentHelper {
         hooks = hooks != null ? new ArrayList<>(hooks) : new ArrayList<>();
 
         // 配置记忆
-        if (definition.getEnableMemory()) {
+        Boolean isMemoryActive = AgentContext.getIfExists().map(AgentContext::isMemoryActive).orElse(false);
+        if (definition.getEnableMemory() && isMemoryActive) {
             if (definition.getEnableMemoryCompression()) {
                 JsonNode config = definition.getMemoryCompressionConfig();
                 AutoContextConfig autoContextConfig = AutoContextConfig.builder()
@@ -152,7 +155,7 @@ public class ReActAgentHelper {
             builder.statePersistence(
                     StatePersistence.builder()
                             .memoryManaged(true)
-                            .planNotebookManaged(definition.getEnablePlanning())
+                            .planNotebookManaged(definition.getEnablePlanning() && isPlanActive)
                             .build());
         }
 

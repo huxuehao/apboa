@@ -1,5 +1,6 @@
 package io.agentscope.spring.boot.agui.webflux;
 
+import com.hxh.apboa.core.agui.AgentContext;
 import io.agentscope.core.agui.AguiException;
 import io.agentscope.core.agui.adapter.AguiAdapterConfig;
 import io.agentscope.core.agui.encoder.AguiEventEncoder;
@@ -115,6 +116,7 @@ public class AguiWebFluxHandler {
                                                 "SSE stream cancelled for run {}, interrupting"
                                                         + " agent",
                                                 runId);
+                                        AgentContext.clean();
                                         result.agent().interrupt();
                                     });
 
@@ -124,9 +126,11 @@ public class AguiWebFluxHandler {
 
         } catch (AguiException.AgentNotFoundException e) {
             logger.error("Agent not found: {}", e.getMessage());
+            AgentContext.clean();
             return createErrorResponse(threadId, runId, e.getMessage());
         } catch (Exception e) {
             logger.error("Error processing AG-UI request: {}", e.getMessage());
+            AgentContext.clean();
             return createErrorResponse(threadId, runId, e.getMessage());
         }
     }

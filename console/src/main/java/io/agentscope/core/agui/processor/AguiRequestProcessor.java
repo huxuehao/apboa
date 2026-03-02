@@ -3,6 +3,7 @@ package io.agentscope.core.agui.processor;
 
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.ChatSession;
+import com.hxh.apboa.core.agui.AgentContext;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.agent.Agent;
 import io.agentscope.core.agui.adapter.AguiAdapterConfig;
@@ -64,6 +65,24 @@ public class AguiRequestProcessor {
 
         // Resolve agent
         Agent agent = agentResolver.resolveAgent(agentId, threadId);
+
+        // 创建上下文
+        AgentContext agentContext = AgentContext.get();
+        agentContext.setThreadId(threadId);
+        agentContext.setRunId(input.getRunId());
+        agentContext.setMemoryActive(
+                input.getForwardedProp("memoryActive") != null
+                        ? (Boolean) input.getForwardedProp("memoryActive")
+                        : false);
+        agentContext.setPlanActive(
+                input.getForwardedProp("planActive") != null
+                        ? (Boolean) input.getForwardedProp("planActive")
+                        : false);
+        @SuppressWarnings("unchecked")
+        List<String> fileIds = input.getForwardedProp("fileIds") != null
+                ? (List<String>) input.getForwardedProp("fileIds")
+                : List.of();
+        agentContext.setFileIds(fileIds);
 
         // Determine effective input based on server-side memory
         RunAgentInput effectiveInput = input;
