@@ -5,7 +5,7 @@
  */
 <script setup lang="ts">
 import { computed } from 'vue'
-import { UserOutlined, TeamOutlined, InfoCircleOutlined, DatabaseOutlined, FolderOutlined, ClockCircleOutlined } from '@ant-design/icons-vue'
+import { UserOutlined, TeamOutlined, InfoCircleOutlined, DatabaseOutlined, FolderOutlined, ClockCircleOutlined, ControlOutlined } from '@ant-design/icons-vue'
 import { useAccountStore } from '@/stores'
 
 /**
@@ -66,6 +66,11 @@ const menuItems = computed(() => {
       key: 'fileLog',
       label: '文件日志',
       icon: ClockCircleOutlined
+    })
+    items.splice(5, 0, {
+      key: 'systemParams',
+      label: '系统参数',
+      icon: ControlOutlined
     })
   }
 

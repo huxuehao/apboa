@@ -11,6 +11,7 @@ import AllAccounts from './AllAccounts.vue'
 import StorageConfig from './StorageConfig.vue'
 import FileManager from './FileManager.vue'
 import FileLog from './FileLog.vue'
+import SystemParams from './SystemParams.vue'
 import SystemIntro from './SystemIntro.vue'
 
 /**
@@ -43,6 +44,7 @@ defineExpose({
       <StorageConfig v-else-if="currentMenu === 'storageConfig'" v-permission="['EDIT','ADMIN']" />
       <FileManager v-else-if="currentMenu === 'fileManager'" v-permission="['EDIT','ADMIN']" />
       <FileLog v-else-if="currentMenu === 'fileLog'" v-permission="['EDIT','ADMIN']" />
+      <SystemParams v-else-if="currentMenu === 'systemParams'" v-permission="['EDIT','ADMIN']" />
       <SystemIntro v-else-if="currentMenu === 'systemIntro'" />
     </div>
   </div>

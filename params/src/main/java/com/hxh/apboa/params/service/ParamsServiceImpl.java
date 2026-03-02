@@ -50,14 +50,6 @@ public class ParamsServiceImpl extends ServiceImpl<ParamsMapper, Params> impleme
             throw new RuntimeException("value值不可为空");
         }
 
-        List<Params> list = lambdaQuery()
-                .eq(Params::getId, params.getId())
-                .eq(Params::getParamKey, params.getParamKey())
-                .list();
-        if (list == null || list.isEmpty()) {
-            return paramsAdapter.updateParams(params) > 0;
-        } else {
-            throw new RuntimeException("Key已存在");
-        }
+        return paramsAdapter.updateParams(params) > 0;
     }
 }
