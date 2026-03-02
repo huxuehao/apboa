@@ -60,7 +60,6 @@ export interface McpServerDTO extends PageParams {
 export interface ModelConfigDTO extends PageParams {
   providerId?: string
   name?: string
-  modelType?: ModelType
   enabled?: boolean
 }
 

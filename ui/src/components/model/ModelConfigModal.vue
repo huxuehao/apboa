@@ -43,12 +43,10 @@ const currentData = ref<ModelConfigVO | undefined>(undefined)
  * 模型类型显示映射
  */
 const modelTypeLabels: Record<string, string> = {
-  CHAT: '对话模型',
+  CHAT: '文本模型',
   IMAGE: '图像模型',
-  VIDEO: '视频模型',
   TTS: '语音模型',
-  EMBEDDING: '嵌入模型',
-  RERANKER: '重排序模型'
+  VIDEO: '视频模型'
 }
 
 /**
@@ -306,7 +304,12 @@ async function handleEnable(id: string) {
           </template>
 
           <template v-if="column.key === 'modelType'">
-            <ATag color="default" :bordered="false">
+            <ASpace v-if="Array.isArray(record.modelType)" :size="4">
+              <ATag v-for="t in record.modelType" :key="t" color="default" :bordered="false">
+                {{ modelTypeLabels[t] || t }}
+              </ATag>
+            </ASpace>
+            <ATag v-else color="default" :bordered="false">
               {{ modelTypeLabels[record.modelType] || record.modelType }}
             </ATag>
           </template>

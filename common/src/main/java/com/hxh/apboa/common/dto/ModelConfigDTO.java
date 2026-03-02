@@ -1,6 +1,5 @@
 package com.hxh.apboa.common.dto;
 
-import com.hxh.apboa.common.enums.ModelType;
 import com.hxh.apboa.common.mp.annotation.QueryDefine;
 import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.mp.support.QueryCondition;
@@ -21,9 +20,6 @@ public class ModelConfigDTO extends PageParams {
 
     @QueryDefine(value = "模型名称", condition = QueryCondition.LIKE)
     private String name;
-
-    @QueryDefine(value = "模型类型", condition = QueryCondition.EQ)
-    private ModelType modelType;
 
     @QueryDefine(value = "是否可用", condition = QueryCondition.EQ)
     private Boolean enabled;

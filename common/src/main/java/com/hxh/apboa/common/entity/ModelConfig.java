@@ -1,6 +1,8 @@
 package com.hxh.apboa.common.entity;
 
-import com.hxh.apboa.common.enums.ModelType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.hxh.apboa.common.config.mybatis.JsonNodeTypeHandler;
 import com.hxh.apboa.common.wrapper.ModelConfigWrapper;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
@@ -13,7 +15,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName("model_config")
+@TableName(value = "model_config", autoResultMap = true)
 public class ModelConfig extends BaseEntity {
 
     /**
@@ -34,7 +36,8 @@ public class ModelConfig extends BaseEntity {
     /**
      * 模型类型
      */
-    private ModelType modelType;
+    @TableField(typeHandler = JsonNodeTypeHandler.class)
+    private JsonNode modelType;
 
     /**
      * 模型描述
