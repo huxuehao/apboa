@@ -14,6 +14,10 @@ const props = defineProps<{
   toolCalls: any[]
   inputValue: string
   isRunning: boolean
+  memoryActive?: boolean
+  planActive?: boolean
+  enableMemory?: boolean
+  enablePlanning?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -22,6 +26,8 @@ const emit = defineEmits<{
   (e: 'scroll', event: UIEvent): void
   (e: 'toolContent', value: any): void
   (e: 'abort'): void
+  (e: 'memory', value: boolean): void
+  (e: 'plan', value: boolean): void
 }>()
 
 // 滚动容器 ref
@@ -109,7 +115,13 @@ defineExpose({
         :description="welcomeDesc"
         :input-value="inputValue"
         :isRunning="isRunning"
+        :memory-active="memoryActive"
+        :plan-active="planActive"
+        :enable-memory="enableMemory"
+        :enable-planning="enablePlanning"
         @update:input-value="$emit('update:inputValue', $event)"
+        @memory="$emit('memory', $event)"
+        @plan="$emit('plan', $event)"
         @send="$emit('send')"
       />
     </div>
@@ -131,7 +143,13 @@ defineExpose({
           <ChatInput
             :model-value="inputValue"
             :isRunning="isRunning"
+            :memory-active="memoryActive"
+            :plan-active="planActive"
+            :enable-memory="enableMemory"
+            :enable-planning="enablePlanning"
             @update:model-value="$emit('update:inputValue', $event)"
+            @memory="$emit('memory', $event)"
+            @plan="$emit('plan', $event)"
             @send="$emit('send')"
             @abort="$emit('abort')"
           />

@@ -6,11 +6,17 @@ defineProps<{
   description?: string
   inputValue: string
   isRunning?: boolean
+  memoryActive?: boolean
+  planActive?: boolean
+  enableMemory?: boolean
+  enablePlanning?: boolean
 }>()
 
 defineEmits<{
   (e: 'update:inputValue', value: string): void
   (e: 'send'): void
+  (e: 'memory', value: boolean): void
+  (e: 'plan', value: boolean): void
 }>()
 </script>
 
@@ -22,8 +28,14 @@ defineEmits<{
       <ChatInput
         :model-value="inputValue"
         :isRunning="isRunning"
+        :memory-active="memoryActive"
+        :plan-active="planActive"
+        :enable-memory="enableMemory"
+        :enable-planning="enablePlanning"
         placeholder="输入消息，Enter 发送，Shift+Enter 换行"
         @update:model-value="$emit('update:inputValue', $event)"
+        @memory="$emit('memory', $event)"
+        @plan="$emit('plan', $event)"
         @send="$emit('send')"
       />
     </div>

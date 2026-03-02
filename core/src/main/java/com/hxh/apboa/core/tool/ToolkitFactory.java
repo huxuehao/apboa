@@ -6,6 +6,7 @@ import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.ToolConfig;
 import com.hxh.apboa.common.enums.ToolType;
 import com.hxh.apboa.core.agent.ReActAgentHelper;
+import com.hxh.apboa.core.agui.AgentContext;
 import com.hxh.apboa.core.hook.builtins.IConfirmationHook;
 import com.hxh.apboa.core.mcp.McpClientFactory;
 import com.hxh.apboa.core.tool.dynamices.DynamicAgentTool;
@@ -54,6 +55,8 @@ public class ToolkitFactory {
 
         Toolkit toolkit = new Toolkit();
         if (!toolIds.isEmpty()) {
+            // 获取是否开启记忆
+            Boolean isMemoryActive = AgentContext.getIfExists().map(AgentContext::isMemoryActive).orElse(false);
             // 注册工具
             toolService.listByIds(toolIds)
                     .stream()
@@ -68,7 +71,7 @@ public class ToolkitFactory {
                             toolkit.registerTool(new DynamicAgentTool(toolConfig));
                         }
 
-                        if (toolConfig.getNeedConfirm()) {
+                        if (toolConfig.getNeedConfirm() && isMemoryActive) {
                             IConfirmationHook.setNeedConfirmTool(toolConfig.getToolId());
                         } else {
                             IConfirmationHook.removeNeedConfirmTool(toolConfig.getToolId());

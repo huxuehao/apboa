@@ -9,9 +9,18 @@ export function useChatStream(options: {
   agentId: import('vue').Ref<string>
   agentDetail: import('vue').Ref<any>
   currentSessionId: import('vue').Ref<string | null>
+  memoryActive?: import('vue').Ref<boolean>
+  planActive?: import('vue').Ref<boolean>
   onMessageSaved?: () => void
 }) {
-  const { agentId, agentDetail, currentSessionId, onMessageSaved } = options
+  const { agentId, agentDetail, currentSessionId, memoryActive, planActive, onMessageSaved } = options
+
+  const getForwardedProps = () => ({
+    agentId: agentId.value,
+    agentCode: agentDetail.value?.agentCode,
+    memoryActive: memoryActive?.value ?? false,
+    planActive: planActive?.value ?? false,
+  })
 
   // 流式内容
   const streamingContent = ref('')
@@ -103,10 +112,7 @@ export function useChatStream(options: {
     await run({
       threadId: currentSessionId.value || undefined,
       runId: `run_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
-      forwardedProps: {
-        agentId: agentId.value,
-        agentCode: agentDetail.value?.agentCode
-      }
+      forwardedProps: getForwardedProps()
     })
   }
 
@@ -155,10 +161,7 @@ export function useChatStream(options: {
     await run({
       threadId: currentSessionId.value || undefined,
       runId: `run_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
-      forwardedProps: {
-        agentId: agentId.value,
-        agentCode: agentDetail.value?.agentCode
-      }
+      forwardedProps: getForwardedProps()
     })
   }
 

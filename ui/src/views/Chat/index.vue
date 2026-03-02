@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { Modal } from 'ant-design-vue'
+import { Modal, message } from 'ant-design-vue'
 import { useAccountStore } from '@/stores'
 import { formatSessionTitle } from '@/utils/chat/format'
 import { useAgentDetail } from '@/composables/chat/useAgentDetail'
@@ -14,6 +14,8 @@ import RenameModal from '@/components/chat/RenameModal.vue'
 import type { DisplayMessage, ChatMessageVO } from '@/types'
 import * as chatSessionApi from '@/api/chatSession'
 
+const STORAGE_KEY_PREFIX = 'chat_agent'
+
 const route = useRoute()
 const accountStore = useAccountStore()
 const userInfo = computed(() => accountStore.userInfo)
@@ -22,6 +24,67 @@ const agentId = computed(() => (route.params.agentId as string) || '')
 
 // 智能体详情
 const { agentDetail } = useAgentDetail(agentId)
+
+// 记忆/规划是否可用（由 agentDetail 决定）
+const accountId = computed(() => accountStore.userInfo?.id)
+const enableMemory = computed(() => agentDetail.value?.enableMemory === true)
+const enablePlanning = computed(() => agentDetail.value?.enablePlanning === true)
+
+// 记忆/规划激活状态，按 agent 隔离持久化到 localStorage
+const memoryActive = ref(false)
+const planActive = ref(false)
+
+const loadPersistedState = () => {
+  const id = agentDetail.value?.id
+  if (!id) return
+  try {
+    const mem = localStorage.getItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_memory_active`)
+    const plan = localStorage.getItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_plan_active`)
+    memoryActive.value = mem !== null
+      ? (mem === 'true') && (agentDetail.value?.enableMemory ?? false)
+      : (agentDetail.value?.enableMemory ?? false)
+
+    planActive.value = plan !== null
+      ? (plan === 'true') && (agentDetail.value?.enablePlanning ?? false)
+      : (agentDetail.value?.enablePlanning ?? false)
+  } catch {
+    memoryActive.value = agentDetail.value?.enableMemory ?? false
+    planActive.value = agentDetail.value?.enablePlanning ?? false
+  }
+}
+
+const persistMemory = (v: boolean) => {
+  const id = agentDetail.value?.id
+  if (!id) return
+  try {
+    localStorage.setItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_memory_active`, String(v))
+  } catch {}
+}
+
+const persistPlan = (v: boolean) => {
+  const id = agentDetail.value?.id
+  if (!id) return
+  try {
+    localStorage.setItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_plan_active`, String(v))
+  } catch {}
+}
+
+watch(agentDetail, () => {
+  loadPersistedState()
+}, { immediate: true })
+
+const handleMemoryChange = (v: boolean) => {
+  if (!v) {
+    message.warning("关闭记忆所有工具调用将无法人工确认")
+  }
+  memoryActive.value = v
+  persistMemory(v)
+}
+
+const handlePlanChange = (v: boolean) => {
+  planActive.value = v
+  persistPlan(v)
+}
 
 // 会话列表管理
 const {
@@ -58,6 +121,8 @@ const {
   agentId,
   agentDetail,
   currentSessionId,
+  memoryActive,
+  planActive,
   onMessageSaved: () => {
     loadCurrentMessages()
   },
@@ -212,7 +277,6 @@ const handleSend = async () => {
 
   // 触发流式回复
   await sendMessage(text, [{ role: 'user', content: text }] as ChatMessageVO[])
-  // await sendMessage(text, messagesList.value)
 }
 
 // 切换侧边栏
@@ -259,7 +323,13 @@ onMounted(() => {
       :tool-calls="toolCallsInProgress"
       :input-value="inputText"
       :isRunning="isRunning"
+      :memory-active="memoryActive"
+      :plan-active="planActive"
+      :enable-memory="enableMemory"
+      :enable-planning="enablePlanning"
       @update:input-value="inputText = $event"
+      @memory="handleMemoryChange"
+      @plan="handlePlanChange"
       @toolContent="handelToolContent"
       @send="handleSend"
       @abort="abortRun"

@@ -16,8 +16,10 @@ const props = withDefaults(
     placeholder?: string
     memoryActive?: boolean
     planActive?: boolean
+    enableMemory?: boolean
+    enablePlanning?: boolean
   }>(),
-  { memoryActive: false, planActive: false }
+  { memoryActive: false, planActive: false, enableMemory: false, enablePlanning: false }
 )
 
 const emit = defineEmits<{
@@ -43,9 +45,11 @@ const formatFileSize = (bytes: number): string => {
 }
 
 const toggleMemory = () => {
+  if (!props.enableMemory) return
   emit('memory', !props.memoryActive)
 }
 const togglePlan = () => {
+  if (!props.enablePlanning) return
   emit('plan', !props.planActive)
 }
 const handleFileClick = () => {
@@ -138,19 +142,21 @@ watch(() => props.modelValue, () => {
     <div class="chat-input-toolbar">
       <div class="chat-input-toolbar-left">
         <button
+          :disabled="!enableMemory"
           type="button"
           class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"
           title="记忆"
-          :class="{ 'is-active': memoryActive }"
+          :class="{ 'is-active': memoryActive && enableMemory }"
           @click="toggleMemory"
         >
           <ClockCircleOutlined />
         </button>
         <button
+          :disabled="!enablePlanning"
           type="button"
           class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"
           title="规划"
-          :class="{ 'is-active': planActive }"
+          :class="{ 'is-active': planActive && enablePlanning }"
           @click="togglePlan"
         >
           <UnorderedListOutlined />
@@ -341,6 +347,7 @@ watch(() => props.modelValue, () => {
   color: var(--color-text-secondary);
   transition: color 0.2s ease, background-color 0.2s ease;
   border-radius: var(--border-radius-md);
+  margin-right: 5px;
 
   &:hover {
     color: $chat-primary;
@@ -351,6 +358,15 @@ watch(() => props.modelValue, () => {
     color: $chat-primary;
     background-color: rgba($chat-primary, 0.1);
     font-weight: 500;
+  }
+
+  &:disabled,
+  &[disabled] {
+    &:hover {
+      cursor: not-allowed;
+      color: var(--color-text-secondary);
+      background-color: transparent;
+    }
   }
 }
 

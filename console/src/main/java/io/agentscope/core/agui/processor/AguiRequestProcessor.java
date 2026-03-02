@@ -70,10 +70,10 @@ public class AguiRequestProcessor {
         AgentContext agentContext = AgentContext.get();
         agentContext.setThreadId(threadId);
         agentContext.setRunId(input.getRunId());
-        agentContext.setMemoryActive(
-                input.getForwardedProp("memoryActive") != null
-                        ? (Boolean) input.getForwardedProp("memoryActive")
-                        : false);
+        boolean memoryActive = input.getForwardedProp("memoryActive") != null
+                ? (Boolean) input.getForwardedProp("memoryActive")
+                : false;
+        agentContext.setMemoryActive(memoryActive);
         agentContext.setPlanActive(
                 input.getForwardedProp("planActive") != null
                         ? (Boolean) input.getForwardedProp("planActive")
@@ -94,7 +94,7 @@ public class AguiRequestProcessor {
         }
 
         // 加载历史记忆
-        if (agent instanceof ReActAgent reActAgent) {
+        if (agent instanceof ReActAgent reActAgent && memoryActive) {
             try {
                 AgentDefinition agentDefinition = getAgentDefinition(threadId, jdbcTemplate);
                 if (agentDefinition != null && agentDefinition.getEnableMemory()) {
