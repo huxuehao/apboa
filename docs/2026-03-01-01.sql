@@ -75,3 +75,21 @@ PRIMARY KEY (`id`)
 ) COMMENT='附件表分片记录表';
 CREATE INDEX idx_chunk_file_key ON attach_chunk(`file_key`);
 CREATE INDEX idx_chunk_create_at ON attach_chunk(`create_at`);
+
+DROP TABLE IF EXISTS `params`;
+CREATE TABLE `params` (
+`id` bigint NOT NULL COMMENT '主键',
+`param_name` varchar(100) DEFAULT NULL COMMENT '参数名称',
+`param_key` varchar(100) DEFAULT NULL COMMENT '参数Key',
+`param_value` varchar(300) DEFAULT NULL COMMENT '参数Value',
+PRIMARY KEY (`id`)
+) COMMENT='参数表';
+CREATE INDEX idx_param_key ON `params` (`param_key`);
+CREATE INDEX idx_param_name ON `params` (`param_name`);
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (1, '访问Token有效期（单位 ms）', 'ACCESS_TOKEN_TTL', '21600000');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (2, '刷新Token有效期（单位 ms）', 'REFRESH_TOKEN_TTL', '64800000');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (3, '单个文件大小限制（单位 MB）', 'SINGLE_FILE_MAX_SIZE', '5');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (4, '支持的图片文件类型', 'ALLOW_IMAGE_FILE_TYPE', 'png,jpeg,png,gif,webp');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (5, '支持的音频文件类型', 'ALLOW_AUDIO_FILE_TYPE', 'mp3,wav,mpeg');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (6, '支持的视频文件类型', 'ALLOW_VIDEO_FILE_TYPE', 'mp4,mpeg');
+

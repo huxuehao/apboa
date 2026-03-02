@@ -7,10 +7,10 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>resource</artifactId>
+    <artifactId>params</artifactId>
     <packaging>jar</packaging>
 
-    <name>resource</name>
+    <name>params</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>com.hxh.apboa</groupId>
-            <artifactId>params</artifactId>
+            <artifactId>common</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -18,7 +18,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName(value = "account_role", autoResultMap = true)
-public class AccountRole  implements SerializableEnable {
+public class AccountRole implements SerializableEnable {
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
     private Long accountId;

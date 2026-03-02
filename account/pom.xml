@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>com.hxh.apboa</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>params</artifactId>
         </dependency>
         <dependency>
             <groupId>com.hxh.apboa</groupId>

@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hxh.apboa.common.entity.Attach;
 import com.hxh.apboa.common.entity.AttachChunk;
 import com.hxh.apboa.common.entity.AttachLog;
+import com.hxh.apboa.params.core.ParamsAdapter;
 import com.hxh.apboa.resource.enums.AttachOptType;
 import com.hxh.apboa.common.util.FuncUtils;
 import com.hxh.apboa.common.util.UserUtils;
@@ -41,8 +42,9 @@ import java.util.zip.ZipOutputStream;
 @Service
 @RequiredArgsConstructor
 public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> implements AttachService {
-    private static final List<String> ALLOW_UPLOAD_FILE_TYPE = List.of("jpg","jpeg","jpe","jfif","png","gif","mp4","m4v","mp3","wav");
+    private static final List<String> ALLOW_IMAGE_FILE_TYPE = List.of("png","jpeg","png","gif","webp");
 
+    private final ParamsAdapter paramsAdapter;
     private final StorageProtocolService storageProtocolService;
     private final AttachLogService attachLogService;
     private final AttachChunkMapper attachChunkMapper;
@@ -72,14 +74,15 @@ public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> impleme
         long size = multipartFile.getSize();
 
         // 文件类型验证
-        if (extension == null || !ALLOW_UPLOAD_FILE_TYPE.contains(extension)) {
+        if (extension == null || !ALLOW_IMAGE_FILE_TYPE.contains(extension)) {
             throw new RuntimeException("["+extension+"]文件类型不被接受");
         }
 
         // 文件大小验证
         double bm = bytesToMB(size);
-        if (bm > Double.parseDouble("10")) {
-            throw new RuntimeException("单个文件大小不可超过10MB");
+        double singleFileMaxSize = Double.parseDouble(paramsAdapter.getValue("SINGLE_FILE_MAX_SIZE"));
+        if (bm > singleFileMaxSize) {
+            throw new RuntimeException("单个文件大小不可超过"+singleFileMaxSize+"MB");
         }
 
         // 获取文件存储服务
@@ -125,7 +128,7 @@ public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> impleme
         // 获取后缀
         String extension = FileNameUtil.getSuffix(fileName);
         // 文件类型验证
-        if (extension == null || !ALLOW_UPLOAD_FILE_TYPE.contains(extension)) {
+        if (extension == null || !ALLOW_IMAGE_FILE_TYPE.contains(extension)) {
             throw new RuntimeException("["+extension+"]文件类型不被接受");
         }
 

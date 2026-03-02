@@ -21,6 +21,7 @@ import com.hxh.apboa.ws.context.ApboaWebSocketSession;
 import com.hxh.apboa.ws.handler.ServiceMessageHandlerAdapter;
 import com.hxh.apboa.ws.handler.server.ServerMessageHandler;
 import com.hxh.apboa.ws.model.WsServerMessage;
+import com.hxh.apboa.params.core.ParamsAdapter;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> implements AccountService {
 
     private final RedisUtils redisUtils;
+    private final ParamsAdapter paramsAdapter;
     private final AccountRoleService accountRoleService;
 
     @Override
@@ -292,12 +294,14 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
                 .build();
 
         // 生成 accessToken 和 refreshToken
-        String accessToken = TokenUtils.createToken(userId, userDetail, SysConst.ACCESS_TOKEN_TTL);
-        String refreshToken = TokenUtils.createToken(userId, userDetail, SysConst.REFRESH_TOKEN_TTL);
+        long accessTokenTtl = Long.parseLong(paramsAdapter.getValue("ACCESS_TOKEN_TTL"));
+        String accessToken = TokenUtils.createToken(userId, userDetail, accessTokenTtl);
+        long refreshTokenTtl = Long.parseLong(paramsAdapter.getValue("REFRESH_TOKEN_TTL"));
+        String refreshToken = TokenUtils.createToken(userId, userDetail, refreshTokenTtl);
 
         // 存储到Redis
         String userDetailStr = JsonUtils.toJsonStr(userDetail);
-        redisUtils.setEx(SysConst.LOGIN_USER_KEY + accessToken, userDetailStr, SysConst.ACCESS_TOKEN_TTL, TimeUnit.MILLISECONDS);
+        redisUtils.setEx(SysConst.LOGIN_USER_KEY + accessToken, userDetailStr, accessTokenTtl, TimeUnit.MILLISECONDS);
 
         // 返回登录响应
         return LoginResponse.builder()

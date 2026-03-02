@@ -18,7 +18,7 @@ const currentYear = new Date().getFullYear()
       </div>
 
       <div class="footer-description">
-        <p>Apboa 是基于 AgentScope 开发框架搭建的智能体平台</p>
+        <p>Apboa 基于 AgentScope 框架搭建的智能体平台</p>
       </div>
 
       <div class="footer-copyright">

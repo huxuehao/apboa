@@ -340,3 +340,13 @@ export interface StorageProtocol {
   remark: string
   valid: number
 }
+
+/**
+ * 系统参数
+ */
+export interface Params {
+  id: string
+  paramName: string
+  paramKey: string
+  paramValue: string
+}
