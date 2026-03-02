@@ -34,12 +34,16 @@ const enablePlanning = computed(() => agentDetail.value?.enablePlanning === true
 const memoryActive = ref(false)
 const planActive = ref(false)
 
+// 侧边栏折叠状态（在 loadPersistedState 中从 localStorage 恢复）
+const sidebarCollapsed = ref(false)
+
 const loadPersistedState = () => {
   const id = agentDetail.value?.id
   if (!id) return
   try {
     const mem = localStorage.getItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_memory_active`)
     const plan = localStorage.getItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_plan_active`)
+    
     memoryActive.value = mem !== null
       ? (mem === 'true') && (agentDetail.value?.enableMemory ?? false)
       : (agentDetail.value?.enableMemory ?? false)
@@ -66,6 +70,14 @@ const persistPlan = (v: boolean) => {
   if (!id) return
   try {
     localStorage.setItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_plan_active`, String(v))
+  } catch {}
+}
+
+const persistSidebar = (v: boolean) => {
+  const id = agentDetail.value?.id
+  if (!id) return
+  try {
+    localStorage.setItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_sidebar_collapsed`, String(v))
   } catch {}
 }
 
@@ -165,9 +177,6 @@ const displayMessages = computed<DisplayMessage[]>(() => {
 })
 
 const isWelcomeMode = computed(() => messagesList.value.length === 0 && !streamingMessageId.value)
-
-// 侧边栏折叠状态
-const sidebarCollapsed = ref(false)
 
 // 重命名模态框
 const renameModalVisible = ref(false)
@@ -282,10 +291,13 @@ const handleSend = async () => {
 // 切换侧边栏
 const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
+  persistSidebar(sidebarCollapsed.value)
 }
 
 // 初始化加载会话列表
 onMounted(() => {
+  const sidebar = localStorage.getItem(`${STORAGE_KEY_PREFIX}_${agentId.value}_${accountId.value}_sidebar_collapsed`)
+  sidebarCollapsed.value = sidebar !== null ? sidebar === 'true' : false
   loadSessions()
 })
 </script>
