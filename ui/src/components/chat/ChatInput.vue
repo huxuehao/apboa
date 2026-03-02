@@ -53,7 +53,7 @@ const togglePlan = () => {
   emit('plan', !props.planActive)
 }
 const handleFileClick = () => {
-  message.info('暂未开放，敬请期待')
+  message.info('努力开发中...')
   // fileInputRef.value?.click()
 }
 const handleFileChange = (e: Event) => {
@@ -164,7 +164,7 @@ watch(() => props.modelValue, () => {
         <button
           type="button"
           class="chat-toolbar-btn chat-toolbar-btn-icon chat-toolbar-btn-circle"
-          title="附件"
+          title="文件"
           @click="handleFileClick"
         >
           <PaperClipOutlined />
