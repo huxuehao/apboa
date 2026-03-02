@@ -2,6 +2,7 @@ package com.hxh.apboa.resource.service;
 
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.file.FileNameUtil;
+import com.amazonaws.util.IOUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
@@ -9,6 +10,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hxh.apboa.common.entity.Attach;
 import com.hxh.apboa.common.entity.AttachChunk;
 import com.hxh.apboa.common.entity.AttachLog;
+import com.hxh.apboa.common.enums.ModelType;
+import com.hxh.apboa.common.wrapper.FileBase64Wrapper;
 import com.hxh.apboa.params.core.ParamsAdapter;
 import com.hxh.apboa.resource.enums.AttachOptType;
 import com.hxh.apboa.common.util.FuncUtils;
@@ -18,6 +21,7 @@ import com.hxh.apboa.resource.mapper.AttachChunkMapper;
 import com.hxh.apboa.resource.mapper.AttachMapper;
 import com.hxh.apboa.resource.storage.core.FileStorageService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +31,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +44,7 @@ import java.util.zip.ZipOutputStream;
  *
  * @author huxuehao
  **/
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> implements AttachService {
@@ -235,6 +241,52 @@ public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> impleme
         } catch (IOException e) {
             throw new RuntimeException("文件下载失败", e);
         }
+    }
+
+    @Override
+    public FileBase64Wrapper getFileBase64(Long fileId) {
+        Attach attach = getById(fileId);
+        FileBase64Wrapper wrapper = new FileBase64Wrapper();
+
+        String extension = attach.getExtension();
+        String resultType = switch (extension) {
+            case String ext when paramsAdapter.getValue("ALLOW_IMAGE_FILE_TYPE").contains(ext) -> "IMAGE";
+            case String ext when paramsAdapter.getValue("ALLOW_AUDIO_FILE_TYPE").contains(ext) -> "AUDIO";
+            case String ext when paramsAdapter.getValue("ALLOW_VIDEO_FILE_TYPE").contains(ext) -> "VIDEO";
+            default -> null;
+        };
+
+        if (resultType != null) {
+            wrapper.setModelType(ModelType.valueOf(resultType));
+
+            // 设置正确的mediaType
+            String mediaType = switch (resultType) {
+                case "IMAGE" -> "image/" + extension;
+                case "AUDIO" -> "audio/" + extension;
+                case "VIDEO" -> "video/" + extension;
+                default -> null;
+            };
+            wrapper.setMediaType(mediaType);
+        } else {
+            return null; // 不支持的文件类型
+        }
+
+        //获取文件存储服务
+        FileStorageService storageService = storageProtocolService.getStorageService();
+        if (!storageService.getProtocol().equals(attach.getProtocol())) {
+            log.warn("当前文件存储协议为{}，与当前启用的存储配置不匹配", attach.getProtocol());
+            return null;
+        }
+
+        // 下载
+        try (InputStream inputStream = storageService.load(genStoragePath(attach))) {
+            byte[] bytes = IOUtils.toByteArray(inputStream);
+            wrapper.setBase64(Base64.getEncoder().encodeToString(bytes));
+        } catch (IOException e) {
+            return null;
+        }
+
+        return wrapper;
     }
 
     @Override

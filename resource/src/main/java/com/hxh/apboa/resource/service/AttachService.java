@@ -2,6 +2,7 @@ package com.hxh.apboa.resource.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hxh.apboa.common.entity.Attach;
+import com.hxh.apboa.common.wrapper.FileBase64Wrapper;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.OutputStream;
@@ -50,6 +51,11 @@ public interface AttachService extends IService<Attach> {
      * @param outputStream 输出流
      */
     void download(Attach attach,OutputStream outputStream);
+
+    /**
+     * 获取文件的base64编码
+     */
+    FileBase64Wrapper getFileBase64(Long fileId);
 
     /**
      * 批量现在

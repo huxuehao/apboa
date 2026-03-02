@@ -45,7 +45,7 @@ const currentData = ref<ModelConfigVO | undefined>(undefined)
 const modelTypeLabels: Record<string, string> = {
   CHAT: '文本模型',
   IMAGE: '图像模型',
-  TTS: '语音模型',
+  AUDIO: '音频模型',
   VIDEO: '视频模型'
 }
 

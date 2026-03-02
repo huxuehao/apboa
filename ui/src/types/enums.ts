@@ -73,9 +73,7 @@ export enum ModelType {
   CHAT = 'CHAT',
   IMAGE = 'IMAGE',
   VIDEO = 'VIDEO',
-  TTS = 'TTS',
-  EMBEDDING = 'EMBEDDING',
-  RERANKER = 'RERANKER'
+  AUDIO = 'AUDIO'
 }
 
 /**

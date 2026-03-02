@@ -169,6 +169,9 @@ public class ReActAgentHelper {
             builder.structuredOutputReminder(definition.getStructuredOutputReminder());
         }
 
+        // 保存Agent定义到上下文
+        AgentContext.get().setAgentDefinition(definition);
+
         return builder;
     }
 }

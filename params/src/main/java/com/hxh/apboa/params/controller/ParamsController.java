@@ -53,9 +53,9 @@ public class ParamsController {
         return R.data(paramsService.getById(id));
     }
 
-//    @GetMapping(value = "/fetch-value-by-key", name = "根据key获取value")
-//    public R<?> fetchValueByKey(@RequestParam("key") String key) {
-//        return R.data(paramsService.fetchValueByKey(key));
-//    }
+    @GetMapping(value = "/fetch-value-by-key", name = "根据key获取value")
+    public R<?> fetchValueByKey(@RequestParam("key") String key) {
+        return R.data(paramsService.fetchValueByKey(key));
+    }
 
 }
