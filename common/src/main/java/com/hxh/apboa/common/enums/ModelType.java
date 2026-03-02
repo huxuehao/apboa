@@ -11,12 +11,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ModelType {
-    CHAT("对话"),
-    IMAGE("生图"),
+    CHAT("文本"),
+    IMAGE("图像"),
     VIDEO("视频"),
-    TTS("语音"),
-    EMBEDDING("向量"),
-    RERANKER("排序");
+    TTS("语音");
 
     private final String description;
 }

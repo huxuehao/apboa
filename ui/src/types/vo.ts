@@ -152,7 +152,7 @@ export interface ModelConfigVO {
   providerId: string
   name: string
   modelId: string
-  modelType: ModelType
+  modelType: ModelType[]
   description: string
   streaming: boolean
   thinking: boolean

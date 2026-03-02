@@ -35,7 +35,7 @@ const formData = ref<{
   used?: string[]
   name: string
   modelId: string
-  modelType: ModelType
+  modelType: ModelType[]
   description: string
   streaming: boolean
   thinking: boolean
@@ -49,7 +49,7 @@ const formData = ref<{
 }>({
   name: '',
   modelId: '',
-  modelType: ModelType.CHAT,
+  modelType: [ModelType.CHAT],
   description: '',
   streaming: true,
   thinking: false,
@@ -68,12 +68,10 @@ const isEdit = computed(() => !!props.data?.id)
  * 模型类型选项
  */
 const modelTypeOptions = [
-  { label: '对话模型', value: ModelType.CHAT },
+  { label: '文本模型', value: ModelType.CHAT },
   { label: '图像模型', value: ModelType.IMAGE },
-  { label: '视频模型', value: ModelType.VIDEO },
   { label: '语音模型', value: ModelType.TTS },
-  { label: '嵌入模型', value: ModelType.EMBEDDING },
-  { label: '重排序模型', value: ModelType.RERANKER }
+  { label: '视频模型', value: ModelType.VIDEO }
 ]
 
 watch(
@@ -85,7 +83,7 @@ watch(
           used: props.data.used,
           name: props.data.name,
           modelId: props.data.modelId,
-          modelType: props.data.modelType,
+          modelType: Array.isArray(props.data.modelType) ? props.data.modelType : [props.data.modelType],
           description: props.data.description,
           streaming: props.data.streaming,
           thinking: props.data.thinking,
@@ -117,7 +115,7 @@ const rules = {
     { max: 100, message: '模型ID长度不能超过100个字符', trigger: 'blur' }
   ],
   modelType: [
-    { required: true, message: '请选择模型类型', trigger: 'blur' }
+    { required: true, type: 'array', min: 1, message: '请至少选择一个模型类型', trigger: 'change' }
   ],
   description: [
     { required: true, message: '请选择模型类型', trigger: 'blur' },
@@ -150,7 +148,7 @@ function resetForm() {
   formData.value = {
     name: '',
     modelId: '',
-    modelType: ModelType.CHAT,
+    modelType: [ModelType.CHAT],
     description: '',
     streaming: true,
     thinking: false,
@@ -303,7 +301,11 @@ async function handleViewProvider() {
         </AFormItem>
 
         <AFormItem label="模型类型" name="modelType">
-          <ASelect v-model:value="formData.modelType" placeholder="请选择模型类型">
+          <ASelect
+            v-model:value="formData.modelType"
+            mode="multiple"
+            placeholder="请选择模型类型"
+          >
             <ASelectOption v-for="opt in modelTypeOptions" :key="opt.value" :value="opt.value">
               {{ opt.label }}
             </ASelectOption>
