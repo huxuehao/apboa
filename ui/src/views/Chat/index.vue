@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { Modal, message } from 'ant-design-vue'
-import { useAccountStore } from '@/stores'
+import { useAccountStore, useChatStore } from '@/stores'
 import { formatSessionTitle } from '@/utils/chat/format'
 import { useAgentDetail } from '@/composables/chat/useAgentDetail'
 import { useSessions } from '@/composables/chat/useSessions'
@@ -14,10 +14,9 @@ import RenameModal from '@/components/chat/RenameModal.vue'
 import type { DisplayMessage, ChatMessageVO } from '@/types'
 import * as chatSessionApi from '@/api/chatSession'
 
-const STORAGE_KEY_PREFIX = 'chat_agent'
-
 const route = useRoute()
 const accountStore = useAccountStore()
+const chatStore = useChatStore()
 const userInfo = computed(() => accountStore.userInfo)
 
 const agentId = computed(() => (route.params.agentId as string) || '')
@@ -30,72 +29,40 @@ const accountId = computed(() => accountStore.userInfo?.id)
 const enableMemory = computed(() => agentDetail.value?.enableMemory === true)
 const enablePlanning = computed(() => agentDetail.value?.enablePlanning === true)
 
-// 记忆/规划激活状态，按 agent 隔离持久化到 localStorage
-const memoryActive = ref(false)
-const planActive = ref(false)
-
-// 侧边栏折叠状态（在 loadPersistedState 中从 localStorage 恢复）
-const sidebarCollapsed = ref(false)
-
-const loadPersistedState = () => {
-  const id = agentDetail.value?.id
-  if (!id) return
-  try {
-    const mem = localStorage.getItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_memory_active`)
-    const plan = localStorage.getItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_plan_active`)
-    
-    memoryActive.value = mem !== null
-      ? (mem === 'true') && (agentDetail.value?.enableMemory ?? false)
-      : (agentDetail.value?.enableMemory ?? false)
-
-    planActive.value = plan !== null
-      ? (plan === 'true') && (agentDetail.value?.enablePlanning ?? false)
-      : (agentDetail.value?.enablePlanning ?? false)
-  } catch {
-    memoryActive.value = agentDetail.value?.enableMemory ?? false
-    planActive.value = agentDetail.value?.enablePlanning ?? false
-  }
-}
-
-const persistMemory = (v: boolean) => {
-  const id = agentDetail.value?.id
-  if (!id) return
-  try {
-    localStorage.setItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_memory_active`, String(v))
-  } catch {}
-}
-
-const persistPlan = (v: boolean) => {
-  const id = agentDetail.value?.id
-  if (!id) return
-  try {
-    localStorage.setItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_plan_active`, String(v))
-  } catch {}
-}
-
-const persistSidebar = (v: boolean) => {
-  const id = agentDetail.value?.id
-  if (!id) return
-  try {
-    localStorage.setItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_sidebar_collapsed`, String(v))
-  } catch {}
-}
-
-watch(agentDetail, () => {
-  loadPersistedState()
-}, { immediate: true })
+// 记忆/规划/侧边栏状态：从 Pinia store 读取（持久化由 pinia-plugin-persistedstate 处理）
+const memoryActive = computed(() => {
+  const id = agentDetail.value?.id ?? agentId.value
+  chatStore.preferences // 依赖以保持响应性
+  return chatStore.getMemoryActive(id, accountId.value, enableMemory.value)
+})
+const planActive = computed(() => {
+  const id = agentDetail.value?.id ?? agentId.value
+  chatStore.preferences
+  return chatStore.getPlanActive(id, accountId.value, enablePlanning.value)
+})
+const sidebarCollapsed = computed({
+  get: () => {
+    const id = agentDetail.value?.id ?? agentId.value
+    chatStore.preferences
+    return chatStore.getSidebarCollapsed(id, accountId.value)
+  },
+  set: (v: boolean) => {
+    const id = agentDetail.value?.id ?? agentId.value
+    chatStore.setSidebarCollapsed(id, accountId.value, v)
+  },
+})
 
 const handleMemoryChange = (v: boolean) => {
   if (!v) {
     message.warning("关闭记忆后，所有工具调用将无需人工确认，自动执行")
   }
-  memoryActive.value = v
-  persistMemory(v)
+  const id = agentDetail.value?.id ?? agentId.value
+  chatStore.setMemoryActive(id, accountId.value, v)
 }
 
 const handlePlanChange = (v: boolean) => {
-  planActive.value = v
-  persistPlan(v)
+  const id = agentDetail.value?.id ?? agentId.value
+  chatStore.setPlanActive(id, accountId.value, v)
 }
 
 // 会话列表管理
@@ -288,16 +255,13 @@ const handleSend = async () => {
   await sendMessage(text, [{ role: 'user', content: text }] as ChatMessageVO[])
 }
 
-// 切换侧边栏
+// 切换侧边栏（通过 computed setter 自动持久化到 store）
 const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
-  persistSidebar(sidebarCollapsed.value)
 }
 
 // 初始化加载会话列表
 onMounted(() => {
-  const sidebar = localStorage.getItem(`${STORAGE_KEY_PREFIX}_${agentId.value}_${accountId.value}_sidebar_collapsed`)
-  sidebarCollapsed.value = sidebar !== null ? sidebar === 'true' : false
   loadSessions()
 })
 </script>

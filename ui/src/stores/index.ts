@@ -1,4 +1,5 @@
 import { useAccountStore } from './modules/account'
+import { useChatStore } from './modules/chat'
 import { useSensitiveStore } from './modules/sensitive'
 import { usePromptStore } from './modules/prompt'
 import { useToolStore } from './modules/tool'
@@ -11,6 +12,7 @@ import { useAgentStore } from './modules/agent'
 
 export {
   useAccountStore,
+  useChatStore,
   useSensitiveStore,
   usePromptStore,
   useToolStore,
