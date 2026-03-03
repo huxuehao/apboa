@@ -48,8 +48,6 @@ import java.util.zip.ZipOutputStream;
 @Service
 @RequiredArgsConstructor
 public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> implements AttachService {
-    private static final List<String> ALLOW_IMAGE_FILE_TYPE = List.of("png","jpeg","png","gif","webp");
-
     private final ParamsAdapter paramsAdapter;
     private final StorageProtocolService storageProtocolService;
     private final AttachLogService attachLogService;
@@ -78,11 +76,6 @@ public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> impleme
     public Attach upload(MultipartFile multipartFile, String originalFilename) {
         String extension = FileNameUtil.getSuffix(originalFilename);
         long size = multipartFile.getSize();
-
-        // 文件类型验证
-        if (extension == null || !ALLOW_IMAGE_FILE_TYPE.contains(extension)) {
-            throw new RuntimeException("["+extension+"]文件类型不被接受");
-        }
 
         // 文件大小验证
         double bm = bytesToMB(size);
@@ -133,10 +126,6 @@ public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> impleme
 
         // 获取后缀
         String extension = FileNameUtil.getSuffix(fileName);
-        // 文件类型验证
-        if (extension == null || !ALLOW_IMAGE_FILE_TYPE.contains(extension)) {
-            throw new RuntimeException("["+extension+"]文件类型不被接受");
-        }
 
         // 记录分片上传
         saveFileChunkInfo(hash,totalSize,index,totalChunks,key,fileName);

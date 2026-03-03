@@ -8,10 +8,13 @@ import {
   UnorderedListOutlined,
   ClockCircleOutlined
 } from '@ant-design/icons-vue'
+import * as attachApi from '@/api/attach'
+import type { UploadedFileItem } from '@/types'
 
 const props = withDefaults(
   defineProps<{
     modelValue: string
+    uploadedFiles?: UploadedFileItem[]
     isRunning?: boolean
     placeholder?: string
     memoryActive?: boolean
@@ -19,21 +22,20 @@ const props = withDefaults(
     enableMemory?: boolean
     enablePlanning?: boolean
   }>(),
-  { memoryActive: false, planActive: false, enableMemory: false, enablePlanning: false }
+  { uploadedFiles: () => [], memoryActive: false, planActive: false, enableMemory: false, enablePlanning: false }
 )
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
+  (e: 'update:uploadedFiles', value: UploadedFileItem[]): void
   (e: 'send'): void
   (e: 'abort'): void
   (e: 'memory', value: boolean): void
   (e: 'plan', value: boolean): void
-  (e: 'file', file: File): void
 }>()
 
 const textareaRef = ref<HTMLTextAreaElement | null>()
 const fileInputRef = ref<HTMLInputElement | null>()
-const selectedFiles = ref<File[]>([])
 
 /** 格式化文件大小显示 */
 const formatFileSize = (bytes: number): string => {
@@ -42,6 +44,12 @@ const formatFileSize = (bytes: number): string => {
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
+}
+
+/** 从文件名解析扩展名 */
+const getExtension = (fileName: string): string => {
+  const lastDot = fileName.lastIndexOf('.')
+  return lastDot > -1 ? fileName.slice(lastDot + 1) : ''
 }
 
 const toggleMemory = () => {
@@ -53,21 +61,38 @@ const togglePlan = () => {
   emit('plan', !props.planActive)
 }
 const handleFileClick = () => {
-  // message.info('努力开发中...')
   fileInputRef.value?.click()
 }
-const handleFileChange = (e: Event) => {
+const handleFileChange = async (e: Event) => {
   const input = e.target as HTMLInputElement
   const files = input.files
-  if (files?.length) {
-    const newFiles = Array.from(files)
-    selectedFiles.value = [...selectedFiles.value, ...newFiles]
-    newFiles.forEach((file) => emit('file', file))
+  if (!files?.length) {
+    input.value = ''
+    return
   }
+  const current = props.uploadedFiles ?? []
+  const newList = [...current]
+  for (const file of Array.from(files)) {
+    const res = await attachApi.upload(file)
+    const data = res?.data?.data
+    if (data) {
+      newList.push({
+        id: data,
+        name: file.name,
+        extension: getExtension(file.name),
+        size: formatFileSize(file.size)
+      })
+    } else {
+      message.error(`上传失败: ${file.name}`)
+    }
+  }
+  emit('update:uploadedFiles', newList)
   input.value = ''
 }
-const removeFile = (index: number) => {
-  selectedFiles.value = selectedFiles.value.filter((_, i) => i !== index)
+const removeFile = async (item: UploadedFileItem) => {
+  await attachApi.remove([item.id])
+  const newList = (props.uploadedFiles ?? []).filter((f) => f.id !== item.id)
+  emit('update:uploadedFiles', newList)
 }
 
 const autoResize = () => {
@@ -106,21 +131,21 @@ watch(() => props.modelValue, () => {
       multiple
       @change="handleFileChange"
     />
-    <!-- 已选文件列表：显示于 textarea 上方，支持横向滚动与单个移除 -->
-    <div v-if="selectedFiles.length > 0" class="chat-input-files-row">
+    <!-- 已上传附件列表：显示于 textarea 上方，支持横向滚动与单个移除 -->
+    <div v-if="(uploadedFiles ?? []).length > 0" class="chat-input-files-row">
       <div class="chat-input-files-scroll">
         <div
-          v-for="(file, index) in selectedFiles"
-          :key="`${file.name}-${file.size}-${index}`"
+          v-for="item in (uploadedFiles ?? [])"
+          :key="item.id"
           class="chat-input-file-item"
         >
-          <span class="chat-input-file-name" :title="file.name">{{ file.name }}</span>
-          <span class="chat-input-file-size">{{ formatFileSize(file.size) }}</span>
+          <span class="chat-input-file-name" :title="item.name">{{ item.name }}</span>
+          <span class="chat-input-file-size">{{ item.size }}</span>
           <button
             type="button"
             class="chat-input-file-remove"
             title="移除"
-            @click="removeFile(index)"
+            @click="removeFile(item)"
           >
             <CloseOutlined />
           </button>
@@ -174,7 +199,7 @@ watch(() => props.modelValue, () => {
         <button
           type="button"
           class="chat-send-btn-inner"
-          :disabled="!isRunning && !modelValue.trim()"
+          :disabled="!isRunning && !modelValue.trim() && (uploadedFiles ?? []).length === 0"
           @click="isRunning ? $emit('abort') : $emit('send')"
         >
           <template v-if="isRunning"><div class="send"></div></template>

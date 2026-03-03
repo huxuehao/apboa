@@ -9,15 +9,17 @@ export function useChatStream(options: {
   agentId: import('vue').Ref<string>
   agentDetail: import('vue').Ref<any>
   currentSessionId: import('vue').Ref<string | null>
+  fileIds?: import('vue').Ref<string[]>
   memoryActive?: import('vue').Ref<boolean>
   planActive?: import('vue').Ref<boolean>
   onMessageSaved?: () => void
 }) {
-  const { agentId, agentDetail, currentSessionId, memoryActive, planActive, onMessageSaved } = options
+  const { agentId, agentDetail, currentSessionId, fileIds, memoryActive, planActive, onMessageSaved } = options
 
   const getForwardedProps = () => ({
     agentId: agentId.value,
     agentCode: agentDetail.value?.agentCode,
+    fileIds: fileIds?.value ?? [],
     memoryActive: memoryActive?.value ?? false,
     planActive: planActive?.value ?? false,
   })
@@ -142,7 +144,8 @@ export function useChatStream(options: {
 
   // 发送消息
   const sendMessage = async (inputText: string, messagesList: ChatMessageVO[]) => {
-    if (!inputText.trim() || !agentId.value) return
+    if (!agentId.value) return
+    if (!inputText.trim() && !(fileIds?.value?.length)) return
     if (isRunning.value) return
     if (!agentDetail.value?.agentCode) {
       message.error('智能体信息未加载完成，请稍后再试')

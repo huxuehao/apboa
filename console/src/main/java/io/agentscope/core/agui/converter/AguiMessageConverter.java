@@ -203,7 +203,13 @@ public class AguiMessageConverter {
             });
 
             // 移除 message 中最后一条消息，并构建新的文本 ContentBlock
-            blocks.add(TextBlock.builder().text(message.removeLast().getTextContent()).build());
+            String content = message.removeLast().getTextContent();
+            if (content != null && !content.isEmpty()) {
+                // 去除
+                String[] split = content.split("@==##::::##==@", 2);
+                String result = split.length > 1 ? split[1] : split[0];
+                blocks.add(TextBlock.builder().text(result).build());
+            }
 
             // 构建复合消息
             Msg multiMsg = Msg.builder()

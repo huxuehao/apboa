@@ -11,7 +11,7 @@ import { useChatStream } from '@/composables/chat/useChatStream'
 import ChatSidebar from '@/components/chat/ChatSidebar.vue'
 import ChatMain from '@/components/chat/ChatMain.vue'
 import RenameModal from '@/components/chat/RenameModal.vue'
-import type { DisplayMessage, ChatMessageVO } from '@/types'
+import type { DisplayMessage, ChatMessageVO, UploadedFileItem } from '@/types'
 import * as chatSessionApi from '@/api/chatSession'
 
 const route = useRoute()
@@ -87,6 +87,10 @@ const {
   loadCurrentMessages,
 } = useCurrentSession(agentId)
 
+// 已上传附件
+const uploadedFiles = ref<UploadedFileItem[]>([])
+const fileIds = computed(() => uploadedFiles.value.map((f) => f.id))
+
 // 流式对话及工具调用
 const {
   streamingContent,
@@ -100,6 +104,7 @@ const {
   agentId,
   agentDetail,
   currentSessionId,
+  fileIds,
   memoryActive,
   planActive,
   onMessageSaved: () => {
@@ -109,6 +114,12 @@ const {
 
 // 输入框内容
 const inputText = ref('')
+
+/** 构建文件前缀字符串 */
+function buildFilesPrefix(files: UploadedFileItem[]): string {
+  if (!files.length) return ''
+  return JSON.stringify({ files }) + '@==##::::##==@'
+}
 
 // 构建展示消息
 const displayMessages = computed<DisplayMessage[]>(() => {
@@ -229,11 +240,17 @@ const handelToolContent = async (value: any) => {
 // 发送消息
 const handleSend = async () => {
   const text = inputText.value.trim()
-  if (!text || !agentId.value || isRunning.value) return
+  const hasFiles = uploadedFiles.value.length > 0
+  if ((!text && !hasFiles) || !agentId.value || isRunning.value) return
+
+  const finalText = hasFiles
+    ? buildFilesPrefix(uploadedFiles.value) + text
+    : text
 
   // 如果没有当前会话，先创建
   if (!currentSessionId.value) {
-    const newSession = await createSession(formatSessionTitleFromInput(text))
+    const titleInput = text || (hasFiles ? '附件' : '新对话')
+    const newSession = await createSession(formatSessionTitleFromInput(titleInput))
     if (!newSession) return
     currentSessionId.value = String(newSession.id)
     currentSessionTitle.value = newSession.title || '新对话'
@@ -241,18 +258,19 @@ const handleSend = async () => {
   }
 
   // 保存用户消息
-  await chatSessionApi.appendMessage(currentSessionId.value, { role: 'user', content: text })
+  await chatSessionApi.appendMessage(currentSessionId.value, { role: 'user', content: finalText })
   // 如果是新会话，更新标题
   if (messagesList.value.length === 0) {
-    const title = formatSessionTitle(text)
+    const title = formatSessionTitle(text || (hasFiles ? '附件' : '新对话'))
     await updateSessionTitle(currentSessionId.value, title)
     currentSessionTitle.value = title
   }
   inputText.value = ''
   await loadCurrentMessages()
 
-  // 触发流式回复
-  await sendMessage(text, [{ role: 'user', content: text }] as ChatMessageVO[])
+  // 触发流式回复（需在清空附件前调用，以便 getForwardedProps 能读取 fileIds）
+  await sendMessage(finalText, [{ role: 'user', content: finalText }] as ChatMessageVO[])
+  uploadedFiles.value = []
 }
 
 // 切换侧边栏（通过 computed setter 自动持久化到 store）
@@ -298,12 +316,14 @@ onMounted(() => {
       :messages="displayMessages"
       :tool-calls="toolCallsInProgress"
       :input-value="inputText"
+      :uploaded-files="uploadedFiles"
       :isRunning="isRunning"
       :memory-active="memoryActive"
       :plan-active="planActive"
       :enable-memory="enableMemory"
       :enable-planning="enablePlanning"
       @update:input-value="inputText = $event"
+      @update:uploaded-files="uploadedFiles = $event"
       @memory="handleMemoryChange"
       @plan="handlePlanChange"
       @toolContent="handelToolContent"

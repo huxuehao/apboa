@@ -3,7 +3,7 @@ import { ref, nextTick, watch, onMounted } from 'vue'
 import MessageList from './MessageList.vue'
 import ChatInput from './ChatInput.vue'
 import Welcome from './Welcome.vue'
-import type { DisplayMessage } from '@/types'
+import type { DisplayMessage, UploadedFileItem } from '@/types'
 
 const props = defineProps<{
   title: string
@@ -13,6 +13,7 @@ const props = defineProps<{
   messages: DisplayMessage[]
   toolCalls: any[]
   inputValue: string
+  uploadedFiles?: UploadedFileItem[]
   isRunning: boolean
   memoryActive?: boolean
   planActive?: boolean
@@ -22,6 +23,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:inputValue', value: string): void
+  (e: 'update:uploadedFiles', value: UploadedFileItem[]): void
   (e: 'send'): void
   (e: 'scroll', event: UIEvent): void
   (e: 'toolContent', value: any): void
@@ -114,12 +116,14 @@ defineExpose({
         :headline="welcomeHeadline"
         :description="welcomeDesc"
         :input-value="inputValue"
+        :uploaded-files="uploadedFiles"
         :isRunning="isRunning"
         :memory-active="memoryActive"
         :plan-active="planActive"
         :enable-memory="enableMemory"
         :enable-planning="enablePlanning"
         @update:input-value="$emit('update:inputValue', $event)"
+        @update:uploaded-files="$emit('update:uploadedFiles', $event)"
         @memory="$emit('memory', $event)"
         @plan="$emit('plan', $event)"
         @send="$emit('send')"
@@ -142,12 +146,14 @@ defineExpose({
         <div class="chat-input-outer">
           <ChatInput
             :model-value="inputValue"
+            :uploaded-files="uploadedFiles"
             :isRunning="isRunning"
             :memory-active="memoryActive"
             :plan-active="planActive"
             :enable-memory="enableMemory"
             :enable-planning="enablePlanning"
             @update:model-value="$emit('update:inputValue', $event)"
+            @update:uploaded-files="$emit('update:uploadedFiles', $event)"
             @memory="$emit('memory', $event)"
             @plan="$emit('plan', $event)"
             @send="$emit('send')"
