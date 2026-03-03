@@ -142,7 +142,14 @@ function initHookSortable() {
     ghostClass: 'hook-sortable-ghost',
     chosenClass: 'hook-sortable-chosen',
     dragClass: 'hook-sortable-drag',
-    onEnd(evt: { oldIndex?: number; newIndex?: number }) {
+    forceFallback: false,
+    fallbackClass: 'hook-sortable-fallback',
+    preventOnFilter: false,
+    onStart: () => {
+      document.body.classList.add('dragging')
+    },
+    onEnd: async (evt: { oldIndex?: number; newIndex?: number }) => {
+      document.body.classList.remove('dragging')
       const { oldIndex, newIndex } = evt
       if (oldIndex == null || newIndex == null || oldIndex === newIndex) return
       const newOrder = [...formData.value.hook]
@@ -150,6 +157,10 @@ function initHookSortable() {
       if (item === undefined) return
       newOrder.splice(newIndex, 0, item)
       formData.value = { ...formData.value, hook: newOrder }
+      // 拖拽后销毁并重新初始化 Sortable，确保 DOM 与 Vue 数据同步
+      destroyHookSortable()
+      await nextTick()
+      initHookSortable()
     }
   })
 }
@@ -359,7 +370,7 @@ defineExpose({
               class="selected-hook-item"
             >
               <span class="hook-drag-handle" title="拖拽排序">
-                <HolderOutlined />
+                <HolderOutlined class="hook-drag-handle-icon" />
               </span>
               <div class="selected-hook-info">
                 <span class="selected-hook-name" :title="hook.name">{{ hook.name }}</span>
@@ -561,7 +572,6 @@ defineExpose({
 .hook-drag-handle {
   display: flex;
   align-items: center;
-  color: var(--color-text-secondary);
   cursor: grab;
   padding: 2px;
 
@@ -569,8 +579,13 @@ defineExpose({
     cursor: grabbing;
   }
 
-  &:hover {
-    color: var(--color-primary);
+  .hook-drag-handle-icon {
+    color: #999;
+    font-size: 16px;
+
+    &:hover {
+      color: #666;
+    }
   }
 }
 
@@ -606,17 +621,30 @@ defineExpose({
   }
 }
 
-.hook-sortable-ghost {
-  opacity: 0.4;
-  background-color: var(--color-bg-light);
+:deep(.hook-sortable-ghost) {
+  opacity: 0.5;
+  background-color: #f0f0f0;
+  border: 1px dashed #1890ff;
 }
 
-.hook-sortable-chosen {
-  border-color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+:deep(.hook-sortable-chosen) {
+  background-color: #fafafa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.hook-sortable-drag {
-  opacity: 1;
+:deep(.hook-sortable-drag) {
+  opacity: 0.9;
+  transform: rotate(2deg);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+:deep(.hook-sortable-fallback) {
+  opacity: 1 !important;
+}
+
+/* 防止拖拽时页面滚动 */
+:global(body.dragging) {
+  user-select: none;
+  -webkit-user-select: none;
 }
 </style>

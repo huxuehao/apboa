@@ -53,8 +53,8 @@ const togglePlan = () => {
   emit('plan', !props.planActive)
 }
 const handleFileClick = () => {
-  message.info('努力开发中...')
-  // fileInputRef.value?.click()
+  // message.info('努力开发中...')
+  fileInputRef.value?.click()
 }
 const handleFileChange = (e: Event) => {
   const input = e.target as HTMLInputElement
