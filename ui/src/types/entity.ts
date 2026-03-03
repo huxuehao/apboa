@@ -296,6 +296,8 @@ export interface UploadedFileItem {
   name: string
   extension: string
   size: string
+  /** 是否正在上传中（上传完成后为 false 或 undefined） */
+  uploading?: boolean
 }
 
 /**

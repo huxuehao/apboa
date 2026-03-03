@@ -60,6 +60,14 @@ export function listTags() {
   return request.get<ApiResponse<string[]>>('/api/agent/definition/get/tags')
 }
 
+/**
+ * 获取所有Tag
+ * GET /api/agent/definition/get/tags
+ */
+export function allowFileType(id: string) {
+  return request.get<ApiResponse<string[]>>(`/api/agent/definition/${id}/allow/file-type`)
+}
+
 
 /**
  * 执行工具

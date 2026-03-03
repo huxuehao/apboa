@@ -11,6 +11,7 @@ defineProps<{
   planActive?: boolean
   enableMemory?: boolean
   enablePlanning?: boolean
+  allowUploadFileType?: string[]
 }>()
 
 defineEmits<{
@@ -35,6 +36,7 @@ defineEmits<{
         :plan-active="planActive"
         :enable-memory="enableMemory"
         :enable-planning="enablePlanning"
+        :allow-upload-file-type="allowUploadFileType"
         placeholder="输入消息，Enter 发送，Shift+Enter 换行"
         @update:model-value="$emit('update:inputValue', $event)"
         @update:uploaded-files="$emit('update:uploadedFiles', $event)"

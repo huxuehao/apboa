@@ -43,10 +43,10 @@ const currentData = ref<ModelConfigVO | undefined>(undefined)
  * 模型类型显示映射
  */
 const modelTypeLabels: Record<string, string> = {
-  CHAT: '文本模型',
-  IMAGE: '图像模型',
-  AUDIO: '音频模型',
-  VIDEO: '视频模型'
+  CHAT: '文本',
+  IMAGE: '图像',
+  AUDIO: '音频',
+  VIDEO: '视频'
 }
 
 /**
@@ -57,25 +57,23 @@ const columns = [
     title: '名称',
     dataIndex: 'name',
     key: 'name',
-    width: 200
   },
   {
     title: '模型ID',
     dataIndex: 'modelId',
     key: 'modelId',
-    width: 200
   },
   {
     title: '模型类型',
     dataIndex: 'modelType',
     key: 'modelType',
-    width: 90
+    width: 220
   },
   {
     title: '是否启用',
     dataIndex: 'enabled',
     key: 'enabled',
-    width: 80
+    width: 90
   }
 ]
 
@@ -84,7 +82,7 @@ if (hasPermission) {
   columns.push({
     title: '操作',
     key: 'action',
-    width: 100,
+    width: 110,
     fixed: 'right'
   })
 }
@@ -261,7 +259,7 @@ async function handleEnable(id: string) {
   <AModal
     :open="visible"
     :title="`${providerName} - 配置模型`"
-    width="850px"
+    width="1000px"
     :footer="null"
     @cancel="handleClose"
   >
@@ -299,7 +297,10 @@ async function handleEnable(id: string) {
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'name'">
-            <AButton type="link" @click="handleEdit(record)" v-permission="['EDIT','ADMIN']">{{ record.name }}</AButton>
+            <span
+              style="color: #0F74FF; cursor: pointer"
+              @click="handleEdit(record)"
+              v-permission="['EDIT','ADMIN']">{{ record.name }}</span>
             <span v-permission="['READ_ONLY']">{{ record.name }}</span>
           </template>
 

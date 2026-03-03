@@ -89,4 +89,9 @@ public class AgentDefinitionController {
     public R<List<String>> listTags() {
         return R.data(agentDefinitionService.listTags());
     }
+
+    @GetMapping("/{id}/allow/file-type")
+    public R<List<String>> allowFileType(@PathVariable("id") Long id) {
+        return R.data(agentDefinitionService.allowFileType(id));
+    }
 }

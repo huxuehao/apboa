@@ -1,16 +1,22 @@
 package com.hxh.apboa.agent.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.hxh.apboa.agent.mapper.AgentDefinitionMapper;
 import com.hxh.apboa.agent.service.AgentDefinitionService;
 import com.hxh.apboa.agent.service.AgentSubAgentService;
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.common.entity.ModelConfig;
 import com.hxh.apboa.common.entity.SensitiveWordConfig;
+import com.hxh.apboa.common.enums.ModelType;
 import com.hxh.apboa.common.event.AgentReRegisterEvent;
 import com.hxh.apboa.common.util.BeanUtils;
+import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.common.vo.AgentDefinitionVO;
 import com.hxh.apboa.hook.service.AgentHookService;
 import com.hxh.apboa.knowledge.service.AgentKnowledgeBaseService;
 import com.hxh.apboa.mcp.service.AgentMcpServerService;
+import com.hxh.apboa.model.service.ModelConfigService;
+import com.hxh.apboa.params.core.ParamsAdapter;
 import com.hxh.apboa.skill.service.AgentSkillPackageService;
 import com.hxh.apboa.tool.service.AgentToolService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -20,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +44,9 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
     private final AgentSkillPackageService skillPackageService;
     private final AgentSubAgentService subAgentService;
     private final AgentKnowledgeBaseService agentKnowledgeBaseService;
+    private final ModelConfigService modelConfigService;
     private final ApplicationEventPublisher publisher;
+    private final ParamsAdapter paramsAdapter;
 
     @Override
     public AgentDefinitionVO agentDefinitionDetail(Long id) {
@@ -63,8 +72,10 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         AgentDefinition agentDefinition = BeanUtils.copy(vo, AgentDefinition.class);
         save(agentDefinition);
         vo.setId(agentDefinition.getId());
+        saveSubItems(vo);
 
-        return saveSubItems(vo);
+        publisher.publishEvent(new AgentReRegisterEvent(vo.getId()));
+        return true;
     }
 
     @Override
@@ -133,5 +144,50 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
                 .map(AgentDefinition::getTag)
                 .filter(category -> category != null && !category.isEmpty())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> allowFileType(Long id) {
+        AgentDefinition agentDefinition = getById(id);
+        if (agentDefinition == null || !agentDefinition.getEnabled()) {
+            return List.of();
+        }
+
+        ModelConfig modelConfig = modelConfigService.getById(agentDefinition.getModelConfigId());
+        if (modelConfig == null) {
+            return List.of();
+        }
+        JsonNode modelTypeJ = modelConfig.getModelType();
+        if (modelTypeJ == null) {
+            return List.of();
+        }
+
+        List<String> modelType = parseModelType(modelTypeJ);
+        List<String> allowImageFileType = new ArrayList<>();
+        if (modelType.contains(ModelType.IMAGE.name())) {
+            allowImageFileType.add(paramsAdapter.getValue("ALLOW_IMAGE_FILE_TYPE"));
+        }
+        if (modelType.contains(ModelType.AUDIO.name())) {
+            allowImageFileType.add(paramsAdapter.getValue("ALLOW_AUDIO_FILE_TYPE"));
+        }
+        if (modelType.contains(ModelType.VIDEO.name())) {
+            allowImageFileType.add(paramsAdapter.getValue("ALLOW_VIDEO_FILE_TYPE"));
+        }
+
+        if (allowImageFileType.isEmpty()) {
+            return List.of();
+        }
+
+        String join = String.join(",", allowImageFileType);
+        return List.of(join.split(","));
+    }
+
+    private List<String> parseModelType(JsonNode modelTypeJ) {
+        try {
+            return (List<String>)JsonUtils.parse(modelTypeJ.toString(), List.class);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return Collections.emptyList();
+        }
     }
 }

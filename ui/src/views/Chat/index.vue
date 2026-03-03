@@ -22,7 +22,7 @@ const userInfo = computed(() => accountStore.userInfo)
 const agentId = computed(() => (route.params.agentId as string) || '')
 
 // 智能体详情
-const { agentDetail } = useAgentDetail(agentId)
+const { agentDetail, allowFileType } = useAgentDetail(agentId)
 
 // 记忆/规划是否可用（由 agentDetail 决定）
 const accountId = computed(() => accountStore.userInfo?.id)
@@ -87,9 +87,11 @@ const {
   loadCurrentMessages,
 } = useCurrentSession(agentId)
 
-// 已上传附件
+// 已上传附件（仅已完成上传的计入 fileIds）
 const uploadedFiles = ref<UploadedFileItem[]>([])
-const fileIds = computed(() => uploadedFiles.value.map((f) => f.id))
+const fileIds = computed(() =>
+  uploadedFiles.value.filter((f) => !f.uploading).map((f) => f.id)
+)
 
 // 流式对话及工具调用
 const {
@@ -240,12 +242,16 @@ const handelToolContent = async (value: any) => {
 // 发送消息
 const handleSend = async () => {
   const text = inputText.value.trim()
-  const hasFiles = uploadedFiles.value.length > 0
+  const filesToSend = uploadedFiles.value.filter((f) => !f.uploading)
+  const hasFiles = filesToSend.length > 0
   if ((!text && !hasFiles) || !agentId.value || isRunning.value) return
 
-  const finalText = hasFiles
-    ? buildFilesPrefix(uploadedFiles.value) + text
-    : text
+  const finalText = hasFiles ? buildFilesPrefix(filesToSend) + text : text
+  const fileIdsToSend = filesToSend.map((f) => f.id)
+
+  // 立即清空输入框和附件，提升交互体验
+  inputText.value = ''
+  uploadedFiles.value = []
 
   // 如果没有当前会话，先创建
   if (!currentSessionId.value) {
@@ -265,12 +271,14 @@ const handleSend = async () => {
     await updateSessionTitle(currentSessionId.value, title)
     currentSessionTitle.value = title
   }
-  inputText.value = ''
   await loadCurrentMessages()
 
-  // 触发流式回复（需在清空附件前调用，以便 getForwardedProps 能读取 fileIds）
-  await sendMessage(finalText, [{ role: 'user', content: finalText }] as ChatMessageVO[])
-  uploadedFiles.value = []
+  // 触发流式回复（传入 fileIdsToSend，因输入框已提前清空）
+  await sendMessage(
+    finalText,
+    [{ role: 'user', content: finalText }] as ChatMessageVO[],
+    fileIdsToSend
+  )
 }
 
 // 切换侧边栏（通过 computed setter 自动持久化到 store）
@@ -322,6 +330,7 @@ onMounted(() => {
       :plan-active="planActive"
       :enable-memory="enableMemory"
       :enable-planning="enablePlanning"
+      :allow-upload-file-type="allowFileType"
       @update:input-value="inputText = $event"
       @update:uploaded-files="uploadedFiles = $event"
       @memory="handleMemoryChange"

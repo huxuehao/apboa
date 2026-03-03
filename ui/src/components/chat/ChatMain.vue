@@ -19,6 +19,7 @@ const props = defineProps<{
   planActive?: boolean
   enableMemory?: boolean
   enablePlanning?: boolean
+  allowUploadFileType?: string[]
 }>()
 
 const emit = defineEmits<{
@@ -122,6 +123,7 @@ defineExpose({
         :plan-active="planActive"
         :enable-memory="enableMemory"
         :enable-planning="enablePlanning"
+        :allow-upload-file-type="allowUploadFileType"
         @update:input-value="$emit('update:inputValue', $event)"
         @update:uploaded-files="$emit('update:uploadedFiles', $event)"
         @memory="$emit('memory', $event)"
@@ -152,6 +154,7 @@ defineExpose({
             :plan-active="planActive"
             :enable-memory="enableMemory"
             :enable-planning="enablePlanning"
+            :allow-upload-file-type="allowUploadFileType"
             @update:model-value="$emit('update:inputValue', $event)"
             @update:uploaded-files="$emit('update:uploadedFiles', $event)"
             @memory="$emit('memory', $event)"

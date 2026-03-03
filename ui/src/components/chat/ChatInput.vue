@@ -6,7 +6,8 @@ import {
   PaperClipOutlined,
   CloseOutlined,
   UnorderedListOutlined,
-  ClockCircleOutlined
+  ClockCircleOutlined,
+  LoadingOutlined
 } from '@ant-design/icons-vue'
 import * as attachApi from '@/api/attach'
 import type { UploadedFileItem } from '@/types'
@@ -21,6 +22,7 @@ const props = withDefaults(
     planActive?: boolean
     enableMemory?: boolean
     enablePlanning?: boolean
+    allowUploadFileType?: string[]
   }>(),
   { uploadedFiles: () => [], memoryActive: false, planActive: false, enableMemory: false, enablePlanning: false }
 )
@@ -46,10 +48,24 @@ const formatFileSize = (bytes: number): string => {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
 }
 
-/** 从文件名解析扩展名 */
+/** 从文件名解析扩展名（小写） */
 const getExtension = (fileName: string): string => {
   const lastDot = fileName.lastIndexOf('.')
-  return lastDot > -1 ? fileName.slice(lastDot + 1) : ''
+  return lastDot > -1 ? fileName.slice(lastDot + 1).toLowerCase() : ''
+}
+
+/** 检查文件类型是否在允许列表中 */
+const isFileTypeAllowed = (extension: string): boolean => {
+  const allowed = props.allowUploadFileType
+  if (!allowed?.length) return true
+  return allowed.some((t) => t.toLowerCase() === extension)
+}
+
+/** 根据 allowUploadFileType 生成 input accept 属性值 */
+const fileAcceptAttr = (): string => {
+  const allowed = props.allowUploadFileType
+  if (!allowed?.length) return '*/*'
+  return allowed.map((t) => `.${t}`).join(',')
 }
 
 const toggleMemory = () => {
@@ -70,27 +86,76 @@ const handleFileChange = async (e: Event) => {
     input.value = ''
     return
   }
+  const fileArray = Array.from(files)
+  const allowedFiles: File[] = []
+  const rejectedNames: string[] = []
+  for (const file of fileArray) {
+    const ext = getExtension(file.name)
+    if (isFileTypeAllowed(ext)) {
+      allowedFiles.push(file)
+    } else {
+      rejectedNames.push(file.name)
+    }
+  }
+  if (rejectedNames.length > 0) {
+    message.warning(`以下文件类型不允许上传: ${rejectedNames.join(', ')}`)
+  }
+  if (allowedFiles.length === 0) {
+    input.value = ''
+    return
+  }
+
   const current = props.uploadedFiles ?? []
   const newList = [...current]
-  for (const file of Array.from(files)) {
-    const res = await attachApi.upload(file)
-    const data = res?.data?.data
-    if (data) {
-      newList.push({
-        id: data,
-        name: file.name,
-        extension: getExtension(file.name),
-        size: formatFileSize(file.size)
-      })
-    } else {
-      message.error(`上传失败: ${file.name}`)
-    }
+  const tempIds: string[] = []
+
+  // 立即将文件加入列表并显示（上传中状态）
+  for (let i = 0; i < allowedFiles.length; i++) {
+    const file = allowedFiles[i]
+    if (!file) continue
+    const tempId = `temp-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 9)}`
+    tempIds.push(tempId)
+    newList.push({
+      id: tempId,
+      name: file.name,
+      extension: getExtension(file.name),
+      size: formatFileSize(file.size),
+      uploading: true
+    })
   }
   emit('update:uploadedFiles', newList)
   input.value = ''
+
+  // 后台逐个上传，完成后更新对应项
+  for (let i = 0; i < allowedFiles.length; i++) {
+    const file = allowedFiles[i]
+    const tempId = tempIds[i]
+    if (!file || tempId === undefined) continue
+    try {
+      const res = await attachApi.upload(file)
+      const data = res?.data?.data
+      if (data) {
+        const updated = (props.uploadedFiles ?? []).map((item) =>
+          item.id === tempId ? { ...item, id: data, uploading: false } : item
+        )
+        emit('update:uploadedFiles', updated)
+      } else {
+        message.error(`上传失败: ${file.name}`)
+        const filtered = (props.uploadedFiles ?? []).filter((f) => f.id !== tempId)
+        emit('update:uploadedFiles', filtered)
+      }
+    } catch {
+      message.error(`上传失败: ${file.name}`)
+      const filtered = (props.uploadedFiles ?? []).filter((f) => f.id !== tempId)
+      emit('update:uploadedFiles', filtered)
+    }
+  }
 }
 const removeFile = async (item: UploadedFileItem) => {
-  await attachApi.remove([item.id])
+  // 上传中的文件无需调用删除接口
+  if (!item.uploading && !item.id.startsWith('temp-')) {
+    await attachApi.remove([item.id])
+  }
   const newList = (props.uploadedFiles ?? []).filter((f) => f.id !== item.id)
   emit('update:uploadedFiles', newList)
 }
@@ -127,7 +192,7 @@ watch(() => props.modelValue, () => {
       ref="fileInputRef"
       type="file"
       class="chat-file-input-hidden"
-      accept="*/*"
+      :accept="fileAcceptAttr()"
       multiple
       @change="handleFileChange"
     />
@@ -139,6 +204,9 @@ watch(() => props.modelValue, () => {
           :key="item.id"
           class="chat-input-file-item"
         >
+          <span v-if="item.uploading" class="chat-input-file-loading">
+            <LoadingOutlined spin />
+          </span>
           <span class="chat-input-file-name" :title="item.name">{{ item.name }}</span>
           <span class="chat-input-file-size">{{ item.size }}</span>
           <button
@@ -187,6 +255,7 @@ watch(() => props.modelValue, () => {
           <UnorderedListOutlined />
         </button>
         <button
+          :disabled="!allowUploadFileType?.length"
           type="button"
           class="chat-toolbar-btn chat-toolbar-btn-icon chat-toolbar-btn-circle"
           title="文件"
@@ -199,7 +268,7 @@ watch(() => props.modelValue, () => {
         <button
           type="button"
           class="chat-send-btn-inner"
-          :disabled="!isRunning && !modelValue.trim() && (uploadedFiles ?? []).length === 0"
+          :disabled="!isRunning && ((uploadedFiles ?? []).some((f) => f.uploading) || (!modelValue.trim() && (uploadedFiles ?? []).filter((f) => !f.uploading).length === 0))"
           @click="isRunning ? $emit('abort') : $emit('send')"
         >
           <template v-if="isRunning"><div class="send"></div></template>
@@ -279,6 +348,14 @@ watch(() => props.modelValue, () => {
     background: rgba($chat-primary, 0.1);
     border-color: rgba($chat-primary, 0.25);
   }
+}
+
+.chat-input-file-loading {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  color: $chat-primary;
+  font-size: 14px;
 }
 
 .chat-input-file-name {
