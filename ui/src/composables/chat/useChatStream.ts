@@ -9,15 +9,17 @@ export function useChatStream(options: {
   agentId: import('vue').Ref<string>
   agentDetail: import('vue').Ref<any>
   currentSessionId: import('vue').Ref<string | null>
+  fileIds?: import('vue').Ref<string[]>
   memoryActive?: import('vue').Ref<boolean>
   planActive?: import('vue').Ref<boolean>
   onMessageSaved?: () => void
 }) {
-  const { agentId, agentDetail, currentSessionId, memoryActive, planActive, onMessageSaved } = options
+  const { agentId, agentDetail, currentSessionId, fileIds, memoryActive, planActive, onMessageSaved } = options
 
   const getForwardedProps = () => ({
     agentId: agentId.value,
     agentCode: agentDetail.value?.agentCode,
+    fileIds: fileIds?.value ?? [],
     memoryActive: memoryActive?.value ?? false,
     planActive: planActive?.value ?? false,
   })
@@ -140,9 +142,15 @@ export function useChatStream(options: {
 
   }
 
-  // 发送消息
-  const sendMessage = async (inputText: string, messagesList: ChatMessageVO[]) => {
-    if (!inputText.trim() || !agentId.value) return
+  // 发送消息（可选传入 fileIds 覆盖，用于发送时已清空输入框的场景）
+  const sendMessage = async (
+    inputText: string,
+    messagesList: ChatMessageVO[],
+    overrideFileIds?: string[]
+  ) => {
+    const effectiveFileIds = overrideFileIds ?? fileIds?.value ?? []
+    if (!agentId.value) return
+    if (!inputText.trim() && !effectiveFileIds.length) return
     if (isRunning.value) return
     if (!agentDetail.value?.agentCode) {
       message.error('智能体信息未加载完成，请稍后再试')
@@ -158,10 +166,15 @@ export function useChatStream(options: {
         content: (m.content || '') as string
       }))
 
+    const forwardedProps = getForwardedProps()
+    if (overrideFileIds !== undefined) {
+      forwardedProps.fileIds = overrideFileIds
+    }
+
     await run({
       threadId: currentSessionId.value || undefined,
       runId: `run_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
-      forwardedProps: getForwardedProps()
+      forwardedProps
     })
   }
 

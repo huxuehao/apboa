@@ -70,7 +70,7 @@ const isEdit = computed(() => !!props.data?.id)
 const modelTypeOptions = [
   { label: '文本模型', value: ModelType.CHAT },
   { label: '图像模型', value: ModelType.IMAGE },
-  { label: '语音模型', value: ModelType.TTS },
+  { label: '音频模型', value: ModelType.AUDIO },
   { label: '视频模型', value: ModelType.VIDEO }
 ]
 

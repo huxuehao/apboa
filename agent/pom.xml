@@ -49,5 +49,9 @@
             <groupId>com.hxh.apboa</groupId>
             <artifactId>tool</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>params</artifactId>
+        </dependency>
     </dependencies>
 </project>

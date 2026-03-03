@@ -278,7 +278,7 @@ onMounted(() => {
 }
 
 .params-list-value-text {
-  color: var(--color-text-regular);
+  color: var(--color-primary);
 }
 
 .params-edit-input {

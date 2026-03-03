@@ -1,5 +1,6 @@
 package com.hxh.apboa.core.agui;
 
+import com.hxh.apboa.common.entity.AgentDefinition;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,7 @@ public class AgentContext {
     private boolean memoryActive;
     private boolean planActive;
     private List<String> fileIds;
+    private AgentDefinition agentDefinition;
 
     public static AgentContext get() {
         AgentContext agentContext = CONTEXT_HOLDER.get();

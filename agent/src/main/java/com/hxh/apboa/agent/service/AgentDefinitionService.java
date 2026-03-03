@@ -23,4 +23,5 @@ public interface AgentDefinitionService extends IService<AgentDefinition> {
      * @return Tag列表
      */
     List<String> listTags();
+    List<String> allowFileType(Long id);
 }

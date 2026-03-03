@@ -1,6 +1,7 @@
 package com.hxh.apboa.params.core;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.hxh.apboa.common.entity.Params;
 import com.hxh.apboa.params.mapper.ParamsMapper;
 import org.springframework.stereotype.Component;
@@ -58,6 +59,9 @@ public class ParamsAdapter {
         if (paramsCore != null) {
             params.setParamValue(paramsCore.checkAndFormatValue(params.getParamValue()));
         }
-        return paramsMapper.updateById(params);
+        return paramsMapper.update(
+                new UpdateWrapper<Params>()
+                        .eq("id", params.getId())
+                        .set("param_value", params.getParamValue()));
     }
 }

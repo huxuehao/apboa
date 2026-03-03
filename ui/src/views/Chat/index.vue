@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { Modal, message } from 'ant-design-vue'
-import { useAccountStore } from '@/stores'
+import { useAccountStore, useChatStore } from '@/stores'
 import { formatSessionTitle } from '@/utils/chat/format'
 import { useAgentDetail } from '@/composables/chat/useAgentDetail'
 import { useSessions } from '@/composables/chat/useSessions'
@@ -11,79 +11,58 @@ import { useChatStream } from '@/composables/chat/useChatStream'
 import ChatSidebar from '@/components/chat/ChatSidebar.vue'
 import ChatMain from '@/components/chat/ChatMain.vue'
 import RenameModal from '@/components/chat/RenameModal.vue'
-import type { DisplayMessage, ChatMessageVO } from '@/types'
+import type { DisplayMessage, ChatMessageVO, UploadedFileItem } from '@/types'
 import * as chatSessionApi from '@/api/chatSession'
-
-const STORAGE_KEY_PREFIX = 'chat_agent'
 
 const route = useRoute()
 const accountStore = useAccountStore()
+const chatStore = useChatStore()
 const userInfo = computed(() => accountStore.userInfo)
 
 const agentId = computed(() => (route.params.agentId as string) || '')
 
 // 智能体详情
-const { agentDetail } = useAgentDetail(agentId)
+const { agentDetail, allowFileType } = useAgentDetail(agentId)
 
 // 记忆/规划是否可用（由 agentDetail 决定）
 const accountId = computed(() => accountStore.userInfo?.id)
 const enableMemory = computed(() => agentDetail.value?.enableMemory === true)
 const enablePlanning = computed(() => agentDetail.value?.enablePlanning === true)
 
-// 记忆/规划激活状态，按 agent 隔离持久化到 localStorage
-const memoryActive = ref(false)
-const planActive = ref(false)
-
-const loadPersistedState = () => {
-  const id = agentDetail.value?.id
-  if (!id) return
-  try {
-    const mem = localStorage.getItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_memory_active`)
-    const plan = localStorage.getItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_plan_active`)
-    memoryActive.value = mem !== null
-      ? (mem === 'true') && (agentDetail.value?.enableMemory ?? false)
-      : (agentDetail.value?.enableMemory ?? false)
-
-    planActive.value = plan !== null
-      ? (plan === 'true') && (agentDetail.value?.enablePlanning ?? false)
-      : (agentDetail.value?.enablePlanning ?? false)
-  } catch {
-    memoryActive.value = agentDetail.value?.enableMemory ?? false
-    planActive.value = agentDetail.value?.enablePlanning ?? false
-  }
-}
-
-const persistMemory = (v: boolean) => {
-  const id = agentDetail.value?.id
-  if (!id) return
-  try {
-    localStorage.setItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_memory_active`, String(v))
-  } catch {}
-}
-
-const persistPlan = (v: boolean) => {
-  const id = agentDetail.value?.id
-  if (!id) return
-  try {
-    localStorage.setItem(`${STORAGE_KEY_PREFIX}_${id}_${accountId.value}_plan_active`, String(v))
-  } catch {}
-}
-
-watch(agentDetail, () => {
-  loadPersistedState()
-}, { immediate: true })
+// 记忆/规划/侧边栏状态：从 Pinia store 读取（持久化由 pinia-plugin-persistedstate 处理）
+const memoryActive = computed(() => {
+  const id = agentDetail.value?.id ?? agentId.value
+  chatStore.preferences // 依赖以保持响应性
+  return chatStore.getMemoryActive(id, accountId.value, enableMemory.value)
+})
+const planActive = computed(() => {
+  const id = agentDetail.value?.id ?? agentId.value
+  chatStore.preferences
+  return chatStore.getPlanActive(id, accountId.value, enablePlanning.value)
+})
+const sidebarCollapsed = computed({
+  get: () => {
+    const id = agentDetail.value?.id ?? agentId.value
+    chatStore.preferences
+    return chatStore.getSidebarCollapsed(id, accountId.value)
+  },
+  set: (v: boolean) => {
+    const id = agentDetail.value?.id ?? agentId.value
+    chatStore.setSidebarCollapsed(id, accountId.value, v)
+  },
+})
 
 const handleMemoryChange = (v: boolean) => {
   if (!v) {
     message.warning("关闭记忆后，所有工具调用将无需人工确认，自动执行")
   }
-  memoryActive.value = v
-  persistMemory(v)
+  const id = agentDetail.value?.id ?? agentId.value
+  chatStore.setMemoryActive(id, accountId.value, v)
 }
 
 const handlePlanChange = (v: boolean) => {
-  planActive.value = v
-  persistPlan(v)
+  const id = agentDetail.value?.id ?? agentId.value
+  chatStore.setPlanActive(id, accountId.value, v)
 }
 
 // 会话列表管理
@@ -108,6 +87,12 @@ const {
   loadCurrentMessages,
 } = useCurrentSession(agentId)
 
+// 已上传附件（仅已完成上传的计入 fileIds）
+const uploadedFiles = ref<UploadedFileItem[]>([])
+const fileIds = computed(() =>
+  uploadedFiles.value.filter((f) => !f.uploading).map((f) => f.id)
+)
+
 // 流式对话及工具调用
 const {
   streamingContent,
@@ -121,6 +106,7 @@ const {
   agentId,
   agentDetail,
   currentSessionId,
+  fileIds,
   memoryActive,
   planActive,
   onMessageSaved: () => {
@@ -130,6 +116,12 @@ const {
 
 // 输入框内容
 const inputText = ref('')
+
+/** 构建文件前缀字符串 */
+function buildFilesPrefix(files: UploadedFileItem[]): string {
+  if (!files.length) return ''
+  return JSON.stringify({ files }) + '@==##::::##==@'
+}
 
 // 构建展示消息
 const displayMessages = computed<DisplayMessage[]>(() => {
@@ -165,9 +157,6 @@ const displayMessages = computed<DisplayMessage[]>(() => {
 })
 
 const isWelcomeMode = computed(() => messagesList.value.length === 0 && !streamingMessageId.value)
-
-// 侧边栏折叠状态
-const sidebarCollapsed = ref(false)
 
 // 重命名模态框
 const renameModalVisible = ref(false)
@@ -253,11 +242,21 @@ const handelToolContent = async (value: any) => {
 // 发送消息
 const handleSend = async () => {
   const text = inputText.value.trim()
-  if (!text || !agentId.value || isRunning.value) return
+  const filesToSend = uploadedFiles.value.filter((f) => !f.uploading)
+  const hasFiles = filesToSend.length > 0
+  if ((!text && !hasFiles) || !agentId.value || isRunning.value) return
+
+  const finalText = hasFiles ? buildFilesPrefix(filesToSend) + text : text
+  const fileIdsToSend = filesToSend.map((f) => f.id)
+
+  // 立即清空输入框和附件，提升交互体验
+  inputText.value = ''
+  uploadedFiles.value = []
 
   // 如果没有当前会话，先创建
   if (!currentSessionId.value) {
-    const newSession = await createSession(formatSessionTitleFromInput(text))
+    const titleInput = text || (hasFiles ? '附件' : '新对话')
+    const newSession = await createSession(formatSessionTitleFromInput(titleInput))
     if (!newSession) return
     currentSessionId.value = String(newSession.id)
     currentSessionTitle.value = newSession.title || '新对话'
@@ -265,21 +264,24 @@ const handleSend = async () => {
   }
 
   // 保存用户消息
-  await chatSessionApi.appendMessage(currentSessionId.value, { role: 'user', content: text })
+  await chatSessionApi.appendMessage(currentSessionId.value, { role: 'user', content: finalText })
   // 如果是新会话，更新标题
   if (messagesList.value.length === 0) {
-    const title = formatSessionTitle(text)
+    const title = formatSessionTitle(text || (hasFiles ? '附件' : '新对话'))
     await updateSessionTitle(currentSessionId.value, title)
     currentSessionTitle.value = title
   }
-  inputText.value = ''
   await loadCurrentMessages()
 
-  // 触发流式回复
-  await sendMessage(text, [{ role: 'user', content: text }] as ChatMessageVO[])
+  // 触发流式回复（传入 fileIdsToSend，因输入框已提前清空）
+  await sendMessage(
+    finalText,
+    [{ role: 'user', content: finalText }] as ChatMessageVO[],
+    fileIdsToSend
+  )
 }
 
-// 切换侧边栏
+// 切换侧边栏（通过 computed setter 自动持久化到 store）
 const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
 }
@@ -322,12 +324,15 @@ onMounted(() => {
       :messages="displayMessages"
       :tool-calls="toolCallsInProgress"
       :input-value="inputText"
+      :uploaded-files="uploadedFiles"
       :isRunning="isRunning"
       :memory-active="memoryActive"
       :plan-active="planActive"
       :enable-memory="enableMemory"
       :enable-planning="enablePlanning"
+      :allow-upload-file-type="allowFileType"
       @update:input-value="inputText = $event"
+      @update:uploaded-files="uploadedFiles = $event"
       @memory="handleMemoryChange"
       @plan="handlePlanChange"
       @toolContent="handelToolContent"

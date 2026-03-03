@@ -4,9 +4,10 @@
  * @author huxuehao
  */
 <script setup lang="ts">
-import { ref, watch, computed, defineComponent } from 'vue'
+import { ref, watch, computed, defineComponent, nextTick, onUnmounted } from 'vue'
 import { message } from 'ant-design-vue'
-import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons-vue'
+import { PlusOutlined, MinusCircleOutlined, HolderOutlined } from '@ant-design/icons-vue'
+import Sortable from 'sortablejs'
 import type { ToolVO, ToolConfig } from '@/types'
 import { ToolType, CodeLanguage } from '@/types'
 import * as toolApi from '@/api/tool'
@@ -42,7 +43,12 @@ interface InputSchemaItem {
   type: string
   defaultValue: string
   required: boolean
+  // 添加一个临时ID用于拖拽识别
+  _tempId?: number
 }
+
+// 用于生成临时ID的计数器
+let tempIdCounter = 0
 
 const formData = ref<{
   used?: string[]
@@ -67,6 +73,8 @@ const formData = ref<{
 
 const inputRef = ref()
 const name = ref()
+const inputSchemaListRef = ref<HTMLElement | null>(null)
+let sortableInstance: ReturnType<typeof Sortable.create> | null = null
 
 const isEdit = computed(() => !!props.data?.id)
 const isBuiltin = computed(() => props.data?.toolType === 'BUILTIN')
@@ -130,9 +138,17 @@ public class CustomTool implements IDynamicAgentTool {
     }
 }`
 
+// 为每个输入参数添加临时ID
+function addTempIdToSchema(schema: InputSchemaItem[]): InputSchemaItem[] {
+  return schema.map(item => ({
+    ...item,
+    _tempId: tempIdCounter++
+  }))
+}
+
 watch(
   () => props.visible,
-  (newVal) => {
+  async (newVal) => {
     if (newVal) {
       if (props.data) {
         const inputSchemaList = props.data.inputSchema || []
@@ -144,21 +160,43 @@ watch(
           description: props.data.description,
           needConfirm: props.data.needConfirm,
           version: props.data.version,
-          inputSchema: Array.isArray(inputSchemaList) ? inputSchemaList.map((item: InputSchemaItem) => ({
-            name: item.name || '',
-            description: item.description || '',
-            type: item.type || 'string',
-            defaultValue: item.defaultValue || '',
-            required: item.required || false
-          })) : [],
+          inputSchema: Array.isArray(inputSchemaList) 
+            ? addTempIdToSchema(inputSchemaList.map((item: InputSchemaItem) => ({
+                name: item.name || '',
+                description: item.description || '',
+                type: item.type || 'string',
+                defaultValue: item.defaultValue || '',
+                required: item.required || false
+              })))
+            : [],
           code: props.data.code || ''
         }
       } else {
         resetForm()
       }
+      await nextTick()
+      destroyInputSchemaSortable()
+      initInputSchemaSortable()
+    } else {
+      destroyInputSchemaSortable()
     }
   }
 )
+
+watch(
+  () => formData.value.inputSchema.length,
+  async () => {
+    if (props.visible && !isBuiltin.value) {
+      await nextTick()
+      destroyInputSchemaSortable()
+      initInputSchemaSortable()
+    }
+  }
+)
+
+onUnmounted(() => {
+  destroyInputSchemaSortable()
+})
 
 /**
  * 表单验证规则
@@ -199,6 +237,7 @@ const rules = computed(() => {
  * 重置表单
  */
 function resetForm() {
+  tempIdCounter = 0
   formData.value = {
     category: '',
     name: '',
@@ -221,15 +260,77 @@ function addInputParam() {
     description: '',
     type: 'string',
     defaultValue: '',
-    required: false
+    required: false,
+    _tempId: tempIdCounter++
   })
 }
 
 /**
- * 删除输入参数
+ * 删除输入参数（通过对象引用删除，避免拖拽后索引错位导致删除错误）
  */
-function removeInputParam(index: number) {
-  formData.value.inputSchema.splice(index, 1)
+function removeInputParam(param: InputSchemaItem) {
+  const index = formData.value.inputSchema.indexOf(param)
+  if (index >= 0) {
+    formData.value.inputSchema.splice(index, 1)
+  }
+}
+
+/**
+ * 初始化输入参数拖拽排序
+ */
+function initInputSchemaSortable() {
+  if (!inputSchemaListRef.value || formData.value.inputSchema.length === 0) return
+  if (sortableInstance) return
+
+  sortableInstance = Sortable.create(inputSchemaListRef.value, {
+    animation: 150,
+    handle: '.input-schema-drag-handle',
+    ghostClass: 'input-schema-sortable-ghost',
+    chosenClass: 'input-schema-sortable-chosen',
+    dragClass: 'input-schema-sortable-drag',
+    onStart: () => {
+      // 拖拽开始时，禁用过渡动画，防止闪烁
+      document.body.classList.add('dragging')
+    },
+    onEnd: async (evt: { oldIndex?: number; newIndex?: number }) => {
+      document.body.classList.remove('dragging')
+      
+      const { oldIndex, newIndex } = evt
+      if (oldIndex == null || newIndex == null || oldIndex === newIndex) return
+      
+      // 使用 Vue 的响应式数组方法
+      const schema = [...formData.value.inputSchema]
+      const [item] = schema.splice(oldIndex, 1)
+      if (!item) return
+      
+      schema.splice(newIndex, 0, item)
+      
+      // 一次性更新整个数组，避免多次触发响应式更新
+      formData.value.inputSchema = schema
+      
+      // 拖拽后销毁并重新初始化 Sortable，确保 DOM 与 Vue 数据同步
+      // 避免快速拖拽时 Sortable 直接操作 DOM 与 Vue 响应式更新产生竞态
+      destroyInputSchemaSortable()
+      await nextTick()
+      initInputSchemaSortable()
+    },
+    // 添加这个选项来提高拖拽性能
+    forceFallback: false,
+    // 使用原生HTML5拖拽
+    fallbackClass: 'input-schema-sortable-fallback',
+    // 防止拖拽时触发点击事件
+    preventOnFilter: false
+  })
+}
+
+/**
+ * 销毁输入参数拖拽实例
+ */
+function destroyInputSchemaSortable() {
+  if (sortableInstance) {
+    sortableInstance.destroy()
+    sortableInstance = null
+  }
 }
 
 /**
@@ -240,6 +341,12 @@ async function handleSubmit() {
     await formRef.value?.validate()
     loading.value = true
 
+    // 提交前移除临时ID
+    const inputSchema = formData.value.inputSchema.map(({ _tempId, ...item }) => {
+      void _tempId // 解构仅用于排除该字段
+      return item
+    })
+
     const entity: ToolConfig = {
       category: formData.value.category || '',
       name: formData.value.name,
@@ -247,7 +354,7 @@ async function handleSubmit() {
       description: formData.value.description,
       toolType: isBuiltin.value ? ToolType.BUILTIN : ToolType.CUSTOM,
       needConfirm: formData.value.needConfirm,
-      inputSchema: isBuiltin.value ? null : formData.value.inputSchema || [],
+      inputSchema: isBuiltin.value ? null : inputSchema || [],
       outputSchema: null,
       classPath: null,
       language: CodeLanguage.JAVA,
@@ -381,33 +488,43 @@ const addItem = (e: Event) => {
       <template v-if="!isBuiltin">
         <AFormItem label="输入参数">
           <div class="input-schema-list">
-            <div v-for="(param, index) in formData.inputSchema" :key="index" class="input-schema-item">
-              <ARow :gutter="8">
-                <ACol :span="5">
-                  <AInput v-model:value="param.name" placeholder="参数名" />
-                </ACol>
-                <ACol :span="7">
-                  <AInput v-model:value="param.description" placeholder="参数描述" />
-                </ACol>
-                <ACol :span="4">
-                  <ASelect v-model:value="param.type" placeholder="类型">
-                    <ASelectOption v-for="opt in typeOptions" :key="opt.value" :value="opt.value">
-                      {{ opt.label }}
-                    </ASelectOption>
-                  </ASelect>
-                </ACol>
-                <ACol :span="4">
-                  <AInput v-model:value="param.defaultValue" placeholder="默认值" />
-                </ACol>
-                <ACol :span="2">
-                  <ACheckbox v-model:checked="param.required">必填</ACheckbox>
-                </ACol>
-                <ACol :span="2">
-                  <AButton type="text" danger @click="removeInputParam(index)">
-                    <MinusCircleOutlined />
-                  </AButton>
-                </ACol>
-              </ARow>
+            <!-- 使用 :key="_tempId" 确保Vue能够正确识别每个元素 -->
+            <div ref="inputSchemaListRef" class="input-schema-sortable">
+              <div 
+                v-for="(param, index) in formData.inputSchema" 
+                :key="param._tempId ?? `fallback-${index}`" 
+                class="input-schema-item"
+              >
+                <ARow :gutter="8">
+                  <ACol :span="1" class="input-schema-drag-handle">
+                    <HolderOutlined class="drag-handle-icon" />
+                  </ACol>
+                  <ACol :span="5">
+                    <AInput v-model:value="param.name" placeholder="参数名" />
+                  </ACol>
+                  <ACol :span="6">
+                    <AInput v-model:value="param.description" placeholder="参数描述" />
+                  </ACol>
+                  <ACol :span="4">
+                    <ASelect v-model:value="param.type" placeholder="类型">
+                      <ASelectOption v-for="opt in typeOptions" :key="opt.value" :value="opt.value">
+                        {{ opt.label }}
+                      </ASelectOption>
+                    </ASelect>
+                  </ACol>
+                  <ACol :span="4">
+                    <AInput v-model:value="param.defaultValue" placeholder="默认值" />
+                  </ACol>
+                  <ACol :span="2">
+                    <ACheckbox v-model:checked="param.required">必填</ACheckbox>
+                  </ACol>
+                  <ACol :span="2">
+                    <AButton type="text" danger @click="removeInputParam(param)">
+                      <MinusCircleOutlined />
+                    </AButton>
+                  </ACol>
+                </ARow>
+              </div>
             </div>
             <AButton type="dashed" block @click="addInputParam">
               <PlusOutlined />
@@ -424,7 +541,6 @@ const addItem = (e: Event) => {
             language="java"
             height="350px"
           />
-
         </AFormItem>
       </template>
     </AForm>
@@ -433,8 +549,65 @@ const addItem = (e: Event) => {
 
 <style scoped lang="scss">
 .input-schema-list {
+  .input-schema-sortable {
+    min-height: 4px;
+  }
+
   .input-schema-item {
     margin-bottom: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.02);
+    }
   }
+
+  .input-schema-drag-handle {
+    display: flex;
+    align-items: center;
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    .drag-handle-icon {
+      color: #999;
+      font-size: 16px;
+
+      &:hover {
+        color: #666;
+      }
+    }
+  }
+
+  :deep(.input-schema-sortable-ghost) {
+    opacity: 0.5;
+    background-color: #f0f0f0;
+    border: 1px dashed #1890ff;
+  }
+
+  :deep(.input-schema-sortable-chosen) {
+    background-color: #fafafa;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  :deep(.input-schema-sortable-drag) {
+    opacity: 0.9;
+    transform: rotate(2deg);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  :deep(.input-schema-sortable-fallback) {
+    opacity: 1 !important;
+  }
+}
+
+/* 防止拖拽时页面滚动 */
+:global(body.dragging) {
+  user-select: none;
+  -webkit-user-select: none;
 }
 </style>

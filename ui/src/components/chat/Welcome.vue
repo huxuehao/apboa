@@ -5,15 +5,18 @@ defineProps<{
   headline: string
   description?: string
   inputValue: string
+  uploadedFiles?: import('@/types').UploadedFileItem[]
   isRunning?: boolean
   memoryActive?: boolean
   planActive?: boolean
   enableMemory?: boolean
   enablePlanning?: boolean
+  allowUploadFileType?: string[]
 }>()
 
 defineEmits<{
   (e: 'update:inputValue', value: string): void
+  (e: 'update:uploadedFiles', value: import('@/types').UploadedFileItem[]): void
   (e: 'send'): void
   (e: 'memory', value: boolean): void
   (e: 'plan', value: boolean): void
@@ -27,13 +30,16 @@ defineEmits<{
     <div class="chat-input-outer chat-welcome-input">
       <ChatInput
         :model-value="inputValue"
+        :uploaded-files="uploadedFiles"
         :isRunning="isRunning"
         :memory-active="memoryActive"
         :plan-active="planActive"
         :enable-memory="enableMemory"
         :enable-planning="enablePlanning"
+        :allow-upload-file-type="allowUploadFileType"
         placeholder="输入消息，Enter 发送，Shift+Enter 换行"
         @update:model-value="$emit('update:inputValue', $event)"
+        @update:uploaded-files="$emit('update:uploadedFiles', $event)"
         @memory="$emit('memory', $event)"
         @plan="$emit('plan', $event)"
         @send="$emit('send')"

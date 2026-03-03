@@ -289,6 +289,18 @@ export interface ChatMessage {
 }
 
 /**
+ * 已上传附件项（用于聊天输入框展示）
+ */
+export interface UploadedFileItem {
+  id: string
+  name: string
+  extension: string
+  size: string
+  /** 是否正在上传中（上传完成后为 false 或 undefined） */
+  uploading?: boolean
+}
+
+/**
  * 附件
  */
 export interface Attach {

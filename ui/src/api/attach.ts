@@ -51,6 +51,7 @@ export function list(ids: string[]) {
 /**
  * 上传附件
  * POST /attach/upload
+ * @retrun fileId
  */
 export function upload(file: File) {
   const formData = new FormData()

@@ -111,7 +111,7 @@ public class AguiRequestProcessor {
         // 执行完成后保存session
         Flux<AguiEvent> events = adapter.run(effectiveInput)
                 .doFinally(signalType -> {
-                    if (agent instanceof ReActAgent reActAgent) {
+                    if (agent instanceof ReActAgent reActAgent && memoryActive) {
                         try {
                             reActAgent.saveTo(session, threadId);
                         } catch (Exception ex) {

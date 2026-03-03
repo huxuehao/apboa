@@ -3,6 +3,9 @@ spring:
     active: dev
   application:
     name: Apboa
+  servlet:
+    multipart:
+      max-file-size: 30MB
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
