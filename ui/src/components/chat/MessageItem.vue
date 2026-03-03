@@ -19,6 +19,12 @@ function parseUserContent(content: string): { files: UploadedFileItem[]; text: s
   }
 }
 
+/** 从文件名解析扩展名（小写） */
+const getExtension = (fileName: string): string => {
+  const lastDot = fileName.lastIndexOf('.')
+  return lastDot > -1 ? fileName.slice(lastDot + 1).toLowerCase() : ''
+}
+
 const props = defineProps<{
   role: 'user' | 'assistant' | 'system' | 'tool'
   content: string
@@ -42,6 +48,9 @@ const parsedUserContent = computed(() => parseUserContent(props.content))
             :key="item.id"
             class="chat-message-file-item"
           >
+            <span class="chat-input-file-tag">
+              {{ (item.extension ?? getExtension(item.name)).toUpperCase() || 'FILE' }}
+            </span>
             <span class="chat-message-file-name" :title="item.name">{{ item.name }}</span>
             <span class="chat-message-file-size">{{ item.size }}</span>
           </div>
@@ -77,12 +86,23 @@ const parsedUserContent = computed(() => parseUserContent(props.content))
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  max-width: 220px;
+  max-width: 280px;
   padding: 6px 10px;
   background: rgba($chat-primary, 0.06);
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-sm);
   border: 1px solid #cbe1ff;
+}
+
+.chat-input-file-tag {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 4px;
+  color: var(--color-text-regular);
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .chat-message-file-name {

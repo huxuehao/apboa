@@ -207,6 +207,9 @@ watch(() => props.modelValue, () => {
           <span v-if="item.uploading" class="chat-input-file-loading">
             <LoadingOutlined spin />
           </span>
+          <span class="chat-input-file-tag">
+            {{ (item.extension ?? getExtension(item.name)).toUpperCase() || 'FILE' }}
+          </span>
           <span class="chat-input-file-name" :title="item.name">{{ item.name }}</span>
           <span class="chat-input-file-size">{{ item.size }}</span>
           <button
@@ -336,7 +339,7 @@ watch(() => props.modelValue, () => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  max-width: 220px;
+  max-width: 280px;
   padding: 6px 10px;
   background: rgba($chat-primary, 0.06);
   // border: 1px solid rgba($chat-primary, 0.15);
@@ -356,6 +359,17 @@ watch(() => props.modelValue, () => {
   align-items: center;
   color: $chat-primary;
   font-size: 14px;
+}
+
+.chat-input-file-tag {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 4px;
+  color: var(--color-text-regular);
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .chat-input-file-name {
