@@ -3,6 +3,7 @@ package com.hxh.apboa.common.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hxh.apboa.common.config.mybatis.JsonNodeTypeHandler;
+import com.hxh.apboa.common.util.ExtendConfigHelper;
 import com.hxh.apboa.common.wrapper.ModelConfigWrapper;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
@@ -88,6 +89,12 @@ public class ModelConfig extends BaseEntity {
      */
     private Long seed;
 
+    /**
+     * 扩展配置
+     */
+    @TableField(typeHandler = JsonNodeTypeHandler.class)
+    private JsonNode extendConfig;
+
     public void fillModelConfigWrapper(ModelConfigWrapper configWrapper) {
         configWrapper.setModelCode(this.modelId);
         configWrapper.setStreaming(configWrapper.getStreaming() == null ? this.streaming: configWrapper.getStreaming());
@@ -99,5 +106,6 @@ public class ModelConfig extends BaseEntity {
         configWrapper.setTopK(configWrapper.getTopK() == null ? this.topK: configWrapper.getTopK());
         configWrapper.setRepeatPenalty(configWrapper.getRepeatPenalty() == null ? this.repeatPenalty: configWrapper.getRepeatPenalty());
         configWrapper.setSeed(configWrapper.getSeed() == null ? this.seed: configWrapper.getSeed());
+        ExtendConfigHelper.fillIfAbsent(configWrapper, this.extendConfig);
     }
 }

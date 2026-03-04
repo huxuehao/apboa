@@ -4,6 +4,8 @@ import com.hxh.apboa.common.enums.ModelProviderType;
 import com.hxh.apboa.common.enums.ToolChoiceStrategy;
 import lombok.*;
 
+import java.util.Map;
+
 /**
  * 描述：模型配置包装类
  *
@@ -93,6 +95,25 @@ public class ModelConfigWrapper {
      */
     private String specificToolName;
 
+    /**
+     * 请求头
+     */
+    private Map<String, String> headers;
+    /**
+     * 请求参数
+     */
+    private Map<String, String> queryParams;
+    /**
+     * body参数
+     */
+    private Map<String, Object> bodyParams;
+
+    /**
+     * 固定系统提示词
+     * 确保 system 消息始终在消息列表的最前面，以兼容 SGLang 等严格部署环境
+     */
+    private Boolean fixedSystemMessage;
+
     @Override
     public String toString() {
         return "ModelConfigWrapper{" +
@@ -112,6 +133,10 @@ public class ModelConfigWrapper {
                 ", multi=" + multi +
                 ", toolChoiceStrategy=" + toolChoiceStrategy +
                 ", specificToolName='" + specificToolName + '\'' +
+                ", headers=" + headers +
+                ", queryParams=" + queryParams +
+                ", bodyParams=" + bodyParams +
+                ", fixedSystemMessage=" + fixedSystemMessage +
                 '}';
     }
 }

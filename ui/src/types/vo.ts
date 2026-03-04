@@ -163,6 +163,7 @@ export interface ModelConfigVO {
   topK: number
   repeatPenalty: number
   seed: string
+  extendConfig: Record<string, any> | null
   enabled: boolean
   createdAt: string
   updatedAt: string

@@ -1,5 +1,6 @@
 package com.hxh.apboa.core.model;
 
+import com.hxh.apboa.common.util.FuncUtils;
 import com.hxh.apboa.common.wrapper.ModelConfigWrapper;
 import io.agentscope.core.model.GenerateOptions;
 import io.agentscope.core.model.ToolChoice;
@@ -38,6 +39,18 @@ public class GenerateOptionsHelper {
 
         if (config.getThinking()) {
             builder.thinkingBudget(THINKING_BUDGET);
+        }
+
+        if (!FuncUtils.isEmpty(config.getHeaders())) {
+            builder.additionalHeaders(config.getHeaders());
+        }
+
+        if (!FuncUtils.isEmpty(config.getQueryParams())) {
+            builder.additionalQueryParams(config.getQueryParams());
+        }
+
+        if (!FuncUtils.isEmpty(config.getBodyParams())) {
+            builder.additionalBodyParams(config.getBodyParams());
         }
 
         return builder.build();

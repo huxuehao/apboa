@@ -20,6 +20,7 @@ const props = defineProps<{
   visible: boolean
   providerId: string
   providerName: string
+  providerType?: string
 }>()
 
 /**
@@ -344,6 +345,7 @@ async function handleEnable(id: string) {
     <ModelConfigForm
       v-model:visible="formVisible"
       :provider-id="providerId"
+      :provider-type="providerType"
       :data="currentData"
       @success="handleFormSuccess"
     />
