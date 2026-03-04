@@ -28,6 +28,7 @@ const loadMoreObserver = ref<IntersectionObserver>()
 const configModalVisible = ref<boolean>(false)
 const currentProviderId = ref<string>('')
 const currentProviderName = ref<string>('')
+const currentProviderType = ref<string>('')
 
 /**
  * 供应商类型选项
@@ -113,9 +114,10 @@ async function handleEdit(id: string) {
 /**
  * 处理模型配置
  */
-function handleConfigModels(id: string, name: string) {
+function handleConfigModels(id: string, name: string, type?: string) {
   currentProviderId.value = id
   currentProviderName.value = name
+  currentProviderType.value = type || ''
   configModalVisible.value = true
 }
 
@@ -291,6 +293,7 @@ onUnmounted(() => {
       v-model:visible="configModalVisible"
       :provider-id="currentProviderId"
       :provider-name="currentProviderName"
+      :provider-type="currentProviderType"
     />
   </div>
 </template>

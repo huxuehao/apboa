@@ -2,6 +2,8 @@ package com.hxh.apboa.core.model.impl;
 
 import com.hxh.apboa.common.enums.ModelProviderType;
 import com.hxh.apboa.common.wrapper.ModelConfigWrapper;
+import com.hxh.apboa.core.formatter.FixedSysMsgOpenAIChatFormatter;
+import com.hxh.apboa.core.formatter.FixedSysMsgOpenAIMultiAgentFormatter;
 import com.hxh.apboa.core.model.IChatModel;
 import com.hxh.apboa.core.model.GenerateOptionsHelper;
 import com.hxh.apboa.core.model.HttpTransportHelper;
@@ -36,9 +38,18 @@ public class DefaultOpenAIModelI implements IChatModel {
         }
 
         if (config.isMulti()) {
-            builder.formatter(new OpenAIMultiAgentFormatter());
+            if (config.getFixedSystemMessage() != null && config.getFixedSystemMessage()) {
+                builder.formatter(new FixedSysMsgOpenAIMultiAgentFormatter());
+            } else {
+                builder.formatter(new OpenAIMultiAgentFormatter());
+            }
+
         } else {
-            builder.formatter(new OpenAIChatFormatter());
+            if (config.getFixedSystemMessage() != null && config.getFixedSystemMessage()) {
+                builder.formatter(new FixedSysMsgOpenAIChatFormatter());
+            } else {
+                builder.formatter(new OpenAIChatFormatter());
+            }
         }
 
         return builder.build();

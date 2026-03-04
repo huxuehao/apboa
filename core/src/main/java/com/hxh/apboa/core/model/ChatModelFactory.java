@@ -2,7 +2,7 @@ package com.hxh.apboa.core.model;
 
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.enums.ModelProviderType;
-import com.hxh.apboa.common.util.JsonUtils;
+import com.hxh.apboa.common.util.ExtendConfigHelper;
 import com.hxh.apboa.common.wrapper.ModelConfigWrapper;
 import com.hxh.apboa.common.wrapper.ModelWrapper;
 import com.hxh.apboa.model.service.ModelConfigService;
@@ -60,13 +60,32 @@ public class ChatModelFactory {
         // 获取agent中配置的参数
         JsonNode modelParamsOverride = agentDefinition.getModelParamsOverride();
         if (modelParamsOverride != null && !modelParamsOverride.isEmpty()) {
-            configWrapper.setTemperature(modelParamsOverride.get("temperature").asDouble());
-            configWrapper.setTopP(modelParamsOverride.get("topP").asDouble());
-            configWrapper.setTopK(modelParamsOverride.get("topK").asInt());
-            configWrapper.setMaxTokens(modelParamsOverride.get("maxTokens").asInt());
-            configWrapper.setRepeatPenalty(modelParamsOverride.get("repeatPenalty").asDouble());
-            configWrapper.setStreaming(modelParamsOverride.get("streaming").asBoolean());
-            configWrapper.setSeed(modelParamsOverride.get("seed").asLong());
+            if (modelParamsOverride.has("temperature")) {
+                configWrapper.setTemperature(modelParamsOverride.get("temperature").asDouble());
+            }
+            if (modelParamsOverride.has("topP")) {
+                configWrapper.setTopP(modelParamsOverride.get("topP").asDouble());
+            }
+            if (modelParamsOverride.has("topK")) {
+                configWrapper.setTopK(modelParamsOverride.get("topK").asInt());
+            }
+            if (modelParamsOverride.has("maxTokens")) {
+                configWrapper.setMaxTokens(modelParamsOverride.get("maxTokens").asInt());
+            }
+            if (modelParamsOverride.has("repeatPenalty")) {
+                configWrapper.setRepeatPenalty(modelParamsOverride.get("repeatPenalty").asDouble());
+            }
+            if (modelParamsOverride.has("streaming")) {
+                configWrapper.setStreaming(modelParamsOverride.get("streaming").asBoolean());
+            }
+            if (modelParamsOverride.has("seed")) {
+                configWrapper.setSeed(modelParamsOverride.get("seed").asLong());
+            }
+            // 解析 extendConfig 填充 headers、queryParams、bodyParams（agent 级覆盖优先）
+            JsonNode extendConfig = modelParamsOverride.get("extendConfig");
+            if (extendConfig != null && !extendConfig.isNull() && extendConfig.isObject()) {
+                ExtendConfigHelper.fillOverride(configWrapper, extendConfig);
+            }
         }
 
         ModelWrapper config = modelConfigService.getModelWrapperById(agentDefinition.getModelConfigId());

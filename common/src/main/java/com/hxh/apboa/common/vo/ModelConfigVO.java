@@ -31,6 +31,7 @@ public class ModelConfigVO implements SerializableEnable {
     private Integer topK;
     private Double repeatPenalty;
     private Long seed;
+    private JsonNode extendConfig;
     private Boolean enabled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -188,6 +188,7 @@ export interface ModelConfig extends BaseEntity {
   topK: number
   repeatPenalty: number
   seed: string
+  extendConfig: Record<string, any> | null
 }
 
 /**

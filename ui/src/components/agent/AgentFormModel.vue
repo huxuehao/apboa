@@ -7,6 +7,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { RoutePaths } from '@/router/constants.ts'
 import SmartCodeEditor from '@/components/editor/SmartCodeEditor.vue'
+import ExtendConfigEditor, { type ExtendConfigData } from '@/components/model/ExtendConfigEditor.vue'
 import * as modelApi from '@/api/model'
 import * as promptApi from '@/api/prompt'
 import type { ModelProviderVO, ModelConfigVO, SystemPromptTemplateVO } from '@/types'
@@ -171,6 +172,11 @@ async function loadModelParams(modelId: string) {
   const response = await modelApi.configDetail(modelId)
   const model = response.data.data
 
+  const ec = model.extendConfig as ExtendConfigData | null | undefined
+  const extendConfig = ec && typeof ec === 'object'
+    ? { headers: ec.headers || {}, queryParams: ec.queryParams || {}, bodyParams: ec.bodyParams || {}, fixedSystemMessage: ec.fixedSystemMessage ?? false }
+    : null
+
   modelParamsForm.value = {
     streaming: model.streaming,
     temperature: model.temperature,
@@ -178,7 +184,8 @@ async function loadModelParams(modelId: string) {
     topK: model.topK,
     maxTokens: model.maxTokens,
     repeatPenalty: model.repeatPenalty,
-    seed: model.seed
+    seed: model.seed,
+    extendConfig
   }
 
   formData.value.modelParamsOverride = { ...modelParamsForm.value }
@@ -218,6 +225,27 @@ function handleFollowTemplateToggle(checked: boolean) {
     handlePromptChange(formData.value.systemPromptTemplateId)
   }
 }
+
+/**
+ * 是否显示固定系统消息配置（仅 OpenAI 供应商）
+ */
+const showFixedSystemMessage = computed(() => {
+  if (!formData.value.modelConfigId) return false
+  const model = allModels.value.find(m => String(m.id) === String(formData.value.modelConfigId))
+  if (!model) return false
+  const provider = modelProviders.value.find(p => String(p.id) === String(model.providerId))
+  return provider?.type === 'OPEN_AI'
+})
+
+/**
+ * 扩展配置（用于 v-model 绑定）
+ */
+const extendConfigForm = computed({
+  get: () => (modelParamsForm.value.extendConfig as ExtendConfigData) || null,
+  set: (v: ExtendConfigData | null) => {
+    modelParamsForm.value = { ...modelParamsForm.value, extendConfig: v }
+  }
+})
 
 /**
  * 更新模型参数
@@ -260,9 +288,16 @@ onMounted(() => {
     }
   }
 
-  if (formData.value.modelParamsOverride) {
+  if (formData.value.modelParamsOverride && Object.keys(formData.value.modelParamsOverride).length > 0) {
     showModelParamsOverride.value = true
-    modelParamsForm.value = { ...formData.value.modelParamsOverride }
+    const override = formData.value.modelParamsOverride
+    const ec = override.extendConfig as ExtendConfigData | null | undefined
+    modelParamsForm.value = {
+      ...override,
+      extendConfig: ec && typeof ec === 'object'
+        ? { headers: ec.headers || {}, queryParams: ec.queryParams || {}, bodyParams: ec.bodyParams || {}, fixedSystemMessage: ec.fixedSystemMessage ?? false }
+        : null
+    }
   }
 })
 
@@ -391,6 +426,15 @@ defineExpose({
             </AFormItem>
           </ACol>
         </ARow>
+        <div class="extend-config-wrapper">
+          <AFormItem label="扩展配置">
+            <ExtendConfigEditor
+              v-model="extendConfigForm"
+              compact
+              :show-fixed-system-message="showFixedSystemMessage"
+            />
+          </AFormItem>
+        </div>
       </div>
 
       <AFormItem label="系统提示词模板" name="systemPromptTemplateId" required>
@@ -497,5 +541,11 @@ defineExpose({
   background-color: var(--color-bg-light);
   border-radius: var(--border-radius-md);
   margin-bottom: var(--spacing-md);
+
+  .extend-config-wrapper {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border-light);
+  }
 }
 </style>

@@ -10,6 +10,7 @@ import { EyeOutlined } from '@ant-design/icons-vue'
 import type { ModelConfigVO, ModelConfig, ModelProviderVO } from '@/types'
 import { ModelType, ModelProviderType } from '@/types'
 import * as modelApi from '@/api/model'
+import ExtendConfigEditor, { type ExtendConfigData } from './ExtendConfigEditor.vue'
 
 /**
  * Props定义
@@ -17,6 +18,7 @@ import * as modelApi from '@/api/model'
 const props = defineProps<{
   visible: boolean
   providerId: string
+  providerType?: string
   data?: ModelConfigVO
 }>()
 
@@ -46,6 +48,7 @@ const formData = ref<{
   topK: number
   repeatPenalty: number
   seed: string
+  extendConfig: ExtendConfigData | null
 }>({
   name: '',
   modelId: '',
@@ -59,7 +62,8 @@ const formData = ref<{
   topP: 0.9,
   topK: 50,
   repeatPenalty: 1.0,
-  seed: ''
+  seed: '',
+  extendConfig: null
 })
 
 const isEdit = computed(() => !!props.data?.id)
@@ -79,6 +83,7 @@ watch(
   (newVal) => {
     if (newVal) {
       if (props.data) {
+        const ec = props.data.extendConfig as ExtendConfigData | null
         formData.value = {
           used: props.data.used,
           name: props.data.name,
@@ -93,7 +98,8 @@ watch(
           topP: props.data.topP,
           topK: props.data.topK,
           repeatPenalty: props.data.repeatPenalty,
-          seed: props.data.seed || ''
+          seed: props.data.seed || '',
+          extendConfig: ec && typeof ec === 'object' ? { headers: ec.headers || {}, queryParams: ec.queryParams || {}, bodyParams: ec.bodyParams || {}, fixedSystemMessage: ec.fixedSystemMessage ?? false } : null
         }
       } else {
         resetForm()
@@ -158,7 +164,8 @@ function resetForm() {
     topP: 0.9,
     topK: 50,
     repeatPenalty: 1.0,
-    seed: ''
+    seed: '',
+    extendConfig: null
   }
   formRef.value?.resetFields()
 }
@@ -185,7 +192,8 @@ async function handleSubmit() {
       topP: formData.value.topP,
       topK: formData.value.topK,
       repeatPenalty: formData.value.repeatPenalty,
-      seed: formData.value.seed
+      seed: formData.value.seed,
+      extendConfig: formData.value.extendConfig || undefined
     } as ModelConfig
 
     if (isEdit.value && props.data) {
@@ -447,6 +455,16 @@ async function handleViewProvider() {
             v-model:value="formData.seed"
             style="width: 100%"
             placeholder="请输入随机种子，留空表示随机" />
+        </AFormItem>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">扩展配置</div>
+        <AFormItem label="">
+          <ExtendConfigEditor
+            v-model="formData.extendConfig"
+            :show-fixed-system-message="props.providerType === 'OPEN_AI'"
+          />
         </AFormItem>
       </div>
     </AForm>
