@@ -63,7 +63,7 @@ public final class ExtendConfigHelper {
 
     public static Map<String, String> parseStringMap(JsonNode node) {
         if (node == null || !node.isObject()) {
-            return null;
+            return Map.of();
         }
         Map<String, String> map = new HashMap<>();
         Iterator<String> names = node.fieldNames();
@@ -74,7 +74,7 @@ public final class ExtendConfigHelper {
                 map.put(key, valueNode.asText());
             }
         }
-        return map.isEmpty() ? null : map;
+        return map.isEmpty() ? Map.of() : map;
     }
 
     public static boolean parseBoolean(JsonNode node) {
@@ -87,7 +87,7 @@ public final class ExtendConfigHelper {
 
     public static Map<String, Object> parseObjectMap(JsonNode node) {
         if (node == null || !node.isObject()) {
-            return null;
+            return Map.of();
         }
         Map<String, Object> map = new HashMap<>();
         Iterator<String> names = node.fieldNames();
@@ -95,10 +95,10 @@ public final class ExtendConfigHelper {
             String key = names.next();
             JsonNode valueNode = node.get(key);
             if (valueNode != null && !valueNode.isNull()) {
-                map.put(key, jsonNodeToObject(JsonUtils.parse(valueNode.asText())));
+                map.put(key, jsonNodeToObject(valueNode));
             }
         }
-        return map.isEmpty() ? null : map;
+        return map.isEmpty() ? Map.of() : map;
     }
 
     private static Object jsonNodeToObject(JsonNode node) {
@@ -106,7 +106,13 @@ public final class ExtendConfigHelper {
             return null;
         }
         if (node.isTextual()) {
-            return node.asText();
+            try {
+                // 尝试将字符串转对象
+                return JsonUtils.parse(node.asText());
+            } catch (Exception e) {
+                return node.asText();
+            }
+
         }
         if (node.isNumber()) {
             if (node.isInt()) {
