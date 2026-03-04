@@ -14,6 +14,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AAvatar: typeof import('ant-design-vue/es')['Avatar']
     AButton: typeof import('ant-design-vue/es')['Button']
+    ACard: typeof import('ant-design-vue/es')['Card']
     ACheckbox: typeof import('ant-design-vue/es')['Checkbox']
     ACheckboxGroup: typeof import('ant-design-vue/es')['CheckboxGroup']
     ACol: typeof import('ant-design-vue/es')['Col']
@@ -116,6 +117,7 @@ declare module 'vue' {
 declare global {
   const AAvatar: typeof import('ant-design-vue/es')['Avatar']
   const AButton: typeof import('ant-design-vue/es')['Button']
+  const ACard: typeof import('ant-design-vue/es')['Card']
   const ACheckbox: typeof import('ant-design-vue/es')['Checkbox']
   const ACheckboxGroup: typeof import('ant-design-vue/es')['CheckboxGroup']
   const ACol: typeof import('ant-design-vue/es')['Col']
