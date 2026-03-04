@@ -18,10 +18,10 @@ public class AgentSubAgentServiceImpl extends ServiceImpl<AgentSubAgentMapper, A
     @Override
     public List<Long> getSubAgentIds(Long agentDefinitionId) {
         return lambdaQuery()
-                .eq(AgentSubAgent::getSubAgentId, agentDefinitionId)
+                .eq(AgentSubAgent::getParentAgentId, agentDefinitionId)
                 .list()
                 .stream()
-                .map(AgentSubAgent::getParentAgentId).toList();
+                .map(AgentSubAgent::getSubAgentId).toList();
     }
 
     @Override
