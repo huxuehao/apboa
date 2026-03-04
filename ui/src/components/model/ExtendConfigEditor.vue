@@ -43,9 +43,9 @@ const emit = defineEmits<{
 }>()
 
 /** 内部编辑结构 - 使用 ref 以便可编辑 */
-const headersList = ref<KeyValueItem[]>([{ key: '', value: '' }])
-const queryParamsList = ref<KeyValueItem[]>([{ key: '', value: '' }])
-const bodyParamsList = ref<BodyParamItem[]>([{ key: '', value: '', valueType: 'string' }])
+const headersList = ref<KeyValueItem[]>([])
+const queryParamsList = ref<KeyValueItem[]>([])
+const bodyParamsList = ref<BodyParamItem[]>([])
 const fixedSystemMessage = ref(false)
 
 watch(
@@ -72,20 +72,20 @@ function syncBodyParams() {
 }
 
 function recordToKeyValueList(record: Record<string, string> | undefined): KeyValueItem[] {
-  if (!record || Object.keys(record).length === 0) return [{ key: '', value: '' }]
+  if (!record || Object.keys(record).length === 0) return []
   return Object.entries(record).map(([key, value]) => ({ key, value }))
 }
 
 function keyValueListToRecord(list: KeyValueItem[]): Record<string, string> {
   const record: Record<string, string> = {}
   list.forEach(({ key, value }) => {
-    if (key?.trim()) record[key.trim()] = value ?? ''
+    record[key.trim()] = value ?? ''
   })
   return Object.keys(record).length > 0 ? record : {}
 }
 
 function recordToBodyParamList(record: Record<string, unknown> | undefined): BodyParamItem[] {
-  if (!record || Object.keys(record).length === 0) return [{ key: '', value: '', valueType: 'string' }]
+  if (!record || Object.keys(record).length === 0) return []
   return Object.entries(record).map(([key, value]) => ({
     key,
     value: String(value),
@@ -96,7 +96,6 @@ function recordToBodyParamList(record: Record<string, unknown> | undefined): Bod
 function bodyParamListToRecord(list: BodyParamItem[]): Record<string, unknown> {
   const record: Record<string, unknown> = {}
   list.forEach(({ key, value, valueType }) => {
-    if (!key?.trim()) return
     const v = valueType === 'number' ? Number(value) : valueType === 'boolean' ? value === 'true' : value
     record[key.trim()] = v
   })
@@ -128,20 +127,19 @@ function addRow(field: 'headers' | 'queryParams' | 'bodyParams') {
     queryParamsList.value.push({ key: '', value: '' })
     syncQueryParams()
   }
+  // 不在此处 sync：新增空行会被 keyValueListToRecord 过滤，emit 后 watch 会覆盖列表
+  // 用户填写后 blur 时会自动 sync
 }
 
 function removeRow(field: 'headers' | 'queryParams' | 'bodyParams', index: number) {
   if (field === 'bodyParams') {
     bodyParamsList.value.splice(index, 1)
-    if (bodyParamsList.value.length === 0) bodyParamsList.value.push({ key: '', value: '', valueType: 'string' })
     syncBodyParams()
   } else if (field === 'headers') {
     headersList.value.splice(index, 1)
-    if (headersList.value.length === 0) headersList.value.push({ key: '', value: '' })
     syncHeaders()
   } else {
     queryParamsList.value.splice(index, 1)
-    if (queryParamsList.value.length === 0) queryParamsList.value.push({ key: '', value: '' })
     syncQueryParams()
   }
 }
@@ -163,8 +161,8 @@ const bodyValueTypeOptions = [
         <span class="text-placeholder text-xs">确保 system 消息始终在消息列表的最前面，以兼容 SGLang 等严格部署环境</span>
       </div>
     </div>
-    <ACollapse :bordered="false" :default-active-key="['headers', 'queryParams', 'bodyParams']">
-      <ACollapsePanel key="headers" header="请求头 (Headers)">
+    <ACollapse :bordered="false" :default-active-key="[]">
+      <ACollapsePanel key="headers" :header="`请求头 (${headersList.length})`">
         <div class="param-list">
           <div
             v-for="(item, index) in headersList"
@@ -173,17 +171,17 @@ const bodyValueTypeOptions = [
           >
             <AInput v-model:value="item.key" placeholder="Header 名称" class="param-key" @blur="syncHeaders" />
             <AInput v-model:value="item.value" placeholder="Header 值" class="param-value" @blur="syncHeaders" />
-            <AButton type="text" danger size="small" class="param-remove" @click="removeRow('headers', index)">
+            <AButton type="text" danger size="small" html-type="button" class="param-remove" @click="removeRow('headers', index)">
               <MinusCircleOutlined />
             </AButton>
           </div>
-          <AButton type="dashed" block size="small" @click="addRow('headers')">
+          <AButton type="dashed" block size="small" html-type="button" @click="addRow('headers')">
             <PlusOutlined /> 添加请求头
           </AButton>
         </div>
       </ACollapsePanel>
 
-      <ACollapsePanel key="queryParams" header="查询参数 (Query Params)">
+      <ACollapsePanel key="queryParams" :header="`查询参数 (${queryParamsList.length})`">
         <div class="param-list">
           <div
             v-for="(item, index) in queryParamsList"
@@ -192,17 +190,17 @@ const bodyValueTypeOptions = [
           >
             <AInput v-model:value="item.key" placeholder="参数名" class="param-key" @blur="syncQueryParams" />
             <AInput v-model:value="item.value" placeholder="参数值" class="param-value" @blur="syncQueryParams" />
-            <AButton type="text" danger size="small" class="param-remove" @click="removeRow('queryParams', index)">
+            <AButton type="text" danger size="small" html-type="button" class="param-remove" @click="removeRow('queryParams', index)">
               <MinusCircleOutlined />
             </AButton>
           </div>
-          <AButton type="dashed" block size="small" @click="addRow('queryParams')">
+          <AButton type="dashed" block size="small" html-type="button" @click="addRow('queryParams')">
             <PlusOutlined /> 添加查询参数
           </AButton>
         </div>
       </ACollapsePanel>
 
-      <ACollapsePanel key="bodyParams" header="请求体参数 (Body Params)">
+      <ACollapsePanel key="bodyParams" :header="`请求体参数 (${bodyParamsList.length})`">
         <div class="param-list">
           <div
             v-for="(item, index) in bodyParamsList"
@@ -217,11 +215,11 @@ const bodyValueTypeOptions = [
               class="param-value"
               @blur="syncBodyParams"
             />
-            <AButton type="text" danger size="small" class="param-remove" @click="removeRow('bodyParams', index)">
+            <AButton type="text" danger size="small" html-type="button" class="param-remove" @click="removeRow('bodyParams', index)">
               <MinusCircleOutlined />
             </AButton>
           </div>
-          <AButton type="dashed" block size="small" @click="addRow('bodyParams')">
+          <AButton type="dashed" block size="small" html-type="button" @click="addRow('bodyParams')">
             <PlusOutlined /> 添加 Body 参数
           </AButton>
         </div>
