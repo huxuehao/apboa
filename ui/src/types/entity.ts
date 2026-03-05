@@ -45,6 +45,7 @@ export interface AccountRole {
  * 智能体定义
  */
 export interface AgentDefinition extends BaseEntity {
+  agentType: 'CUSTOM' | 'A2A'
   name: string
   agentCode: string
   description: string

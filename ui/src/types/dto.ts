@@ -22,6 +22,7 @@ export interface AccountDTO extends PageParams {
  */
 export interface AgentDefinitionDTO extends PageParams {
   name?: string
+  agentType?: 'CUSTOM' | 'A2A'
   agentCode?: string
   enabled?: boolean
   tag?: string

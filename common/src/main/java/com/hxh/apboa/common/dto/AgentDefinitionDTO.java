@@ -1,5 +1,6 @@
 package com.hxh.apboa.common.dto;
 
+import com.hxh.apboa.common.enums.AgentType;
 import com.hxh.apboa.common.mp.annotation.QueryDefine;
 import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.mp.support.QueryCondition;
@@ -17,6 +18,9 @@ public class AgentDefinitionDTO extends PageParams {
 
     @QueryDefine(value = "智能体名称", condition = QueryCondition.LIKE)
     private String name;
+
+    @QueryDefine(value = "智能体类型", condition = QueryCondition.EQ)
+    private AgentType agentType;
 
     @QueryDefine(value = "智能体代码", condition = QueryCondition.EQ)
     private String agentCode;

@@ -1,6 +1,7 @@
 package com.hxh.apboa.common.vo;
 
 import com.hxh.apboa.common.config.SerializableEnable;
+import com.hxh.apboa.common.enums.AgentType;
 import com.hxh.apboa.common.enums.ToolChoiceStrategy;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.agentscope.core.model.StructuredOutputReminder;
@@ -19,6 +20,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class AgentDefinitionVO implements SerializableEnable {
     private Long id;
+    private AgentType agentType;
     private String name;
     private String agentCode;
     private String description;

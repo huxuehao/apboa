@@ -2,7 +2,7 @@ package com.hxh.apboa.core.agui;
 
 import com.hxh.apboa.agent.service.AgentDefinitionService;
 import com.hxh.apboa.common.entity.AgentDefinition;
-import com.hxh.apboa.core.agent.ReActAgentFactory;
+import com.hxh.apboa.core.agent.IAgentFactory;
 import io.agentscope.core.agui.registry.AguiAgentRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class AguiAgentConfiguration {
     private final AgentDefinitionService agentDefinitionService;
-    private final ReActAgentFactory reActAgentFactory;
+    private final IAgentFactory iAgentFactory;
 
     private AguiAgentRegistry registry;
 
@@ -33,7 +33,7 @@ public class AguiAgentConfiguration {
                     .forEach(agentDefinition ->
                         registry.registerFactory(
                                 agentDefinition.getAgentCode(),
-                                () -> reActAgentFactory.getReActAgent(agentDefinition)));
+                                () -> iAgentFactory.getAgent(agentDefinition)));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -54,7 +54,7 @@ public class AguiAgentConfiguration {
             unregisterAgent(agentDefinition);
             registry.registerFactory(
                     agentDefinition.getAgentCode(),
-                    () -> reActAgentFactory.getReActAgent(agentDefinition));
+                    () -> iAgentFactory.getAgent(agentDefinition));
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);

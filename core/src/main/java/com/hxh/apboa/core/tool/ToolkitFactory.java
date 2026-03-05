@@ -102,10 +102,19 @@ public class ToolkitFactory {
 
             try {
                 // Agent as Tool
-                toolkit.registration()
-                        .subAgent(() -> agentHelper.getReActAgent(definition),
-                                createSubAgentConfig(definition))
-                        .apply();
+                switch (definition.getAgentType()) {
+                    case CUSTOM:
+                        toolkit.registration()
+                                .subAgent(() -> agentHelper.getReActAgent(definition),
+                                        createSubAgentConfig(definition))
+                                .apply();
+                        break;
+                    case A2A:
+                        // TODO: A2A
+                        break;
+                    default:
+                        break;
+                }
                 log.debug("Register sub agent: {}", subAgentId);
             } catch (Exception e) {
                 log.error("Registration of sub agent failed: {}", subAgentId, e);

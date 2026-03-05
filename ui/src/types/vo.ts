@@ -40,6 +40,7 @@ export interface AccountVO {
  */
 export interface AgentDefinitionVO {
   id: string
+  agentType: 'CUSTOM' | 'A2A'
   name: string
   agentCode: string
   description: string
