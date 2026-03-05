@@ -11,10 +11,12 @@ import { SearchOutlined } from '@ant-design/icons-vue'
 import { useAgentStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as agentApi from '@/api/agent'
-import type { AgentDefinitionVO } from '@/types'
+import * as agentA2aApi from '@/api/agentA2a'
+import type { AgentDefinitionVO, WellKnownAgentConfig, NacosAgentConfig } from '@/types'
 import AgentCard from '@/components/agent/AgentCard.vue'
 import CreateCard from '@/components/agent/CreateCard.vue'
 import AgentForm from '@/components/agent/AgentForm.vue'
+import AgentA2aForm from '@/components/agent/AgentA2aForm.vue'
 
 const store = useAgentStore()
 const { list, tags, selectedAgentType, selectedTag, keyword, loading, hasMore } = storeToRefs(store)
@@ -23,13 +25,18 @@ const formVisible = ref<boolean>(false)
 const currentData = ref<AgentDefinitionVO | undefined>(undefined)
 const scrollContainer = ref<HTMLElement>()
 const loadMoreObserver = ref<IntersectionObserver>()
+/** A2A 智能体表单 */
+const a2aFormVisible = ref<boolean>(false)
+/** A2A 类型（新建时传入） */
+const currentA2aType = ref<'WELLKNOWN' | 'NACOS' | undefined>(undefined)
 
 /**
  * 智能体类型选项
  */
 const agentTypeOptions = [
-  { label: '智能体', value: 'AGENT' },
-  { label: '智能体协同', value: 'MULTI' }
+  { label: '全部', value: null },
+  { label: '自定义', value: 'CUSTOM' },
+  { label: 'A2A', value: 'A2A' }
 ]
 
 /**
@@ -47,19 +54,99 @@ const tagOptions = computed(() => {
 })
 
 /**
- * 处理新增
+ * 新建自定义智能体
  */
-function handleCreate() {
+function handleCreateCustom() {
   currentData.value = undefined
   formVisible.value = true
 }
 
 /**
- * 处理查看
+ * 新建 A2A 智能体
+ *
+ * @param type A2A 协议类型
+ */
+function handleCreateA2a(type: 'WELLKNOWN' | 'NACOS') {
+  currentData.value = undefined
+  currentA2aType.value = type
+  a2aFormVisible.value = true
+}
+
+/**
+ * 处理查看 — 根据类型分居展示内容
+ *
+ * @param id 智能体 ID
  */
 async function handleView(id: string) {
   const response = await agentApi.detail(id)
   const data = response.data.data
+
+  if (data.agentType === 'A2A') {
+    try {
+      const a2aRes = await agentA2aApi.getA2aConfig(id)
+      const a2aRecord = a2aRes.data.data
+      const type = a2aRecord?.a2aType as string
+      const config = a2aRecord?.a2aConfig
+
+      let content
+      if (type === 'WELLKNOWN' && config) {
+        const c = config as WellKnownAgentConfig
+        const headerRows = (c.authHeaders || []).map((item) =>
+          h('p', { style: { paddingLeft: '16px' } }, [
+            `${item.key}: `,
+            item.evn
+              ? h('span', { style: { color: '#888' } }, `环境变量 ${item.key}`)
+              : item.value
+          ])
+        )
+        content = h('div', { style: { maxHeight: '800px', overflowY: 'auto' } }, [
+          h('p', {}, [h('strong', '名称: '), data.name]),
+          h('p', {}, [h('strong', '智能体编号: '), data.agentCode]),
+          h('p', {}, [h('strong', '描述: '), data.description]),
+          ...(data.tag ? [h('p', {}, [h('strong', '标签: '), data.tag])] : []),
+          h('p', {}, [h('strong', 'A2A 类型: '), 'WellKnown']),
+          h('p', {}, [h('strong', 'Base URL: '), c.baseUrl]),
+          h('p', {}, [h('strong', 'Agent Card 路径: '), c.relativeCardPath]),
+          h('p', {}, [h('strong', '认证头数量: '), (c.authHeaders || []).length]),
+          ...headerRows
+        ])
+      } else if (type === 'NACOS' && config) {
+        const c = config as NacosAgentConfig
+        const propRows = (c.nacosProperties || []).map((p) =>
+          h('p', { style: { paddingLeft: '16px' } }, [
+            `${p.key}: `,
+            p.evn
+              ? h('span', { style: { color: '#888' } }, `环境变量 ${p.key}`)
+              : p.value
+          ])
+        )
+        content = h('div', { style: { maxHeight: '800px', overflowY: 'auto' } }, [
+          h('p', {}, [h('strong', '名称: '), data.name]),
+          h('p', {}, [h('strong', '智能体编号: '), data.agentCode]),
+          h('p', {}, [h('strong', '描述: '), data.description]),
+          ...(data.tag ? [h('p', {}, [h('strong', '标签: '), data.tag])] : []),
+          h('p', {}, [h('strong', 'A2A 类型: '), 'Nacos']),
+          h('p', {}, [h('strong', 'Nacos 属性数量: '), (c.nacosProperties || []).length]),
+          ...propRows
+        ])
+      } else {
+        content = h('p', {}, 'A2A 配置暂无数据')
+      }
+
+      Modal.info({
+        title: 'A2A 智能体详情',
+        closable: true,
+        icon: null,
+        footer: null,
+        style: { top: '50px' },
+        width: 700,
+        content
+      })
+    } catch (e) {
+      console.error('加载 A2A 配置失败:', e)
+    }
+    return
+  }
 
   Modal.info({
     title: '智能体详情',
@@ -92,11 +179,22 @@ async function handleView(id: string) {
 }
 
 /**
- * 处理编辑
+ * 处理编辑 — 根据类型打开对应表单
+ *
+ * @param id 智能体 ID
  */
 async function handleEdit(id: string) {
   const response = await agentApi.detail(id)
-  currentData.value = response.data.data
+  const data = response.data.data
+
+  if (data.agentType === 'A2A') {
+    currentData.value = data
+    currentA2aType.value = undefined
+    a2aFormVisible.value = true
+    return
+  }
+
+  currentData.value = data
   formVisible.value = true
 }
 
@@ -281,9 +379,14 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <section ref="scrollContainer" class="card-section" v-show="selectedAgentType === 'AGENT'">
+    <section ref="scrollContainer" class="card-section">
       <div class="card-grid">
-        <CreateCard @click="handleCreate" v-permission="['EDIT','ADMIN']" />
+        <CreateCard
+          :agent-type="selectedAgentType"
+          v-permission="['EDIT','ADMIN']"
+          @create-custom="handleCreateCustom"
+          @create-a2a="handleCreateA2a"
+        />
 
         <AgentCard
           v-for="item in list"
@@ -310,15 +413,20 @@ onUnmounted(() => {
         <AEmpty description="暂无数据" />
       </div>
     </section>
-    <section v-show="selectedAgentType === 'MULTI'">
-      <div style="text-align: center" class="text-placeholder">
-        未来将会支持通过编排智能体实现多智能体协同，同时会将 Agent As Tool 移动到该模块中
-      </div>
-    </section>
 
+    <!-- 自定义智能体表单 -->
     <AgentForm
       v-model:visible="formVisible"
       :data="currentData"
+      :tags="tags"
+      @success="handleFormSuccess"
+    />
+
+    <!-- A2A 智能体表单 -->
+    <AgentA2aForm
+      v-model:visible="a2aFormVisible"
+      :data="currentData"
+      :a2a-type="currentA2aType"
       :tags="tags"
       @success="handleFormSuccess"
     />

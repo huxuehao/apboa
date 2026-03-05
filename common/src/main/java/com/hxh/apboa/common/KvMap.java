@@ -1,9 +1,9 @@
-package com.hxh.apboa.a2a.config;
+package com.hxh.apboa.common;
 
 import lombok.Data;
 
 /**
- * 描述：NacosMap
+ * 描述：KvMap
  *
  * @author huxuehao
  **/

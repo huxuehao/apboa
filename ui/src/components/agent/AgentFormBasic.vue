@@ -165,7 +165,7 @@ defineExpose({
       <ATextarea
         v-model:value="formData.description"
         placeholder="请输入智能体描述"
-        :rows="4"
+        :rows="2"
       />
     </AFormItem>
   </AForm>

@@ -127,3 +127,11 @@ export enum RAGMode {
   GENERIC = 'GENERIC',
   AGENTIC = 'AGENTIC'
 }
+
+/**
+ * A2A协议类型
+ */
+export enum A2aType {
+  WELLKNOWN = 'WELLKNOWN',
+  NACOS = 'NACOS'
+}

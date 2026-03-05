@@ -1,5 +1,6 @@
 package com.hxh.apboa.a2a.config;
 
+import com.hxh.apboa.common.KvMap;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

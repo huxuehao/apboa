@@ -18,6 +18,7 @@ import type {
   SensitiveWordAction,
   RAGMode
 } from './enums'
+import type {AgentA2A} from "@/types/entity.ts";
 
 /**
  * 账号VO
@@ -77,6 +78,7 @@ export interface AgentDefinitionVO {
   createdBy: string
   updatedBy: string
   used: string[]
+  agentA2A: AgentA2A
 }
 
 /**

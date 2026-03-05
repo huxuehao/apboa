@@ -25,10 +25,6 @@
             <groupId>com.hxh.apboa</groupId>
             <artifactId>resource</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.hxh.apboa</groupId>
-            <artifactId>a2a</artifactId>
-        </dependency>
 
         <!--模型依赖-->
         <dependency>

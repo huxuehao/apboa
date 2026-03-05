@@ -6,6 +6,8 @@ import com.hxh.apboa.common.entity.AgentA2A;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * 描述：AgentA2aServiceImpl
  *
@@ -26,5 +28,12 @@ public class AgentA2aServiceImpl extends ServiceImpl<AgentA2aMapper, AgentA2A> i
                 .remove();
 
         return save(agentA2A);
+    }
+
+    @Override
+    public boolean deleteA2aConfig(List<Long> agentIds) {
+        return lambdaUpdate()
+                .in(AgentA2A::getAgentDefinitionId, agentIds)
+                .remove();
     }
 }

@@ -132,6 +132,9 @@ function handleMenuClick({ key }: { key: string }) {
     <div class="card-footer flex items-center justify-between">
       <div class="card-tags flex items-center gap-xs">
         <ATag color="default" class="tag">
+          {{ data.agentType }}
+        </ATag>
+        <ATag color="default" class="tag">
           {{ data.tag || '未设置标签' }}
         </ATag>
       </div>

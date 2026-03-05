@@ -13,7 +13,7 @@ import { message } from 'ant-design-vue'
 export const useAgentStore = defineStore('agent', () => {
   const list = ref<AgentDefinitionVO[]>([])
   const tags = ref<string[]>([])
-  const selectedAgentType = ref<string | null>('AGENT')
+  const selectedAgentType = ref<string | null>(null)
   const selectedTag = ref<string | null>(null)
   const keyword = ref<string>('')
   const loading = ref<boolean>(false)
@@ -47,7 +47,8 @@ export const useAgentStore = defineStore('agent', () => {
         page,
         size: pageSize.value,
         name: keyword.value || undefined,
-        tag: selectedTag.value || undefined
+        tag: selectedTag.value || undefined,
+        agentType: (selectedAgentType.value as 'CUSTOM' | 'A2A') || undefined
       }
 
       const response = await agentApi.page(query)
