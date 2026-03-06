@@ -111,16 +111,15 @@ defineExpose({ validate, getFormData })
           />
           <div class="kv-env flex items-center gap-xs">
             <span class="text-secondary" style="margin-right: 5px">ENV</span>
-            <ASwitch v-model:checked="prop.evn" :disabled="isFixed(prop.key)" />
+            <ASwitch v-model:checked="prop.evn" />
           </div>
           <AInput
-            v-if="!prop.evn"
             v-model:value="prop.value"
-            :placeholder="isFixed(prop.key) ? `${prop.key} 的值` : '属性值'"
+            :placeholder="`属性值${prop.evn ? '（环境变量）':''}`"
             class="kv-value"
           />
-          <div v-else class="kv-env-hint text-xs text-placeholder kv-value">
-            从环境变量 <strong>{{ prop.key || '(key)' }}</strong> 中读取
+          <div v-if="prop.evn" class="kv-env-hint text-xs text-placeholder">
+            从环境变量中读取
           </div>
           <AButton
             :disabled="isFixed(prop.key)"

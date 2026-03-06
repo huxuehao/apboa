@@ -78,7 +78,10 @@ function handleOptionClick(value: 'CUSTOM' | 'WELLKNOWN' | 'NACOS') {
         class="type-item cursor-pointer"
         @click="handleOptionClick(option.value)"
       >
-        <div class="type-label"><PlusOutlined /> {{ option.label }}</div>
+        <div class="type-label">
+          <PlusOutlined class="type-icon"/>&nbsp;
+          <span>{{ option.label }}</span>
+        </div>
         <div class="type-desc text-placeholder text-xs">{{ option.desc }}</div>
       </div>
     </div>
@@ -135,14 +138,13 @@ function handleOptionClick(value: 'CUSTOM' | 'WELLKNOWN' | 'NACOS') {
       width: 100%;
 
       .type-item {
-        padding: var(--spacing-xs);
+        padding: 3px 8px;
         border-radius: var(--border-radius-base);
         border: 1px solid transparent;
         transition: all var(--transition-base);
 
         &:hover {
-          background-color: var(--color-primary-light);
-          border: 1px solid var(--color-border-base);
+          background-color: #ededed;
         }
 
         .type-label {

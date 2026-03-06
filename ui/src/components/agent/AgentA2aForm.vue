@@ -12,7 +12,6 @@ import AgentA2aFormNacos from './AgentA2aFormNacos.vue'
 import type { AgentDefinitionVO, WellKnownAgentConfig, NacosAgentConfig } from '@/types'
 import { A2aType } from '@/types'
 import * as agentApi from '@/api/agent'
-import * as agentA2aApi from '@/api/agentA2a'
 
 /**
  * Props定义
@@ -121,7 +120,7 @@ function fillA2aConfig(config: WellKnownAgentConfig | NacosAgentConfig, type: 'W
     const c = config as NacosAgentConfig
     const props_list = c.nacosProperties || []
     // 确保固定行始终存在
-    const fixedKeys = ['serverAddr', 'username', 'password']
+    const fixedKeys = ['serverAddr']
     const merged = fixedKeys.map(k => {
       const found = props_list.find(p => p.key === k)
       return found || { key: k, value: '', evn: false }
@@ -152,8 +151,7 @@ watch(
       }
       // 加载 A2A 配置
       try {
-        const res = await agentA2aApi.getA2aConfig(props.data.id)
-        const a2aRecord = res.data.data
+        const a2aRecord = props.data.agentA2A
         if (a2aRecord) {
           fillA2aConfig(
             a2aRecord.a2aConfig as WellKnownAgentConfig | NacosAgentConfig,
@@ -247,8 +245,6 @@ function handleCancel() {
           :tags="tags"
         />
       </div>
-
-      <ADivider />
 
       <!-- A2A 配置 -->
       <div class="form-section">

@@ -1,6 +1,7 @@
 package com.hxh.apboa.a2a.config;
 
 import com.hxh.apboa.common.KvMap;
+import com.hxh.apboa.common.util.FuncUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,10 +28,9 @@ public class WellKnownAgentConfig {
         Map<String, String> authHeadersMap = new HashMap<>();
 
         authHeaders.forEach(kvMap -> {
-            if (kvMap.isEvn()) {
-                authHeadersMap.put(kvMap.getKey(), System.getenv(kvMap.getKey()));
-            } else {
-                authHeadersMap.put(kvMap.getKey(), kvMap.getValue());
+            String value = kvMap.isEvn() ? System.getenv(kvMap.getValue()) : kvMap.getValue();
+            if (!FuncUtils.isEmpty(value)) {
+                authHeadersMap.put(kvMap.getKey(), value);
             }
         });
 

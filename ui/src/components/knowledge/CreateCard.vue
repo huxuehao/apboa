@@ -129,14 +129,13 @@ function handleCreate(kbType?: KbType) {
       width: 100%;
 
       .type-item {
-        padding: var(--spacing-xs);
+        padding: 3px 8px;
         border-radius: var(--border-radius-base);
         border: 1px solid transparent;
         transition: all var(--transition-base);
 
         &:hover {
-          background-color: var(--color-primary-light);
-          border: 1px solid var(--color-border-base);
+          background-color: #ededed;
         }
 
         .type-label {

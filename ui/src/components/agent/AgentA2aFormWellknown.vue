@@ -126,13 +126,12 @@ defineExpose({ validate, getFormData })
             <ASwitch v-model:checked="header.evn" />
           </div>
           <AInput
-            v-if="!header.evn"
             v-model:value="header.value"
-            placeholder="Header 值"
+            :placeholder="`Header 值${header.evn ? '（环境变量）':''}`"
             class="kv-value"
           />
-          <div v-else class="kv-env-hint text-xs text-placeholder kv-value">
-            从环境变量 <strong>{{ header.key || '(key)' }}</strong> 中读取
+          <div v-if="header.evn" class="kv-env-hint text-xs text-placeholder">
+            从环境变量中读取
           </div>
           <AButton
             type="text"

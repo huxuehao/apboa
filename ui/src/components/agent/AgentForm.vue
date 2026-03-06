@@ -265,10 +265,9 @@ async function handleSubmit() {
 
     loading.value = true
 
-    console.log('formData.value.advanced.structuredOutputSchema', formData.value.advanced.structuredOutputSchema)
-
     const vo: Partial<AgentDefinitionVO> = {
       name: formData.value.basic.name,
+      agentType: 'CUSTOM',
       agentCode: formData.value.basic.agentCode,
       description: formData.value.basic.description,
       tag: formData.value.basic.tag || '',
@@ -305,10 +304,6 @@ async function handleSubmit() {
     if (isEdit.value && props.data) {
       vo.id = props.data.id
       vo.enabled = props.data.enabled
-      vo.createdAt = props.data.createdAt
-      vo.updatedAt = props.data.updatedAt
-      vo.createdBy = props.data.createdBy
-      vo.updatedBy = props.data.updatedBy
       await agentApi.update(vo as AgentDefinitionVO)
       message.success('更新成功')
     } else {

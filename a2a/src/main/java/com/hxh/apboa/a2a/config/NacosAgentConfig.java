@@ -1,6 +1,7 @@
 package com.hxh.apboa.a2a.config;
 
 import com.hxh.apboa.common.KvMap;
+import com.hxh.apboa.common.util.FuncUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,10 +25,9 @@ public class NacosAgentConfig {
         Properties properties = new Properties();
 
         nacosProperties.forEach(kvMap -> {
-            if (kvMap.isEvn()) {
-                properties.put(kvMap.getKey(), System.getenv(kvMap.getKey()));
-            } else {
-                properties.put(kvMap.getKey(), kvMap.getValue());
+            String value = kvMap.isEvn() ? System.getenv(kvMap.getValue()) : kvMap.getValue();
+            if (!FuncUtils.isEmpty(value)) {
+                properties.put(kvMap.getKey(), value);
             }
         });
 

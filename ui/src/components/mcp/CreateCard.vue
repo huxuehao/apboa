@@ -140,16 +140,13 @@ function handleCreate(protocol?: McpProtocol) {
       width: 100%;
 
       .protocol-item {
-        padding: var(--spacing-xs);
-        //background-color: var(--color-bg-light);
+        padding: 3px 8px;
         border-radius: var(--border-radius-base);
         border: 1px solid transparent;
         transition: all var(--transition-base);
 
         &:hover {
-          background-color: var(--color-primary-light);
-          border: 1px solid var(--color-border-base);
-          //transform: translateX(4px);
+          background-color: #ededed;
         }
 
         .protocol-label {

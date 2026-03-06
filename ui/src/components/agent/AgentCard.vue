@@ -126,14 +126,13 @@ function handleMenuClick({ key }: { key: string }) {
     </div>
 
     <div class="card-content line-clamp-3" :title="data.description">
-      {{ data.description }}
+      类型：<span>{{ data.agentType == 'CUSTOM'? '自定义': 'A2A' }}</span>
+      <br/>
+      描述：<span>{{ data.description }}</span>
     </div>
 
     <div class="card-footer flex items-center justify-between">
       <div class="card-tags flex items-center gap-xs">
-        <ATag color="default" class="tag">
-          {{ data.agentType }}
-        </ATag>
         <ATag color="default" class="tag">
           {{ data.tag || '未设置标签' }}
         </ATag>

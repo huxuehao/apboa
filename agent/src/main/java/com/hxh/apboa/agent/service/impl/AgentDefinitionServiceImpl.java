@@ -59,12 +59,17 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         }
 
         AgentDefinitionVO vo = BeanUtils.copy(entity, AgentDefinitionVO.class);
+
         vo.setHook(hookService.getHookIds(id));
-        vo.setTool(toolService.getToolIds(id));
-        vo.setMcp(mcpServerService.getMcpIds(id));
-        vo.setSkill(skillPackageService.getSkillPackageIds(id));
-        vo.setSubAgent(subAgentService.getSubAgentIds(id));
-        vo.setKnowledgeBase(agentKnowledgeBaseService.getKnowledgeIds(id));
+        if(entity.getAgentType() == AgentType.CUSTOM) {
+            vo.setTool(toolService.getToolIds(id));
+            vo.setMcp(mcpServerService.getMcpIds(id));
+            vo.setSkill(skillPackageService.getSkillPackageIds(id));
+            vo.setSubAgent(subAgentService.getSubAgentIds(id));
+            vo.setKnowledgeBase(agentKnowledgeBaseService.getKnowledgeIds(id));
+        } else {
+            vo.setAgentA2A(agentA2aService.getA2aConfigByAgentId(id));
+        }
 
         return vo;
     }
@@ -76,7 +81,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         save(agentDefinition);
         vo.setId(agentDefinition.getId());
 
-        saveItems(vo);
+        saveSubItems(vo);
 
         publisher.publishEvent(new AgentReRegisterEvent(vo.getId()));
         return true;
@@ -92,31 +97,25 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
             return true;
         }
 
-        saveItems(vo);
+        saveSubItems(vo);
 
         publisher.publishEvent(new AgentReRegisterEvent(vo.getId()));
         return true;
     }
 
-    private void saveItems(AgentDefinitionVO vo) {
+    private void saveSubItems(AgentDefinitionVO vo) {
+        hookService.saveAgentHook(vo.getId(), vo.getHook());
         if (vo.getAgentType() == AgentType.CUSTOM) {
-            saveSubItems(vo);
+            subAgentService.saveSubAgent(vo.getId(), vo.getSubAgent());
+            toolService.saveAgentTool(vo.getId(), vo.getTool());
+            mcpServerService.saveAgentMcpServer(vo.getId(), vo.getMcp());
+            skillPackageService.saveAgentSkillPackage(vo.getId(), vo.getSkill());
+            agentKnowledgeBaseService.saveAgentKnowledge(vo.getId(), vo.getKnowledgeBase());
         } else {
             AgentA2A agentA2A = vo.getAgentA2A();
             agentA2A.setAgentDefinitionId(vo.getId());
             agentA2aService.saveA2aConfig(agentA2A);
         }
-    }
-
-
-    private void saveSubItems(AgentDefinitionVO vo) {
-        subAgentService.saveSubAgent(vo.getId(), vo.getSubAgent());
-        hookService.saveAgentHook(vo.getId(), vo.getHook());
-        toolService.saveAgentTool(vo.getId(), vo.getTool());
-        mcpServerService.saveAgentMcpServer(vo.getId(), vo.getMcp());
-        skillPackageService.saveAgentSkillPackage(vo.getId(), vo.getSkill());
-        agentKnowledgeBaseService.saveAgentKnowledge(vo.getId(), vo.getKnowledgeBase());
-
     }
 
     @Override
