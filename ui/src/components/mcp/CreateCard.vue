@@ -146,7 +146,7 @@ function handleCreate(protocol?: McpProtocol) {
         transition: all var(--transition-base);
 
         &:hover {
-          background-color: #ededed;
+          background-color: #eeeeee;
         }
 
         .protocol-label {

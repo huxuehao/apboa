@@ -57,7 +57,7 @@ public class ToolController {
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> save(@RequestBody ToolConfig entity) {
         entity.setToolType(ToolType.CUSTOM);
-        return R.status(toolService.save(entity));
+        return R.data(toolService.save(entity));
     }
 
     /**
@@ -66,7 +66,7 @@ public class ToolController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody ToolConfig entity) {
-        return R.status(toolService.doUpdate(entity));
+        return R.data(toolService.doUpdate(entity));
     }
 
     /**
@@ -75,7 +75,7 @@ public class ToolController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.status(toolService.deleteTools(ids));
+        return R.data(toolService.deleteTools(ids));
     }
 
     /**

@@ -55,7 +55,7 @@ public class HookConfigController {
     @PostMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> save(@RequestBody HookConfig entity) {
-        return R.status(hookConfigService.save(entity));
+        return R.data(hookConfigService.save(entity));
     }
 
     /**
@@ -64,7 +64,7 @@ public class HookConfigController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody HookConfig entity) {
-        return R.status(hookConfigService.updateById(entity));
+        return R.data(hookConfigService.updateById(entity));
     }
 
     /**
@@ -73,7 +73,7 @@ public class HookConfigController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.status(hookConfigService.deleteByIds(ids));
+        return R.data(hookConfigService.deleteByIds(ids));
     }
 
     /**

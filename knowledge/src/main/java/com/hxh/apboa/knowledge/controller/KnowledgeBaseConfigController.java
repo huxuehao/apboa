@@ -55,7 +55,7 @@ public class KnowledgeBaseConfigController {
     @PostMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> save(@RequestBody KnowledgeBaseConfig entity) {
-        return R.status(knowledgeBaseConfigService.save(entity));
+        return R.data(knowledgeBaseConfigService.save(entity));
     }
 
     /**
@@ -64,7 +64,7 @@ public class KnowledgeBaseConfigController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody KnowledgeBaseConfig entity) {
-        return R.status(knowledgeBaseConfigService.updateById(entity));
+        return R.data(knowledgeBaseConfigService.updateById(entity));
     }
 
     /**
@@ -73,7 +73,7 @@ public class KnowledgeBaseConfigController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.status(knowledgeBaseConfigService.deleteByIds(ids));
+        return R.data(knowledgeBaseConfigService.deleteByIds(ids));
     }
 
     /**

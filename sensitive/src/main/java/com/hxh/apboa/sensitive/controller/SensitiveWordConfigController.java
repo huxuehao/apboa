@@ -55,7 +55,7 @@ public class SensitiveWordConfigController {
     @PostMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> save(@RequestBody SensitiveWordConfig entity) {
-        return R.status(sensitiveWordConfigService.save(entity));
+        return R.data(sensitiveWordConfigService.save(entity));
     }
 
     /**
@@ -64,7 +64,7 @@ public class SensitiveWordConfigController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody SensitiveWordConfig entity) {
-        return R.status(sensitiveWordConfigService.updateById(entity));
+        return R.data(sensitiveWordConfigService.updateById(entity));
     }
 
     /**
@@ -73,7 +73,7 @@ public class SensitiveWordConfigController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.status(sensitiveWordConfigService.removeByIds(ids));
+        return R.data(sensitiveWordConfigService.removeByIds(ids));
     }
 
     /**

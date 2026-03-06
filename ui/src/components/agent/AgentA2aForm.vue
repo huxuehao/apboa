@@ -9,6 +9,7 @@ import { message } from 'ant-design-vue'
 import AgentFormBasic from './AgentFormBasic.vue'
 import AgentA2aFormWellknown from './AgentA2aFormWellknown.vue'
 import AgentA2aFormNacos from './AgentA2aFormNacos.vue'
+import AgentA2aFormAdvanced from './AgentA2aFormAdvanced.vue'
 import type { AgentDefinitionVO, WellKnownAgentConfig, NacosAgentConfig } from '@/types'
 import { A2aType } from '@/types'
 import * as agentApi from '@/api/agent'
@@ -57,6 +58,14 @@ const basicData = ref({
 })
 
 /**
+ * 增强配置
+ */
+const advancedData = ref({
+  hook: [],
+  enableMemory: false
+})
+
+/**
  * WellKnown 配置表单数据
  */
 const wellknownData = ref<WellKnownAgentConfig>({
@@ -96,6 +105,10 @@ function resetForm() {
       { key: 'username', value: '', evn: false },
       { key: 'password', value: '', evn: false }
     ]
+  }
+  advancedData.value = {
+    hook: [],
+    enableMemory: false
   }
   resolvedA2aType.value = props.a2aType || 'WELLKNOWN'
 }
@@ -149,6 +162,10 @@ watch(
         description: props.data.description || '',
         tag: props.data.tag || ''
       }
+      advancedData.value = {
+        hook: props.data.hook || [],
+        enableMemory: props.data.enableMemory || false
+      }
       // 加载 A2A 配置
       try {
         const a2aRecord = props.data.agentA2A
@@ -193,6 +210,8 @@ async function handleSubmit() {
       description: basicData.value.description,
       tag: basicData.value.tag || '',
       agentType: 'A2A',
+      hook: advancedData.value.hook ?? [],
+      enableMemory: advancedData.value.enableMemory ?? false,
       agentA2A: {
         a2aType: resolvedA2aType.value === 'WELLKNOWN' ? A2aType.WELLKNOWN : A2aType.NACOS,
         a2aConfig: a2aConfigData
@@ -231,7 +250,7 @@ function handleCancel() {
     :title="isEdit ? '编辑 A2A 智能体' : `新增 A2A 智能体 · ${resolvedA2aType === 'WELLKNOWN' ? 'WellKnown' : 'Nacos'}`"
     :width="800"
     :footer="null"
-    style="top: 50px"
+    style="top: 0"
     destroyOnClose
     @cancel="handleCancel"
   >
@@ -267,6 +286,14 @@ function handleCancel() {
           v-model="nacosData"
         />
       </div>
+
+      <!-- 基本信息 -->
+      <div class="form-section">
+        <div class="section-title">增强配置</div>
+        <AgentA2aFormAdvanced
+          v-model="advancedData"
+        />
+      </div>
     </div>
 
     <div class="form-actions flex justify-end gap-sm mt-lg">
@@ -280,8 +307,8 @@ function handleCancel() {
 
 <style scoped lang="scss">
 .a2a-form-body {
-  max-height: 70vh;
-  overflow-y: auto;
+  //max-height: 70vh;
+  //overflow-y: auto;
   padding: var(--spacing-sm) var(--spacing-xs);
 
   .form-section {

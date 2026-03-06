@@ -53,7 +53,7 @@ public class AgentDefinitionController {
     @PostMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> save(@RequestBody AgentDefinitionVO vo) {
-        return R.status(agentDefinitionService.saveAgentDefinition(vo));
+        return R.data(agentDefinitionService.saveAgentDefinition(vo));
     }
 
     /**
@@ -62,7 +62,7 @@ public class AgentDefinitionController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody AgentDefinitionVO vo) {
-        return R.status(agentDefinitionService.updateAgentDefinition(vo));
+        return R.data(agentDefinitionService.updateAgentDefinition(vo));
     }
 
     /**
@@ -71,7 +71,7 @@ public class AgentDefinitionController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.status(agentDefinitionService.deleteAgentDefinition(ids));
+        return R.data(agentDefinitionService.deleteAgentDefinition(ids));
     }
 
     /**

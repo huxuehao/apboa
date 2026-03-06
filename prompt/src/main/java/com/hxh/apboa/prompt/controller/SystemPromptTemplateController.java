@@ -55,7 +55,7 @@ public class SystemPromptTemplateController {
     @PostMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> save(@RequestBody SystemPromptTemplate entity) {
-        return R.status(systemPromptTemplateService.save(entity));
+        return R.data(systemPromptTemplateService.save(entity));
     }
 
     /**
@@ -64,7 +64,7 @@ public class SystemPromptTemplateController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody SystemPromptTemplate entity) {
-        return R.status(systemPromptTemplateService.updateById(entity));
+        return R.data(systemPromptTemplateService.updateById(entity));
     }
 
     /**
@@ -73,7 +73,7 @@ public class SystemPromptTemplateController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.status(systemPromptTemplateService.removeByIds(ids));
+        return R.data(systemPromptTemplateService.removeByIds(ids));
     }
 
     /**

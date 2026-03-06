@@ -135,7 +135,7 @@ function handleCreate(kbType?: KbType) {
         transition: all var(--transition-base);
 
         &:hover {
-          background-color: #ededed;
+          background-color: #eeeeee;
         }
 
         .type-label {

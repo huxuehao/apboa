@@ -38,7 +38,7 @@ public class AuthController {
     @PostMapping("/register")
     public R<Boolean> register(@RequestBody RegisterRequest request) {
         boolean result = accountService.register(request);
-        return R.status(result);
+        return R.data(result);
     }
 
     /**
@@ -66,7 +66,7 @@ public class AuthController {
     @PostMapping("/change-password")
     public R<Boolean> changePassword(@RequestBody ChangePasswordRequest request) {
         boolean result = accountService.changePassword(request);
-        return R.status(result);
+        return R.data(result);
     }
 
     /**
@@ -75,7 +75,7 @@ public class AuthController {
     @PostMapping("/update-profile")
     public R<Boolean> updateProfile(@RequestBody UpdateProfileRequest request) {
         boolean result = accountService.updateProfile(request);
-        return R.status(result);
+        return R.data(result);
     }
 
     /**
@@ -84,6 +84,6 @@ public class AuthController {
     @RoleNeed({Role.ADMIN})
     @PostMapping("/admin/create-account")
     public R<Boolean> adminCreateAccount(@RequestBody RegisterRequest request) {
-        return R.status(accountService.register(request));
+        return R.data(accountService.register(request));
     }
 }

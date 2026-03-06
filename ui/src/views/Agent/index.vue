@@ -100,11 +100,13 @@ async function handleView(id: string) {
           ])
         )
         content = h('div', { style: { maxHeight: '800px', overflowY: 'auto' } }, [
+          h('p', {}, [h('strong', 'A2A 类型: '), 'WellKnown']),
+          ...(data.tag ? [h('p', {}, [h('strong', '标签: '), data.tag])] : []),
           h('p', {}, [h('strong', '名称: '), data.name]),
           h('p', {}, [h('strong', '智能体编号: '), data.agentCode]),
           h('p', {}, [h('strong', '描述: '), data.description]),
-          ...(data.tag ? [h('p', {}, [h('strong', '标签: '), data.tag])] : []),
-          h('p', {}, [h('strong', 'A2A 类型: '), 'WellKnown']),
+          h('p', {}, [h('strong', '钩子数量: '), data.hook.length]),
+          h('p', {}, [h('strong', '启用记忆: '), data.enableMemory ? '是' : '否']),
           h('p', {}, [h('strong', 'Base URL: '), c.baseUrl]),
           h('p', {}, [h('strong', 'Agent Card 路径: '), c.relativeCardPath]),
           h('p', {}, [h('strong', '认证头数量: '), (c.authHeaders || []).length]),
@@ -121,11 +123,13 @@ async function handleView(id: string) {
           ])
         )
         content = h('div', { style: { maxHeight: '800px', overflowY: 'auto' } }, [
+          h('p', {}, [h('strong', 'A2A 类型: '), 'Nacos']),
+          ...(data.tag ? [h('p', {}, [h('strong', '标签: '), data.tag])] : []),
           h('p', {}, [h('strong', '名称: '), data.name]),
           h('p', {}, [h('strong', '智能体编号: '), data.agentCode]),
           h('p', {}, [h('strong', '描述: '), data.description]),
-          ...(data.tag ? [h('p', {}, [h('strong', '标签: '), data.tag])] : []),
-          h('p', {}, [h('strong', 'A2A 类型: '), 'Nacos']),
+          h('p', {}, [h('strong', '钩子数量: '), data.hook.length]),
+          h('p', {}, [h('strong', '启用记忆: '), data.enableMemory ? '是' : '否']),
           h('p', {}, [h('strong', 'Nacos 属性数量: '), (c.nacosProperties || []).length]),
           ...propRows
         ])
@@ -164,6 +168,7 @@ async function handleView(id: string) {
       h('p', {}, [h('strong', '模型配置ID: '), data.modelConfigId]),
       h('p', {}, [h('strong', '系统提示词模板ID: '), data.systemPromptTemplateId]),
       h('p', {}, [h('strong', '随模板变化: '), data.followTemplate ? '是' : '否']),
+      h('p', {}, [h('strong', '钩子数量: '), data.hook.length]),
       h('p', {}, [h('strong', '工具选择策略: '), data.toolChoiceStrategy]),
       h('p', {}, [h('strong', '工具数量: '), data.tool.length]),
       h('p', {}, [h('strong', '技能包数量: '), data.skill.length]),

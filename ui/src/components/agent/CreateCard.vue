@@ -144,7 +144,7 @@ function handleOptionClick(value: 'CUSTOM' | 'WELLKNOWN' | 'NACOS') {
         transition: all var(--transition-base);
 
         &:hover {
-          background-color: #ededed;
+          background-color: #eeeeee;
         }
 
         .type-label {
