@@ -124,7 +124,13 @@ public class AguiAgentAdapter {
                 if (block instanceof TextBlock textBlock) {
                     String text = textBlock.getText();
                     if (text != null && !text.isEmpty()) {
-                        String messageId = msg.getId();
+                        // 如果当前已有活跃的文本消息，复用其 messageId，避免产生多个 TEXT_MESSAGE_START
+                        String messageId;
+                        if (state.hasActiveTextMessage()) {
+                            messageId = state.getCurrentTextMessageId();
+                        } else {
+                            messageId = msg.getId();
+                        }
 
                         // Start message if not started
                         if (!state.hasStartedMessage(messageId)) {
