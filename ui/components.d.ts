@@ -12,6 +12,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AAlert: typeof import('ant-design-vue/es')['Alert']
     AAvatar: typeof import('ant-design-vue/es')['Avatar']
     AButton: typeof import('ant-design-vue/es')['Button']
     ACard: typeof import('ant-design-vue/es')['Card']
@@ -26,6 +27,10 @@ declare module 'vue' {
     AEmpty: typeof import('ant-design-vue/es')['Empty']
     AForm: typeof import('ant-design-vue/es')['Form']
     AFormItem: typeof import('ant-design-vue/es')['FormItem']
+    AgentA2aForm: typeof import('./src/components/agent/AgentA2aForm.vue')['default']
+    AgentA2aFormAdvanced: typeof import('./src/components/agent/AgentA2aFormAdvanced.vue')['default']
+    AgentA2aFormNacos: typeof import('./src/components/agent/AgentA2aFormNacos.vue')['default']
+    AgentA2aFormWellknown: typeof import('./src/components/agent/AgentA2aFormWellknown.vue')['default']
     AgentCard: typeof import('./src/components/agent/AgentCard.vue')['default']
     AgentForm: typeof import('./src/components/agent/AgentForm.vue')['default']
     AgentFormAdvanced: typeof import('./src/components/agent/AgentFormAdvanced.vue')['default']
@@ -61,6 +66,7 @@ declare module 'vue' {
     ATag: typeof import('ant-design-vue/es')['Tag']
     ATextarea: typeof import('ant-design-vue/es')['Textarea']
     AuthContainer: typeof import('./src/components/auth/AuthContainer.vue')['default']
+    AWatermark: typeof import('ant-design-vue/es')['Watermark']
     BackButton: typeof import('./src/components/auth/BackButton.vue')['default']
     ChatInput: typeof import('./src/components/chat/ChatInput.vue')['default']
     ChatMain: typeof import('./src/components/chat/ChatMain.vue')['default']
@@ -116,6 +122,7 @@ declare module 'vue' {
 
 // For TSX support
 declare global {
+  const AAlert: typeof import('ant-design-vue/es')['Alert']
   const AAvatar: typeof import('ant-design-vue/es')['Avatar']
   const AButton: typeof import('ant-design-vue/es')['Button']
   const ACard: typeof import('ant-design-vue/es')['Card']
@@ -130,6 +137,10 @@ declare global {
   const AEmpty: typeof import('ant-design-vue/es')['Empty']
   const AForm: typeof import('ant-design-vue/es')['Form']
   const AFormItem: typeof import('ant-design-vue/es')['FormItem']
+  const AgentA2aForm: typeof import('./src/components/agent/AgentA2aForm.vue')['default']
+  const AgentA2aFormAdvanced: typeof import('./src/components/agent/AgentA2aFormAdvanced.vue')['default']
+  const AgentA2aFormNacos: typeof import('./src/components/agent/AgentA2aFormNacos.vue')['default']
+  const AgentA2aFormWellknown: typeof import('./src/components/agent/AgentA2aFormWellknown.vue')['default']
   const AgentCard: typeof import('./src/components/agent/AgentCard.vue')['default']
   const AgentForm: typeof import('./src/components/agent/AgentForm.vue')['default']
   const AgentFormAdvanced: typeof import('./src/components/agent/AgentFormAdvanced.vue')['default']
@@ -165,6 +176,7 @@ declare global {
   const ATag: typeof import('ant-design-vue/es')['Tag']
   const ATextarea: typeof import('ant-design-vue/es')['Textarea']
   const AuthContainer: typeof import('./src/components/auth/AuthContainer.vue')['default']
+  const AWatermark: typeof import('ant-design-vue/es')['Watermark']
   const BackButton: typeof import('./src/components/auth/BackButton.vue')['default']
   const ChatInput: typeof import('./src/components/chat/ChatInput.vue')['default']
   const ChatMain: typeof import('./src/components/chat/ChatMain.vue')['default']

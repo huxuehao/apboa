@@ -55,7 +55,7 @@ public class McpServerController {
     @PostMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> save(@RequestBody McpServer entity) {
-        return R.status(mcpServerService.save(entity));
+        return R.data(mcpServerService.save(entity));
     }
 
     /**
@@ -64,7 +64,7 @@ public class McpServerController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody McpServer entity) {
-        return R.status(mcpServerService.updateById(entity));
+        return R.data(mcpServerService.updateById(entity));
     }
 
     /**
@@ -73,7 +73,7 @@ public class McpServerController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.status(mcpServerService.deleteByIds(ids));
+        return R.data(mcpServerService.deleteByIds(ids));
     }
 
     /**

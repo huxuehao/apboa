@@ -3,6 +3,7 @@ package com.hxh.apboa.core.agent;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hxh.apboa.agent.service.AgentDefinitionService;
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.common.enums.AgentType;
 import com.hxh.apboa.common.util.FuncUtils;
 import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.common.wrapper.KnowledgeWrapper;
@@ -32,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 描述：智能体Helper
+ * 描述：ReAct智能体Helper
  *
  * @author huxuehao
  **/
@@ -59,6 +60,10 @@ public class ReActAgentHelper {
 
         if (!definition.getEnabled()) {
             throw new RuntimeException("Agent is disabled, agentId: " + agentId);
+        }
+
+        if (definition.getAgentType() != AgentType.CUSTOM) {
+            throw new RuntimeException("Agent type is not custom, agentId: " + agentId);
         }
 
         return getReActAgent(definition);

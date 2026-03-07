@@ -55,7 +55,7 @@ public class SkillPackageController {
     @PostMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> save(@RequestBody SkillPackage entity) {
-        return R.status(skillPackageService.save(entity));
+        return R.data(skillPackageService.save(entity));
     }
 
     /**
@@ -64,7 +64,7 @@ public class SkillPackageController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody SkillPackage entity) {
-        return R.status(skillPackageService.updateById(entity));
+        return R.data(skillPackageService.updateById(entity));
     }
 
     /**
@@ -73,7 +73,7 @@ public class SkillPackageController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.status(skillPackageService.deleteByIds(ids));
+        return R.data(skillPackageService.deleteByIds(ids));
     }
 
     /**

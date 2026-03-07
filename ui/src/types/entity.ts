@@ -19,7 +19,8 @@ import type {
   McpMode,
   McpProtocol,
   SensitiveWordAction,
-  RAGMode
+  RAGMode,
+  A2aType
 } from './enums'
 
 /**
@@ -45,6 +46,7 @@ export interface AccountRole {
  * 智能体定义
  */
 export interface AgentDefinition extends BaseEntity {
+  agentType: 'CUSTOM' | 'A2A'
   name: string
   agentCode: string
   description: string
@@ -362,4 +364,41 @@ export interface Params {
   paramName: string
   paramKey: string
   paramValue: string
+}
+
+/**
+ * KvMap 键值对，支持环境变量模式
+ */
+export interface KvMap {
+  key: string
+  value: string
+  evn: boolean
+}
+
+/**
+ * A2A WellKnown 协议配置
+ */
+export interface WellKnownAgentConfig {
+  agentName: string
+  baseUrl: string
+  relativeCardPath: string
+  authHeaders: KvMap[]
+}
+
+/**
+ * A2A Nacos 协议配置
+ */
+export interface NacosAgentConfig {
+  agentName: string
+  nacosProperties: KvMap[]
+}
+
+/**
+ * AgentA2A 实体 — 智能体与 A2A 协议的关联配置
+ */
+export interface AgentA2A {
+  id?: string
+  agentDefinitionId?: string
+  a2aType: A2aType
+  a2aConfig: WellKnownAgentConfig | NacosAgentConfig
 }

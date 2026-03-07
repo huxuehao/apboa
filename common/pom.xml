@@ -33,6 +33,18 @@
             <optional>true</optional>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>io.agentscope</groupId>-->
+<!--            <artifactId>agentscope-a2a-spring-boot-starter</artifactId>-->
+<!--            <version>${agentscope.version}</version>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>io.agentscope</groupId>-->
+<!--            <artifactId>agentscope-nacos-spring-boot-starter</artifactId>-->
+<!--            <version>${agentscope.version}</version>-->
+<!--        </dependency>-->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

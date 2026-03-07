@@ -81,6 +81,16 @@ public class AuthInterceptor implements HandlerInterceptor {
             handleAuthenticationFailure(response, e.getMessage());
             return false;
         }
+
+//        String token = "eyJhbGciOiJIUzI1NiJ9.eyJMT0dJTi1VU0VSLUtFWSI6ImUyNDExN2MzLTlhOTMtNDIxZC1iYjhhLTU2NDgzY2ExOGQ3MCIsImp0aSI6IjExMTExMTExMTExMTExMTExMTEiLCJpYXQiOjE3NzI4MDgwNDgsInN1YiI6IntcImlkXCI6XCIxMTExMTExMTExMTExMTExMTExXCIsXCJuYW1lXCI6XCLnrqHnkIblkZhcIixcInVzZXJuYW1lXCI6XCJhZG1pblwiLFwiZW1haWxcIjpcImFkbWluQGdtYWlsLmNvbVwifSIsImV4cCI6MTc3MjgyOTY0OH0.Yb6OXO_onEJ1-DFZDx_IPGToyEUCTdh0KOnZELc4NvE";
+//        Claims claims = TokenUtils.parseAndValidateToken(token);
+//        if (redisUtils.get(SysConst.LOGIN_USER_KEY + token) == null) {
+//            throw new NotAuthException("用户未登录");
+//        }
+//
+//        // 将用户信息存储到请求中供后续使用
+//        request.setAttribute(SysConst.USER_DETAIL, JsonUtils.parse(claims.getSubject(), UserDetail.class));
+//        return true;
     }
 
     @Override

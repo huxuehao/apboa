@@ -25,7 +25,7 @@ export function detail(id: string) {
  * POST /agent/definition
  */
 export function save(vo: AgentDefinitionVO) {
-  return request.post<ApiResponse<boolean>>('/api/agent/definition', vo)
+  return request.post<ApiResponse<AgentDefinitionVO>>('/api/agent/definition', vo)
 }
 
 /**

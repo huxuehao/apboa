@@ -55,7 +55,7 @@ public class ModelConfigController {
     @PostMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> save(@RequestBody ModelConfig entity) {
-        return R.status(modelConfigService.save(entity));
+        return R.data(modelConfigService.save(entity));
     }
 
     /**
@@ -64,7 +64,7 @@ public class ModelConfigController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody ModelConfig entity) {
-        return R.status(modelConfigService.updateById(entity));
+        return R.data(modelConfigService.updateById(entity));
     }
 
     /**
@@ -73,7 +73,7 @@ public class ModelConfigController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.status(modelConfigService.removeByIds(ids));
+        return R.data(modelConfigService.removeByIds(ids));
     }
 
     /**

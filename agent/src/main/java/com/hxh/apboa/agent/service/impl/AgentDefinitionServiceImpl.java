@@ -1,12 +1,14 @@
 package com.hxh.apboa.agent.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.hxh.apboa.a2a.service.AgentA2aService;
 import com.hxh.apboa.agent.mapper.AgentDefinitionMapper;
 import com.hxh.apboa.agent.service.AgentDefinitionService;
 import com.hxh.apboa.agent.service.AgentSubAgentService;
+import com.hxh.apboa.common.entity.AgentA2A;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.ModelConfig;
-import com.hxh.apboa.common.entity.SensitiveWordConfig;
+import com.hxh.apboa.common.enums.AgentType;
 import com.hxh.apboa.common.enums.ModelType;
 import com.hxh.apboa.common.event.AgentReRegisterEvent;
 import com.hxh.apboa.common.util.BeanUtils;
@@ -47,6 +49,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
     private final ModelConfigService modelConfigService;
     private final ApplicationEventPublisher publisher;
     private final ParamsAdapter paramsAdapter;
+    private final AgentA2aService agentA2aService;
 
     @Override
     public AgentDefinitionVO agentDefinitionDetail(Long id) {
@@ -56,12 +59,17 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         }
 
         AgentDefinitionVO vo = BeanUtils.copy(entity, AgentDefinitionVO.class);
+
         vo.setHook(hookService.getHookIds(id));
-        vo.setTool(toolService.getToolIds(id));
-        vo.setMcp(mcpServerService.getMcpIds(id));
-        vo.setSkill(skillPackageService.getSkillPackageIds(id));
-        vo.setSubAgent(subAgentService.getSubAgentIds(id));
-        vo.setKnowledgeBase(agentKnowledgeBaseService.getKnowledgeIds(id));
+        if(entity.getAgentType() == AgentType.CUSTOM) {
+            vo.setTool(toolService.getToolIds(id));
+            vo.setMcp(mcpServerService.getMcpIds(id));
+            vo.setSkill(skillPackageService.getSkillPackageIds(id));
+            vo.setSubAgent(subAgentService.getSubAgentIds(id));
+            vo.setKnowledgeBase(agentKnowledgeBaseService.getKnowledgeIds(id));
+        } else {
+            vo.setAgentA2A(agentA2aService.getA2aConfigByAgentId(id));
+        }
 
         return vo;
     }
@@ -72,6 +80,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         AgentDefinition agentDefinition = BeanUtils.copy(vo, AgentDefinition.class);
         save(agentDefinition);
         vo.setId(agentDefinition.getId());
+
         saveSubItems(vo);
 
         publisher.publishEvent(new AgentReRegisterEvent(vo.getId()));
@@ -89,25 +98,31 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         }
 
         saveSubItems(vo);
+
         publisher.publishEvent(new AgentReRegisterEvent(vo.getId()));
         return true;
     }
 
-    private Boolean saveSubItems(AgentDefinitionVO vo) {
-        subAgentService.saveSubAgent(vo.getId(), vo.getSubAgent());
+    private void saveSubItems(AgentDefinitionVO vo) {
         hookService.saveAgentHook(vo.getId(), vo.getHook());
-        toolService.saveAgentTool(vo.getId(), vo.getTool());
-        mcpServerService.saveAgentMcpServer(vo.getId(), vo.getMcp());
-        skillPackageService.saveAgentSkillPackage(vo.getId(), vo.getSkill());
-        agentKnowledgeBaseService.saveAgentKnowledge(vo.getId(), vo.getKnowledgeBase());
-
-        return Boolean.TRUE;
+        if (vo.getAgentType() == AgentType.CUSTOM) {
+            subAgentService.saveSubAgent(vo.getId(), vo.getSubAgent());
+            toolService.saveAgentTool(vo.getId(), vo.getTool());
+            mcpServerService.saveAgentMcpServer(vo.getId(), vo.getMcp());
+            skillPackageService.saveAgentSkillPackage(vo.getId(), vo.getSkill());
+            agentKnowledgeBaseService.saveAgentKnowledge(vo.getId(), vo.getKnowledgeBase());
+        } else {
+            AgentA2A agentA2A = vo.getAgentA2A();
+            agentA2A.setAgentDefinitionId(vo.getId());
+            agentA2aService.saveA2aConfig(agentA2A);
+        }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteAgentDefinition(List<Long> ids) {
         removeByIds(ids);
+        agentA2aService.deleteA2aConfig(ids);
         subAgentService.deleteSubAgent(ids);
         hookService.deleteAgentHook(ids);
         toolService.deleteAgentTool(ids);

@@ -74,7 +74,7 @@ public class AccountController {
     @PostMapping
     @RoleNeed({Role.ADMIN})
     public R<Boolean> save(@RequestBody Account entity) {
-        return R.status(accountService.register(BeanUtils.copy(entity, RegisterRequest.class)));
+        return R.data(accountService.register(BeanUtils.copy(entity, RegisterRequest.class)));
     }
 
     /**
@@ -90,7 +90,7 @@ public class AccountController {
             }
         }
         accountRoleService.remove(Wrappers.<AccountRole>lambdaQuery().in(AccountRole::getAccountId, ids));
-        return R.status(accountService.removeByIds(ids));
+        return R.data(accountService.removeByIds(ids));
     }
 
     /**
@@ -99,7 +99,7 @@ public class AccountController {
     @RoleNeed({Role.ADMIN})
     @PutMapping("/{id}/change-role")
     public R<Boolean> changeRole(@PathVariable("id") Long id, @RequestBody List<Role> roles) {
-        return R.status(accountService.changeRole(id, roles));
+        return R.data(accountService.changeRole(id, roles));
     }
 
     /**
@@ -108,7 +108,7 @@ public class AccountController {
     @RoleNeed({Role.ADMIN})
     @PutMapping("/{id}/toggle-enabled")
     public R<Boolean> toggleEnabled(@PathVariable("id") Long id, @RequestParam("enabled") Boolean enabled) {
-        return R.status(accountService.toggleEnabled(id, enabled));
+        return R.data(accountService.toggleEnabled(id, enabled));
     }
 
     /**
@@ -117,6 +117,6 @@ public class AccountController {
     @RoleNeed({Role.ADMIN})
     @PutMapping("/{id}/change-password")
     public R<Boolean> adminChangePassword(@PathVariable("id") Long id, @RequestParam("newPassword") String newPassword) {
-        return R.status(accountService.adminChangePassword(id, newPassword));
+        return R.data(accountService.adminChangePassword(id, newPassword));
     }
 }

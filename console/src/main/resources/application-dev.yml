@@ -7,6 +7,16 @@ agentscope:
     cors-enabled: true
     server-side-memory: false  # 启用服务端会话保持
     max-thread-sessions: 500
+#  a2a:
+#    server:
+#      enabled: false
+#      card:
+#        name: my_assistant
+#        description: 智能助手
+#    nacos:
+#      server-addr: 192.168.174.130:8848
+#      username: nacos
+#      password: nacos
 
 spring:
   data:

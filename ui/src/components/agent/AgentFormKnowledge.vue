@@ -160,6 +160,17 @@ const handleMcpChange = (mcpId: string, checked: boolean) => {
   }
 };
 
+const handleSubAgentChange = (agentId: string, checked: boolean) => {
+  if (checked) {
+    formData.value.subAgent.push(agentId);
+  } else {
+    const index = formData.value.subAgent.indexOf(agentId);
+    if (index > -1) {
+      formData.value.subAgent.splice(index, 1);
+    }
+  }
+};
+
 onMounted(() => {
   loadAllKnowledgeBases()
   loadAllMcpServers()
@@ -236,21 +247,26 @@ defineExpose({
 
       <AFormItem label="子智能体">
         <template v-if="availableAgents?.length > 0">
-          <ACheckboxGroup v-model:value="formData.subAgent">
-            <div class="checkbox-grid">
-              <ACheckbox
-                v-for="agent in availableAgents"
-                :key="agent.id"
-                :value="agent.id"
-                class="checkbox-item"
-              >
-                <div class="item-info">
-                  <div class="item-name text-ellipsis" :title="agent.name">{{ agent.name }}</div>
-                  <div class="item-desc text-placeholder text-xs text-ellipsis" :title="agent.description">{{ agent.description }}</div>
+<!--          <ACheckboxGroup v-model:value="formData.subAgent">-->
+          <div class="checkbox-grid">
+            <ACheckbox
+              v-for="agent in availableAgents"
+              :checked="formData.subAgent.includes(agent.id)"
+              :key="agent.id"
+              :value="agent.id"
+              @change="(e: any) => handleSubAgentChange(agent.id, e.target.checked)"
+              class="checkbox-item"
+            >
+              <div class="item-info">
+                <div class="item-name text-ellipsis" :title="agent.name">{{ agent.name }}</div>
+                <div class="item-desc text-placeholder text-xs text-ellipsis" :title="agent.description">
+                  <span style="color: #0F74FF">{{ agent.agentType == 'CUSTOM'? '自定义': 'A2A' }}</span> &nbsp;
+                  <span>{{ agent.description }}</span>
                 </div>
-              </ACheckbox>
-            </div>
-          </ACheckboxGroup>
+              </div>
+            </ACheckbox>
+          </div>
+<!--          </ACheckboxGroup>-->
           <div class="text-placeholder text-xs mt-sm">
             选择子智能体后,当前智能体将成为多智能体系统
           </div>

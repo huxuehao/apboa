@@ -1,6 +1,7 @@
 package com.hxh.apboa.common.entity;
 
 import com.hxh.apboa.common.config.mybatis.JsonNodeTypeHandler;
+import com.hxh.apboa.common.enums.AgentType;
 import com.hxh.apboa.common.enums.ToolChoiceStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -18,6 +19,10 @@ import lombok.Setter;
 @Setter
 @TableName(value = "agent_definition", autoResultMap = true)
 public class AgentDefinition extends BaseEntity {
+    /**
+     * 智能体类型
+     */
+    private AgentType agentType;
 
     /**
      * 智能体名称
