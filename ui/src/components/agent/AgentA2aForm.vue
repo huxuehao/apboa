@@ -254,6 +254,11 @@ function handleCancel() {
     destroyOnClose
     @cancel="handleCancel"
   >
+    <AAlert
+      message="特别说明：因 AgentScope 未适配 AgentCard 的 securitySchemes，目前只能调用非鉴权 A2A-Server"
+      banner
+      closable
+    />
     <div class="a2a-form-body" v-if="visible">
       <!-- 基本信息 -->
       <div class="form-section">
