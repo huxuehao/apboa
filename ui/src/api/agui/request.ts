@@ -17,9 +17,6 @@ export function getAgentRunURL(): string {
   const base = (import.meta.env.VITE_APP_BASE_API as string) || ''
   const path = base.endsWith('/') ? DEFAULT_RUN_PATH.slice(1) : DEFAULT_RUN_PATH
   if (base) return `${base}${path}`
-  if (import.meta.env.DEV) {
-    return `http://127.0.0.1:3060${path.replace(/^\/api/, '')}`
-  }
   return path
 }
 

@@ -4,6 +4,7 @@ import com.hxh.apboa.common.config.SpringContextHolder;
 import com.hxh.apboa.common.consts.SysConst;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 import javax.crypto.SecretKey;
@@ -18,6 +19,7 @@ public class TokenUtils {
     private static final String AUTH_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String TOKEN = "accessToken";
+    private static final String COOKIE_AUTH = "apboa-access-token";
 
     /**
      * 创建token
@@ -118,6 +120,15 @@ public class TokenUtils {
         String paramToken = request.getParameter(TOKEN);
         if (!FuncUtils.isEmpty(paramToken)) {
             return paramToken;
+        }
+
+        // 从 cookie 中获取
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null && cookies.length > 0) {
+            Optional<Cookie> first = Arrays.stream(cookies).filter((cookie) -> Objects.equals(cookie.getName(), COOKIE_AUTH)).findFirst();
+            if (first.isPresent()) {
+                return first.get().getValue();
+            }
         }
 
         throw new RuntimeException("未提供认证Token");
