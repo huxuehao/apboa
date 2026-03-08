@@ -8,10 +8,11 @@ export const WS_CONFIG = {
 };
 
 export const WS_MESSAGE_TYPES = {
-  CLIENT: 'CLIENT',
-  ACCOUNT_ROLE_CHANGE: 'ACCOUNT_ROLE_CHANGE',
   PING: 'PING',
   PONG: 'PONG',
+
+  CLIENT: 'CLIENT',
+  ACCOUNT_ROLE_CHANGE: 'ACCOUNT_ROLE_CHANGE',
 } as const;
 
 export type WSMessageType = typeof WS_MESSAGE_TYPES[keyof typeof WS_MESSAGE_TYPES];

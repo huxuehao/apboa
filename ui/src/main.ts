@@ -10,7 +10,6 @@ import { message } from 'ant-design-vue'
 import App from './App.vue'
 import router from './router'
 import { useAccountStore } from '@/stores'
-import { useWebSocket } from '@/composables/useWebSocket';
 
 const app = createApp(App)
 
@@ -43,9 +42,5 @@ app.directive('permission', {
     }
   }
 });
-
-// 尝试初始化ws
-const { initWS } = useWebSocket();
-initWS()
 
 app.mount('#app')

@@ -1,6 +1,7 @@
 import setting from "@/config/setting";
 import cache from "@/utils/cache";
-import {type AccountVO, Role} from "@/types";
+import Cookies from 'js-cookie';
+import {type AccountVO} from "@/types";
 
 const TokenKey = setting.systemName + '-' + setting.accessToken;
 const refreshTokenKey = setting.systemName + '-' + setting.refreshToken;
@@ -27,6 +28,7 @@ function setToken(token: string) {
  * 清除token
  */
 function removeToken() {
+  Cookies.remove("apboa-access-token")
   cache.local.remove(TokenKey);
 }
 
