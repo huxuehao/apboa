@@ -71,19 +71,24 @@ const nodeTypes = {
  * 布局配置
  */
 const LAYOUT = {
-  centerX: 400,
-  centerY: 400,
-  categoryDistance: 280,
-  itemStartDistance: 200,
-  itemSpacingY: 140
+  centerX: 600,
+  centerY: 450,
+  categoryDistance: 320,
+  itemStartDistance: 220,
+  itemSpacingY: 130,
+  directNodeY: 750,
+  directNodeSpacing: 300
 }
 
 /**
- * 计算分类节点位置（围绕中心分布）
+ * 计算分类节点位置（在上半圆区域分布）
  */
 function getCategoryPosition(index: number, total: number): { x: number; y: number } {
-  const startAngle = -Math.PI / 2
-  const angle = startAngle + (2 * Math.PI * index) / total
+  // 角度范围：-180度到0度（上方180度半圆，最大分散）
+  const startAngle = (-180 * Math.PI) / 180
+  const endAngle = (0 * Math.PI) / 180
+  const angleRange = endAngle - startAngle
+  const angle = startAngle + (angleRange * index) / Math.max(total - 1, 1)
   return {
     x: LAYOUT.centerX + Math.cos(angle) * LAYOUT.categoryDistance - NODE_SIZES.category.width / 2,
     y: LAYOUT.centerY + Math.sin(angle) * LAYOUT.categoryDistance - NODE_SIZES.category.height / 2
@@ -91,7 +96,7 @@ function getCategoryPosition(index: number, total: number): { x: number; y: numb
 }
 
 /**
- * 计算配置项节点位置
+ * 计算配置项节点位置（向外辐射排列）
  */
 function getItemPosition(
   categoryPos: { x: number; y: number },
@@ -100,31 +105,29 @@ function getItemPosition(
   categoryIndex: number,
   totalCategories: number
 ): { x: number; y: number } {
-  const angle = -Math.PI / 2 + (2 * Math.PI * categoryIndex) / totalCategories
-  const dirX = Math.cos(angle)
-  const dirY = Math.sin(angle)
+  // 计算分类节点的角度
+  const startAngle = (-180 * Math.PI) / 180
+  const endAngle = (0 * Math.PI) / 180
+  const angleRange = endAngle - startAngle
+  const categoryAngle = startAngle + (angleRange * categoryIndex) / Math.max(totalCategories - 1, 1)
 
-  const startOffset = -((total - 1) * LAYOUT.itemSpacingY) / 2
-  const offsetY = startOffset + index * LAYOUT.itemSpacingY
+  // 计算配置项的扇形展开
+  const itemSpreadAngle = 0.15 // 每个配置项之间的角度偏移
+  const totalSpread = (total - 1) * itemSpreadAngle
+  const itemAngle = categoryAngle - totalSpread / 2 + index * itemSpreadAngle
 
-  const baseX = categoryPos.x + NODE_SIZES.category.width + 60
-  const baseY = categoryPos.y + NODE_SIZES.category.height / 2
+  // 计算配置项位置（从分类节点向外延伸）
+  const categoryCenterX = categoryPos.x + NODE_SIZES.category.width / 2
+  const categoryCenterY = categoryPos.y + NODE_SIZES.category.height / 2
 
-  if (Math.abs(dirX) > Math.abs(dirY)) {
-    return {
-      x: baseX + (dirX > 0 ? LAYOUT.itemStartDistance : -LAYOUT.itemStartDistance - NODE_SIZES.item.width),
-      y: baseY + offsetY - NODE_SIZES.item.height / 2
-    }
-  } else {
-    return {
-      x: categoryPos.x + NODE_SIZES.category.width / 2 + offsetY - NODE_SIZES.item.width / 2,
-      y: baseY + (dirY > 0 ? LAYOUT.itemStartDistance : -LAYOUT.itemStartDistance - NODE_SIZES.item.height)
-    }
+  return {
+    x: categoryCenterX + Math.cos(itemAngle) * LAYOUT.itemStartDistance - NODE_SIZES.item.width / 2,
+    y: categoryCenterY + Math.sin(itemAngle) * LAYOUT.itemStartDistance - NODE_SIZES.item.height / 2
   }
 }
 
 /**
- * 需要显示的分类列表
+ * 需要显示的分类列表（仅包含多对一关系的分类）
  */
 const activeCategories = computed<CategoryType[]>(() => {
   const categories: CategoryType[] = []
@@ -135,16 +138,6 @@ const activeCategories = computed<CategoryType[]>(() => {
   if (data.mcps.length > 0) categories.push('mcp')
   if (data.knowledgeBases.length > 0) categories.push('knowledge')
   if (data.subAgents.length > 0) categories.push('sub-agent')
-
-  // 模型、提示词、高级配置始终显示
-  categories.push('model')
-  categories.push('prompt')
-  categories.push('advanced')
-
-  // 敏感词只在启用时显示
-  if (data.agent?.sensitiveFilterEnabled && data.sensitiveConfig) {
-    categories.push('sensitive')
-  }
 
   return categories
 })
@@ -170,10 +163,16 @@ const nodes = computed<Node[]>(() => {
     draggable: true
   })
 
-  // 遍历活跃的分类
+  // 遭历活跃的分类
   activeCategories.value.forEach((category, categoryIndex) => {
     const config = CATEGORY_CONFIGS[category]
     const categoryPos = getCategoryPosition(categoryIndex, totalCategories)
+
+    // 根据分类类型添加X轴偏移
+    let xOffset = 0
+    if (category === 'tool') xOffset = -80
+    if (category === 'sub-agent') xOffset = 80
+    categoryPos.x += xOffset
 
     // 分类节点
     let count = 0
@@ -208,6 +207,7 @@ const nodes = computed<Node[]>(() => {
       case 'tool':
         data.tools.forEach((tool, i) => {
           const pos = getItemPosition(categoryPos, i, data.tools.length, categoryIndex, totalCategories)
+          pos.x += xOffset // 配置项也应用相同偏移
           result.push({
             id: `tool-${tool.id}`,
             type: 'tool-item',
@@ -273,6 +273,7 @@ const nodes = computed<Node[]>(() => {
       case 'sub-agent':
         data.subAgents.forEach((agent, i) => {
           const pos = getItemPosition(categoryPos, i, data.subAgents.length, categoryIndex, totalCategories)
+          pos.x += xOffset // 配置项也应用相同偏移
           result.push({
             id: `agent-${agent.id}`,
             type: 'agent-item',
@@ -282,76 +283,79 @@ const nodes = computed<Node[]>(() => {
           })
         })
         break
-
-      case 'model':
-        result.push({
-          id: 'model-config',
-          type: 'model',
-          position: {
-            x: categoryPos.x + NODE_SIZES.category.width + 60,
-            y: categoryPos.y - NODE_SIZES.model.height / 2 + NODE_SIZES.category.height / 2
-          },
-          data: {
-            modelConfig: data.modelConfig,
-            provider: data.modelProvider,
-            paramsOverride: data.agent?.modelParamsOverride || null
-          },
-          draggable: true
-        })
-        break
-
-      case 'prompt':
-        result.push({
-          id: 'prompt-config',
-          type: 'prompt',
-          position: {
-            x: categoryPos.x + NODE_SIZES.category.width + 60,
-            y: categoryPos.y - NODE_SIZES.prompt.height / 2 + NODE_SIZES.category.height / 2
-          },
-          data: {
-            promptTemplate: data.promptTemplate,
-            followTemplate: data.agent?.followTemplate || false,
-            systemPrompt: data.agent?.systemPrompt || ''
-          },
-          draggable: true
-        })
-        break
-
-      case 'advanced':
-        result.push({
-          id: 'advanced-config',
-          type: 'advanced-config',
-          position: {
-            x: categoryPos.x + NODE_SIZES.category.width + 60,
-            y: categoryPos.y - NODE_SIZES.advanced.height / 2 + NODE_SIZES.category.height / 2
-          },
-          data: {
-            enablePlanning: data.agent?.enablePlanning || false,
-            enableMemory: data.agent?.enableMemory || false,
-            enableMemoryCompression: data.agent?.enableMemoryCompression || false,
-            structuredOutputEnabled: data.agent?.structuredOutputEnabled || false,
-            maxIterations: data.agent?.maxIterations || 10,
-            maxSubtasks: data.agent?.maxSubtasks || 5
-          },
-          draggable: true
-        })
-        break
-
-      case 'sensitive':
-        if (data.sensitiveConfig) {
-          result.push({
-            id: `sensitive-${data.sensitiveConfig.id}`,
-            type: 'sensitive-item',
-            position: {
-              x: categoryPos.x + NODE_SIZES.category.width + 60,
-              y: categoryPos.y - NODE_SIZES.item.height / 2 + NODE_SIZES.category.height / 2
-            },
-            data: { sensitive: data.sensitiveConfig },
-            draggable: true
-          })
-        }
-        break
     }
+  })
+
+  // 直连节点（模型配置、提示词、高级配置、敏感词）放置在中心节点下方
+  const directNodes: { id: string; type: string; data: Record<string, unknown>; width: number }[] = []
+
+  // 模型配置节点
+  directNodes.push({
+    id: 'model-config',
+    type: 'model',
+    data: {
+      modelConfig: data.modelConfig,
+      provider: data.modelProvider,
+      paramsOverride: data.agent?.modelParamsOverride || null
+    },
+    width: NODE_SIZES.model.width
+  })
+
+  // 提示词节点
+  directNodes.push({
+    id: 'prompt-config',
+    type: 'prompt',
+    data: {
+      promptTemplate: data.promptTemplate,
+      followTemplate: data.agent?.followTemplate || false,
+      systemPrompt: data.agent?.systemPrompt || ''
+    },
+    width: NODE_SIZES.prompt.width
+  })
+
+  // 高级配置节点
+  directNodes.push({
+    id: 'advanced-config',
+    type: 'advanced-config',
+    data: {
+      enablePlanning: data.agent?.enablePlanning || false,
+      enableMemory: data.agent?.enableMemory || false,
+      enableMemoryCompression: data.agent?.enableMemoryCompression || false,
+      structuredOutputEnabled: data.agent?.structuredOutputEnabled || false,
+      maxIterations: data.agent?.maxIterations || 10,
+      maxSubtasks: data.agent?.maxSubtasks || 5
+    },
+    width: NODE_SIZES.advanced.width
+  })
+
+  // 敏感词节点（仅在启用时显示）
+  if (data.agent?.sensitiveFilterEnabled && data.sensitiveConfig) {
+    directNodes.push({
+      id: `sensitive-${data.sensitiveConfig.id}`,
+      type: 'sensitive-item',
+      data: { sensitive: data.sensitiveConfig },
+      width: NODE_SIZES.item.width
+    })
+  }
+
+  // 计算直连节点的水平布局
+  const totalDirectWidth = directNodes.reduce((sum, node) => sum + node.width, 0)
+  const totalSpacing = (directNodes.length - 1) * 40 // 节点间距
+  const startX = LAYOUT.centerX - (totalDirectWidth + totalSpacing) / 2
+
+  let currentX = startX
+  directNodes.forEach((node) => {
+    result.push({
+      id: node.id,
+      type: node.type,
+      position: {
+        x: currentX,
+        y: LAYOUT.directNodeY
+      },
+      data: node.data,
+      draggable: true
+    })
+    currentX += node.width + 40
   })
 
   return result
@@ -365,16 +369,17 @@ const edges = computed<Edge[]>(() => {
 
   const result: Edge[] = []
 
+  // 统一边样式
+  const edgeStyle = { stroke: '#d9d9d9', strokeWidth: 1.5 }
+
   // 中心到分类的连线
   activeCategories.value.forEach((category) => {
-    const config = CATEGORY_CONFIGS[category]
     result.push({
       id: `e-center-${category}`,
       source: 'center',
       target: `category-${category}`,
-      type: 'smoothstep',
-      animated: true,
-      style: { stroke: config.color, strokeWidth: 2 }
+      type: 'default',
+      style: edgeStyle
     })
 
     // 分类到配置项的连线
@@ -384,11 +389,9 @@ const edges = computed<Edge[]>(() => {
           result.push({
             id: `e-category-tool-${tool.id}`,
             source: `category-${category}`,
-            sourceHandle: 'right',
             target: `tool-${tool.id}`,
-            targetHandle: 'left',
-            type: 'smoothstep',
-            style: { stroke: config.borderColor, strokeWidth: 1.5 }
+            type: 'default',
+            style: edgeStyle
           })
         })
         break
@@ -398,11 +401,9 @@ const edges = computed<Edge[]>(() => {
           result.push({
             id: `e-category-hook-${hook.id}`,
             source: `category-${category}`,
-            sourceHandle: 'right',
             target: `hook-${hook.id}`,
-            targetHandle: 'left',
-            type: 'smoothstep',
-            style: { stroke: config.borderColor, strokeWidth: 1.5 }
+            type: 'default',
+            style: edgeStyle
           })
         })
         break
@@ -412,11 +413,9 @@ const edges = computed<Edge[]>(() => {
           result.push({
             id: `e-category-skill-${skill.id}`,
             source: `category-${category}`,
-            sourceHandle: 'right',
             target: `skill-${skill.id}`,
-            targetHandle: 'left',
-            type: 'smoothstep',
-            style: { stroke: config.borderColor, strokeWidth: 1.5 }
+            type: 'default',
+            style: edgeStyle
           })
         })
         break
@@ -426,11 +425,9 @@ const edges = computed<Edge[]>(() => {
           result.push({
             id: `e-category-mcp-${mcp.id}`,
             source: `category-${category}`,
-            sourceHandle: 'right',
             target: `mcp-${mcp.id}`,
-            targetHandle: 'left',
-            type: 'smoothstep',
-            style: { stroke: config.borderColor, strokeWidth: 1.5 }
+            type: 'default',
+            style: edgeStyle
           })
         })
         break
@@ -440,11 +437,9 @@ const edges = computed<Edge[]>(() => {
           result.push({
             id: `e-category-knowledge-${kb.id}`,
             source: `category-${category}`,
-            sourceHandle: 'right',
             target: `knowledge-${kb.id}`,
-            targetHandle: 'left',
-            type: 'smoothstep',
-            style: { stroke: config.borderColor, strokeWidth: 1.5 }
+            type: 'default',
+            style: edgeStyle
           })
         })
         break
@@ -454,66 +449,50 @@ const edges = computed<Edge[]>(() => {
           result.push({
             id: `e-category-agent-${agent.id}`,
             source: `category-${category}`,
-            sourceHandle: 'right',
             target: `agent-${agent.id}`,
-            targetHandle: 'left',
-            type: 'smoothstep',
-            style: { stroke: config.borderColor, strokeWidth: 1.5 }
+            type: 'default',
+            style: edgeStyle
           })
         })
-        break
-
-      case 'model':
-        result.push({
-          id: `e-category-model`,
-          source: `category-${category}`,
-          sourceHandle: 'right',
-          target: 'model-config',
-          targetHandle: 'left',
-          type: 'smoothstep',
-          style: { stroke: config.borderColor, strokeWidth: 1.5 }
-        })
-        break
-
-      case 'prompt':
-        result.push({
-          id: `e-category-prompt`,
-          source: `category-${category}`,
-          sourceHandle: 'right',
-          target: 'prompt-config',
-          targetHandle: 'left',
-          type: 'smoothstep',
-          style: { stroke: config.borderColor, strokeWidth: 1.5 }
-        })
-        break
-
-      case 'advanced':
-        result.push({
-          id: `e-category-advanced`,
-          source: `category-${category}`,
-          sourceHandle: 'right',
-          target: 'advanced-config',
-          targetHandle: 'left',
-          type: 'smoothstep',
-          style: { stroke: config.borderColor, strokeWidth: 1.5 }
-        })
-        break
-
-      case 'sensitive':
-        if (data.sensitiveConfig) {
-          result.push({
-            id: `e-category-sensitive`,
-            source: `category-${category}`,
-            sourceHandle: 'right',
-            target: `sensitive-${data.sensitiveConfig.id}`,
-            targetHandle: 'left',
-            type: 'smoothstep',
-            style: { stroke: config.borderColor, strokeWidth: 1.5 }
-          })
-        }
         break
     }
   })
+
+  // 中心直连四个配置节点的连线
+  result.push({
+    id: 'e-center-model',
+    source: 'center',
+    target: 'model-config',
+    type: 'default',
+    style: edgeStyle
+  })
+
+  result.push({
+    id: 'e-center-prompt',
+    source: 'center',
+    target: 'prompt-config',
+    type: 'default',
+    style: edgeStyle
+  })
+
+  result.push({
+    id: 'e-center-advanced',
+    source: 'center',
+    target: 'advanced-config',
+    type: 'default',
+    style: edgeStyle
+  })
+
+  // 敏感词节点连线（仅在启用时）
+  if (data.agent?.sensitiveFilterEnabled && data.sensitiveConfig) {
+    result.push({
+      id: 'e-center-sensitive',
+      source: 'center',
+      target: `sensitive-${data.sensitiveConfig.id}`,
+      type: 'default',
+      style: edgeStyle
+    })
+  }
 
   return result
 })

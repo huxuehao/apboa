@@ -51,10 +51,10 @@ const descriptionText = computed(() => {
     </div>
 
     <div class="node-footer">
-      <ATag size="small" :color="data.tool.toolType === 'BUILTIN' ? 'blue' : 'green'">
+      <ATag :bordered="false" size="small" :color="data.tool.toolType === 'BUILTIN' ? 'blue' : 'green'">
         {{ toolTypeText }}
       </ATag>
-      <ATag size="small" color="default" v-if="data.tool.category">
+      <ATag :bordered="false" size="small" color="default" v-if="data.tool.category">
         {{ data.tool.category }}
       </ATag>
     </div>
@@ -72,9 +72,7 @@ const descriptionText = computed(() => {
   transition: all 0.2s ease;
 
   &:hover {
-    transform: translateX(4px);
-    border-color: #1890ff;
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
   }
 
   &.disabled {
@@ -145,8 +143,9 @@ const descriptionText = computed(() => {
   :deep(.vue-flow__handle) {
     width: 8px;
     height: 8px;
-    background: #91d5ff;
-    border: 2px solid #1890ff;
+    background: transparent;
+    border: none;
+    opacity: 0;
   }
 }
 </style>

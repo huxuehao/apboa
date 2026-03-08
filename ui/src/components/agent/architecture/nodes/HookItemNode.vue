@@ -51,10 +51,10 @@ const descriptionText = computed(() => {
     </div>
 
     <div class="node-footer">
-      <ATag size="small" :color="data.hook.hookType === 'BUILTIN' ? 'magenta' : 'pink'">
+      <ATag size="small" :bordered="false" :color="data.hook.hookType === 'BUILTIN' ? 'magenta' : 'pink'">
         {{ hookTypeText }}
       </ATag>
-      <ATag size="small" color="default" v-if="data.hook.priority">
+      <ATag size="small" :bordered="false" color="default" v-if="data.hook.priority">
         优先级: {{ data.hook.priority }}
       </ATag>
     </div>
@@ -72,9 +72,7 @@ const descriptionText = computed(() => {
   transition: all 0.2s ease;
 
   &:hover {
-    transform: translateX(4px);
-    border-color: #eb2f96;
-    box-shadow: 0 4px 12px rgba(235, 47, 150, 0.15);
+    box-shadow: 0 4px 12px rgba(235, 47, 150, 0.3);
   }
 
   &.disabled {
@@ -145,8 +143,9 @@ const descriptionText = computed(() => {
   :deep(.vue-flow__handle) {
     width: 8px;
     height: 8px;
-    background: #ffadd2;
-    border: 2px solid #eb2f96;
+    background: transparent;
+    border: none;
+    opacity: 0;
   }
 }
 </style>

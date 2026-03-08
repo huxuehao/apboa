@@ -53,10 +53,10 @@ const descriptionText = computed(() => {
 
     <div class="node-content">
       <div class="node-type">
-        <ATag :color="data.agent.agentType === 'CUSTOM' ? 'purple' : 'blue'">
+        <ATag :color="data.agent.agentType === 'CUSTOM' ? 'purple' : 'blue'" :bordered="false">
           {{ agentTypeText }}
         </ATag>
-        <ATag v-if="data.agent.tag" color="default">{{ data.agent.tag }}</ATag>
+        <ATag v-if="data.agent.tag" color="default" :bordered="false">{{ data.agent.tag }}</ATag>
       </div>
       <div class="node-desc" :title="data.agent.description">
         {{ descriptionText }}
@@ -70,12 +70,14 @@ const descriptionText = computed(() => {
   width: 280px;
   min-height: 160px;
   padding: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ffffff;
   border-radius: 16px;
-  color: white;
-  box-shadow:
-    0 10px 40px rgba(102, 126, 234, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  color: #333333;
+  box-shadow:0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
 
   .node-header {
     display: flex;
@@ -89,10 +91,10 @@ const descriptionText = computed(() => {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255, 255, 255, 0.2);
+      background-color: #E8EAF6;
       border-radius: 12px;
       font-size: 24px;
-      backdrop-filter: blur(10px);
+      color: #4449D0;
     }
 
     .node-title {
@@ -106,11 +108,12 @@ const descriptionText = computed(() => {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        color: #1a1a1a;
       }
 
       .node-code {
         font-size: 12px;
-        opacity: 0.8;
+        color: #8c8c8c;
         font-family: 'Monaco', 'Menlo', monospace;
         margin-top: 2px;
       }
@@ -126,7 +129,6 @@ const descriptionText = computed(() => {
 
       :deep(.ant-tag) {
         margin: 0;
-        border: none;
         font-size: 11px;
       }
     }
@@ -134,7 +136,7 @@ const descriptionText = computed(() => {
     .node-desc {
       font-size: 12px;
       line-height: 1.5;
-      opacity: 0.9;
+      color: #666666;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -143,10 +145,18 @@ const descriptionText = computed(() => {
   }
 
   :deep(.vue-flow__handle) {
-    width: 10px;
-    height: 10px;
-    background: rgba(255, 255, 255, 0.8);
-    border: 2px solid #667eea;
+    width: 1px;
+    height: 1px;
+    background: transparent;
+    border: none;
+    opacity: 0;
   }
+}
+</style>
+<style>
+.vue-flow__node.selected {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 </style>

@@ -44,7 +44,7 @@ const descriptionText = computed(() => {
     </div>
 
     <div class="node-footer">
-      <ATag size="small" color="purple" v-if="data.skill.category">
+      <ATag :bordered="false" size="small" color="purple" v-if="data.skill.category">
         {{ data.skill.category }}
       </ATag>
     </div>
@@ -62,9 +62,7 @@ const descriptionText = computed(() => {
   transition: all 0.2s ease;
 
   &:hover {
-    transform: translateX(4px);
-    border-color: #722ed1;
-    box-shadow: 0 4px 12px rgba(114, 46, 209, 0.15);
+    box-shadow: 0 4px 12px rgba(114, 46, 209, 0.3);
   }
 
   &.disabled {
@@ -135,8 +133,9 @@ const descriptionText = computed(() => {
   :deep(.vue-flow__handle) {
     width: 8px;
     height: 8px;
-    background: #d3adf7;
-    border: 2px solid #722ed1;
+    background: transparent;
+    border: none;
+    opacity: 0;
   }
 }
 </style>

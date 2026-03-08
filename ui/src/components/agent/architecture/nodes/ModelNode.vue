@@ -59,7 +59,7 @@ const hasOverride = computed(() => {
           {{ data.provider.name }}
         </div>
       </div>
-      <ATag v-if="hasOverride" color="orange" size="small">已覆盖</ATag>
+      <ATag v-if="hasOverride" :bordered="false" color="orange" size="small">已覆盖</ATag>
     </div>
 
     <template v-if="data.modelConfig">
@@ -125,6 +125,11 @@ const hasOverride = computed(() => {
   border: 1px solid #fff7e6;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(250, 140, 22, 0.08);
+  transition: all 0.2s ease;
+  &:hover {
+    box-shadow: 0 4px 12px rgba(250, 140, 22, 0.3);
+  }
+
 
   .node-header {
     display: flex;
@@ -271,8 +276,9 @@ const hasOverride = computed(() => {
   :deep(.vue-flow__handle) {
     width: 8px;
     height: 8px;
-    background: #ffd591;
-    border: 2px solid #fa8c16;
+    background: transparent;
+    border: none;
+    opacity: 0;
   }
 }
 </style>

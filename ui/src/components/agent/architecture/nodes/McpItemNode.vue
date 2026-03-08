@@ -51,10 +51,10 @@ const descriptionText = computed(() => {
     </div>
 
     <div class="node-footer">
-      <ATag size="small" color="green">
+      <ATag size="small" :bordered="false" color="green">
         {{ data.mcp.protocol }}
       </ATag>
-      <ATag size="small" color="default">
+      <ATag size="small" :bordered="false" color="default">
         {{ modeText }}
       </ATag>
     </div>
@@ -72,9 +72,7 @@ const descriptionText = computed(() => {
   transition: all 0.2s ease;
 
   &:hover {
-    transform: translateX(4px);
-    border-color: #52c41a;
-    box-shadow: 0 4px 12px rgba(82, 196, 26, 0.15);
+    box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
   }
 
   &.disabled {
@@ -145,8 +143,9 @@ const descriptionText = computed(() => {
   :deep(.vue-flow__handle) {
     width: 8px;
     height: 8px;
-    background: #b7eb8f;
-    border: 2px solid #52c41a;
+    background: transparent;
+    border: none;
+    opacity: 0;
   }
 }
 </style>

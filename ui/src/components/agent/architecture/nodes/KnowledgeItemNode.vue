@@ -56,10 +56,10 @@ const descriptionText = computed(() => {
     </div>
 
     <div class="node-footer">
-      <ATag size="small" color="cyan">
+      <ATag size="small" :bordered="false" color="cyan">
         {{ kbTypeText }}
       </ATag>
-      <ATag size="small" color="default" v-if="data.knowledge.ragMode">
+      <ATag size="small" :bordered="false" color="default" v-if="data.knowledge.ragMode">
         {{ data.knowledge.ragMode }}
       </ATag>
     </div>
@@ -77,9 +77,7 @@ const descriptionText = computed(() => {
   transition: all 0.2s ease;
 
   &:hover {
-    transform: translateX(4px);
-    border-color: #13c2c2;
-    box-shadow: 0 4px 12px rgba(19, 194, 194, 0.15);
+    box-shadow: 0 4px 12px rgba(19, 194, 194, 0.3);
   }
 
   &.disabled {
@@ -150,8 +148,9 @@ const descriptionText = computed(() => {
   :deep(.vue-flow__handle) {
     width: 8px;
     height: 8px;
-    background: #87e8de;
-    border: 2px solid #13c2c2;
+    background: transparent;
+    border: none;
+    opacity: 0;
   }
 }
 </style>

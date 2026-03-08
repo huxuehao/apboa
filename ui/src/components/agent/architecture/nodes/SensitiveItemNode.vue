@@ -56,10 +56,10 @@ const actionText = computed(() => {
     </div>
 
     <div class="node-footer">
-      <ATag size="small" color="red">
+      <ATag :bordered="false" size="small" color="red">
         {{ actionText }}
       </ATag>
-      <ATag size="small" color="default" v-if="data.sensitive.category">
+      <ATag :bordered="false" size="small" color="default" v-if="data.sensitive.category">
         {{ data.sensitive.category }}
       </ATag>
     </div>
@@ -77,9 +77,7 @@ const actionText = computed(() => {
   transition: all 0.2s ease;
 
   &:hover {
-    transform: translateX(4px);
-    border-color: #f5222d;
-    box-shadow: 0 4px 12px rgba(245, 34, 45, 0.15);
+    box-shadow: 0 4px 12px rgba(245, 34, 45, 0.3);
   }
 
   &.disabled {
@@ -150,8 +148,9 @@ const actionText = computed(() => {
   :deep(.vue-flow__handle) {
     width: 8px;
     height: 8px;
-    background: #ffa39e;
-    border: 2px solid #f5222d;
+    background: transparent;
+    border: none;
+    opacity: 0;
   }
 }
 </style>

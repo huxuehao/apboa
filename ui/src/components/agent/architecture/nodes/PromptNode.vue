@@ -76,7 +76,6 @@ function toggleExpand() {
         </div>
       </div>
       <div class="node-actions">
-        <ATag v-if="data.followTemplate" color="blue" size="small">跟随模板</ATag>
         <AButton type="text" size="small" @click="toggleExpand">
           <CompressOutlined v-if="expanded" />
           <ExpandOutlined v-else />
@@ -91,7 +90,8 @@ function toggleExpand() {
     </div>
 
     <div class="node-footer" v-if="data.promptTemplate">
-      <ATag size="small" color="default" v-if="data.promptTemplate.category">
+      <ATag v-if="data.followTemplate" :bordered="false" color="blue" size="small">跟随模板</ATag>
+      <ATag size="small" :bordered="false" color="default" v-if="data.promptTemplate.category">
         {{ data.promptTemplate.category }}
       </ATag>
     </div>
@@ -107,6 +107,9 @@ function toggleExpand() {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(47, 84, 235, 0.08);
   transition: all 0.3s ease;
+  &:hover {
+    box-shadow: 0 4px 12px rgba(47, 84, 235, 0.3);
+  }
 
   &.expanded {
     width: 360px;
@@ -202,8 +205,9 @@ function toggleExpand() {
   :deep(.vue-flow__handle) {
     width: 8px;
     height: 8px;
-    background: #adc6ff;
-    border: 2px solid #2f54eb;
+    background: transparent;
+    border: none;
+    opacity: 0;
   }
 }
 </style>

@@ -80,9 +80,8 @@ const iconMap: Record<string, typeof ToolOutlined> = {
   transition: all 0.2s ease;
 
   &:hover {
-    transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: var(--node-color);
+    // border-color: var(--node-color);
   }
 
   .node-icon {
@@ -105,7 +104,7 @@ const iconMap: Record<string, typeof ToolOutlined> = {
     .node-label {
       font-size: 13px;
       font-weight: 600;
-      color: var(--node-color);
+      color: #474747;
       white-space: nowrap;
     }
 
@@ -119,8 +118,9 @@ const iconMap: Record<string, typeof ToolOutlined> = {
   :deep(.vue-flow__handle) {
     width: 8px;
     height: 8px;
-    background: var(--node-border-color);
-    border: 2px solid var(--node-color);
+    background: transparent;
+    border: none;
+    opacity: 0;
   }
 }
 </style>

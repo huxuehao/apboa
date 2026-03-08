@@ -54,10 +54,10 @@ const descriptionText = computed(() => {
     </div>
 
     <div class="node-footer">
-      <ATag size="small" :color="data.agent.agentType === 'CUSTOM' ? 'purple' : 'blue'">
+      <ATag size="small" :bordered="false" :color="data.agent.agentType === 'CUSTOM' ? 'purple' : 'blue'">
         {{ agentTypeText }}
       </ATag>
-      <ATag size="small" color="default" v-if="data.agent.tag">
+      <ATag size="small" :bordered="false" color="default" v-if="data.agent.tag">
         {{ data.agent.tag }}
       </ATag>
     </div>
@@ -75,9 +75,7 @@ const descriptionText = computed(() => {
   transition: all 0.2s ease;
 
   &:hover {
-    transform: translateX(4px);
-    border-color: #5b69d6;
-    box-shadow: 0 4px 12px rgba(91, 105, 214, 0.15);
+    box-shadow: 0 4px 12px rgba(91, 105, 214, 0.3);
   }
 
   &.disabled {
@@ -159,8 +157,9 @@ const descriptionText = computed(() => {
   :deep(.vue-flow__handle) {
     width: 8px;
     height: 8px;
-    background: #adc6ff;
-    border: 2px solid #5b69d6;
+    background: transparent;
+    border: none;
+    opacity: 0;
   }
 }
 </style>

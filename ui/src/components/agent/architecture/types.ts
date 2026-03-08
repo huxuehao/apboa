@@ -212,70 +212,70 @@ export const CATEGORY_CONFIGS: Record<CategoryType, Omit<CategoryConfig, 'type'>
     label: '工具',
     icon: 'ToolOutlined',
     color: '#1890ff',
-    bgColor: '#e6f7ff',
-    borderColor: '#91d5ff'
+    bgColor: '#FFFFFF',
+    borderColor: '#e7e7e7'
   },
   hook: {
     label: '钩子',
     icon: 'LoginOutlined',
     color: '#eb2f96',
-    bgColor: '#fff0f6',
-    borderColor: '#ffadd2'
+    bgColor: '#FFFFFF',
+    borderColor: '#e7e7e7'
   },
   skill: {
     label: '技能包',
     icon: 'AppstoreOutlined',
     color: '#722ed1',
-    bgColor: '#f9f0ff',
-    borderColor: '#d3adf7'
+    bgColor: '#FFFFFF',
+    borderColor: '#e7e7e7'
   },
   mcp: {
     label: 'MCP服务',
     icon: 'CloudServerOutlined',
     color: '#52c41a',
-    bgColor: '#f6ffed',
-    borderColor: '#b7eb8f'
+    bgColor: '#FFFFFF',
+    borderColor: '#e7e7e7'
   },
   knowledge: {
     label: '知识库',
     icon: 'DatabaseOutlined',
     color: '#13c2c2',
-    bgColor: '#e6fffb',
-    borderColor: '#87e8de'
+    bgColor: '#FFFFFF',
+    borderColor: '#e7e7e7'
   },
   'sub-agent': {
     label: '子智能体',
     icon: 'RobotOutlined',
     color: '#5b69d6',
-    bgColor: '#f0f5ff',
-    borderColor: '#adc6ff'
+    bgColor: '#FFFFFF',
+    borderColor: '#e7e7e7'
   },
   model: {
     label: '模型配置',
     icon: 'ThunderboltOutlined',
-    color: '#fa8c16',
-    bgColor: '#fff7e6',
-    borderColor: '#ffd591'
+    color: '#e7e7e7',
+    bgColor: '#FFFFFF',
+    borderColor: '#e7e7e7'
   },
   prompt: {
     label: '提示词',
     icon: 'FileTextOutlined',
     color: '#2f54eb',
-    bgColor: '#f0f5ff',
+    bgColor: '#FFFFFF',
     borderColor: '#adc6ff'
   },
   advanced: {
     label: '高级配置',
     icon: 'SettingOutlined',
     color: '#595959',
-    bgColor: '#fafafa',
+    bgColor: '#FFFFFF',
     borderColor: '#d9d9d9'
   },
   sensitive: {
     label: '敏感词',
     icon: 'SafetyCertificateOutlined',
     color: '#f5222d',
-    bgColor: '#fff1f0',
+    bgColor: '#FFFFFF',
     borderColor: '#ffa39e'
   }
 }

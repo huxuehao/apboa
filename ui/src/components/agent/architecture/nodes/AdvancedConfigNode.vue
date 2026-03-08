@@ -110,6 +110,10 @@ defineProps<{
   border: 1px solid #f0f0f0;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
 
   .node-header {
     display: flex;
@@ -227,8 +231,9 @@ defineProps<{
   :deep(.vue-flow__handle) {
     width: 8px;
     height: 8px;
-    background: #d9d9d9;
-    border: 2px solid #595959;
+    background: transparent;
+    border: none;
+    opacity: 0;
   }
 }
 </style>
