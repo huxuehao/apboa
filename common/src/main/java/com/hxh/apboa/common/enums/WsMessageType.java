@@ -17,7 +17,7 @@ public enum WsMessageType {
     /**
      * 账号
      */
-    USER,
+    CLIENT,
     /**
      * 账号角色变化
      */

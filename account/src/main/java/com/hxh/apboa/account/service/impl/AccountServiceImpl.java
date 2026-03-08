@@ -16,11 +16,13 @@ import com.hxh.apboa.common.enums.WsMessageType;
 import com.hxh.apboa.common.exception.NotAuthException;
 import com.hxh.apboa.common.message.AccountRoleChangeMessage;
 import com.hxh.apboa.common.util.*;
-import com.hxh.apboa.ws.config.ApboaWebSocketSessionManager;
-import com.hxh.apboa.ws.context.ApboaWebSocketSession;
-import com.hxh.apboa.ws.handler.ServiceMessageHandlerAdapter;
-import com.hxh.apboa.ws.handler.server.ServerMessageHandler;
-import com.hxh.apboa.ws.model.WsServerMessage;
+import com.hxh.apboa.websocket.model.WsServerMessage;
+import com.hxh.apboa.websocket.service.WebSocketPushService;
+//import com.hxh.apboa.ws.config.ApboaWebSocketSessionManager;
+//import com.hxh.apboa.ws.context.ApboaWebSocketSession;
+//import com.hxh.apboa.ws.handler.ServiceMessageHandlerAdapter;
+//import com.hxh.apboa.ws.handler.server.ServerMessageHandler;
+//import com.hxh.apboa.ws.model.WsServerMessage;
 import com.hxh.apboa.params.core.ParamsAdapter;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +45,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     private final RedisUtils redisUtils;
     private final ParamsAdapter paramsAdapter;
     private final AccountRoleService accountRoleService;
+    private final WebSocketPushService webSocketPushService;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -338,19 +341,28 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
      */
     private void senRoleChangeNoticeUseWs(String accountId, Role role) {
         try {
-            List<ApboaWebSocketSession> sessions = ApboaWebSocketSessionManager.getSessionByAccountId(accountId);
-            ServerMessageHandler messageHandler = ServiceMessageHandlerAdapter.getHandler(WsMessageType.ACCOUNT_ROLE_CHANGE);
-            sessions.forEach(session -> {
-                WsServerMessage message = new WsServerMessage(
-                        WsMessageType.ACCOUNT_ROLE_CHANGE,
-                        AccountRoleChangeMessage
-                                .builder()
-                                .accountId(accountId)
-                                .role(role)
-                                .build());
+            webSocketPushService.pushToUserCluster(accountId,
+                    WsServerMessage.build(
+                            WsMessageType.ACCOUNT_ROLE_CHANGE.name(),
+                            AccountRoleChangeMessage
+                                    .builder()
+                                    .accountId(accountId)
+                                    .role(role)
+                                    .build()));
 
-                messageHandler.handle(session, message);
-            });
+//            List<ApboaWebSocketSession> sessions = ApboaWebSocketSessionManager.getSessionByAccountId(accountId);
+//            ServerMessageHandler messageHandler = ServiceMessageHandlerAdapter.getHandler(WsMessageType.ACCOUNT_ROLE_CHANGE);
+//            sessions.forEach(session -> {
+//                WsServerMessage message = new WsServerMessage(
+//                        WsMessageType.ACCOUNT_ROLE_CHANGE,
+//                        AccountRoleChangeMessage
+//                                .builder()
+//                                .accountId(accountId)
+//                                .role(role)
+//                                .build());
+//
+//                messageHandler.handle(session, message);
+//            });
         } catch (Exception ignored) {}
     }
 }

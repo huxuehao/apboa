@@ -8,7 +8,7 @@ export const WS_CONFIG = {
 };
 
 export const WS_MESSAGE_TYPES = {
-  USER: 'USER',
+  CLIENT: 'CLIENT',
   ACCOUNT_ROLE_CHANGE: 'ACCOUNT_ROLE_CHANGE',
   PING: 'PING',
   PONG: 'PONG',

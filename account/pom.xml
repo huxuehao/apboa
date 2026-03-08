@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>com.hxh.apboa</groupId>
-            <artifactId>ws</artifactId>
+            <artifactId>websocket</artifactId>
         </dependency>
     </dependencies>
 </project>

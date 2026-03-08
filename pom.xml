@@ -20,10 +20,10 @@
     <module>console</module>
     <module>account</module>
     <module>core</module>
-    <module>ws</module>
     <module>resource</module>
     <module>params</module>
     <module>a2a</module>
+    <module>websocket</module>
   </modules>
 
   <properties>
@@ -202,6 +202,11 @@
       <dependency>
         <groupId>com.hxh.apboa</groupId>
         <artifactId>a2a</artifactId>
+        <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>com.hxh.apboa</groupId>
+        <artifactId>websocket</artifactId>
         <version>1.0-SNAPSHOT</version>
       </dependency>
     </dependencies>

@@ -11,9 +11,9 @@ import { useAccountStore } from '@/stores'
 import { UndoOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons-vue'
 import { Modal } from "ant-design-vue";
 import SettingsModal from '@/components/settings/SettingsModal.vue'
-import { useWebSocket } from '@/composables/useWebSocket';
+// import { useWebSocket } from '@/composables/useWebSocket';
 
-const { disconnectWS } = useWebSocket();
+// const { disconnectWS } = useWebSocket();
 
 const router = useRouter()
 const { logout, setRefresh, userInfo} = useAccountStore()
@@ -66,7 +66,7 @@ const handleMenuClick = async ({ key }: { key: string }) => {
       content: '确认退出当前系统,是否继续?',
       onOk: async () => {
         await logout()
-        disconnectWS()
+        // disconnectWS()
         await router.push(RoutePaths.LOGIN)
       }
     })

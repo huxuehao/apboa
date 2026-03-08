@@ -34,10 +34,10 @@ export class MessageHandler {
       ...userInfo,
     };
 
-    this.sendMessage({
-      type: WS_MESSAGE_TYPES.USER,
-      content: JSON.stringify(userInfoMessage),
-    });
+    // this.sendMessage({
+    //   type: WS_MESSAGE_TYPES.USER,
+    //   content: JSON.stringify(userInfoMessage),
+    // });
   }
 
   private sendMessage(message: WebSocketMessage) {

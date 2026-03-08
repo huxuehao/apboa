@@ -12,11 +12,8 @@ import type { FormInstance, Rule } from 'ant-design-vue/es/form'
 import type { LoginRequest } from '@/types'
 import { AuthContainer } from '@/components/auth'
 import { useAccountStore } from '@/stores'
-import { useWebSocket } from '@/composables/useWebSocket';
 import { md5 } from 'js-md5'
 import { RoutePaths } from '@/router/constants.ts'
-
-const { initWS } = useWebSocket();
 
 interface LoginForm extends LoginRequest {
   remember: boolean
@@ -60,8 +57,10 @@ const handleLogin = async () => {
       localStorage.removeItem('remember')
       localStorage.removeItem('username')
     }
-    await initWS()
-    await router.push(RoutePaths.AGENT)
+    location.reload();
+    setTimeout(() => {
+      router.push(RoutePaths.AGENT)
+    }, 100);
   } catch (error) {
     console.error('登录失败:', error)
   } finally {
