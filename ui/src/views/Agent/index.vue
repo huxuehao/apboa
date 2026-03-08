@@ -17,6 +17,7 @@ import AgentCard from '@/components/agent/AgentCard.vue'
 import CreateCard from '@/components/agent/CreateCard.vue'
 import AgentForm from '@/components/agent/AgentForm.vue'
 import AgentA2aForm from '@/components/agent/AgentA2aForm.vue'
+import AgentArchitectureDiagram from '@/components/agent/architecture/AgentArchitectureDiagram.vue'
 
 const store = useAgentStore()
 const { list, tags, selectedAgentType, selectedTag, keyword, loading, hasMore } = storeToRefs(store)
@@ -29,6 +30,10 @@ const loadMoreObserver = ref<IntersectionObserver>()
 const a2aFormVisible = ref<boolean>(false)
 /** A2A 类型（新建时传入） */
 const currentA2aType = ref<'WELLKNOWN' | 'NACOS' | undefined>(undefined)
+/** 架构图弹窗可见性 */
+const architectureVisible = ref<boolean>(false)
+/** 当前查看架构图的智能体ID */
+const currentArchitectureId = ref<string>('')
 
 /**
  * 智能体类型选项
@@ -279,6 +284,16 @@ function handleAccessLog(id: string) {
 }
 
 /**
+ * 处理查看架构图
+ *
+ * @param id 智能体 ID
+ */
+function handleArchitecture(id: string) {
+  currentArchitectureId.value = id
+  architectureVisible.value = true
+}
+
+/**
  * 处理状态
  */
 async function handleEnable(id: string) {
@@ -403,6 +418,7 @@ onUnmounted(() => {
           @delete="handleDelete"
           @go-visit="handleGoVisit"
           @access-log="handleAccessLog"
+          @architecture="handleArchitecture"
         />
       </div>
 
@@ -435,6 +451,20 @@ onUnmounted(() => {
       :tags="tags"
       @success="handleFormSuccess"
     />
+
+    <!-- 架构图弹窗 -->
+    <AModal
+      v-model:open="architectureVisible"
+      title="智能体架构图"
+      :footer="null"
+      wrap-class-name="full-modal"
+      destroyOnClose
+    >
+      <AgentArchitectureDiagram
+        v-if="currentArchitectureId"
+        :agent-id="currentArchitectureId"
+      />
+    </AModal>
   </div>
 </template>
 

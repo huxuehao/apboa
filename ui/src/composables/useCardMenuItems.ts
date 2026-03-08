@@ -14,7 +14,8 @@ import {
   MessageOutlined,
   HistoryOutlined,
   DeleteOutlined,
-  SettingOutlined
+  SettingOutlined,
+  ApartmentOutlined
 } from '@ant-design/icons-vue'
 
 /** 菜单项类型（兼容 Ant Design Menu items） */
@@ -81,6 +82,13 @@ export function createConfigItem(): CardMenuItem {
  */
 export function createProtocolConfigItem(): CardMenuItem {
   return { key: 'protocolConfig', label: '协议配置', icon: () => h(SettingOutlined) }
+}
+
+/**
+ * 创建「架构图」菜单项
+ */
+export function createArchitectureItem(): CardMenuItem {
+  return { key: 'architecture', label: '架构图', icon: () => h(ApartmentOutlined) }
 }
 
 /**

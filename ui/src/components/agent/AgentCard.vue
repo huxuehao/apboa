@@ -15,6 +15,7 @@ import {
   createDeleteItem,
   createGoVisitItem,
   createAccessLogItem,
+  createArchitectureItem,
   createDivider,
 } from '@/composables/useCardMenuItems'
 
@@ -37,6 +38,7 @@ const emit = defineEmits<{
   enable: [id: string]
   goVisit: [id: string]
   accessLog: [id: string]
+  architecture: [id: string]
 }>()
 
 /**
@@ -59,10 +61,16 @@ const formattedTime = computed(() => {
  */
 const hasReadOnly = accountStore.roles.some(role => ['READ_ONLY'].includes(role))
 const menuItems = computed(() => {
+  // 架构图菜单项（仅自定义类型显示）
+  const architectureItem = props.data.agentType === 'CUSTOM'
+    ? [createArchitectureItem(), createDivider()]
+    : []
+
   if (hasReadOnly) {
     return [
       createViewItem(),
       createDivider(),
+      ...architectureItem,
       createGoVisitItem(),
       createAccessLogItem(),
     ]
@@ -72,6 +80,7 @@ const menuItems = computed(() => {
     createEditItem(),
     createEnableItem(props.data.enabled),
     createDivider(),
+    ...architectureItem,
     createGoVisitItem(),
     createAccessLogItem(),
     createDivider(),
@@ -101,6 +110,9 @@ function handleMenuClick({ key }: { key: string }) {
       break
     case 'accessLog':
       emit('accessLog', props.data.id)
+      break
+    case 'architecture':
+      emit('architecture', props.data.id)
       break
   }
 }

@@ -1,0 +1,129 @@
+/**
+ * 智能体架构图样式
+ *
+ * @author huxuehao
+ */
+
+.agent-architecture-diagram {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+  position: relative;
+
+  .diagram-container {
+    width: 100%;
+    height: calc(100vh - 72px);
+    min-height: 600px;
+  }
+
+  // Vue Flow 基础样式
+  :deep(.vue-flow) {
+    background: transparent;
+  }
+
+  // 节点通用样式
+  :deep(.vue-flow__node) {
+    border-radius: 12px;
+
+    &.selected {
+      box-shadow: 0 0 0 2px #667eea;
+    }
+  }
+
+  // 连线动画
+  :deep(.vue-flow__edge.animated path) {
+    animation: flowAnimation 1.5s linear infinite;
+    stroke-dasharray: 6 3;
+  }
+
+  @keyframes flowAnimation {
+    from {
+      stroke-dashoffset: 9;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  // 连线样式
+  :deep(.vue-flow__edge path) {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  // 小地图样式
+  :deep(.vue-flow__minimap) {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+
+    .vue-flow__minimap-mask {
+      fill: rgba(102, 126, 234, 0.08);
+    }
+  }
+
+  // 控制按钮样式
+  :deep(.vue-flow__controls) {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+
+    button {
+      border-color: rgba(0, 0, 0, 0.06);
+      background: transparent;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: #f0f5ff;
+        color: #667eea;
+      }
+
+      &:first-child {
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+      }
+
+      &:last-child {
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+      }
+    }
+  }
+
+  // 背景样式
+  :deep(.vue-flow__background) {
+    background-color: transparent;
+  }
+
+  // 加载状态
+  :deep(.ant-spin-nested-loading) {
+    height: 100%;
+
+    > div {
+      height: 100%;
+    }
+  }
+
+  :deep(.ant-spin-container) {
+    height: 100%;
+  }
+
+  :deep(.ant-spin) {
+    max-height: none;
+  }
+
+  // 加载提示
+  :deep(.ant-spin-text) {
+    color: #667eea;
+    font-size: 14px;
+    margin-top: 12px;
+  }
+
+  :deep(.ant-spin-dot-item) {
+    background-color: #667eea;
+  }
+}
