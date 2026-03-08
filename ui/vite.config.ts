@@ -14,7 +14,7 @@ export default defineConfig({
     vue(),
     vueJsx(),
     vueSetupExtend(),
-    vueDevTools(),
+    // vueDevTools(),
     zipPack({
       inDir: 'dist',
       outFileName: 'dist.zip',

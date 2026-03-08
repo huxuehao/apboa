@@ -89,6 +89,17 @@ const menuItems = computed(() => {
 })
 
 /**
+ * 点击标题
+ */
+function handleTitleClick() {
+  if (props.data.agentType==='CUSTOM') {
+    emit('architecture', props.data.id)
+  } else {
+    emit('view', props.data.id)
+  }
+}
+
+/**
  * 处理菜单点击
  */
 function handleMenuClick({ key }: { key: string }) {
@@ -124,7 +135,7 @@ function handleMenuClick({ key }: { key: string }) {
       <div  class="card-avatar flex-center" :class="{ disabled: !data.enabled }">
         <RobotOutlined />
       </div>
-      <div class="card-name flex-1 truncate" :title="data.name" @click="emit('view', data.id)">
+      <div class="card-name flex-1 truncate" :title="data.name" @click="handleTitleClick">
         {{ data.name }}
       </div>
       <ADropdown :trigger="['hover']">
