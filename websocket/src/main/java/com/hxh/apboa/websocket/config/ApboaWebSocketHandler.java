@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 /**
@@ -26,7 +27,7 @@ public class ApboaWebSocketHandler extends TextWebSocketHandler {
      * 连接建立后
      */
     @Override
-    public void afterConnectionEstablished(org.springframework.web.socket.WebSocketSession session) {
+    public void afterConnectionEstablished(WebSocketSession session) {
         // 将 WebSocketSession 包装成 ApboaWebSocketSession 并进行缓存
         ApboaWebSocketSession apboaSession = ApboaWebSocketSession.from(session);
 
@@ -49,7 +50,7 @@ public class ApboaWebSocketHandler extends TextWebSocketHandler {
      * 链接断开时
      */
     @Override
-    public void afterConnectionClosed(org.springframework.web.socket.WebSocketSession session, CloseStatus status) {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         ApboaWebSocketSession apboaSession = ApboaWebSocketSession.from(session);
 
         // 从本地缓存移除
@@ -64,7 +65,7 @@ public class ApboaWebSocketHandler extends TextWebSocketHandler {
      * 处理客户端的消息
      */
     @Override
-    protected void handleTextMessage(org.springframework.web.socket.WebSocketSession session, TextMessage message) {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         try {
             // 刷新会话 TTL
             ApboaWebSocketSession apboaSession = ApboaWebSocketSession.from(session);

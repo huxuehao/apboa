@@ -4,7 +4,7 @@ import { WS_MESSAGE_TYPES, type WSMessageType} from '../const/websocket';
 import type { MessagePayloadMap, EventSubscriptionOptions } from '../types/events';
 import { EnhancedMessageHandler } from '@/websocket/handlers/enhanced-message-handler';
 import { useAccountStore } from '@/stores'
-import {md5} from "js-md5";
+import { md5 } from "js-md5";
 
 
 // 通用订阅Hook
