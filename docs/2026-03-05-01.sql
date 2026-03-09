@@ -2,7 +2,7 @@ ALTER TABLE `agent_definition`
     ADD COLUMN `agent_type` varchar(100) NULL COMMENT '智能体类型' AFTER `id`,
 ADD INDEX `idx_agent_type`(`agent_type`);
 
-UPDATE `model_config` SET `model_type` = 'CUSTOM';
+UPDATE `agent_definition` SET `agent_type` = 'CUSTOM';
 
 DROP TABLE IF EXISTS `agent_a2a`;
 CREATE TABLE `agent_a2a`  (
