@@ -1,12 +1,15 @@
 package com.hxh.apboa.agent.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hxh.apboa.a2a.service.AgentA2aService;
 import com.hxh.apboa.agent.mapper.AgentDefinitionMapper;
+import com.hxh.apboa.agent.mapper.IJobInfoMapper;
 import com.hxh.apboa.agent.service.AgentDefinitionService;
 import com.hxh.apboa.agent.service.AgentSubAgentService;
 import com.hxh.apboa.common.entity.AgentA2A;
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.common.entity.JobInfo;
 import com.hxh.apboa.common.entity.ModelConfig;
 import com.hxh.apboa.common.enums.AgentType;
 import com.hxh.apboa.common.enums.ModelType;
@@ -50,6 +53,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
     private final ApplicationEventPublisher publisher;
     private final ParamsAdapter paramsAdapter;
     private final AgentA2aService agentA2aService;
+    private final IJobInfoMapper iJobInfoMapper;
 
     @Override
     public AgentDefinitionVO agentDefinitionDetail(Long id) {
@@ -93,6 +97,13 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         updateById(BeanUtils.copy(vo, AgentDefinition.class));
 
         if (vo.getAgentCode() == null) {
+            List<JobInfo> agent = iJobInfoMapper.selectList(
+                    new LambdaQueryWrapper<JobInfo>()
+                            .eq(JobInfo::getType, "AGENT")
+                            .eq(JobInfo::getBizId, vo.getId()));
+            if (!agent.isEmpty() && agent.getFirst().isEnabled()) {
+                throw new RuntimeException("请先禁用定时任务");
+            }
             publisher.publishEvent(new AgentReRegisterEvent(vo.getId()));
             return true;
         }
@@ -121,6 +132,14 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteAgentDefinition(List<Long> ids) {
+        List<JobInfo> agent = iJobInfoMapper.selectList(
+                new LambdaQueryWrapper<JobInfo>()
+                        .eq(JobInfo::getType, "AGENT")
+                        .in(JobInfo::getBizId, ids));
+        if (!agent.isEmpty()) {
+            throw new RuntimeException("请先解绑定时任务");
+        }
+
         removeByIds(ids);
         agentA2aService.deleteA2aConfig(ids);
         subAgentService.deleteSubAgent(ids);

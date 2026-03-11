@@ -1,5 +1,9 @@
 export const WS_CONFIG = {
-  URL: `ws://${window.location.hostname}:${window.location.port}/api/ws/apboa`,
+  URL: (() => {
+    const isHttps = window.location.protocol === 'https:';
+    const protocol = isHttps ? 'wss:' : 'ws:';
+    return `${protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api/ws/apboa`;
+  })(),
   MAX_RECONNECT_ATTEMPTS: 1440, // 约6小时
   INITIAL_RECONNECT_DELAY: 45000, // 45秒
   MAX_RECONNECT_DELAY: 300000, // 最大重连延迟5分钟

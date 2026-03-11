@@ -18,6 +18,9 @@ import CreateCard from '@/components/agent/CreateCard.vue'
 import AgentForm from '@/components/agent/AgentForm.vue'
 import AgentA2aForm from '@/components/agent/AgentA2aForm.vue'
 import AgentArchitectureDiagram from '@/components/agent/architecture/AgentArchitectureDiagram.vue'
+import AgentJobForm from '@/components/agent/AgentJobForm.vue'
+import * as jobApi from '@/api/job'
+import type { JobInfo } from '@/types'
 
 const store = useAgentStore()
 const { list, tags, selectedAgentType, selectedTag, keyword, loading, hasMore } = storeToRefs(store)
@@ -34,6 +37,12 @@ const currentA2aType = ref<'WELLKNOWN' | 'NACOS' | undefined>(undefined)
 const architectureVisible = ref<boolean>(false)
 /** 当前查看架构图的智能体ID */
 const currentArchitectureId = ref<string>('')
+/** 定时任务表单弹窗可见性 */
+const jobFormVisible = ref<boolean>(false)
+/** 当前编辑定时任务的智能体ID */
+const currentJobAgentId = ref<string>('')
+/** 当前智能体的定时任务信息 */
+const currentJobInfo = ref<JobInfo | null>(null)
 
 /**
  * 智能体类型选项
@@ -294,6 +303,30 @@ function handleArchitecture(id: string) {
 }
 
 /**
+ * 处理定时任务配置
+ *
+ * @param id 智能体 ID
+ */
+async function handleTiming(id: string) {
+  currentJobAgentId.value = id
+  try {
+    const response = await jobApi.getByBizId(id)
+    currentJobInfo.value = response.data.data || null
+  } catch {
+    currentJobInfo.value = null
+  }
+  jobFormVisible.value = true
+}
+
+/**
+ * 处理定时任务配置成功
+ */
+function handleJobFormSuccess() {
+  jobFormVisible.value = false
+  store.resetAndFetch()
+}
+
+/**
  * 处理状态
  */
 async function handleEnable(id: string) {
@@ -419,6 +452,7 @@ onUnmounted(() => {
           @go-visit="handleGoVisit"
           @access-log="handleAccessLog"
           @architecture="handleArchitecture"
+          @timing="handleTiming"
         />
       </div>
 
@@ -465,6 +499,14 @@ onUnmounted(() => {
         :agent-id="currentArchitectureId"
       />
     </AModal>
+
+    <!-- 定时任务表单 -->
+    <AgentJobForm
+      v-model:visible="jobFormVisible"
+      :agent-id="currentJobAgentId"
+      :job-info="currentJobInfo"
+      @success="handleJobFormSuccess"
+    />
   </div>
 </template>
 

@@ -111,7 +111,6 @@ export const useAgentStore = defineStore('agent', () => {
    * 重置并重新加载
    */
   function resetAndFetch() {
-    list.value = []
     currentPage.value = 1
     hasMore.value = true
     fetchPage(1)

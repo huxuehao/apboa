@@ -10,25 +10,25 @@ import { useAccountStore } from '@/stores'
 import {type AccountVO} from "@/types";
 import {useWebSocket} from "@/websocket/useWebSocket.ts";
 
-const { initWS } = useWebSocket();
+void (() => {
+  const { initWS } = useWebSocket();
+  useWebSocketSender();
+  initWS();
+  // 订阅 ACCOUNT_ROLE_CHANGE 消息
+  useWebSocketEvent(WS_MESSAGE_TYPES.ACCOUNT_ROLE_CHANGE, (message) => {
+    const { userInfo, setUserInfo, setRefresh} = useAccountStore()
+    if (userInfo?.id !== message.accountId) {
+      return
+    }
 
-useWebSocketSender()
-initWS()
+    setUserInfo({
+      ...userInfo,
+      roles: [message.role]
+    } as AccountVO)
 
-// 订阅 ACCOUNT_ROLE_CHANGE 消息
-useWebSocketEvent(WS_MESSAGE_TYPES.ACCOUNT_ROLE_CHANGE, (message) => {
-  const { userInfo, setUserInfo, setRefresh} = useAccountStore()
-  if (userInfo?.id !== message.accountId) {
-    return
-  }
-
-  setUserInfo({
-    ...userInfo,
-    roles: [message.role]
-  } as AccountVO)
-
-  setRefresh()
-});
+    setRefresh()
+  });
+})();
 </script>
 
 <template>
