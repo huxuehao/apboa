@@ -2,6 +2,7 @@ package com.hxh.apboa.common.vo;
 
 import com.hxh.apboa.common.config.SerializableEnable;
 import com.hxh.apboa.common.entity.AgentA2A;
+import com.hxh.apboa.common.entity.JobInfo;
 import com.hxh.apboa.common.enums.AgentType;
 import com.hxh.apboa.common.enums.ToolChoiceStrategy;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -59,4 +60,5 @@ public class AgentDefinitionVO implements SerializableEnable {
     private Long updatedBy;
     private List<Object> used;
     private AgentA2A agentA2A;
+    private JobInfo jobInfo;
 }

@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
-import { RobotOutlined } from '@ant-design/icons-vue'
+import {ClockCircleOutlined, RobotOutlined} from '@ant-design/icons-vue'
 import type { CenterAgentNodeData } from '../types'
 
 /**
@@ -44,6 +44,10 @@ const descriptionText = computed(() => {
     <div class="node-header">
       <div class="node-avatar">
         <RobotOutlined />
+        <ClockCircleOutlined
+          v-if="data.agent?.jobInfo"
+          class="timing"
+          :class="{'timing_start' : data.agent?.jobInfo?.enabled && data.agent.enabled}" />
       </div>
       <div class="node-title">
         <div class="node-name">{{ data.agent.name }}</div>
@@ -86,6 +90,7 @@ const descriptionText = computed(() => {
     margin-bottom: 12px;
 
     .node-avatar {
+      position: relative;
       width: 48px;
       height: 48px;
       display: flex;
@@ -95,6 +100,18 @@ const descriptionText = computed(() => {
       border-radius: 12px;
       font-size: 24px;
       color: #4449D0;
+
+      .timing {
+        position: absolute;
+        right: -7px;
+        bottom:-0px;
+        font-size: 16px;
+        color: #8a8a8a;
+
+        &_start {
+          color: #4449d0;
+        }
+      }
     }
 
     .node-title {

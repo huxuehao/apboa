@@ -1,9 +1,12 @@
 package com.hxh.apboa.agent.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hxh.apboa.agent.mapper.IJobInfoMapper;
 import com.hxh.apboa.agent.service.AgentDefinitionService;
 import com.hxh.apboa.common.config.auth.RoleNeed;
 import com.hxh.apboa.common.dto.AgentDefinitionDTO;
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.common.entity.JobInfo;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.mp.support.MP;
 import com.hxh.apboa.common.r.R;
@@ -14,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 智能体定义Controller
@@ -26,6 +31,7 @@ import java.util.List;
 public class AgentDefinitionController {
 
     private final AgentDefinitionService agentDefinitionService;
+    private final IJobInfoMapper iJobInfoMapper;
 
     /**
      * 分页查询
@@ -33,7 +39,21 @@ public class AgentDefinitionController {
     @GetMapping("/page")
     public R<IPage<AgentDefinitionVO>> page(AgentDefinitionDTO query) {
         IPage<AgentDefinition> page = agentDefinitionService.page(MP.<AgentDefinition>getPage(query), MP.getQueryWrapper(query));
-        return R.data(BeanUtils.copyPage(page, AgentDefinitionVO.class));
+        IPage<AgentDefinitionVO> pageVo = BeanUtils.copyPage(page, AgentDefinitionVO.class);
+        List<JobInfo> agent = iJobInfoMapper.selectList(new LambdaQueryWrapper<JobInfo>().eq(JobInfo::getType, "AGENT"));
+        if (!agent.isEmpty()) {
+            Map<String, JobInfo> collectMap = agent.stream().collect(Collectors.toMap(
+                    JobInfo::getBizId,
+                    item -> item,
+                    (existing, replacement) -> existing));
+            pageVo.getRecords().forEach(agentVo -> {
+                if (collectMap.containsKey(String.valueOf(agentVo.getId()))) {
+                    agentVo.setJobInfo(collectMap.get(String.valueOf(agentVo.getId())));
+                }
+            });
+        }
+
+        return R.data(pageVo);
     }
 
     /**
@@ -43,6 +63,13 @@ public class AgentDefinitionController {
     public R<AgentDefinitionVO> detail(@PathVariable("id") Long id) {
         AgentDefinitionVO vo = agentDefinitionService.agentDefinitionDetail(id);
         vo.setUsed(agentDefinitionService.usedWithAgent(List.of(id)));
+        List<JobInfo> agent = iJobInfoMapper.selectList(
+                new LambdaQueryWrapper<JobInfo>()
+                        .eq(JobInfo::getType, "AGENT")
+                        .eq(JobInfo::getBizId, String.valueOf(id)));
+        if (agent.size() == 1) {
+            vo.setJobInfo(agent.getFirst());
+        }
 
         return R.data(vo);
     }

@@ -5,7 +5,7 @@
  */
 <script setup lang="ts">
 import { computed } from 'vue'
-import { EllipsisOutlined, RobotOutlined } from '@ant-design/icons-vue'
+import { EllipsisOutlined, RobotOutlined, ClockCircleOutlined } from '@ant-design/icons-vue'
 import type { AgentDefinitionVO } from '@/types'
 import { useAccountStore } from '@/stores'
 import {
@@ -16,7 +16,7 @@ import {
   createGoVisitItem,
   createAccessLogItem,
   createArchitectureItem,
-  createDivider,
+  createDivider, createTimingItem,
 } from '@/composables/useCardMenuItems'
 
 const accountStore = useAccountStore()
@@ -39,6 +39,7 @@ const emit = defineEmits<{
   goVisit: [id: string]
   accessLog: [id: string]
   architecture: [id: string]
+  timing: [id: string]
 }>()
 
 /**
@@ -79,6 +80,7 @@ const menuItems = computed(() => {
     createViewItem(),
     createEditItem(),
     createEnableItem(props.data.enabled),
+    createTimingItem(),
     createDivider(),
     ...architectureItem,
     createGoVisitItem(),
@@ -125,6 +127,9 @@ function handleMenuClick({ key }: { key: string }) {
     case 'architecture':
       emit('architecture', props.data.id)
       break
+    case 'timing':
+      emit('timing', props.data.id)
+      break
   }
 }
 </script>
@@ -134,6 +139,10 @@ function handleMenuClick({ key }: { key: string }) {
     <div class="card-header flex items-center gap-sm">
       <div  class="card-avatar flex-center" :class="{ disabled: !data.enabled }">
         <RobotOutlined />
+        <ClockCircleOutlined
+          v-if="data?.jobInfo"
+          class="timing"
+          :class="{'timing_start' : data?.jobInfo?.enabled && data.enabled}" />
       </div>
       <div class="card-name flex-1 truncate" :title="data.name" @click="handleTitleClick">
         {{ data.name }}
@@ -184,6 +193,7 @@ function handleMenuClick({ key }: { key: string }) {
 
   .card-header {
     .card-avatar {
+      position: relative;
       width: 40px;
       height: 40px;
       background-color: #e8eaf6;
@@ -192,6 +202,19 @@ function handleMenuClick({ key }: { key: string }) {
       font-size: var(--font-size-2xl);
       font-weight: 600;
       flex-shrink: 0;
+
+      .timing {
+        position: absolute;
+        right: -7px;
+        bottom:-0px;
+        font-size: 16px;
+        color: #8a8a8a;
+
+        &_start {
+          color: #4449d0;
+        }
+      }
+
     }
 
     .card-name {

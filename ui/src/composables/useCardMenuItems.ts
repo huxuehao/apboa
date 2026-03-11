@@ -15,7 +15,8 @@ import {
   HistoryOutlined,
   DeleteOutlined,
   SettingOutlined,
-  ApartmentOutlined
+  ApartmentOutlined,
+  ClockCircleOutlined
 } from '@ant-design/icons-vue'
 
 /** 菜单项类型（兼容 Ant Design Menu items） */
@@ -89,6 +90,13 @@ export function createProtocolConfigItem(): CardMenuItem {
  */
 export function createArchitectureItem(): CardMenuItem {
   return { key: 'architecture', label: '架构图', icon: () => h(ApartmentOutlined) }
+}
+
+/**
+ * 创建「架构图」菜单项
+ */
+export function createTimingItem(): CardMenuItem {
+  return { key: 'timing', label: '定时', icon: () => h(ClockCircleOutlined) }
 }
 
 /**

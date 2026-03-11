@@ -402,3 +402,16 @@ export interface AgentA2A {
   a2aType: A2aType
   a2aConfig: WellKnownAgentConfig | NacosAgentConfig
 }
+
+/**
+ * 定时任务 实体
+ */
+export interface JobInfo {
+  id?: string
+  type: string
+  bizId: string
+  cron: string
+  jobClass: string // com.hxh.apboa.job.scheduler.AgentScheduler
+  dataMap: string // {"agentId":"xxxx", "input":"xxxx"}
+  enabled: boolean // 0表示未启动，1表示启动
+}
