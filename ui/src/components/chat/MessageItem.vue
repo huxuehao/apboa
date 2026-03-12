@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { renderMarkdown } from '@/utils/chat/markdown'
+import MediaPreview from '@/components/common/MediaPreview.vue'
 import type { UploadedFileItem } from '@/types'
 
 const FILE_SEP = '@==##::::##==@'
 
+/**
+ * 解析用户内容，分离文件和文本
+ */
 function parseUserContent(content: string): { files: UploadedFileItem[]; text: string } {
   const idx = content.indexOf(FILE_SEP)
   if (idx === -1) return { files: [], text: content }
@@ -36,6 +40,18 @@ const isAssistant = computed(() => props.role === 'assistant')
 const isTool = computed(() => props.role === 'tool')
 
 const parsedUserContent = computed(() => parseUserContent(props.content))
+
+// 预览相关状态
+const previewVisible = ref(false)
+const previewCurrentIndex = ref(0)
+
+/**
+ * 打开文件预览
+ */
+const openPreview = (index: number) => {
+  previewCurrentIndex.value = index
+  previewVisible.value = true
+}
 </script>
 
 <template>
@@ -44,8 +60,9 @@ const parsedUserContent = computed(() => parseUserContent(props.content))
       <template v-if="isUser">
         <div v-if="parsedUserContent.files.length > 0" class="chat-message-files">
           <div
-            v-for="item in parsedUserContent.files"
+            v-for="(item, index) in parsedUserContent.files"
             :key="item.id"
+            @click="openPreview(index)"
             class="chat-message-file-item"
           >
             <span class="chat-input-file-tag">
@@ -69,6 +86,13 @@ const parsedUserContent = computed(() => parseUserContent(props.content))
         <div class="chat-md-content" v-html="renderMarkdown(content)"></div>
       </template>
     </div>
+
+    <!-- 媒体预览组件 -->
+    <MediaPreview
+      v-model:visible="previewVisible"
+      :items="parsedUserContent.files"
+      :current-index="previewCurrentIndex"
+    />
   </div>
 </template>
 
@@ -87,11 +111,12 @@ const parsedUserContent = computed(() => parseUserContent(props.content))
   align-items: center;
   gap: 6px;
   max-width: 280px;
-  padding: 6px 10px;
-  background: rgba($chat-primary, 0.06);
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-sm);
-  border: 1px solid #cbe1ff;
+  cursor: pointer;
+  &:hover {
+    color: var(--color-primary);
+  }
 }
 
 .chat-input-file-tag {
@@ -111,7 +136,7 @@ const parsedUserContent = computed(() => parseUserContent(props.content))
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--color-text-primary);
+  //color: var(--color-text-primary);
 }
 
 .chat-message-file-size {
