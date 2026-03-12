@@ -110,11 +110,12 @@ const openPreview = (index: number) => {
   align-items: center;
   gap: 6px;
   max-width: 280px;
-  padding: 6px 10px;
-  background-color: #ffffff;
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-sm);
   cursor: pointer;
+  &:hover {
+    color: var(--color-primary);
+  }
 }
 
 .chat-input-file-tag {
@@ -134,7 +135,6 @@ const openPreview = (index: number) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--color-text-primary);
 }
 
 .chat-message-file-size {

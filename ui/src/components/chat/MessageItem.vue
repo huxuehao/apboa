@@ -136,7 +136,6 @@ const openPreview = (index: number) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  //color: var(--color-text-primary);
 }
 
 .chat-message-file-size {
