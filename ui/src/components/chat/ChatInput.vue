@@ -7,9 +7,10 @@ import {
   CloseOutlined,
   UnorderedListOutlined,
   ClockCircleOutlined,
-  LoadingOutlined
+  LoadingOutlined,
 } from '@ant-design/icons-vue'
 import * as attachApi from '@/api/attach'
+import MediaPreview from '@/components/common/MediaPreview.vue'
 import type { UploadedFileItem } from '@/types'
 
 const props = withDefaults(
@@ -52,6 +53,22 @@ const formatFileSize = (bytes: number): string => {
 const getExtension = (fileName: string): string => {
   const lastDot = fileName.lastIndexOf('.')
   return lastDot > -1 ? fileName.slice(lastDot + 1).toLowerCase() : ''
+}
+
+// 预览相关状态
+const previewVisible = ref(false)
+const previewCurrentIndex = ref(0)
+
+/**
+ * 打开文件预览
+ */
+const openPreview = (item: UploadedFileItem, index: number) => {
+  if (item.uploading) {
+    message.warning('文件上传中')
+    return
+  }
+  previewCurrentIndex.value = index
+  previewVisible.value = true
 }
 
 /** 检查文件类型是否在允许列表中 */
@@ -200,8 +217,9 @@ watch(() => props.modelValue, () => {
     <div v-if="(uploadedFiles ?? []).length > 0" class="chat-input-files-row">
       <div class="chat-input-files-scroll">
         <div
-          v-for="item in (uploadedFiles ?? [])"
+          v-for="(item, index) in (uploadedFiles ?? [])"
           :key="item.id"
+          @click="openPreview(item, index)"
           class="chat-input-file-item"
         >
           <span v-if="item.uploading" class="chat-input-file-loading">
@@ -216,13 +234,20 @@ watch(() => props.modelValue, () => {
             type="button"
             class="chat-input-file-remove"
             title="移除"
-            @click="removeFile(item)"
+            @click.stop="removeFile(item)"
           >
             <CloseOutlined />
           </button>
         </div>
       </div>
     </div>
+
+    <!-- 媒体预览组件 -->
+    <MediaPreview
+      v-model:visible="previewVisible"
+      :items="uploadedFiles ?? []"
+      :current-index="previewCurrentIndex"
+    />
     <div class="chat-input-textarea-row">
       <textarea
         ref="textareaRef"
@@ -346,6 +371,7 @@ watch(() => props.modelValue, () => {
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-sm);
   transition: background-color 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
 
   &:hover {
     background: rgba($chat-primary, 0.1);
