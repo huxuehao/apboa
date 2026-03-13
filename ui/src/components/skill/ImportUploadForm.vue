@@ -193,7 +193,7 @@ watch(() => props.visible, (val) => {
           </div>
           <div class="file-tree__item file-tree__item--l2">
             <FolderOutlined class="file-tree__icon file-tree__icon--file" />
-            <span class="file-tree__name">技能一</span>
+            <span class="file-tree__name">技能二</span>
           </div>
           <div class="file-tree__item file-tree__item--l2">
             <span class="file-tree__name file-tree__name--more">... 更多技能文件夹</span>
