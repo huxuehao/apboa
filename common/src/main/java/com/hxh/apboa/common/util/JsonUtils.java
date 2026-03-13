@@ -36,6 +36,16 @@ public class JsonUtils {
             throw new RuntimeException("JSON序列化失败", e);
         }
     }
+    public static JsonNode valueToTree(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        try {
+            return mapper.valueToTree(obj);
+        } catch (Exception e) {
+            throw new RuntimeException("JSON序列化失败", e);
+        }
+    }
 
     public static JsonNode toJsonNode(Object obj) {
         try {
