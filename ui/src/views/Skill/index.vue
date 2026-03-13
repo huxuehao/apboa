@@ -15,6 +15,9 @@ import type { SkillPackageVO } from '@/types'
 import SkillCard from '@/components/skill/SkillCard.vue'
 import CreateCard from '@/components/skill/CreateCard.vue'
 import SkillForm from '@/components/skill/SkillForm.vue'
+import ImportLocalForm from '@/components/skill/ImportLocalForm.vue'
+import ImportGitForm from '@/components/skill/ImportGitForm.vue'
+import ImportUploadForm from '@/components/skill/ImportUploadForm.vue'
 
 /**
  * 资源项接口
@@ -32,6 +35,10 @@ const formVisible = ref<boolean>(false)
 const currentData = ref<SkillPackageVO | undefined>(undefined)
 const scrollContainer = ref<HTMLElement>()
 const loadMoreObserver = ref<IntersectionObserver>()
+
+const importLocalVisible = ref(false)
+const importGitVisible = ref(false)
+const importUploadVisible = ref(false)
 
 /**
  * 分类选项列表
@@ -53,6 +60,27 @@ const categoryOptions = computed(() => {
 function handleCreate() {
   currentData.value = undefined
   formVisible.value = true
+}
+
+/**
+ * 处理装载本地技能包
+ */
+function handleImportLocal() {
+  importLocalVisible.value = true
+}
+
+/**
+ * 处理导入 Git 技能包
+ */
+function handleImportGit() {
+  importGitVisible.value = true
+}
+
+/**
+ * 处理导入压缩包技能
+ */
+function handleImportUpload() {
+  importUploadVisible.value = true
 }
 
 /**
@@ -208,6 +236,14 @@ function handleFormSuccess() {
 }
 
 /**
+ * 处理导入成功
+ */
+function handleImportSuccess() {
+  store.resetAndFetch()
+  store.fetchCategories()
+}
+
+/**
  * 处理分类切换
  */
 function handleCategoryChange(value: string | null) {
@@ -312,7 +348,13 @@ onUnmounted(() => {
 
     <section ref="scrollContainer" class="card-section">
       <div class="card-grid">
-        <CreateCard @click="handleCreate" v-permission="['EDIT','ADMIN']" />
+        <CreateCard
+          @click="handleCreate"
+          @importLocal="handleImportLocal"
+          @importGit="handleImportGit"
+          @importUpload="handleImportUpload"
+          v-permission="['EDIT','ADMIN']"
+        />
 
         <SkillCard
           v-for="item in list"
@@ -343,6 +385,21 @@ onUnmounted(() => {
       :data="currentData"
       :categories="categories"
       @success="handleFormSuccess"
+    />
+
+    <ImportLocalForm
+      v-model:visible="importLocalVisible"
+      @success="handleImportSuccess"
+    />
+
+    <ImportGitForm
+      v-model:visible="importGitVisible"
+      @success="handleImportSuccess"
+    />
+
+    <ImportUploadForm
+      v-model:visible="importUploadVisible"
+      @success="handleImportSuccess"
     />
   </div>
 </template>

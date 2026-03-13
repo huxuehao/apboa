@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 import type { ApiResponse, PageResult } from '@/types'
-import type { SkillPackageDTO, SkillPackageVO } from '@/types'
+import type { SkillPackageDTO, SkillPackageVO, LocalImportConfig, GitImportConfig } from '@/types'
 import type { SkillPackage } from '@/types'
 
 /**
@@ -59,4 +59,34 @@ export function usedWithAgent(ids: string[]) {
  */
 export function listCategories() {
   return request.get<ApiResponse<string[]>>('/api/skill/get/categories')
+}
+
+/**
+ * 从本地导入
+ * POST /skill/import/local
+ */
+export function importFromLocal(config: LocalImportConfig) {
+  return request.post<ApiResponse<boolean>>('/api/skill/import/local', config)
+}
+
+/**
+ * 从Git导入
+ * POST /skill/import/git
+ */
+export function importFromGit(config: GitImportConfig) {
+  return request.post<ApiResponse<boolean>>('/api/skill/import/git', config)
+}
+
+/**
+ * 从压缩包上传导入
+ * POST /skill/import/upload
+ */
+export function importFromUpload(file: File, category: string, cover: boolean) {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('category', category)
+  formData.append('cover', String(cover))
+  return request.post<ApiResponse<boolean>>('/api/skill/import/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
 }

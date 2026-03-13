@@ -92,6 +92,30 @@ export interface SkillPackageDTO extends PageParams {
 }
 
 /**
+ * 本地导入技能包配置
+ */
+export interface LocalImportConfig {
+  /** 技能分类 */
+  category: string
+  /** 本地路径 */
+  path: string
+  /** 是否覆盖已存在的同名技能 */
+  cover: boolean
+}
+
+/**
+ * Git导入技能包配置
+ */
+export interface GitImportConfig {
+  /** 技能分类 */
+  category: string
+  /** 仓库地址 */
+  repoUrl: string
+  /** 是否覆盖已存在的同名技能 */
+  cover: boolean
+}
+
+/**
  * 系统提示词模板查询DTO
  */
 export interface SystemPromptTemplateDTO extends PageParams {

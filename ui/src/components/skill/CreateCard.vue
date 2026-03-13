@@ -4,21 +4,35 @@
  * @author huxuehao
  */
 <script setup lang="ts">
-import { PlusOutlined } from '@ant-design/icons-vue'
+import { PlusOutlined, ImportOutlined, DownloadOutlined, CloudDownloadOutlined } from '@ant-design/icons-vue'
 
 /**
  * Emits定义
  */
 defineEmits<{
-  click: []
+  click: [],
+  importLocal: []
+  importGit: []
+  importUpload: []
 }>()
+
+
 </script>
 
 <template>
   <div class="create-card flex-col flex-center cursor-pointer" @click="$emit('click')">
     <PlusOutlined class="create-icon" />
-    <div class="create-text text-secondary">添加新技能</div>
-    <div class="create-desc text-placeholder text-sm">创建技能包赋予智能体专业领域知识</div>
+<!--    <div class="create-text text-secondary">添加新技能</div>-->
+<!--    <div class="create-desc text-placeholder text-sm">创建技能包赋予智能体专业领域知识</div>-->
+    <div class="import text-placeholder text-sm" @click.stop="$emit('importLocal')">
+      <DownloadOutlined /> <span>装载本地技能包</span>
+    </div>
+    <div class="import text-placeholder text-sm" @click.stop="$emit('importUpload')">
+      <ImportOutlined /> <span>导入技能压缩包</span>
+    </div>
+    <div class="import text-placeholder text-sm" @click.stop="$emit('importGit')">
+      <CloudDownloadOutlined /> <span>下载 Git 技能包</span>
+    </div>
   </div>
 </template>
 
@@ -56,6 +70,18 @@ defineEmits<{
 
   .create-desc {
     text-align: center;
+  }
+
+  .import {
+    cursor: pointer;
+    margin-top: 10px;
+    //text-decoration: underline wavy var(--color-primary);  /* 下划线、波浪线、红色 */
+    //text-underline-offset: 5px;           /* 下划线偏移距离（CSS3） */
+    //text-decoration-thickness: 1px;       /* 下划线粗细（CSS3） */
+
+    &:hover {
+      color: var(--color-primary);
+    }
   }
 }
 </style>
