@@ -193,6 +193,10 @@ const handleInput = (e: Event) => {
 
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Enter' && !e.shiftKey) {
+    if (props.isRunning) {
+      message.info('停止生成后再发送')
+      return
+    }
     e.preventDefault()
     emit('send')
   }
@@ -253,7 +257,6 @@ watch(() => props.modelValue, () => {
         ref="textareaRef"
         :value="modelValue"
         :placeholder="placeholder || '输入消息，Enter 发送，Shift+Enter 换行'"
-        :disabled="isRunning"
         rows="1"
         class="chat-input-textarea"
         @input="handleInput"

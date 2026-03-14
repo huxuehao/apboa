@@ -95,6 +95,7 @@ const fileIds = computed(() =>
 
 // 流式对话及工具调用
 const {
+  agentHasResult,
   streamingContent,
   streamingMessageId,
   toolCallsInProgress,
@@ -331,6 +332,7 @@ onMounted(() => {
       :enable-memory="enableMemory"
       :enable-planning="enablePlanning"
       :allow-upload-file-type="allowFileType"
+      :agent-has-result="agentHasResult"
       @update:input-value="inputText = $event"
       @update:uploaded-files="uploadedFiles = $event"
       @memory="handleMemoryChange"
