@@ -5,6 +5,7 @@ import io.agentscope.core.formatter.openai.dto.OpenAIMessage;
 import io.agentscope.core.message.ContentBlock;
 import io.agentscope.core.message.Msg;
 import io.agentscope.core.message.MsgRole;
+import io.agentscope.core.message.ThinkingBlock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +65,14 @@ public class FixedSysMsgOpenAIChatFormatter extends OpenAIChatFormatter {
             boolean hasMedia = hasMediaContent(msg);
             OpenAIMessage openAIMsg = messageConverter.convertToMessage(msg, hasMedia);
             if (openAIMsg != null) {
+                // 当消息内容中有 ThinkingBlock 时，清除 reasoningContent 和 ReasoningDetails 的内容，以实现对本地模型的最大兼容性，
+                // 例如： SGLang 部署的本地 Qwen 模型不支持该字段
+                if (msg.getRole() == MsgRole.ASSISTANT
+                        && msg.getContent() != null
+                        && msg.getContent().stream().anyMatch(b -> b instanceof ThinkingBlock)) {
+                    openAIMsg.setReasoningContent(null);
+                    openAIMsg.setReasoningDetails(null);
+                }
                 result.add(openAIMsg);
             }
         }

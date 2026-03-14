@@ -37,9 +37,9 @@ const providerTypeOptions = [
   { label: '全部', value: null },
   { label: 'DashScope', value: 'DASH_SCOPE' },
   { label: 'OpenAI', value: 'OPEN_AI' },
+  { label: 'Ollama', value: 'OLLAMA' },
   { label: 'Anthropic', value: 'ANTHROPIC' },
 //   { label: 'Gemini', value: 'GEMINI' },
-  { label: 'Ollama', value: 'OLLAMA' }
 ]
 
 /**

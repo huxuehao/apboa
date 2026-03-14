@@ -5,6 +5,7 @@ import type { DisplayMessage } from '@/types'
 
 defineProps<{
   messages: DisplayMessage[]
+  agentHasResult?: boolean
   toolCalls: Array<{ id: string; name: string; args: string; result?: string; elapsed?: number, needConfirm?: boolean }>
 }>()
 
@@ -20,6 +21,7 @@ const emit = defineEmits<{
       :key="msg.id"
       :role="msg.role"
       :content="msg.content"
+      :agent-has-result="agentHasResult"
       :is-streaming="msg.isStreaming"
     />
     <ToolCallItem

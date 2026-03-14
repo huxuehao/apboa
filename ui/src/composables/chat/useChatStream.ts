@@ -25,6 +25,7 @@ export function useChatStream(options: {
   })
 
   // 流式内容
+  const agentHasResult = ref(true)
   const streamingContent = ref('')
   const streamingMessageId = ref<string | null>(null)
 
@@ -44,6 +45,7 @@ export function useChatStream(options: {
         streamingContent.value = ''
       },
       onTextMessageContent: (_e, currentText) => {
+        agentHasResult.value = true
         streamingContent.value = currentText
       },
       onTextMessageEnd: async (_e, finalText) => {
@@ -55,6 +57,7 @@ export function useChatStream(options: {
         }
       },
       onToolCallStart: (e) => {
+        agentHasResult.value = true
         toolCallsInProgress.value = [
           ...toolCallsInProgress.value,
           { id: e.toolCallId, name: e.toolCallName, args: '', startTime: Date.now() }
@@ -87,6 +90,7 @@ export function useChatStream(options: {
         }
       },
       onRunFinished: (e) => {
+        agentHasResult.value = true
         if (toolCallsInProgress.value.length > 0) {
           toolCallsInProgress.value.forEach(item => item.needConfirm = true)
         }
@@ -108,6 +112,7 @@ export function useChatStream(options: {
     const contentToSave = buildToolCallsContent([{ id, name, args, result, elapsed: 0 }])
     if (contentToSave) {
       await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'tool', content: contentToSave })
+      toolCallsInProgress.value = toolCallsInProgress.value.filter(item => item.id != id)
       onMessageSaved?.()
     }
 
@@ -121,6 +126,7 @@ export function useChatStream(options: {
   // 中止运行
   const abortRun = async  () => {
     await abort()
+    agentHasResult.value = true
     if (currentSessionId.value) {
       // 保存工具调用消息
       if (toolCallsInProgress.value.length > 0) {
@@ -171,6 +177,7 @@ export function useChatStream(options: {
       forwardedProps.fileIds = overrideFileIds
     }
 
+    agentHasResult.value = false
     await run({
       threadId: currentSessionId.value || undefined,
       runId: `run_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
@@ -179,6 +186,7 @@ export function useChatStream(options: {
   }
 
   return {
+    agentHasResult,
     streamingContent,
     streamingMessageId,
     toolCallsInProgress,

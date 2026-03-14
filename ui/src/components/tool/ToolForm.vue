@@ -160,7 +160,7 @@ watch(
           description: props.data.description,
           needConfirm: props.data.needConfirm,
           version: props.data.version,
-          inputSchema: Array.isArray(inputSchemaList) 
+          inputSchema: Array.isArray(inputSchemaList)
             ? addTempIdToSchema(inputSchemaList.map((item: InputSchemaItem) => ({
                 name: item.name || '',
                 description: item.description || '',
@@ -294,20 +294,20 @@ function initInputSchemaSortable() {
     },
     onEnd: async (evt: { oldIndex?: number; newIndex?: number }) => {
       document.body.classList.remove('dragging')
-      
+
       const { oldIndex, newIndex } = evt
       if (oldIndex == null || newIndex == null || oldIndex === newIndex) return
-      
+
       // 使用 Vue 的响应式数组方法
       const schema = [...formData.value.inputSchema]
       const [item] = schema.splice(oldIndex, 1)
       if (!item) return
-      
+
       schema.splice(newIndex, 0, item)
-      
+
       // 一次性更新整个数组，避免多次触发响应式更新
       formData.value.inputSchema = schema
-      
+
       // 拖拽后销毁并重新初始化 Sortable，确保 DOM 与 Vue 数据同步
       // 避免快速拖拽时 Sortable 直接操作 DOM 与 Vue 响应式更新产生竞态
       destroyInputSchemaSortable()
@@ -425,6 +425,11 @@ const addItem = (e: Event) => {
     @ok="handleSubmit"
     @cancel="handleCancel"
   >
+    <AAlert
+      message="特别说明：在线工具目前只支持同步工具，异步或流式工具请自行在com.hxh.apboa.core.tool.builtins进行编写"
+      banner
+      closable
+    />
     <AForm ref="formRef" :model="formData" :rules="rules" layout="vertical">
       <AFormItem label="关联智能体" v-if="isEdit">
         <div class="code-wrapper ">
@@ -490,9 +495,9 @@ const addItem = (e: Event) => {
           <div class="input-schema-list">
             <!-- 使用 :key="_tempId" 确保Vue能够正确识别每个元素 -->
             <div ref="inputSchemaListRef" class="input-schema-sortable">
-              <div 
-                v-for="(param, index) in formData.inputSchema" 
-                :key="param._tempId ?? `fallback-${index}`" 
+              <div
+                v-for="(param, index) in formData.inputSchema"
+                :key="param._tempId ?? `fallback-${index}`"
                 class="input-schema-item"
               >
                 <ARow :gutter="8">

@@ -20,6 +20,7 @@ const props = defineProps<{
   enableMemory?: boolean
   enablePlanning?: boolean
   allowUploadFileType?: string[]
+  agentHasResult?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -139,6 +140,7 @@ defineExpose({
         @scroll="handleScroll"
       >
         <MessageList
+          :agent-has-result="agentHasResult"
           :messages="messages"
           :tool-calls="toolCalls"
           @toolContent="(content: any) => $emit('toolContent', content)"

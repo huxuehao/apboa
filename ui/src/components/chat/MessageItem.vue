@@ -32,6 +32,7 @@ const getExtension = (fileName: string): string => {
 const props = defineProps<{
   role: 'user' | 'assistant' | 'system' | 'tool'
   content: string
+  agentHasResult?: boolean
   isStreaming?: boolean
 }>()
 
@@ -77,7 +78,7 @@ const openPreview = (index: number) => {
         </span>
       </template>
       <template v-else-if="isAssistant">
-        <div v-if="!content && isStreaming" class="chat-loading-dots">
+        <div v-if="!agentHasResult && !content" class="chat-loading-dots">
           <span></span><span></span><span></span>
         </div>
         <div v-else class="chat-md-content" v-html="renderMarkdown(content)"></div>
