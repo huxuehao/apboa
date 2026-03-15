@@ -257,10 +257,10 @@ async function handleEnable(id: string) {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
     :title="`${providerName} - 配置模型`"
-    width="1000px"
+    defaultWidth="1000px"
     :footer="null"
     @cancel="handleClose"
   >
@@ -349,14 +349,14 @@ async function handleEnable(id: string) {
       :data="currentData"
       @success="handleFormSuccess"
     />
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss">
 .model-config-modal {
   .modal-toolbar {
     padding-bottom: var(--spacing-md);
-    border-bottom: 1px solid var(--color-border-light);
+    //border-bottom: 1px solid var(--color-border-light);
   }
 }
 </style>

@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { message } from 'ant-design-vue'
-import { FolderOpenOutlined, SyncOutlined } from '@ant-design/icons-vue'
+import { FolderOpenOutlined, AppstoreOutlined } from '@ant-design/icons-vue'
 import * as skillApi from '@/api/skill'
 import type { LocalImportConfig } from '@/types'
 
@@ -88,10 +88,10 @@ watch(() => props.visible, (val) => {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
+    :title-icon="AppstoreOutlined"
     title="装载本地技能包"
-    width="520px"
     :confirm-loading="loading"
     ok-text="开始导入"
     cancel-text="取消"
@@ -143,7 +143,7 @@ watch(() => props.visible, (val) => {
         <template #extra>开启后，若存在同名技能包，将以新导入的内容覆盖原有数据</template>
       </AFormItem>
     </AForm>
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss">

@@ -6,6 +6,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
 import { message } from 'ant-design-vue'
+import { DatabaseOutlined } from '@ant-design/icons-vue'
 import {type KnowledgeBaseConfig, type KnowledgeBaseConfigVO, type KbType, RAGMode} from '@/types'
 import * as knowledgeApi from '@/api/knowledge'
 
@@ -475,11 +476,10 @@ function removeMetadataCondition(index: number) {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
+    :title-icon="DatabaseOutlined"
     :title="modalTitle"
-    width="900px"
-    style="top: 5vh"
     destroyOnClose
     @cancel="handleCancel"
   >
@@ -487,7 +487,6 @@ function removeMetadataCondition(index: number) {
       ref="formRef"
       :model="formData"
       layout="vertical"
-      style="max-height: 70vh; overflow-y: auto; padding: 0 1px;"
     >
       <AFormItem label="关联智能体" v-if="isEdit">
         <div class="code-wrapper ">
@@ -808,7 +807,7 @@ function removeMetadataCondition(index: number) {
       <AButton @click="handleCancel">取消</AButton>
       <AButton type="primary" @click="handleSubmit">确定</AButton>
     </template>
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss">

@@ -6,6 +6,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { message } from 'ant-design-vue'
+import { LoginOutlined } from '@ant-design/icons-vue'
 import type { HookConfigVO, HookConfig } from '@/types'
 import { HookType } from '@/types'
 import * as hookApi from '@/api/hook'
@@ -52,7 +53,7 @@ import reactor.core.publisher.Mono;
 public class CustomHook implements Hook {
     @Override
     public <T extends HookEvent> Mono<T> onEvent(T event) {
-        
+
         return Mono.just(event);
     }
 }`
@@ -156,12 +157,11 @@ function handleCancel() {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
+    :title-icon="LoginOutlined"
     :title="isEdit ? '编辑钩子' : '新增钩子'"
     :confirm-loading="loading"
-    width="900px"
-    style="top: 0"
     destroyOnClose
     @ok="handleSubmit"
     @cancel="handleCancel"
@@ -194,5 +194,5 @@ function handleCancel() {
         />
       </AFormItem>
     </AForm>
-  </AModal>
+  </ApboaModal>
 </template>

@@ -10,7 +10,8 @@ import {
   InboxOutlined,
   FileZipOutlined,
   FolderOutlined,
-  InfoCircleOutlined
+  InfoCircleOutlined,
+  AppstoreOutlined
 } from '@ant-design/icons-vue'
 import * as skillApi from '@/api/skill'
 
@@ -158,10 +159,10 @@ watch(() => props.visible, (val) => {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
+    :title-icon="AppstoreOutlined"
     title="导入技能压缩包"
-    width="580px"
     :confirm-loading="loading"
     ok-text="开始导入"
     cancel-text="取消"
@@ -270,7 +271,7 @@ watch(() => props.visible, (val) => {
         <template #extra>开启后，若存在同名技能包，将以新导入的内容覆盖原有数据</template>
       </AFormItem>
     </AForm>
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss">

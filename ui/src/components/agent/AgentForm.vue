@@ -6,6 +6,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { message } from 'ant-design-vue'
+import { RobotOutlined } from '@ant-design/icons-vue'
 import AgentFormBasic from './AgentFormBasic.vue'
 import AgentFormModel from './AgentFormModel.vue'
 import AgentFormTools from './AgentFormTools.vue'
@@ -330,11 +331,12 @@ function handleCancel() {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
+    :title-icon="RobotOutlined"
     :title="isEdit ? '编辑智能体' : '新增智能体'"
     :footer="null"
-    wrap-class-name="full-modal"
+    defaultWidth="100%"
     destroyOnClose
     @cancel="handleCancel"
   >
@@ -342,8 +344,7 @@ function handleCancel() {
       :current="currentStep"
       :items="steps"
       @change="handleStepChange"
-      class="mb-lg"
-      style="margin-top: 25px" />
+      class="mb-lg"/>
 
     <div class="form-content" v-if="visible">
       <AgentFormBasic
@@ -397,7 +398,7 @@ function handleCancel() {
         </AButton>
       </ASpace>
     </div>
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss">

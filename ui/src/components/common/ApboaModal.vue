@@ -28,6 +28,7 @@ const props = withDefaults(
     /** 控制显示状态 */
     open?: boolean
     /** 标题 */
+    titleIcon?: any
     title?: string
     /** 内容区域默认宽度 */
     defaultWidth?: string | number
@@ -54,7 +55,7 @@ const props = withDefaults(
   }>(),
   {
     open: false,
-    defaultWidth: '780px',
+    defaultWidth: '680px',
     expandedWidth: '100%',
     defaultExpanded: false,
     confirmLoading: false,
@@ -155,6 +156,7 @@ watch(
         <div class="apboa-center-header">
           <div class="apboa-center-header-title">
             <slot name="title">
+              <component v-if="titleIcon" :is="titleIcon" style="margin-right: 5px" />
               <span>{{ title }}</span>
             </slot>
           </div>
@@ -219,10 +221,12 @@ watch(
 <style lang="scss">
 /* ===================== AModal 宿主重置 ===================== */
 .apboa-modal-wrap {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  background: rgba(255, 255, 255, 0.65);
-  transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  //backdrop-filter: blur(12px);
+  //-webkit-backdrop-filter: blur(12px);
+  //background: rgba(255, 255, 255, 0.35);
+  //transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #FFFFFF;
+
   /* 对话框容器铺满全屏 */
   .ant-modal {
     top: 0 !important;
@@ -270,8 +274,10 @@ watch(
   display: flex;
   flex-direction: column;
   height: 100vh;
+  padding: 0 18px;
   transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  background-color: #FFFFFF;
 }
 
 /* ===================== Header ===================== */
@@ -280,7 +286,7 @@ watch(
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0;
   height: 52px;
 }
 
@@ -326,8 +332,8 @@ watch(
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
+  //display: flex;
+  //flex-direction: column;
 }
 
 .apboa-body-inner {
@@ -335,7 +341,7 @@ watch(
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 18px;
+  padding: 12px 4px 12px 0;
 }
 
 /* ===================== Footer ===================== */
@@ -345,6 +351,6 @@ watch(
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 12px 0;
 }
 </style>

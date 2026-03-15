@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, defineComponent } from 'vue'
 import { message } from 'ant-design-vue'
-import { PlusOutlined } from '@ant-design/icons-vue';
+import { PlusOutlined, FileTextOutlined } from '@ant-design/icons-vue';
 import type { SystemPromptTemplateVO, SystemPromptTemplate } from '@/types'
 import * as promptApi from '@/api/prompt'
 import SmartCodeEditor from '@/components/editor/SmartCodeEditor.vue'
@@ -193,13 +193,11 @@ const addItem = (e: any) => {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
+    :title-icon="FileTextOutlined"
     :title="isEdit ? '编辑提示词模板' : '新增提示词模板'"
     :confirm-loading="loading"
-    width="800px"
-    style="top: 0"
-    class="fullscreen-modal"
     destroyOnClose
     @ok="handleSubmit"
     @cancel="handleCancel"
@@ -255,7 +253,7 @@ const addItem = (e: any) => {
         />
       </AFormItem>
     </AForm>
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss"></style>

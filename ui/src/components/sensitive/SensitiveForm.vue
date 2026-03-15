@@ -10,7 +10,7 @@ import type { SensitiveWordConfigVO, SensitiveWordConfig } from '@/types'
 import { SensitiveWordAction } from '@/types'
 import * as sensitiveApi from '@/api/sensitive'
 import WordsInput from './WordsInput.vue'
-import {PlusOutlined} from "@ant-design/icons-vue";
+import { PlusOutlined, SafetyCertificateOutlined } from "@ant-design/icons-vue";
 
 /**
  * Props定义
@@ -213,11 +213,11 @@ const addItem = (e: any) => {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
+    :title-icon="SafetyCertificateOutlined"
     :title="isEdit ? '编辑敏感词配置' : '新增敏感词配置'"
     :confirm-loading="loading"
-    width="600px"
     @ok="handleSubmit"
     @cancel="handleCancel"
   >
@@ -287,7 +287,7 @@ const addItem = (e: any) => {
         </ACol>
       </ARow>
     </AForm>
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss"></style>

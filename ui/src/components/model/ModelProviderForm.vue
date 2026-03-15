@@ -6,6 +6,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { message } from 'ant-design-vue'
+import { ApiOutlined } from '@ant-design/icons-vue'
 import type { ModelProviderVO, ModelProvider } from '@/types'
 import { ModelProviderType, AuthType } from '@/types'
 import * as modelApi from '@/api/model'
@@ -222,11 +223,11 @@ function handleCancel() {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
+    :title-icon="ApiOutlined"
     :title="isEdit ? '编辑供应商' : '新增供应商'"
     :confirm-loading="loading"
-    width="600px"
     destroyOnClose
     @ok="handleSubmit"
     @cancel="handleCancel"
@@ -280,7 +281,7 @@ function handleCancel() {
         <AInput v-model:value="formData.envVarName" placeholder="请输入环境变量名，如: OPENAI_API_KEY" />
       </AFormItem>
     </AForm>
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss">
