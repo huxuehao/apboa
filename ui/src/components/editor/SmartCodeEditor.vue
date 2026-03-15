@@ -982,7 +982,7 @@ defineExpose({
 }
 
 .language-select {
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: 4px;
   border: 1px solid;
   background: inherit;

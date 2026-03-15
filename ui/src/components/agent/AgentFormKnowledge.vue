@@ -247,7 +247,6 @@ defineExpose({
 
       <AFormItem label="子智能体">
         <template v-if="availableAgents?.length > 0">
-<!--          <ACheckboxGroup v-model:value="formData.subAgent">-->
           <div class="checkbox-grid">
             <ACheckbox
               v-for="agent in availableAgents"
@@ -266,9 +265,8 @@ defineExpose({
               </div>
             </ACheckbox>
           </div>
-<!--          </ACheckboxGroup>-->
           <div class="text-placeholder text-xs mt-sm">
-            选择子智能体后,当前智能体将成为多智能体系统
+            选中的智能体，将会被当前智能体作为工具进行使用。
           </div>
         </template>
         <div v-else class="text-placeholder mt-xs">
