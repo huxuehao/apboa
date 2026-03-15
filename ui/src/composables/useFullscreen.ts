@@ -13,6 +13,7 @@ export function useFullscreen(target: Ref<HTMLElement | null>): UseFullscreenRet
     zIndex: string
     overflow: string
     backgroundColor: string
+    borderRadius: string
   } | null>(null)
 
   // 保存原始样式
@@ -27,7 +28,8 @@ export function useFullscreen(target: Ref<HTMLElement | null>): UseFullscreenRet
       height: target.value.style.height,
       zIndex: target.value.style.zIndex,
       overflow: target.value.style.overflow,
-      backgroundColor: target.value.style.backgroundColor
+      backgroundColor: target.value.style.backgroundColor,
+      borderRadius: target.value.style.borderRadius
     }
   }
 
@@ -44,6 +46,7 @@ export function useFullscreen(target: Ref<HTMLElement | null>): UseFullscreenRet
     target.value.style.zIndex = styles.zIndex
     target.value.style.overflow = styles.overflow
     target.value.style.backgroundColor = styles.backgroundColor
+    target.value.style.borderRadius = styles.borderRadius
   }
 
   // 进入模拟全屏
@@ -61,9 +64,10 @@ export function useFullscreen(target: Ref<HTMLElement | null>): UseFullscreenRet
       target.value.style.left = '0'
       target.value.style.width = '100vw'
       target.value.style.height = '100vh'
-      target.value.style.zIndex = '9999' // 确保在最上层
+      target.value.style.zIndex = '99999' // 确保在最上层
       target.value.style.overflow = 'auto'
       target.value.style.backgroundColor = '#ffffff' // 默认白色背景
+      target.value.style.borderRadius = '0'
 
       // 防止body滚动
       document.body.style.overflow = 'hidden'

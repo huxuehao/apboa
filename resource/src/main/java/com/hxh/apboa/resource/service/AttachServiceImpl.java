@@ -211,6 +211,12 @@ public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> impleme
         attach.setProtocol(protocol);
         attach.setFileId(IdWorker.getId());
         attach.setPath(storePath);
+        Long userId = UserUtils.getId();
+        attach.setCreateBy(userId);
+        attach.setUpdateBy(userId);
+        LocalDateTime now = LocalDateTime.now();
+        attach.setCreateAt(now);
+        attach.setUpdateAt(now);
         this.baseMapper.insert(attach);
         return attach;
     }
