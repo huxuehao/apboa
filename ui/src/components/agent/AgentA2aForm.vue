@@ -6,6 +6,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { message } from 'ant-design-vue'
+import { RobotOutlined } from '@ant-design/icons-vue'
 import AgentFormBasic from './AgentFormBasic.vue'
 import AgentA2aFormWellknown from './AgentA2aFormWellknown.vue'
 import AgentA2aFormNacos from './AgentA2aFormNacos.vue'
@@ -245,17 +246,18 @@ function handleCancel() {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
+    :title-icon="RobotOutlined"
     :title="isEdit ? '编辑 A2A 智能体' : `新增 A2A 智能体 · ${resolvedA2aType === 'WELLKNOWN' ? 'WellKnown' : 'Nacos'}`"
-    :width="800"
-    :footer="null"
-    style="top: 0"
     destroyOnClose
+    :confirm-loading="loading"
+    :okText="isEdit ? '更新' : '创建'"
+    @ok="handleSubmit"
     @cancel="handleCancel"
   >
     <AAlert
-      message="特别说明：因 AgentScope 未适配 AgentCard 的 securitySchemes，目前只能调用非鉴权 A2A-Server"
+      message="说明：因 AgentScope 未适配 AgentCard 的 securitySchemes，目前只能调用非鉴权 A2A-Server"
       banner
       closable
     />
@@ -300,22 +302,11 @@ function handleCancel() {
         />
       </div>
     </div>
-
-    <div class="form-actions flex justify-end gap-sm mt-lg">
-      <AButton @click="handleCancel">取消</AButton>
-      <AButton type="primary" :loading="loading" @click="handleSubmit">
-        {{ isEdit ? '更新' : '创建' }}
-      </AButton>
-    </div>
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss">
 .a2a-form-body {
-  //max-height: 70vh;
-  //overflow-y: auto;
-  padding: var(--spacing-sm) var(--spacing-xs);
-
   .form-section {
     .section-title {
       font-size: var(--font-size-base);

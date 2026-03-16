@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { message } from 'ant-design-vue'
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons-vue'
+import { MinusCircleOutlined, PlusOutlined, CloudServerOutlined } from '@ant-design/icons-vue'
 import type { McpServerVO, McpServer } from '@/types'
 import { McpProtocol, McpMode } from '@/types'
 import * as mcpApi from '@/api/mcp'
@@ -291,11 +291,10 @@ function handleCancel() {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
+    :title-icon="CloudServerOutlined"
     :title="isEdit ? '编辑MCP服务器' : '新增MCP服务器'"
-    :width="700"
-    style="top: 5vh"
     destroyOnClose
     @cancel="handleCancel"
   >
@@ -304,7 +303,6 @@ function handleCancel() {
       :model="formData"
       :rules="rules"
       layout="vertical"
-      style="max-height: 600px; overflow-y: auto; padding-right: 10px;"
     >
       <AFormItem label="关联智能体" v-if="isEdit">
         <div class="code-wrapper ">
@@ -428,7 +426,7 @@ function handleCancel() {
         {{ isEdit ? '更新' : '创建' }}
       </AButton>
     </template>
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss">

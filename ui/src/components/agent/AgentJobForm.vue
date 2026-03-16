@@ -4,11 +4,10 @@
  * @author huxuehao
  */
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
     :title="modalTitle"
     :confirm-loading="loading"
-    :width="600"
     destroyOnClose
     @ok="handleSubmit"
     @cancel="handleCancel"
@@ -166,8 +165,8 @@
     <template #footer>
       <div class="modal-footer">
         <AButton
-          v-if="isEdit"
           danger
+          :disabled="!isEdit"
           :loading="unbindLoading"
           @click="handleUnbind"
         >
@@ -179,7 +178,7 @@
         </div>
       </div>
     </template>
-  </AModal>
+  </ApboaModal>
 </template>
 
 <script setup lang="ts">

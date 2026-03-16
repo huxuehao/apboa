@@ -10,6 +10,7 @@ import { message } from 'ant-design-vue'
 import App from './App.vue'
 import router from './router'
 import { useAccountStore } from '@/stores'
+import ApboaModal from '@/components/common/ApboaModal.vue'
 
 const app = createApp(App)
 
@@ -18,6 +19,7 @@ pinia.use(piniaPluginPersistedstate)
 app.use(pinia)
 app.use(router)
 app.use(Antd)
+app.component('ApboaModal', ApboaModal)
 message.config({
   top: '50px',
 })

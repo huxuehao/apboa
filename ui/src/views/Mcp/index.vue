@@ -7,7 +7,7 @@
 /* eslint-disable vue/multi-word-component-names */
 import { onMounted, ref, onUnmounted, h, computed } from 'vue'
 import { Modal } from 'ant-design-vue'
-import { SearchOutlined } from '@ant-design/icons-vue'
+import { CloudServerOutlined, SearchOutlined } from '@ant-design/icons-vue'
 import { useMcpStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as mcpApi from '@/api/mcp'
@@ -15,6 +15,7 @@ import type { McpServerVO, McpProtocol } from '@/types'
 import McpCard from '@/components/mcp/McpCard.vue'
 import CreateCard from '@/components/mcp/CreateCard.vue'
 import McpForm from '@/components/mcp/McpForm.vue'
+import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
 
 const store = useMcpStore()
 const { list, selectedProtocol, keyword, loading, hasMore } = storeToRefs(store)
@@ -56,13 +57,11 @@ async function handleView(id: string) {
   const response = await mcpApi.detail(id)
   const data = response.data.data
 
-  Modal.info({
+  ApboaModalApi.open({
     title: 'MCP服务器详情',
-    closable: true,
-    icon: null,
+    titleIcon: CloudServerOutlined,
     footer: null,
-    width: 800,
-    content: h('div', { style: { maxHeight: '800px', overflowY: 'auto' } }, [
+    content: h('div', {}, [
       h('p', {}, [h('strong', '关联智能体: '), data.used?.length ? data.used.join('、') : '无']),
       h('p', {}, [h('strong', '名称: '), data.name]),
       h('p', {}, [h('strong', '协议: '), data.protocol]),
@@ -72,8 +71,6 @@ async function handleView(id: string) {
       h('p', {}, h('strong', '协议配置:')),
       h('pre', {
         style: {
-          maxHeight: '300px',
-          overflowY: 'auto',
           background: '#f5f5f5',
           padding: '12px',
           borderRadius: '4px',

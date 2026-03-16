@@ -7,7 +7,7 @@
 /* eslint-disable vue/multi-word-component-names */
 import { onMounted, ref, onUnmounted, computed, h } from 'vue'
 import { Modal, message } from 'ant-design-vue'
-import { SearchOutlined } from '@ant-design/icons-vue'
+import { SearchOutlined, ApiOutlined } from '@ant-design/icons-vue'
 import { useModelStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as modelApi from '@/api/model'
@@ -16,6 +16,7 @@ import ModelProviderCard from '@/components/model/ModelProviderCard.vue'
 import CreateProviderCard from '@/components/model/CreateProviderCard.vue'
 import ModelProviderForm from '@/components/model/ModelProviderForm.vue'
 import ModelConfigModal from '@/components/model/ModelConfigModal.vue'
+import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
 
 const store = useModelStore()
 const { providerList, selectedProviderType, keyword, loading, hasMore } = storeToRefs(store)
@@ -64,13 +65,11 @@ async function handleView(id: string) {
   const response = await modelApi.providerDetail(id)
   const data = response.data.data
 
-  Modal.info({
+  ApboaModalApi.open({
     title: '供应商详情',
-    closable: true,
-    icon: null,
+    titleIcon: ApiOutlined,
     footer: null,
-    width: 600,
-    content: h('div', { style: { maxHeight: '800px', overflowY: 'auto' } }, [
+    content: h('div', {}, [
       h('p', {}, [h('strong', '供应商类型: '), getProviderTypeLabel(data.type)]),
       h('p', {}, [h('strong', '名称: '), data.name]),
       h('p', {}, [h('strong', '描述: '), data.description]),

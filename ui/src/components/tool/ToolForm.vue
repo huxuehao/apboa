@@ -6,7 +6,12 @@
 <script setup lang="ts">
 import { ref, watch, computed, defineComponent, nextTick, onUnmounted } from 'vue'
 import { message } from 'ant-design-vue'
-import { PlusOutlined, MinusCircleOutlined, HolderOutlined } from '@ant-design/icons-vue'
+import {
+  PlusOutlined,
+  MinusCircleOutlined,
+  HolderOutlined,
+  ToolOutlined
+} from '@ant-design/icons-vue'
 import Sortable from 'sortablejs'
 import type { ToolVO, ToolConfig } from '@/types'
 import { ToolType, CodeLanguage } from '@/types'
@@ -415,18 +420,17 @@ const addItem = (e: Event) => {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
+    :title-icon="ToolOutlined"
     :title="isEdit ? '编辑工具' : '新增工具'"
     :confirm-loading="loading"
-    width="900px"
-    style="top: 0"
     destroyOnClose
     @ok="handleSubmit"
     @cancel="handleCancel"
   >
     <AAlert
-      message="特别说明：在线工具目前支持同步工具，异步或流式工具请自行在com.hxh.apboa.core.tool.builtins包下进行编写"
+      message="说明：在线工具目前支持同步工具。异步或流式工具请自行在com.hxh.apboa.core.tool.builtins包下进行编写"
       banner
       closable
     />
@@ -549,7 +553,7 @@ const addItem = (e: Event) => {
         </AFormItem>
       </template>
     </AForm>
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss">

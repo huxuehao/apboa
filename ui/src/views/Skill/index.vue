@@ -7,7 +7,7 @@
 /* eslint-disable vue/multi-word-component-names */
 import { onMounted, ref, onUnmounted, computed, h } from 'vue'
 import { Modal, Collapse } from 'ant-design-vue'
-import { SearchOutlined } from '@ant-design/icons-vue'
+import { SearchOutlined, AppstoreOutlined } from '@ant-design/icons-vue'
 import { useSkillStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as skillApi from '@/api/skill'
@@ -18,6 +18,7 @@ import SkillForm from '@/components/skill/SkillForm.vue'
 import ImportLocalForm from '@/components/skill/ImportLocalForm.vue'
 import ImportGitForm from '@/components/skill/ImportGitForm.vue'
 import ImportUploadForm from '@/components/skill/ImportUploadForm.vue'
+import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
 
 /**
  * 资源项接口
@@ -135,13 +136,11 @@ async function handleView(id: string) {
   const response = await skillApi.detail(id)
   const data = response.data.data
 
-  Modal.info({
+  ApboaModalApi.open({
     title: '技能包详情',
-    closable: true,
-    icon: null,
+    titleIcon: AppstoreOutlined,
     footer: null,
-    width: 800,
-    content: h('div', { style: { maxHeight: '800px', overflowY: 'auto' } }, [
+    content: h('div', {}, [
       h('p', {}, [h('strong', '关联智能体: '), data.used?.length ? data.used.join('、') : '无']),
       h('p', {}, [h('strong', '分类: '), data.category]),
       h('p', {}, [h('strong', '名称: '), data.name]),

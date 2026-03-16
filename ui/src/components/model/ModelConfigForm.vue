@@ -274,12 +274,10 @@ async function handleViewProvider() {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
     :title="isEdit ? '编辑模型配置' : '新增模型配置'"
     :confirm-loading="loading"
-    width="600px"
-    style="top: 0px"
     destroyOnClose
     @ok="handleSubmit"
     @cancel="handleCancel"
@@ -468,7 +466,7 @@ async function handleViewProvider() {
         </AFormItem>
       </div>
     </AForm>
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss">

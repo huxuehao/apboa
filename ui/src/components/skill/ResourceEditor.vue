@@ -145,10 +145,9 @@ defineExpose({
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     v-model:open="visible"
     :title="title"
-    width="800px"
     @ok="close"
   >
     <div class="resource-editor">
@@ -179,12 +178,11 @@ defineExpose({
 
       <AEmpty v-else description="暂无数据" class="mt-md" />
     </div>
-  </AModal>
+  </ApboaModal>
 
-  <AModal
+  <ApboaModal
     v-model:open="itemFormVisible"
     :title="currentItemIndex === -1 ? '添加项' : '编辑项'"
-    width="800px"
     @ok="handleItemSave"
   >
     <AForm layout="vertical">
@@ -206,7 +204,7 @@ defineExpose({
         />
       </AFormItem>
     </AForm>
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss">

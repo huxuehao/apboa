@@ -103,9 +103,9 @@ function clearAll() {
     border-radius: var(--border-radius-base);
   }
 
-  .words-tags {
-    max-height: 150px;
-    overflow-y: auto;
-  }
+  //.words-tags {
+  //  max-height: 150px;
+  //  overflow-y: auto;
+  //}
 }
 </style>

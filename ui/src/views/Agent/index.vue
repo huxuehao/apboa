@@ -7,7 +7,7 @@
 /* eslint-disable vue/multi-word-component-names */
 import { onMounted, ref, onUnmounted, computed, h } from 'vue'
 import { Modal } from 'ant-design-vue'
-import { SearchOutlined } from '@ant-design/icons-vue'
+import {RobotOutlined, SearchOutlined} from '@ant-design/icons-vue'
 import { useAgentStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as agentApi from '@/api/agent'
@@ -21,6 +21,7 @@ import AgentArchitectureDiagram from '@/components/agent/architecture/AgentArchi
 import AgentJobForm from '@/components/agent/AgentJobForm.vue'
 import * as jobApi from '@/api/job'
 import type { JobInfo } from '@/types'
+import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
 
 const store = useAgentStore()
 const { list, tags, selectedAgentType, selectedTag, keyword, loading, hasMore } = storeToRefs(store)
@@ -151,13 +152,10 @@ async function handleView(id: string) {
         content = h('p', {}, 'A2A 配置暂无数据')
       }
 
-      Modal.info({
+      ApboaModalApi.open({
         title: 'A2A 智能体详情',
-        closable: true,
-        icon: null,
+        titleIcon: null,
         footer: null,
-        style: { top: '50px' },
-        width: 700,
         content
       })
     } catch (e) {
@@ -166,14 +164,11 @@ async function handleView(id: string) {
     return
   }
 
-  Modal.info({
+  ApboaModalApi.open({
     title: '智能体详情',
-    closable: true,
-    icon: null,
+    titleIcon: RobotOutlined,
     footer: null,
-    style: {top: '50px'},
-    width: 800,
-    content: h('div', { style: { maxHeight: '800px', overflowY: 'auto' } }, [
+    content: h('div', {}, [
       h('p', {}, [h('strong', '主智能体: '), data.used?.length ? data.used.join('、') : '无']),
       h('p', {}, [h('strong', '名称: '), data.name]),
       h('p', {}, [h('strong', '智能体编号: '), data.agentCode]),

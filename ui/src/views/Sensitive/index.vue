@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { onMounted, ref, onUnmounted, computed, h } from 'vue'
 import { Modal } from 'ant-design-vue'
-import { SearchOutlined } from '@ant-design/icons-vue'
+import { SearchOutlined, SafetyCertificateOutlined } from '@ant-design/icons-vue'
 import { useSensitiveStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as sensitiveApi from '@/api/sensitive'
@@ -14,6 +14,7 @@ import type { SensitiveWordConfigVO } from '@/types'
 import SensitiveCard from '@/components/sensitive/SensitiveCard.vue'
 import CreateCard from '@/components/sensitive/CreateCard.vue'
 import SensitiveForm from '@/components/sensitive/SensitiveForm.vue'
+import { ApboaModalApi } from "@/components/common/ApboaModalApi.ts";
 
 const store = useSensitiveStore()
 const { list, categories, selectedCategory, keyword, loading, hasMore } = storeToRefs(store)
@@ -53,13 +54,11 @@ async function handleView(id: string) {
   const data = response.data.data
   const wordsList = data.words || []
 
-  Modal.info({
+  ApboaModalApi.open({
     title: '敏感词配置详情',
-    closable: true,
-    icon: null,
+    titleIcon: SafetyCertificateOutlined,
     footer: null,
-    width: 600,
-    content: h('div', { style: { maxHeight: '800px', overflowY: 'auto' } }, [
+    content: h('div', {}, [
       h('p', {}, [h('strong', '关联智能体: '), data.used?.length ? data.used.join('、') : '无']),
       h('p', {}, [h('strong', '名称: '), data.name]),
       h('p', {}, [h('strong', '分类: '), data.category]),

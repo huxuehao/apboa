@@ -6,6 +6,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, defineComponent } from 'vue'
 import { message } from 'ant-design-vue'
+import { AppstoreOutlined } from '@ant-design/icons-vue'
 import SmartCodeEditor from '@/components/editor/SmartCodeEditor.vue'
 import ResourceEditor from './ResourceEditor.vue'
 import type { SkillPackageVO, SkillPackage } from '@/types'
@@ -238,11 +239,10 @@ watch(() => props.visible, (val) => {
 </script>
 
 <template>
-  <AModal
+  <ApboaModal
     :open="visible"
+    :title-icon="AppstoreOutlined"
     :title="title"
-    width="800px"
-    style="top: 0"
     :confirm-loading="loading"
     destroyOnClose
     @ok="handleSubmit"
@@ -349,7 +349,7 @@ watch(() => props.visible, (val) => {
       prefix="scripts"
       :show-language-selector="true"
     />
-  </AModal>
+  </ApboaModal>
 </template>
 
 <style scoped lang="scss">

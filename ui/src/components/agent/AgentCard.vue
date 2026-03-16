@@ -94,11 +94,12 @@ const menuItems = computed(() => {
  * 点击标题
  */
 function handleTitleClick() {
-  if (props.data.agentType==='CUSTOM') {
-    emit('architecture', props.data.id)
-  } else {
-    emit('view', props.data.id)
-  }
+  // if (props.data.agentType==='CUSTOM') {
+  //   emit('architecture', props.data.id)
+  // } else {
+  //   emit('view', props.data.id)
+  // }
+  emit('view', props.data.id)
 }
 
 /**
