@@ -364,7 +364,7 @@ watch(
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 12px 4px 12px 0;
+  padding: 12px 4px;
 }
 
 /* ===================== Footer ===================== */
