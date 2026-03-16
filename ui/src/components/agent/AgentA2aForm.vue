@@ -258,8 +258,8 @@ function handleCancel() {
   >
     <AAlert
       message="说明：因 AgentScope 未适配 AgentCard 的 securitySchemes，目前只能调用非鉴权 A2A-Server"
+      banner
       closable
-      style="margin-bottom: 20px"
     />
     <div class="a2a-form-body" v-if="visible">
       <!-- 基本信息 -->

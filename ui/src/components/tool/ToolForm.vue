@@ -432,8 +432,8 @@ const addItem = (e: Event) => {
   >
     <AAlert
       message="说明：在线工具目前支持同步工具。异步或流式工具请自行在com.hxh.apboa.core.tool.builtins包下进行编写"
+      banner
       closable
-      style="margin-bottom: 20px"
     />
     <AForm ref="formRef" :model="formData" :rules="rules" layout="vertical">
       <AFormItem label="关联智能体" v-if="isEdit">
