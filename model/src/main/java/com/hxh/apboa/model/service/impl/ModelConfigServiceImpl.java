@@ -1,5 +1,6 @@
 package com.hxh.apboa.model.service.impl;
 
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.ModelConfig;
 import com.hxh.apboa.common.entity.ModelProvider;
@@ -70,7 +71,7 @@ public class ModelConfigServiceImpl extends ServiceImpl<ModelConfigMapper, Model
 
         String subSql = systemPromptId.stream().map(String::valueOf).collect(Collectors.joining(","));
 
-        String sql = String.format("SELECT * FROM agent_definition WHERE model_config_id IN (%s)", subSql);
+        String sql = String.format("SELECT * FROM %s WHERE model_config_id IN (%s)", TableConst.AGENT, subSql);
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             AgentDefinition agent = new AgentDefinition();
             // 手动映射字段

@@ -2,6 +2,7 @@ package com.hxh.apboa.common.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hxh.apboa.common.config.SerializableEnable;
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.mp.annotation.QueryDefine;
 import com.hxh.apboa.common.mp.support.QueryCondition;
 import lombok.Data;
@@ -11,7 +12,7 @@ import lombok.Data;
  * @author huxuehao
  **/
 @Data
-@TableName("quartz_job_info")
+@TableName(TableConst.JOB_INFO)
 public class JobInfo implements SerializableEnable {
 	/**定时任务标识*/
     private String id;

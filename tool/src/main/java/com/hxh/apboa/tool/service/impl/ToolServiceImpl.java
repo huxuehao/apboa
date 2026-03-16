@@ -1,9 +1,9 @@
 package com.hxh.apboa.tool.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.AgentTool;
-import com.hxh.apboa.common.entity.SensitiveWordConfig;
 import com.hxh.apboa.common.entity.ToolConfig;
 import com.hxh.apboa.common.enums.ToolType;
 import com.hxh.apboa.common.util.JsonUtils;
@@ -130,7 +130,7 @@ public class ToolServiceImpl extends ServiceImpl<ToolMapper, ToolConfig> impleme
 
         String subSql = agentIds.stream().map(String::valueOf).collect(Collectors.joining(","));
 
-        String sql = String.format("SELECT * FROM agent_definition WHERE id IN (%s)", subSql);
+        String sql = String.format("SELECT * FROM %s WHERE id IN (%s)", TableConst.AGENT, subSql);
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             AgentDefinition agent = new AgentDefinition();
             // 手动映射字段

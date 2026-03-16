@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hxh.apboa.common.config.SerializableEnable;
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.mp.annotation.QueryDefine;
 import com.hxh.apboa.common.mp.support.QueryCondition;
 import lombok.Getter;
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Setter
-@TableName("attach_log")
+@TableName(TableConst.ATTACH_LOG)
 public class AttachLog implements SerializableEnable {
 
     @TableId(type = IdType.ASSIGN_ID)

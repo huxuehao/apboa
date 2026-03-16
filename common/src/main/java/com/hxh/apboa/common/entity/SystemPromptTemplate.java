@@ -1,6 +1,7 @@
 package com.hxh.apboa.common.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.hxh.apboa.common.consts.TableConst;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +12,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName("system_prompt_template")
+@TableName(TableConst.PROMPT)
 public class SystemPromptTemplate extends BaseEntity {
 
     /**

@@ -4,6 +4,7 @@ import com.hxh.apboa.common.config.SerializableEnable;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.hxh.apboa.common.consts.TableConst;
 import lombok.*;
 
 /**
@@ -13,7 +14,7 @@ import lombok.*;
  */
 @Getter
 @Setter
-@TableName("agent_hooks")
+@TableName(TableConst.AGENT_HOOKS)
 @AllArgsConstructor
 @NoArgsConstructor
 public class AgentHook implements SerializableEnable {

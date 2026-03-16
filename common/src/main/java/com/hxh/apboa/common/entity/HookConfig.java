@@ -1,5 +1,6 @@
 package com.hxh.apboa.common.entity;
 
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.enums.HookType;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName(value = "hook_config")
+@TableName(value = TableConst.HOOK)
 public class HookConfig extends BaseEntity {
 
     /**

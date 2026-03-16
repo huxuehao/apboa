@@ -1,4 +1,4 @@
-package com.hxh.apboa.websocket.config;
+package com.hxh.apboa.common.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.ApplicationContext;

@@ -1,7 +1,7 @@
 package com.hxh.apboa.prompt.service.impl;
 
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
-import com.hxh.apboa.common.entity.SensitiveWordConfig;
 import com.hxh.apboa.common.entity.SystemPromptTemplate;
 import com.hxh.apboa.prompt.mapper.SystemPromptTemplateMapper;
 import com.hxh.apboa.prompt.service.SystemPromptTemplateService;
@@ -54,7 +54,7 @@ public class SystemPromptTemplateServiceImpl extends ServiceImpl<SystemPromptTem
 
         String subSql = systemPromptId.stream().map(String::valueOf).collect(Collectors.joining(","));
 
-        String sql = String.format("SELECT * FROM agent_definition WHERE system_prompt_template_id IN (%s)", subSql);
+        String sql = String.format("SELECT * FROM %s WHERE system_prompt_template_id IN (%s)", TableConst.AGENT, subSql);
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             AgentDefinition agent = new AgentDefinition();
             // 手动映射字段

@@ -2,7 +2,7 @@ package com.hxh.apboa.common.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hxh.apboa.common.config.SpringContextHolder;
+import com.hxh.apboa.common.config.ApboaSpringContextHolder;
 
 import java.time.Duration;
 
@@ -15,7 +15,7 @@ public class JsonUtils {
     private static final ObjectMapper mapper;
 
     static {
-        mapper = SpringContextHolder.getObjectMapper();
+        mapper = ApboaSpringContextHolder.getObjectMapper();
     }
 
     public static String toJsonStr(Object obj) {

@@ -1,6 +1,7 @@
 package com.hxh.apboa.common.entity;
 
 import com.hxh.apboa.common.config.mybatis.JsonNodeTypeHandler;
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.enums.HealthStatus;
 import com.hxh.apboa.common.enums.McpMode;
 import com.hxh.apboa.common.enums.McpProtocol;
@@ -19,7 +20,7 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Setter
-@TableName(value = "mcp_server", autoResultMap = true)
+@TableName(value = TableConst.MCP, autoResultMap = true)
 public class McpServer extends BaseEntity {
 
     /**

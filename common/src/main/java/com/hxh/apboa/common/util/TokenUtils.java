@@ -1,6 +1,6 @@
 package com.hxh.apboa.common.util;
 
-import com.hxh.apboa.common.config.SpringContextHolder;
+import com.hxh.apboa.common.config.ApboaSpringContextHolder;
 import com.hxh.apboa.common.consts.SysConst;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -28,7 +28,7 @@ public class TokenUtils {
      * @param ttlMillis 过期时间
      */
     public static String createToken(String id, Object subject, long ttlMillis) {
-        String secret = SpringContextHolder.getProperty(SysConst.JWT_SECRET_KEY);
+        String secret = ApboaSpringContextHolder.getProperty(SysConst.JWT_SECRET_KEY);
         return createToken(id, JsonUtils.toJsonStr(subject), ttlMillis, secret);
     }
 
@@ -70,7 +70,7 @@ public class TokenUtils {
      * @param token token
      */
     public static Claims parseToken(String token) {
-        String secret = SpringContextHolder.getProperty(SysConst.JWT_SECRET_KEY);
+        String secret = ApboaSpringContextHolder.getProperty(SysConst.JWT_SECRET_KEY);
         return parseToken(token, secret);
     }
 

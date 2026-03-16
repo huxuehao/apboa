@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hxh.apboa.common.config.SerializableEnable;
+import com.hxh.apboa.common.consts.TableConst;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -16,7 +17,7 @@ import java.util.Date;
  * @author huxuehao
  **/
 @Data
-@TableName("quartz_job_log")
+@TableName(TableConst.JOB_LOG)
 public class JobLog implements SerializableEnable {
 
 	/**定时任务日志主键*/

@@ -1,6 +1,7 @@
 
 package io.agentscope.core.agui.processor;
 
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.ChatSession;
 import com.hxh.apboa.core.agui.AgentContext;
@@ -133,7 +134,7 @@ public class AguiRequestProcessor {
             return null;
         }
 
-        String chat_session_sql = String.format("SELECT * FROM chat_session WHERE id = %s", sessionId);
+        String chat_session_sql = String.format("SELECT * FROM %s WHERE id = %s", TableConst.CHAT_SESSION, sessionId);
         List<ChatSession> chatSessions = jdbcTemplate.query(chat_session_sql, (rs, rowNum) -> {
             ChatSession chatSession = new ChatSession();
             // 手动映射字段
@@ -146,7 +147,7 @@ public class AguiRequestProcessor {
             return null;
         }
 
-        String agent_definition_sql = String.format("SELECT * FROM agent_definition WHERE id = %s", chatSessions.getFirst().getAgentId());
+        String agent_definition_sql = String.format("SELECT * FROM %s WHERE id = %s", TableConst.AGENT, chatSessions.getFirst().getAgentId());
         List<AgentDefinition> AgentDefinitions = jdbcTemplate.query(agent_definition_sql, (rs, rowNum) -> {
             AgentDefinition agentDefinition = new AgentDefinition();
             // 手动映射字段

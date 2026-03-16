@@ -4,6 +4,7 @@ import com.hxh.apboa.common.config.mybatis.JsonNodeTypeHandler;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.hxh.apboa.common.consts.TableConst;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +15,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName(value = "skill_package", autoResultMap = true)
+@TableName(value = TableConst.SKILL, autoResultMap = true)
 public class SkillPackage extends BaseEntity {
 
     /**

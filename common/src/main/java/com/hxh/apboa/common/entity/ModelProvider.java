@@ -1,6 +1,7 @@
 package com.hxh.apboa.common.entity;
 
 import com.hxh.apboa.common.config.mybatis.JsonNodeTypeHandler;
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.enums.AuthType;
 import com.hxh.apboa.common.enums.ModelProviderType;
 import com.hxh.apboa.common.wrapper.ModelConfigWrapper;
@@ -17,7 +18,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName(value = "model_provider", autoResultMap = true)
+@TableName(value = TableConst.PROVIDER, autoResultMap = true)
 public class ModelProvider extends BaseEntity {
 
     /**
