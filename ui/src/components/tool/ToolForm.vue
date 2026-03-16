@@ -10,8 +10,7 @@ import {
   PlusOutlined,
   MinusCircleOutlined,
   HolderOutlined,
-  ToolOutlined,
-  InfoCircleOutlined
+  ToolOutlined
 } from '@ant-design/icons-vue'
 import Sortable from 'sortablejs'
 import type { ToolVO, ToolConfig } from '@/types'

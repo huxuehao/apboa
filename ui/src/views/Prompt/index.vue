@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { onMounted, ref, onUnmounted, computed, h } from 'vue'
 import { Modal } from 'ant-design-vue'
-import { SearchOutlined } from '@ant-design/icons-vue'
+import { SearchOutlined,FileTextOutlined } from '@ant-design/icons-vue'
 import { usePromptStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as promptApi from '@/api/prompt'
@@ -14,6 +14,7 @@ import type { SystemPromptTemplateVO } from '@/types'
 import PromptCard from '@/components/prompt/PromptCard.vue'
 import CreateCard from '@/components/prompt/CreateCard.vue'
 import PromptForm from '@/components/prompt/PromptForm.vue'
+import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
 
 const store = usePromptStore()
 const { list, categories, selectedCategory, keyword, loading, hasMore } = storeToRefs(store)
@@ -52,13 +53,11 @@ async function handleView(id: string) {
   const response = await promptApi.detail(id)
   const data = response.data.data
 
-  Modal.info({
+  ApboaModalApi.open({
     title: '提示词模板详情',
-    closable: true,
-    icon: null,
+    titleIcon: FileTextOutlined,
     footer: null,
-    width: 800,
-    content: h('div', { style: { maxHeight: '800px', overflowY: 'auto' } }, [
+    content: h('div', {}, [
       h('p', {}, [h('strong', '关联智能体: '), data.used?.length ? data.used.join('、') : '无']),
       h('p', {}, [h('strong', '名称: '), data.name]),
       h('p', {}, [h('strong', '分类: '), data.category]),
@@ -67,8 +66,6 @@ async function handleView(id: string) {
       h('pre', {
         style: {
           backgroundColor: '#f5f5f5',
-          maxHeight: '300px',
-          overflowY: 'auto',
           padding: '12px',
           borderRadius: '4px',
           whiteSpace: 'pre-wrap',

@@ -7,7 +7,7 @@
 /* eslint-disable vue/multi-word-component-names */
 import { onMounted, ref, onUnmounted, computed, h } from 'vue'
 import { Modal } from 'ant-design-vue'
-import { SearchOutlined } from '@ant-design/icons-vue'
+import { SearchOutlined, LoginOutlined } from '@ant-design/icons-vue'
 import { useHookStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as hookApi from '@/api/hook'
@@ -16,6 +16,7 @@ import { HookType } from '@/types'
 import HookCard from '@/components/hook/HookCard.vue'
 import HookCreateCard from '@/components/hook/HookCreateCard.vue'
 import HookForm from '@/components/hook/HookForm.vue'
+import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
 
 const store = useHookStore()
 const {
@@ -117,13 +118,11 @@ async function handleView(id: string) {
   const response = await hookApi.detail(id)
   const data = response.data.data
 
-  Modal.info({
+  ApboaModalApi.open({
     title: '钩子详情',
-    closable: true,
-    icon: null,
+    titleIcon: LoginOutlined,
     footer: null,
-    width: 640,
-    content: h('div', { style: { maxHeight: '600px', overflowY: 'auto' } }, [
+    content: h('div', {}, [
       h('p', {}, [h('strong', '关联智能体: '), data.used?.length ? data.used.join('、') : '无']),
       h('p', {}, [h('strong', '类型: '), data.hookType === 'BUILTIN' ? '内置' : '自定义']),
       h('p', {}, [h('strong', '名称: '), data.name]),
@@ -139,8 +138,6 @@ async function handleView(id: string) {
                 background: '#f5f5f5',
                 padding: '12px',
                 borderRadius: '4px',
-                maxHeight: '200px',
-                overflowY: 'auto',
                 fontSize: '12px'
               }
             }, data.code)

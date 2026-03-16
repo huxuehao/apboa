@@ -7,7 +7,7 @@
 /* eslint-disable vue/multi-word-component-names */
 import { onMounted, ref, onUnmounted, computed, h } from 'vue'
 import { Modal } from 'ant-design-vue'
-import { SearchOutlined } from '@ant-design/icons-vue'
+import { SearchOutlined, ToolOutlined } from '@ant-design/icons-vue'
 import { useToolStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as toolApi from '@/api/tool'
@@ -15,6 +15,7 @@ import type {ToolVO} from '@/types'
 import ToolCard from '@/components/tool/ToolCard.vue'
 import CreateCard from '@/components/tool/CreateCard.vue'
 import ToolForm from '@/components/tool/ToolForm.vue'
+import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
 
 const store = useToolStore()
 const { list, categories, selectedToolType, selectedCategory, keyword, loading, hasMore } = storeToRefs(store)
@@ -70,13 +71,11 @@ async function handleView(id: string) {
   const data = response.data.data
   const inputSchemaList = data.inputSchema || []
 
-  Modal.info({
+  ApboaModalApi.open({
     title: '工具详情',
-    closable: true,
-    icon: null,
+    titleIcon: ToolOutlined,
     footer: null,
-    width: 800,
-    content: h('div', { style: { maxHeight: '800px', overflowY: 'auto' } }, [
+    content: h('div', {}, [
       h('p', {}, [h('strong', '关联智能体: '), data.used?.length ? data.used.join('、') : '无']),
       h('p', {}, [h('strong', '工具类型: '), data.toolType === 'BUILTIN' ? '内置' : '自定义']),
       h('p', {}, [h('strong', '分类: '), data.category]),
@@ -102,7 +101,7 @@ async function handleView(id: string) {
       ] : []),
       ...(data.code ? [
         h('p', {}, h('strong', '代码:')),
-        h('pre', { style: { background: '#f5f5f5', padding: '12px', borderRadius: '4px',maxHeight: '200px', overflowY: 'auto' } }, data.code)
+        h('pre', { style: { background: '#f5f5f5', padding: '12px', borderRadius: '4px' } }, data.code)
       ] : [])
     ])
   })

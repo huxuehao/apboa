@@ -221,11 +221,34 @@ watch(
 <style lang="scss">
 /* ===================== AModal 宿主重置 ===================== */
 .apboa-modal-wrap {
-  //backdrop-filter: blur(12px);
-  //-webkit-backdrop-filter: blur(12px);
-  //background: rgba(255, 255, 255, 0.35);
-  //transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  background-color: #FFFFFF;
+  /* 多重背景实现高级效果 */
+  background:
+    /* 第一层：渐变主色调 */
+    linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.3) 0%,
+        rgba(118, 75, 162, 0.1) 40%,
+        rgba(255, 255, 255, 0.2) 60%,
+        rgba(255, 255, 255, 0.1) 100%
+    ),
+      /* 第二层：噪点纹理 */
+    repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.02) 0px,
+        rgba(255, 255, 255, 0.02) 2px,
+        transparent 2px,
+        transparent 4px
+    );
+  /* 模糊效果 */
+  backdrop-filter: blur(15px) saturate(180%);
+  /* 可选：添加噪点纹理 */
+  background-image:
+    repeating-linear-gradient(45deg,
+      rgba(255, 255, 255, 0.02) 0px,
+      rgba(255, 255, 255, 0.02) 2px,
+      transparent 2px,
+      transparent 4px);
+
 
   /* 对话框容器铺满全屏 */
   .ant-modal {

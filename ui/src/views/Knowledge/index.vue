@@ -7,7 +7,7 @@
 /* eslint-disable vue/multi-word-component-names */
 import { onMounted, ref, onUnmounted, h, computed } from 'vue'
 import { Modal } from 'ant-design-vue'
-import { SearchOutlined } from '@ant-design/icons-vue'
+import { DatabaseOutlined, SearchOutlined } from '@ant-design/icons-vue'
 import { useKnowledgeStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as knowledgeApi from '@/api/knowledge'
@@ -15,6 +15,7 @@ import type { KnowledgeBaseConfigVO, KbType } from '@/types'
 import KnowledgeCard from '@/components/knowledge/KnowledgeCard.vue'
 import CreateCard from '@/components/knowledge/CreateCard.vue'
 import KnowledgeForm from '@/components/knowledge/KnowledgeForm.vue'
+import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
 
 const store = useKnowledgeStore()
 const { list, selectedKbType, keyword, loading, hasMore } = storeToRefs(store)
@@ -77,8 +78,6 @@ async function handleView(id: string) {
       h('p', {}, h('strong', '连接配置:')),
       h('pre', {
         style: {
-          maxHeight: '150px',
-          overflowY: 'auto',
           background: '#f5f5f5',
           padding: '12px',
           borderRadius: '4px',
@@ -93,8 +92,6 @@ async function handleView(id: string) {
       h('p', {}, h('strong', '端点配置:')),
       h('pre', {
         style: {
-          maxHeight: '150px',
-          overflowY: 'auto',
           background: '#f5f5f5',
           padding: '12px',
           borderRadius: '4px',
@@ -110,8 +107,6 @@ async function handleView(id: string) {
       h('p', {}, h('strong', '检索配置:')),
       h('pre', {
         style: {
-          maxHeight: '150px',
-          overflowY: 'auto',
           background: '#f5f5f5',
           padding: '12px',
           borderRadius: '4px',
@@ -126,8 +121,6 @@ async function handleView(id: string) {
       h('p', {}, h('strong', '重排序配置:')),
       h('pre', {
         style: {
-          maxHeight: '150px',
-          overflowY: 'auto',
           background: '#f5f5f5',
           padding: '12px',
           borderRadius: '4px',
@@ -142,8 +135,6 @@ async function handleView(id: string) {
       h('p', {}, h('strong', '查询重写配置:')),
       h('pre', {
         style: {
-          maxHeight: '150px',
-          overflowY: 'auto',
           background: '#f5f5f5',
           padding: '12px',
           borderRadius: '4px',
@@ -158,8 +149,6 @@ async function handleView(id: string) {
       h('p', {}, h('strong', '元数据过滤:')),
       h('pre', {
         style: {
-          maxHeight: '150px',
-          overflowY: 'auto',
           background: '#f5f5f5',
           padding: '12px',
           borderRadius: '4px',
@@ -174,8 +163,6 @@ async function handleView(id: string) {
       h('p', {}, h('strong', 'HTTP配置:')),
       h('pre', {
         style: {
-          maxHeight: '150px',
-          overflowY: 'auto',
           background: '#f5f5f5',
           padding: '12px',
           borderRadius: '4px',
@@ -190,13 +177,11 @@ async function handleView(id: string) {
     h('p', {}, [h('strong', '最后同步时间: '), data.lastSyncTime || '无'])
   )
 
-  Modal.info({
+  ApboaModalApi.open({
     title: '知识库详情',
-    closable: true,
-    icon: null,
+    titleIcon: DatabaseOutlined,
     footer: null,
-    width: 800,
-    content: h('div', { style: { maxHeight: '800px', overflowY: 'auto' } }, contentItems)
+    content: h('div', {}, contentItems)
   })
 }
 
