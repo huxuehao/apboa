@@ -3,6 +3,7 @@ package com.hxh.apboa.common.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hxh.apboa.common.config.mybatis.JsonNodeTypeHandler;
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.util.ExtendConfigHelper;
 import com.hxh.apboa.common.wrapper.ModelConfigWrapper;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -16,7 +17,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName(value = "model_config", autoResultMap = true)
+@TableName(value = TableConst.MODEL, autoResultMap = true)
 public class ModelConfig extends BaseEntity {
 
     /**

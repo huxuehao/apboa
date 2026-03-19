@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hxh.apboa.common.config.SerializableEnable;
 import com.hxh.apboa.common.config.mybatis.JsonNodeTypeHandler;
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.enums.A2aType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@TableName(value = "agent_a2a", autoResultMap = true)
+@TableName(value = TableConst.AGENT_A2A, autoResultMap = true)
 public class AgentA2A implements SerializableEnable {
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;

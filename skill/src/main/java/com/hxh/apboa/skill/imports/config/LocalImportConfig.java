@@ -3,8 +3,6 @@ package com.hxh.apboa.skill.imports.config;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 /**
  * 描述：本地导入配置
  *

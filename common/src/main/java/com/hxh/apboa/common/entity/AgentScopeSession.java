@@ -2,6 +2,7 @@ package com.hxh.apboa.common.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.hxh.apboa.common.config.SerializableEnable;
+import com.hxh.apboa.common.consts.TableConst;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
  **/
 @Getter
 @Setter
-@TableName("agentscope_sessions")
+@TableName(TableConst.AGENT_SCOPE_SESSIONS)
 @AllArgsConstructor
 @NoArgsConstructor
 public class AgentScopeSession implements SerializableEnable {

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hxh.apboa.common.config.SerializableEnable;
+import com.hxh.apboa.common.consts.TableConst;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Setter
-@TableName("chat_message")
+@TableName(TableConst.CHAT_MESSAGE)
 public class ChatMessage implements SerializableEnable {
 
     @TableId(type = IdType.AUTO)

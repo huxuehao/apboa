@@ -1,6 +1,7 @@
 package com.hxh.apboa.common.entity;
 
 import com.hxh.apboa.common.config.mybatis.JsonNodeTypeHandler;
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.enums.SensitiveWordAction;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -15,7 +16,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName(value = "sensitive_word_config", autoResultMap = true)
+@TableName(value = TableConst.SENSITIVE_WORD, autoResultMap = true)
 public class SensitiveWordConfig extends BaseEntity {
 
     /**

@@ -1,8 +1,8 @@
 package com.hxh.apboa.sensitive.service.impl;
 
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.SensitiveWordConfig;
-import com.hxh.apboa.common.entity.ToolConfig;
 import com.hxh.apboa.sensitive.mapper.SensitiveWordConfigMapper;
 import com.hxh.apboa.sensitive.service.SensitiveWordConfigService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -54,7 +54,7 @@ public class SensitiveWordConfigServiceImpl extends ServiceImpl<SensitiveWordCon
 
         String subSql = systemPromptId.stream().map(String::valueOf).collect(Collectors.joining(","));
 
-        String sql = String.format("SELECT * FROM agent_definition WHERE sensitive_word_config_id IN (%s)", subSql);
+        String sql = String.format("SELECT * FROM %s WHERE sensitive_word_config_id IN (%s)", TableConst.AGENT, subSql);
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             AgentDefinition agent = new AgentDefinition();
             // 手动映射字段

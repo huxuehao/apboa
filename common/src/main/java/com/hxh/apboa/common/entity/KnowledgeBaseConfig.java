@@ -1,6 +1,7 @@
 package com.hxh.apboa.common.entity;
 
 import com.hxh.apboa.common.config.mybatis.JsonNodeTypeHandler;
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.enums.HealthStatus;
 import com.hxh.apboa.common.enums.KbType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -19,7 +20,7 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Setter
-@TableName(value = "knowledge_base_config", autoResultMap = true)
+@TableName(value = TableConst.KNOWLEDGE, autoResultMap = true)
 public class KnowledgeBaseConfig extends BaseEntity {
 
     /**

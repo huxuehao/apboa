@@ -1,6 +1,7 @@
 package com.hxh.apboa.common.entity;
 
 import com.hxh.apboa.common.config.mybatis.JsonNodeTypeHandler;
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.enums.CodeLanguage;
 import com.hxh.apboa.common.enums.ToolType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -16,7 +17,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName(value = "tool_config", autoResultMap = true)
+@TableName(value = TableConst.TOOL, autoResultMap = true)
 public class ToolConfig extends BaseEntity {
 
     /**

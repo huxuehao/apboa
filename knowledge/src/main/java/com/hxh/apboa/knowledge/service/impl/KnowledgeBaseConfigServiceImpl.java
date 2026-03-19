@@ -1,6 +1,7 @@
 package com.hxh.apboa.knowledge.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.AgentKnowledgeBase;
 import com.hxh.apboa.common.entity.KnowledgeBaseConfig;
@@ -67,7 +68,7 @@ public class KnowledgeBaseConfigServiceImpl extends ServiceImpl<KnowledgeBaseCon
 
         String subSql = agentIds.stream().map(String::valueOf).collect(Collectors.joining(","));
 
-        String sql = String.format("SELECT * FROM agent_definition WHERE id IN (%s)", subSql);
+        String sql = String.format("SELECT * FROM %s WHERE id IN (%s)", TableConst.AGENT, subSql);
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             AgentDefinition agent = new AgentDefinition();
             // 手动映射字段

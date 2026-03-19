@@ -1,5 +1,6 @@
 package com.hxh.apboa;
 
+import com.hxh.apboa.common.consts.TableConst;
 import io.agentscope.core.agui.registry.AguiAgentRegistry;
 import io.agentscope.core.session.Session;
 import io.agentscope.core.session.mysql.MysqlSession;
@@ -23,10 +24,10 @@ import javax.sql.DataSource;
  */
 @Slf4j
 @Configuration
-public class AgentSessionConfig {
+@ConditionalOnClass({DataSource.class, MysqlSession.class})
+public class ApboaAgentSessionConfig {
 
     private static final String DATABASE_NAME = "apboa";
-    private static final String TABLE_NAME = "agentscope_sessions";
 
     /**
      * 创建 MysqlSession Bean
@@ -37,7 +38,7 @@ public class AgentSessionConfig {
     @Bean
     @Primary
     public Session agentSession(DataSource dataSource) {
-        return new MysqlSession(dataSource, DATABASE_NAME, TABLE_NAME, true);
+        return new MysqlSession(dataSource, DATABASE_NAME, TableConst.AGENT_SCOPE_SESSIONS, true);
     }
 
     /**

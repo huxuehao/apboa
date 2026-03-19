@@ -1,6 +1,7 @@
 package com.hxh.apboa.common.entity;
 
 import com.hxh.apboa.common.config.SerializableEnable;
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.enums.Role;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -17,7 +18,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName(value = "account_role", autoResultMap = true)
+@TableName(value = TableConst.ROLE, autoResultMap = true)
 public class AccountRole implements SerializableEnable {
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;

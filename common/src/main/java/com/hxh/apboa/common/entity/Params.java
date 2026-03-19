@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hxh.apboa.common.config.SerializableEnable;
+import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.mp.annotation.QueryDefine;
 import com.hxh.apboa.common.mp.support.QueryCondition;
 import lombok.Data;
@@ -14,7 +15,7 @@ import lombok.Data;
  * @author huxuehao
  **/
 @Data
-@TableName("params")
+@TableName(TableConst.PARAMS)
 public class Params implements SerializableEnable {
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Long id;
