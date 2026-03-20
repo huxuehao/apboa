@@ -80,6 +80,7 @@ export interface AgentDefinitionVO {
   used: string[]
   agentA2A: AgentA2A
   jobInfo: JobInfo
+  studioConfigId: string | null
 }
 
 /**

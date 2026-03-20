@@ -415,3 +415,12 @@ export interface JobInfo {
   dataMap: string // {"agentId":"xxxx", "input":"xxxx"}
   enabled: boolean // 0表示未启动，1表示启动
 }
+
+/**
+ * StudioConfig 实体
+ */
+export interface StudioConfig {
+  id?: string
+  url: string
+  project: string
+}

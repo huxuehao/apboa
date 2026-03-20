@@ -87,6 +87,6 @@ public class IConfirmationHook implements IAgentHook {
 
     @Override
     public String getDescription() {
-        return "工具调用人工确认Hook";
+        return "工具调用人工确认Hook，用户决定是否执行";
     }
 }

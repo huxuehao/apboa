@@ -57,5 +57,9 @@
             <groupId>com.hxh.apboa</groupId>
             <artifactId>a2a</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>studio</artifactId>
+        </dependency>
     </dependencies>
 </project>
