@@ -31,7 +31,7 @@ public class DefaultOllamaModelI implements IChatModel {
 
         OllamaChatModel.Builder builder = OllamaChatModel.builder()
                 .modelName(config.getModelCode())
-                .httpTransport(HttpTransportHelper.create())
+                .httpTransport(HttpTransportHelper.createOkHttpTransport())
                 .defaultOptions(OllamaOptions.fromGenerateOptions(GenerateOptionsHelper.create(config)));
 
         if (config.getBaseUrl() != null && !config.getBaseUrl().isEmpty()) {

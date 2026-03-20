@@ -55,6 +55,9 @@ const filteredTags = computed(() => {
  * 表单验证规则
  */
 const rules = {
+  tag: [
+    { max: 6, message: '标签长度不能超过6个字符', trigger: 'blur' }
+  ],
   name: [
     { required: true, message: '请输入名称', trigger: 'blur' },
     { max: 100, message: '名称长度不能超过100个字符', trigger: 'blur' }

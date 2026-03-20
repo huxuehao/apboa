@@ -83,7 +83,8 @@ const formData = ref({
     memoryCompressionConfig: null as Record<string, unknown> | null,
     structuredOutputEnabled: false,
     structuredOutputReminder: 'TOOL_CHOICE' as "TOOL_CHOICE" | "PROMPT",
-    structuredOutputSchema: ''
+    structuredOutputSchema: '',
+    studioConfigId: null as string | null
   }
 })
 
@@ -95,7 +96,7 @@ const steps = [
   { title: '模型与提示词', description: '选择模型和提示词模板' },
   { title: '工具与能力', description: '配置钩子、工具、技能和敏感词' },
   { title: '知识库与MCP', description: '配置知识库、MCP服务器和子智能体' },
-  { title: '高级设置', description: '配置计划、记忆和结构化输出' }
+  { title: '高级设置', description: '配置计划、记忆、结构化输出和Studio' }
 ]
 
 /**
@@ -168,7 +169,8 @@ watch(
           memoryCompressionConfig: props.data.memoryCompressionConfig || null,
           structuredOutputEnabled: props.data.structuredOutputEnabled,
           structuredOutputReminder: props.data.structuredOutputReminder || 'TOOL_CHOICE',
-          structuredOutputSchema: props.data.structuredOutputSchema ? JSON.stringify(props.data.structuredOutputSchema, null, 2) : ''
+          structuredOutputSchema: props.data.structuredOutputSchema ? JSON.stringify(props.data.structuredOutputSchema, null, 2) : '',
+          studioConfigId: props.data.studioConfigId || null
         }
       } else {
         resetForm()
@@ -220,7 +222,8 @@ function resetForm() {
       memoryCompressionConfig: null,
       structuredOutputEnabled: false,
       structuredOutputReminder: 'TOOL_CHOICE',
-      structuredOutputSchema: ''
+      structuredOutputSchema: '',
+      studioConfigId: null
     }
   }
 }
@@ -299,6 +302,7 @@ async function handleSubmit() {
       structuredOutputSchema: formData.value.advanced.structuredOutputEnabled && formData.value.advanced.structuredOutputSchema
         ? JSON.parse(formData.value.advanced.structuredOutputSchema)
         : null,
+      studioConfigId: formData.value.advanced.studioConfigId,
       version: '1.0.0'
     }
 

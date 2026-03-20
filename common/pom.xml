@@ -18,26 +18,58 @@
     </properties>
 
     <dependencies>
+        <!--agentscope核心包-->
         <dependency>
             <groupId>io.agentscope</groupId>
-            <artifactId>agentscope</artifactId>
+            <artifactId>agentscope-core</artifactId>
+            <version>${agentscope.version}</version>
         </dependency>
+        <!--agui扩展-->
         <dependency>
             <groupId>io.agentscope</groupId>
             <artifactId>agentscope-agui-spring-boot-starter</artifactId>
             <version>${agentscope.version}</version>
         </dependency>
+        <!--mysql session 存储扩展-->
         <dependency>
             <groupId>io.agentscope</groupId>
             <artifactId>agentscope-extensions-session-mysql</artifactId>
             <version>${agentscope.version}</version>
             <optional>true</optional>
         </dependency>
-
+        <!--a2a-->
         <dependency>
             <groupId>io.agentscope</groupId>
             <artifactId>agentscope-extensions-a2a-client</artifactId>
             <version>${agentscope.version}</version>
+        </dependency>
+        <!--studio-->
+        <dependency>
+            <groupId>io.agentscope</groupId>
+            <artifactId>agentscope-extensions-studio</artifactId>
+            <version>${agentscope.version}</version>
+        </dependency>
+        <!--模型依赖-->
+        <dependency>
+            <groupId>com.anthropic</groupId>
+            <artifactId>anthropic-java</artifactId>
+            <version>2.14.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.openai</groupId>
+            <artifactId>openai-java</artifactId>
+            <version>4.18.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.genai</groupId>
+            <artifactId>google-genai</artifactId>
+            <version>1.38.0</version>
+        </dependency>
+        <!--RAG相关依赖-->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>bailian20231229</artifactId>
+            <version>2.8.1</version>
         </dependency>
 
 <!--        <dependency>-->

@@ -54,8 +54,11 @@ const descriptionText = computed(() => {
     </div>
 
     <div class="node-footer">
-      <ATag size="small" :bordered="false" :color="data.agent.agentType === 'CUSTOM' ? 'purple' : 'blue'">
+      <ATag size="small" :bordered="false" :color="data.agent.agentType === 'CUSTOM' ? 'magenta' : 'blue'">
         {{ agentTypeText }}
+      </ATag>
+      <ATag v-if="data.agent.studioConfigId" color="purple" :bordered="false">
+        Studio
       </ATag>
       <ATag size="small" :bordered="false" color="default" v-if="data.agent.tag">
         {{ data.agent.tag }}

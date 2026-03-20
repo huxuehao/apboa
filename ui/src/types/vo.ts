@@ -307,3 +307,12 @@ export interface ChatMessageVO {
   depth: number
   createdAt: string
 }
+
+/**
+ * Studio配置VO
+ */
+export interface StudioConfigVO {
+  id: string
+  url: string
+  project: string
+}
