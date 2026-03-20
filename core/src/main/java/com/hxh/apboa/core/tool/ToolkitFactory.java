@@ -5,6 +5,7 @@ import com.hxh.apboa.agent.service.AgentSubAgentService;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.ToolConfig;
 import com.hxh.apboa.common.enums.ToolType;
+import com.hxh.apboa.core.agent.A2aAgentHelper;
 import com.hxh.apboa.core.agent.ReActAgentHelper;
 import com.hxh.apboa.core.agui.AgentContext;
 import com.hxh.apboa.core.hook.builtins.IConfirmationHook;
@@ -31,7 +32,8 @@ public class ToolkitFactory {
     private final ToolService toolService;
     private final AgentToolService agentToolService;
     private final AgentSubAgentService agentSubAgentService;
-    private final ReActAgentHelper agentHelper;
+    private final ReActAgentHelper reActAgentHelper;
+    private final A2aAgentHelper a2aAgentHelper;
     private final McpClientFactory mcpClientFactory;
     private final AgentDefinitionService agentDefinitionService;
 
@@ -39,13 +41,16 @@ public class ToolkitFactory {
                           AgentToolService agentToolService,
                           AgentSubAgentService agentSubAgentService,
                           @Lazy
-                          ReActAgentHelper agentHelper,
+                          ReActAgentHelper reActAgentHelper,
+                          @Lazy
+                          A2aAgentHelper a2aAgentHelper,
                           McpClientFactory mcpClientFactory,
                           AgentDefinitionService agentDefinitionService) {
         this.toolService = toolService;
         this.agentToolService = agentToolService;
         this.agentSubAgentService = agentSubAgentService;
-        this.agentHelper = agentHelper;
+        this.reActAgentHelper = reActAgentHelper;
+        this.a2aAgentHelper = a2aAgentHelper;
         this.mcpClientFactory = mcpClientFactory;
         this.agentDefinitionService = agentDefinitionService;
     }
@@ -105,12 +110,15 @@ public class ToolkitFactory {
                 switch (definition.getAgentType()) {
                     case CUSTOM:
                         toolkit.registration()
-                                .subAgent(() -> agentHelper.getReActAgent(definition),
+                                .subAgent(() -> reActAgentHelper.getReActAgent(definition),
                                         createSubAgentConfig(definition))
                                 .apply();
                         break;
                     case A2A:
-                        // TODO: A2A
+                        toolkit.registration()
+                                .subAgent(() -> a2aAgentHelper.getA2aAgent(definition),
+                                        createSubAgentConfig(definition))
+                                .apply();
                         break;
                     default:
                         break;

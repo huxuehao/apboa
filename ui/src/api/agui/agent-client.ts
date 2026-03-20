@@ -340,7 +340,7 @@ export class AgentClient {
         this.messageBuffers[e.messageId] += e.delta
         const msg = this.messages.find((m) => m.id === e.messageId)
         if (msg) msg.content = this.messageBuffers[e.messageId]
-        this.handlers.onTextMessageContent?.(e, this.messageBuffers[e.messageId])
+        this.handlers.onTextMessageContent?.(e, this.messageBuffers[e.messageId] as string)
         break
       }
       case 'TEXT_MESSAGE_END': {

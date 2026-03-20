@@ -6,6 +6,8 @@ import {type AccountVO} from "@/types";
 const TokenKey = setting.systemName + '-' + setting.accessToken;
 const refreshTokenKey = setting.systemName + '-' + setting.refreshToken;
 const userKey = setting.systemName + '-' + setting.user;
+const ACCESS_TOKEN_COOKIE_KEY = 'apboa-access-token';
+const REFRESH_TOKEN_COOKIE_KEY = 'apboa-refresh-token';
 
 
 /**
@@ -21,6 +23,10 @@ function getToken(): string {
  * @param token token
  */
 function setToken(token: string) {
+  Cookies.set(ACCESS_TOKEN_COOKIE_KEY, token, {
+    secure: setting.cookieSecure,
+    sameSite: setting.cookieSameSite
+  })
   cache.local.set(TokenKey, token);
 }
 
@@ -28,7 +34,7 @@ function setToken(token: string) {
  * 清除token
  */
 function removeToken() {
-  Cookies.remove("apboa-access-token")
+  Cookies.remove(ACCESS_TOKEN_COOKIE_KEY)
   cache.local.remove(TokenKey);
 }
 
@@ -45,6 +51,10 @@ function getRefreshToken(): string {
  * @param refreshToken
  */
 function setRefreshToken(refreshToken: string) {
+  Cookies.set(REFRESH_TOKEN_COOKIE_KEY, refreshToken, {
+    secure: setting.cookieSecure,
+    sameSite: setting.cookieSameSite
+  })
   cache.local.set(refreshTokenKey, refreshToken);
 }
 
@@ -52,6 +62,7 @@ function setRefreshToken(refreshToken: string) {
  * 清除refreshToken
  */
 function removeRefreshToken() {
+  Cookies.remove(REFRESH_TOKEN_COOKIE_KEY)
   cache.local.remove(refreshTokenKey);
 }
 
