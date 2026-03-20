@@ -23,7 +23,6 @@ export function useCurrentSession(agentId: import('vue').Ref<string>) {
   const selectSession = async (session: { id: string | number; title?: string }) => {
     currentSessionId.value = String(session.id)
     currentSessionTitle.value = session.title || '新对话'
-    await loadCurrentMessages()
   }
 
   const resetSession = () => {
