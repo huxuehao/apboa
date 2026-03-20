@@ -12,7 +12,7 @@ export function useChatStream(options: {
   fileIds?: import('vue').Ref<string[]>
   memoryActive?: import('vue').Ref<boolean>
   planActive?: import('vue').Ref<boolean>
-  onMessageSaved?: () => void
+  onMessageSaved?: (chatMsg: ChatMessageVO) => void
 }) {
   const { agentId, agentDetail, currentSessionId, fileIds, memoryActive, planActive, onMessageSaved } = options
 
@@ -51,9 +51,9 @@ export function useChatStream(options: {
       onTextMessageEnd: async (_e, finalText) => {
         streamingContent.value = ''
         streamingMessageId.value = null
-        if (currentSessionId.value) {
-          await chatSessionApi.appendMessage(currentSessionId.value, { role: 'assistant', content: finalText })
-          onMessageSaved?.()
+        if (currentSessionId.value && finalText) {
+          const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'assistant', content: finalText })
+          onMessageSaved?.(res.data.data)
         }
       },
       onToolCallStart: (e) => {
@@ -80,8 +80,8 @@ export function useChatStream(options: {
           if (currentSessionId.value) {
             const contentToSave = buildToolCallsContent(toolCallsInProgress.value)
             if (contentToSave) {
-              await chatSessionApi.appendMessage(currentSessionId.value, { role: 'tool', content: contentToSave })
-              onMessageSaved?.()
+              const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'tool', content: contentToSave })
+              onMessageSaved?.(res.data.data)
             }
           }
         } finally {
@@ -111,9 +111,9 @@ export function useChatStream(options: {
     // 保存历史
     const contentToSave = buildToolCallsContent([{ id, name, args, result, elapsed: 0 }])
     if (contentToSave) {
-      await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'tool', content: contentToSave })
+      const res = await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'tool', content: contentToSave })
       toolCallsInProgress.value = toolCallsInProgress.value.filter(item => item.id != id)
-      onMessageSaved?.()
+      onMessageSaved?.(res.data.data)
     }
 
     await run({
@@ -128,14 +128,21 @@ export function useChatStream(options: {
     await abort()
     agentHasResult.value = true
     if (currentSessionId.value) {
+      let chatMsg:ChatMessageVO | null = null;
       // 保存工具调用消息
       if (toolCallsInProgress.value.length > 0) {
         const contentToSave = buildToolCallsContent(toolCallsInProgress.value)
-        await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'tool', content: contentToSave })
+        if (contentToSave) {
+          const res = await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'tool', content: contentToSave })
+          chatMsg = res.data.data
+        }
       }
       // 保存AI回复消息
       else {
-        await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'assistant', content: streamingContent.value })
+        if (streamingContent.value) {
+          const res = await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'assistant', content: streamingContent.value })
+          chatMsg = res.data.data
+        }
       }
 
       toolCallsInProgress.value = []
@@ -143,7 +150,9 @@ export function useChatStream(options: {
       streamingMessageId.value = null
       isRunning.value = false
 
-      onMessageSaved?.()
+      if (chatMsg) {
+        onMessageSaved?.(chatMsg)
+      }
     }
 
   }

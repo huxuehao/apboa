@@ -110,8 +110,8 @@ const {
   fileIds,
   memoryActive,
   planActive,
-  onMessageSaved: () => {
-    loadCurrentMessages()
+  onMessageSaved: (chatMsg: ChatMessageVO) => {
+    messagesList.value.push(chatMsg)
   },
 })
 

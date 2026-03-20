@@ -24,7 +24,7 @@ import type {AgentA2A, JobInfo} from "@/types/entity.ts";
  * 账号VO
  */
 export interface AccountVO {
-  id: string
+  id: string | number
   nickname: string
   email: string
   username: string
@@ -40,7 +40,7 @@ export interface AccountVO {
  * 智能体定义VO
  */
 export interface AgentDefinitionVO {
-  id: string
+  id: string | number
   agentType: 'CUSTOM' | 'A2A'
   name: string
   agentCode: string
@@ -86,7 +86,7 @@ export interface AgentDefinitionVO {
  * Hook配置VO
  */
 export interface HookConfigVO {
-  id: string
+  id: string | number
   name: string
   hookType: HookType
   description: string
@@ -105,7 +105,7 @@ export interface HookConfigVO {
  * 知识库配置VO
  */
 export interface KnowledgeBaseConfigVO {
-  id: string
+  id: string | number
   name: string
   kbType: KbType
   ragMode: RAGMode
@@ -131,7 +131,7 @@ export interface KnowledgeBaseConfigVO {
  * MCP服务器VO
  */
 export interface McpServerVO {
-  id: string
+  id: string | number
   name: string
   protocol: McpProtocol
   mode: McpMode
@@ -152,7 +152,7 @@ export interface McpServerVO {
  * 模型配置VO
  */
 export interface ModelConfigVO {
-  id: string
+  id: string | number
   providerId: string
   name: string
   modelId: string
@@ -180,7 +180,7 @@ export interface ModelConfigVO {
  * 模型提供商VO
  */
 export interface ModelProviderVO {
-  id: string
+  id: string | number
   type: string
   name: string
   description: string
@@ -200,7 +200,7 @@ export interface ModelProviderVO {
  * 敏感词配置VO
  */
 export interface SensitiveWordConfigVO {
-  id: string
+  id: string | number
   category: string
   name: string
   description: string
@@ -219,7 +219,7 @@ export interface SensitiveWordConfigVO {
  * 技能包VO
  */
 export interface SkillPackageVO {
-  id: string
+  id: string | number
   name: string
   description: string
   skillContent: string
@@ -239,7 +239,7 @@ export interface SkillPackageVO {
  * 系统提示词模板VO
  */
 export interface SystemPromptTemplateVO {
-  id: string
+  id: string | number
   category: string
   name: string
   description: string
@@ -257,7 +257,7 @@ export interface SystemPromptTemplateVO {
  * 工具VO
  */
 export interface ToolVO {
-  id: string
+  id: string | number
   name: string
   toolId: string
   description: string
@@ -282,7 +282,7 @@ export interface ToolVO {
  * 聊天会话VO
  */
 export interface ChatSessionVO {
-  id: string
+  id: string | number
   userId: string
   agentId: string
   currentMessageId: string | null
@@ -297,7 +297,7 @@ export interface ChatSessionVO {
  * 聊天消息VO
  */
 export interface ChatMessageVO {
-  id: string
+  id: string | number
   sessionId: string
   role: string
   content: string
