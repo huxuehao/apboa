@@ -29,7 +29,7 @@ public class DefaultDashScopeModelI implements IChatModel {
                 .modelName(config.getModelCode())
                 .stream(config.getStreaming() != null && config.getStreaming())
                 .enableThinking(config.getThinking() != null && config.getThinking())
-                .httpTransport(HttpTransportHelper.create())
+                .httpTransport(HttpTransportHelper.createOkHttpTransport())
                 .defaultOptions(GenerateOptionsHelper.create(config));
 
         if (config.getBaseUrl() != null && !config.getBaseUrl().isEmpty()) {

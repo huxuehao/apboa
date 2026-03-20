@@ -6,6 +6,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import SmartCodeEditor from '@/components/editor/SmartCodeEditor.vue'
+import StudioConfigSelect from '@/components/studio/StudioConfigSelect.vue'
 
 /**
  * Props定义
@@ -22,6 +23,7 @@ const props = defineProps<{
     structuredOutputEnabled: boolean
     structuredOutputReminder: 'PROMPT' | 'TOOL_CHOICE'
     structuredOutputSchema: string
+    studioConfigId: string | null
   }
 }>()
 
@@ -272,7 +274,6 @@ defineExpose({
       </ACol>
     </ARow>
 
-
     <AFormItem v-if="formData.structuredOutputEnabled" label="输出Schema">
       <SmartCodeEditor
         v-model="formData.structuredOutputSchema"
@@ -281,6 +282,13 @@ defineExpose({
       />
       <div class="text-placeholder text-xs mt-xs">
         定义输出的JSON Schema格式
+      </div>
+    </AFormItem>
+
+    <AFormItem label="Studio 可视化调试">
+      <StudioConfigSelect v-model="formData.studioConfigId" />
+      <div class="text-placeholder text-xs mt-xs">
+        配置Studio服务地址,用于智能体的可视化调试
       </div>
     </AFormItem>
   </AForm>

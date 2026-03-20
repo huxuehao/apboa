@@ -187,7 +187,8 @@ async function handleView(id: string) {
       h('p', {}, [h('strong', '启用敏感词: '), data.sensitiveFilterEnabled ? '是' : '否']),
       h('p', {}, [h('strong', '启用计划: '), data.enablePlanning ? '是' : '否']),
       h('p', {}, [h('strong', '启用记忆: '), data.enableMemory ? '是' : '否']),
-      h('p', {}, [h('strong', '结构化输出: '), data.structuredOutputEnabled ? '是' : '否'])
+      h('p', {}, [h('strong', '结构化输出: '), data.structuredOutputEnabled ? '是' : '否']),
+      h('p', {}, [h('strong', 'Studio 可视化调试: '), data.studioConfigId ? '是' : '否'])
     ])
   })
 }

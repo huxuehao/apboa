@@ -4,10 +4,7 @@ import com.hxh.apboa.common.UserDetail;
 import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.exception.NotAuthException;
-import com.hxh.apboa.common.util.JsonUtils;
-import com.hxh.apboa.common.util.RedisUtils;
-import com.hxh.apboa.common.util.TokenUtils;
-import com.hxh.apboa.common.util.UserUtils;
+import com.hxh.apboa.common.util.*;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,6 +45,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(@NonNull HttpServletRequest request,
                              @NonNull HttpServletResponse response,
                              @NonNull Object handler) {
+        RequestHolder.setRequest(request);
 
         if (!(handler instanceof HandlerMethod handlerMethod)) {
             return true;
@@ -98,6 +96,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                            HttpServletResponse response,
                            Object handler,
                            ModelAndView modelAndView) {
+        RequestHolder.clear();
     }
 
     /**

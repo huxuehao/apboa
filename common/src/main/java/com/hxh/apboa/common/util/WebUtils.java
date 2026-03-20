@@ -57,7 +57,7 @@ public class WebUtils extends org.springframework.web.util.WebUtils {
 
     public static HttpServletRequest getRequest() {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        return requestAttributes == null ? null : ((ServletRequestAttributes)requestAttributes).getRequest();
+        return requestAttributes == null ? RequestHolder.getRequest() : ((ServletRequestAttributes)requestAttributes).getRequest();
     }
 
     public static void renderJson(HttpServletResponse response, Object result) {

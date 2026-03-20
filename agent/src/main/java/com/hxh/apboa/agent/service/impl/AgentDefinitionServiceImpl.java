@@ -7,10 +7,7 @@ import com.hxh.apboa.agent.mapper.AgentDefinitionMapper;
 import com.hxh.apboa.agent.mapper.IJobInfoMapper;
 import com.hxh.apboa.agent.service.AgentDefinitionService;
 import com.hxh.apboa.agent.service.AgentSubAgentService;
-import com.hxh.apboa.common.entity.AgentA2A;
-import com.hxh.apboa.common.entity.AgentDefinition;
-import com.hxh.apboa.common.entity.JobInfo;
-import com.hxh.apboa.common.entity.ModelConfig;
+import com.hxh.apboa.common.entity.*;
 import com.hxh.apboa.common.enums.AgentType;
 import com.hxh.apboa.common.enums.ModelType;
 import com.hxh.apboa.common.event.AgentReRegisterEvent;
@@ -23,6 +20,7 @@ import com.hxh.apboa.mcp.service.AgentMcpServerService;
 import com.hxh.apboa.model.service.ModelConfigService;
 import com.hxh.apboa.params.core.ParamsAdapter;
 import com.hxh.apboa.skill.service.AgentSkillPackageService;
+import com.hxh.apboa.studio.service.AgentStudioService;
 import com.hxh.apboa.tool.service.AgentToolService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +51,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
     private final ApplicationEventPublisher publisher;
     private final ParamsAdapter paramsAdapter;
     private final AgentA2aService agentA2aService;
+    private final AgentStudioService agentStudioService;
     private final IJobInfoMapper iJobInfoMapper;
 
     @Override
@@ -65,6 +64,11 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         AgentDefinitionVO vo = BeanUtils.copy(entity, AgentDefinitionVO.class);
 
         vo.setHook(hookService.getHookIds(id));
+        Long studioConfigId = agentStudioService.getStudioIdByAgentId(id);
+        if (studioConfigId != null) {
+            vo.setStudioConfigId(studioConfigId);
+        }
+
         if(entity.getAgentType() == AgentType.CUSTOM) {
             vo.setTool(toolService.getToolIds(id));
             vo.setMcp(mcpServerService.getMcpIds(id));
@@ -122,6 +126,11 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
             mcpServerService.saveAgentMcpServer(vo.getId(), vo.getMcp());
             skillPackageService.saveAgentSkillPackage(vo.getId(), vo.getSkill());
             agentKnowledgeBaseService.saveAgentKnowledge(vo.getId(), vo.getKnowledgeBase());
+            if (vo.getStudioConfigId() != null) {
+                agentStudioService.saveAgentStudio(vo.getId(), List.of(vo.getStudioConfigId()));
+            } else {
+                agentStudioService.deleteAgentStudio(List.of(vo.getId()));
+            }
         } else {
             AgentA2A agentA2A = vo.getAgentA2A();
             agentA2A.setAgentDefinitionId(vo.getId());
@@ -148,6 +157,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         mcpServerService.deleteAgentMcpServer(ids);
         skillPackageService.deleteAgentSkillPackage(ids);
         agentKnowledgeBaseService.deleteAgentKnowledge(ids);
+        agentStudioService.deleteAgentStudio(ids);
 
         return Boolean.TRUE;
     }

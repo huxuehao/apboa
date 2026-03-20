@@ -6,6 +6,7 @@ import com.hxh.apboa.agent.service.AgentDefinitionService;
 import com.hxh.apboa.common.config.auth.RoleNeed;
 import com.hxh.apboa.common.dto.AgentDefinitionDTO;
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.common.entity.AgentStudio;
 import com.hxh.apboa.common.entity.JobInfo;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.mp.support.MP;
@@ -13,6 +14,7 @@ import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.vo.AgentDefinitionVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.hxh.apboa.studio.mapper.AgentStudioMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +34,7 @@ public class AgentDefinitionController {
 
     private final AgentDefinitionService agentDefinitionService;
     private final IJobInfoMapper iJobInfoMapper;
+    private final AgentStudioMapper agentStudioMapper;
 
     /**
      * 分页查询
@@ -41,14 +44,22 @@ public class AgentDefinitionController {
         IPage<AgentDefinition> page = agentDefinitionService.page(MP.<AgentDefinition>getPage(query), MP.getQueryWrapper(query));
         IPage<AgentDefinitionVO> pageVo = BeanUtils.copyPage(page, AgentDefinitionVO.class);
         List<JobInfo> agent = iJobInfoMapper.selectList(new LambdaQueryWrapper<JobInfo>().eq(JobInfo::getType, "AGENT"));
-        if (!agent.isEmpty()) {
+        List<AgentStudio> agentStudios = agentStudioMapper.selectList(null);
+        if (!agent.isEmpty() || !agentStudios.isEmpty()) {
             Map<String, JobInfo> collectMap = agent.stream().collect(Collectors.toMap(
                     JobInfo::getBizId,
                     item -> item,
                     (existing, replacement) -> existing));
+            Map<Long, Long> agentStudioMap = agentStudios.stream().collect(Collectors.toMap(
+                    AgentStudio::getAgentDefinitionId,
+                    AgentStudio::getStudioId,
+                    (existing, replacement) -> existing));
             pageVo.getRecords().forEach(agentVo -> {
                 if (collectMap.containsKey(String.valueOf(agentVo.getId()))) {
                     agentVo.setJobInfo(collectMap.get(String.valueOf(agentVo.getId())));
+                }
+                if (agentStudioMap.containsKey(agentVo.getId())) {
+                    agentVo.setStudioConfigId(agentStudioMap.get(agentVo.getId()));
                 }
             });
         }

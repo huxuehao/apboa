@@ -13,6 +13,7 @@ import com.hxh.apboa.core.knowledge.KnowledgeFactory;
 import com.hxh.apboa.core.model.ChatModelFactory;
 import com.hxh.apboa.core.prompt.AgentSysPromptFactory;
 import com.hxh.apboa.core.skill.SkillBoxFactory;
+import com.hxh.apboa.core.studio.StudioService;
 import com.hxh.apboa.core.tool.ToolkitFactory;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.hook.Hook;
@@ -25,6 +26,8 @@ import io.agentscope.core.state.StatePersistence;
 import io.agentscope.core.plan.PlanNotebook;
 import io.agentscope.core.rag.model.RetrieveConfig;
 import io.agentscope.core.skill.SkillBox;
+import io.agentscope.core.studio.StudioManager;
+import io.agentscope.core.studio.StudioMessageHook;
 import io.agentscope.core.tool.Toolkit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -47,6 +50,7 @@ public class ReActAgentHelper {
     private final SkillBoxFactory skillBoxFactory;
     private final ToolkitFactory toolkitFactory;
     private final KnowledgeFactory knowledgeFactory;
+    private final StudioService studioService;
 
     /**
      * 获取 ReActAgent
@@ -162,6 +166,11 @@ public class ReActAgentHelper {
                             .memoryManaged(true)
                             .planNotebookManaged(definition.getEnablePlanning() && isPlanActive)
                             .build());
+        }
+
+        // 配置Studio
+        if (studioService.init(definition)) {
+            hooks.add(new StudioMessageHook(StudioManager.getClient()));
         }
 
         // 添加Hook

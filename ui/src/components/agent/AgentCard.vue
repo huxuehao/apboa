@@ -169,8 +169,13 @@ function handleMenuClick({ key }: { key: string }) {
         <ATag color="default" class="tag">
           {{ data.tag || '未设置标签' }}
         </ATag>
+        <ATag v-if="data.studioConfigId" color="purple" :bordered="false">
+          Studio
+        </ATag>
       </div>
-      <div class="card-time text-placeholder text-xs">更新于 {{ formattedTime }}</div>
+      <div v-if="!data.studioConfigId" class="card-time text-placeholder text-xs">
+        更新于 {{ formattedTime }}
+      </div>
     </div>
   </div>
 </template>
@@ -207,7 +212,7 @@ function handleMenuClick({ key }: { key: string }) {
       .timing {
         position: absolute;
         right: -7px;
-        bottom:-0px;
+        bottom: 0;
         font-size: 16px;
         color: #8a8a8a;
 
@@ -215,20 +220,16 @@ function handleMenuClick({ key }: { key: string }) {
           color: #4449d0;
         }
       }
-
     }
+  }
 
-    .card-name {
-      font-size: var(--font-size-base);
-      font-weight: 600;
-      color: var(--color-text-primary);
-      cursor: pointer;
-      transition: color var(--transition-base);
-
-      //&:hover {
-      //  color: #5c6bc0;
-      //}
-    }
+  .card-name {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: color var(--transition-base);
+    position: relative;
   }
 
   .card-content {

@@ -7,10 +7,10 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>core</artifactId>
+    <artifactId>studio</artifactId>
     <packaging>jar</packaging>
 
-    <name>core</name>
+    <name>studio</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,11 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>com.hxh.apboa</groupId>
-            <artifactId>agent</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.hxh.apboa</groupId>
-            <artifactId>resource</artifactId>
+            <artifactId>common</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -80,6 +80,7 @@ export interface AgentDefinitionVO {
   used: string[]
   agentA2A: AgentA2A
   jobInfo: JobInfo
+  studioConfigId: string | null
 }
 
 /**
@@ -305,4 +306,13 @@ export interface ChatMessageVO {
   path: string
   depth: number
   createdAt: string
+}
+
+/**
+ * Studio配置VO
+ */
+export interface StudioConfigVO {
+  id: string
+  url: string
+  project: string
 }

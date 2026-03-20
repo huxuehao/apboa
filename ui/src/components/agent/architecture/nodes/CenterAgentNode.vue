@@ -21,7 +21,7 @@ const props = defineProps<{
  * 智能体类型文本
  */
 const agentTypeText = computed(() => {
-  return props.data.agent.agentType === 'CUSTOM' ? '自定义智能体' : 'A2A智能体'
+  return props.data.agent.agentType === 'CUSTOM' ? '自定义' : 'A2A'
 })
 
 /**
@@ -57,8 +57,11 @@ const descriptionText = computed(() => {
 
     <div class="node-content">
       <div class="node-type">
-        <ATag :color="data.agent.agentType === 'CUSTOM' ? 'purple' : 'blue'" :bordered="false">
+        <ATag :color="data.agent.agentType === 'CUSTOM' ? 'magenta' : 'blue'" :bordered="false">
           {{ agentTypeText }}
+        </ATag>
+        <ATag v-if="data.agent.studioConfigId" color="purple" :bordered="false">
+          Studio
         </ATag>
         <ATag v-if="data.agent.tag" color="default" :bordered="false">{{ data.agent.tag }}</ATag>
       </div>

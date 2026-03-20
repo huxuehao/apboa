@@ -30,7 +30,7 @@ public class DefaultOpenAIModelI implements IChatModel {
                 .apiKey(config.getApiKey())
                 .modelName(config.getModelCode())
                 .stream(config.getStreaming() != null && config.getStreaming())
-                .httpTransport(HttpTransportHelper.create())
+                .httpTransport(HttpTransportHelper.createOkHttpTransport())
                 .generateOptions(GenerateOptionsHelper.create(config));
 
         if (config.getBaseUrl() != null && !config.getBaseUrl().isEmpty()) {
