@@ -72,6 +72,18 @@
             <version>2.8.1</version>
         </dependency>
 
+        <!-- JGit -->
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>7.3.0.202506031305-r</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit.ssh.apache</artifactId>
+            <version>7.3.0.202506031305-r</version>
+        </dependency>
+
 <!--        <dependency>-->
 <!--            <groupId>io.agentscope</groupId>-->
 <!--            <artifactId>agentscope-a2a-spring-boot-starter</artifactId>-->
