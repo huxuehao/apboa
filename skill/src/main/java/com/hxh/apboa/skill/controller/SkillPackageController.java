@@ -85,7 +85,12 @@ public class SkillPackageController {
     public R<Boolean> update(@RequestBody SkillPackage entity) {
         boolean b = skillPackageService.updateById(entity);
         // 尝试装载脚本到本地
-        SkillScriptLoadHelper.loadScripts(entity);
+        if (entity.getScripts() == null || entity.getScripts().isNull() || entity.getScripts().isEmpty()) {
+            SkillScriptLoadHelper.removeScripts(entity);
+        } else {
+            SkillScriptLoadHelper.loadScripts(entity);
+        }
+
         return R.data(b);
     }
 

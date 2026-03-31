@@ -36,13 +36,13 @@ const formRef = ref()
  */
 const formData = ref({
   configName: '',
-  workDir: '.apboa/work_dir',
+  workDir: '.apboa/skill-scripts/skills',
   uploadDir: '.apboa/skill-scripts/skills',
   autoUpload: false,
   enableShell: true,
   enableRead: false,
   enableWrite: false,
-  command: ['python3','bash','node', 'npm'] as string[]
+  command: ['python3', 'python','bash','node', 'npm'] as string[]
 })
 
 /**
@@ -75,13 +75,13 @@ const rules = {
 function resetForm() {
   formData.value = {
     configName: '',
-    workDir: '.apboa/work_dir',
+    workDir: '.apboa/skill-scripts/skills',
     uploadDir: '.apboa/skill-scripts/skills',
     autoUpload: false,
     enableShell: true,
     enableRead: false,
     enableWrite: false,
-    command: ['python3','bash','node', 'npm']
+    command: ['python3', 'python', 'bash','node', 'npm']
   }
   newCommand.value = ''
   formRef.value?.resetFields()
@@ -96,7 +96,7 @@ watch(() => props.visible, (val) => {
       formData.value = {
         configName: props.data.configName,
         workDir: props.data.workDir || '',
-        uploadDir: props.data.uploadDir || '',
+        uploadDir: props.data.uploadDir || '.apboa/skill-scripts/skills',
         autoUpload: props.data.autoUpload || false,
         enableShell: props.data.enableShell || false,
         enableRead: props.data.enableRead || false,
@@ -142,6 +142,7 @@ async function handleSubmit() {
     const entity: CodeExecutionConfig = {
       configName: formData.value.configName,
       workDir: formData.value.workDir || undefined,
+      uploadDir: formData.value.uploadDir || '.apboa/skill-scripts/skills',
       autoUpload: formData.value.autoUpload,
       enableShell: formData.value.enableShell,
       enableRead: formData.value.enableRead,

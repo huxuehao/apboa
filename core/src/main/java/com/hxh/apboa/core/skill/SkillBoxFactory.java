@@ -52,9 +52,6 @@ public class SkillBoxFactory {
         }
         registerSkills(skillBox, skillPackageIds);
 
-        // 配置代码执行环境
-        configureCodeExecution(skillBox, agentDefinition.getId());
-
         return skillBox;
     }
 
@@ -127,7 +124,7 @@ public class SkillBoxFactory {
      * @param skillBox SkillBox
      * @param agentDefinitionId 智能体定义ID
      */
-    private void configureCodeExecution(SkillBox skillBox, Long agentDefinitionId) {
+    public void configureCodeExecution(SkillBox skillBox, Long agentDefinitionId) {
         // 获取代码执行配置
         CodeExecutionConfig config = getCodeExecutionConfig(agentDefinitionId);
         if (config == null) {

@@ -111,22 +111,6 @@ public class IAgentFactory {
         }
     }
 
-    public ReActAgent.Builder getReActAgentBuilder(Long agentId) {
-        try {
-            return reActAgentHelper.getReActAgentBuilder(agentId);
-        } finally {
-            AgentContext.clean();
-        }
-    }
-
-    public ReActAgent.Builder getReActAgentBuilder(AgentDefinition definition) {
-        try {
-            return reActAgentHelper.getReActAgentBuilder(definition);
-        } finally {
-            AgentContext.clean();
-        }
-    }
-
     private void validAgentDefinition(AgentDefinition definition) {
         if (definition == null) {
             throw new RuntimeException("Agent not found" );
