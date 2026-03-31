@@ -424,3 +424,23 @@ export interface StudioConfig {
   url: string
   project: string
 }
+
+/**
+ * CodeExecutionConfig 实体 - 代码执行环境配置
+ */
+export interface CodeExecutionConfig {
+  id?: string
+  enabled?: boolean
+  createdAt?: string
+  updatedAt?: string
+  createdBy?: string
+  updatedBy?: string
+  configName: string // 配置名称，便于识别
+  workDir?: string // 工作目录，空则使用临时目录
+  uploadDir?: string // 脚本上传目录，空则使用work_dir/skills
+  autoUpload?: boolean // 是否自动上传skill文件
+  enableShell?: boolean // 是否启用ShellCommandTool
+  enableRead?: boolean // 是否启用ReadFileTool
+  enableWrite?: boolean // 是否启用WriteFileTool
+  command?: string[] | null // 允许执行的命令，如 python3、bash
+}
