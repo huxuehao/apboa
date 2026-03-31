@@ -65,6 +65,7 @@ const formData = ref({
     tool: [] as string[],
     specificToolName: '',
     skill: [] as string[],
+    codeExecutionConfigId: null as string | null,
     sensitiveWordConfigId: '',
     sensitiveFilterEnabled: false
   },
@@ -152,6 +153,7 @@ watch(
           specificToolName: props.data.specificToolName || '',
           skill: props.data.skill || [],
           sensitiveWordConfigId: props.data.sensitiveWordConfigId || '',
+          codeExecutionConfigId: props.data.codeExecutionConfigId,
           sensitiveFilterEnabled: props.data.sensitiveFilterEnabled
         }
         formData.value.knowledge = {
@@ -205,6 +207,7 @@ function resetForm() {
       specificToolName: '',
       skill: [],
       sensitiveWordConfigId: '',
+      codeExecutionConfigId: '',
       sensitiveFilterEnabled: false
     },
     knowledge: {
@@ -303,6 +306,7 @@ async function handleSubmit() {
         ? JSON.parse(formData.value.advanced.structuredOutputSchema)
         : null,
       studioConfigId: formData.value.advanced.studioConfigId,
+      codeExecutionConfigId: formData.value.tools.codeExecutionConfigId,
       version: '1.0.0'
     }
 

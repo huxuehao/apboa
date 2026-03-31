@@ -13,6 +13,7 @@ import * as skillApi from '@/api/skill'
 import * as sensitiveApi from '@/api/sensitive'
 import * as hookApi from '@/api/hook'
 import type { ToolVO, SkillPackageVO, SensitiveWordConfigVO, HookConfigVO } from '@/types'
+import CodeExecutionConfigSelect from '@/components/codeExecution/CodeExecutionConfigSelect.vue'
 import { ToolChoiceStrategy } from '@/types'
 import { countCommonElements } from '@/utils/tools'
 
@@ -28,6 +29,7 @@ const props = defineProps<{
     skill: string[]
     sensitiveWordConfigId: string
     sensitiveFilterEnabled: boolean
+    codeExecutionConfigId: string | null
   }
 }>()
 
@@ -454,6 +456,13 @@ defineExpose({
           <AButton type="text">未配置技能包？</AButton>
           <AButton type="link" :href="`/#/${RoutePaths.SKILL}`" target="_blank">去配置</AButton>
           <AButton type="link" @click="loadSkillCategories();loadAllSkills()">刷新</AButton>
+        </div>
+      </AFormItem>
+
+      <AFormItem label="代码执行配置">
+        <CodeExecutionConfigSelect v-model="formData.codeExecutionConfigId" />
+        <div class="text-placeholder text-xs mt-xs">
+          配置代码执行环境，用于智能体执行代码脚本
         </div>
       </AFormItem>
 

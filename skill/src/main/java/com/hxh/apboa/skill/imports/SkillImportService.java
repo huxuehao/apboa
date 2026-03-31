@@ -3,6 +3,7 @@ package com.hxh.apboa.skill.imports;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hxh.apboa.common.entity.SkillPackage;
 import com.hxh.apboa.common.util.JsonUtils;
+import com.hxh.apboa.skill.SkillScriptLoadHelper;
 import com.hxh.apboa.skill.imports.config.GitImportConfig;
 import com.hxh.apboa.skill.imports.config.LocalImportConfig;
 import com.hxh.apboa.skill.imports.config.UploadImportConfig;
@@ -12,10 +13,12 @@ import io.agentscope.core.skill.repository.AgentSkillRepository;
 import io.agentscope.core.skill.repository.FileSystemSkillRepository;
 import io.agentscope.core.skill.repository.GitSkillRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import cn.hutool.core.io.FileUtil;
-import java.nio.file.Path;
+
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +28,7 @@ import java.util.Map;
  *
  * @author huxuehao
  **/
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SkillImportService {
@@ -35,10 +39,34 @@ public class SkillImportService {
      * @param config 配置
      */
     public boolean importFromGit(GitImportConfig config) {
-       try (AgentSkillRepository repo = new GitSkillRepository(config.getRepoUrl())) {
-           doImport(repo, List.of(), config.isCover(), config.getCategory());
-       }
-       return true;
+        GitSkillRepository repo = null;
+        try {
+            repo = new GitSkillRepository(config.getRepoUrl());
+            doImport(repo, List.of(), config.isCover(), config.getCategory());
+        } finally {
+            if (repo != null) {
+                try {
+                    repo.close();
+                } catch (Exception e) {
+                    // Windows 下文件占用是正常现象，只打印警告，不抛出异常
+                    log.warn("关闭 Git 仓库临时目录时出现文件占用（Windows 环境可忽略）：{}", e.getMessage());
+                }
+            }
+        }
+        return true;
+
+//        Path localPath = Path.of(".apboa/temp/skills-from-git");
+//        try {
+//            if (!Files.exists(localPath)) {
+//                Files.createDirectories(localPath);
+//            }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        try (AgentSkillRepository repo = new GitSkillRepository(config.getRepoUrl(), localPath)) {
+//           doImport(repo, List.of(), config.isCover(), config.getCategory());
+//        }
+//        return true;
     }
 
     /**
@@ -97,6 +125,9 @@ public class SkillImportService {
                 skillPackage.setId(oldSkillPackage.getId());
                 skillPackageService.updateById(skillPackage);
             }
+
+            // 尝试装载脚本到本地
+            SkillScriptLoadHelper.loadScripts(skillPackage);
         }
     }
 

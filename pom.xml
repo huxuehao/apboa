@@ -25,6 +25,7 @@
     <module>a2a</module>
     <module>websocket</module>
     <module>job</module>
+    <module>starter</module>
     <module>studio</module>
   </modules>
 
@@ -57,11 +58,6 @@
         <version>${spring-boot.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>io.agentscope</groupId>
-        <artifactId>agentscope</artifactId>
-        <version>${agentscope.version}</version>
       </dependency>
       <!-- mybatis-plus框架 -->
       <dependency>

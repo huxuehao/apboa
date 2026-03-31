@@ -181,6 +181,7 @@ async function handleView(id: string) {
       h('p', {}, [h('strong', '工具选择策略: '), data.toolChoiceStrategy]),
       h('p', {}, [h('strong', '工具数量: '), data.tool.length]),
       h('p', {}, [h('strong', '技能包数量: '), data.skill.length]),
+      h('p', {}, [h('strong', '配置代码执行: '), data.codeExecutionConfigId ? '是' : '否']),
       h('p', {}, [h('strong', '知识库数量: '), data.knowledgeBase.length]),
       h('p', {}, [h('strong', 'MCP数量: '), data.mcp.length]),
       h('p', {}, [h('strong', '子智能体数量: '), data.subAgent.length]),

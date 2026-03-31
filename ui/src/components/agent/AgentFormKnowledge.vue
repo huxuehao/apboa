@@ -21,7 +21,7 @@ const props = defineProps<{
     mcp: string[]
     subAgent: string[]
   }
-  currentAgentId?: string
+  currentAgentId?: string | number | undefined
 }>()
 
 /**

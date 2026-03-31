@@ -59,6 +59,9 @@ const scale = ref(1)
 // 图片旋转角度
 const rotate = ref(0)
 
+// 当前媒体项
+const currentItem = computed(() => props.items[currentIdx.value])
+
 // 监听索引变化
 watch(() => props.currentIndex, (val) => {
   if (val !== undefined) {
@@ -85,9 +88,6 @@ watch(() => props.visible, (val) => {
     }
   }
 })
-
-// 当前媒体项
-const currentItem = computed(() => props.items[currentIdx.value])
 
 // 媒体类型判断
 const mediaType = computed((): MediaType => {

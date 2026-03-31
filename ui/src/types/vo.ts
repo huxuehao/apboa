@@ -81,6 +81,7 @@ export interface AgentDefinitionVO {
   agentA2A: AgentA2A
   jobInfo: JobInfo
   studioConfigId: string | null
+  codeExecutionConfigId: string | null
 }
 
 /**
@@ -315,4 +316,19 @@ export interface StudioConfigVO {
   id: string
   url: string
   project: string
+}
+
+/**
+ * 代码执行配置VO
+ */
+export interface CodeExecutionConfigVO {
+  id: string
+  configName: string
+  workDir?: string
+  uploadDir?: string
+  autoUpload?: boolean
+  enableShell?: boolean
+  enableRead?: boolean
+  enableWrite?: boolean
+  command?: string[] | null
 }

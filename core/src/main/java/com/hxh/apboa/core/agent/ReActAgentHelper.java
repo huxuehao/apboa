@@ -72,36 +72,12 @@ public class ReActAgentHelper {
 
         return getReActAgent(definition);
     }
-    /**
-     * 获取预构建的 ReActAgent.Builder
-     * @param agentId agentId
-     */
-    public ReActAgent.Builder getReActAgentBuilder(Long agentId) {
-        AgentDefinition definition = agentDefinitionService.getById(agentId);
-        if (definition == null) {
-            throw new RuntimeException("Agent not found, agentId: " + agentId);
-        }
-
-        if (!definition.getEnabled()) {
-            throw new RuntimeException("Agent is disabled, agentId: " + agentId);
-        }
-
-        return getReActAgentBuilder(definition);
-    }
 
     /**
      * 获取 ReActAgent
      * @param definition agent 定义
      */
     public ReActAgent getReActAgent(AgentDefinition definition) {
-        return getReActAgentBuilder(definition).build();
-    }
-
-    /**
-     * 获取预构建的 ReActAgent.Builder
-     * @param definition agent 定义
-     */
-    public ReActAgent.Builder getReActAgentBuilder(AgentDefinition definition) {
         Model model = chatModelFactory.getModel(definition);
         ReActAgent.Builder builder = ReActAgent.builder()
                 .name(definition.getAgentCode())
@@ -186,6 +162,10 @@ public class ReActAgentHelper {
         // 保存Agent定义到上下文
         AgentContext.get().setAgentDefinition(definition);
 
-        return builder;
+        ReActAgent reActAgent = builder.build();
+
+        skillBoxFactory.configureCodeExecution(skillBox, definition.getId());
+
+        return reActAgent;
     }
 }

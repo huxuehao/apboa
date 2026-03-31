@@ -22,6 +22,7 @@ import com.hxh.apboa.params.core.ParamsAdapter;
 import com.hxh.apboa.skill.service.AgentSkillPackageService;
 import com.hxh.apboa.studio.service.AgentStudioService;
 import com.hxh.apboa.tool.service.AgentToolService;
+import com.hxh.apboa.agent.service.AgentCodeExecutionService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -53,6 +54,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
     private final AgentA2aService agentA2aService;
     private final AgentStudioService agentStudioService;
     private final IJobInfoMapper iJobInfoMapper;
+    private final AgentCodeExecutionService agentCodeExecutionService;
 
     @Override
     public AgentDefinitionVO agentDefinitionDetail(Long id) {
@@ -67,6 +69,10 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         Long studioConfigId = agentStudioService.getStudioIdByAgentId(id);
         if (studioConfigId != null) {
             vo.setStudioConfigId(studioConfigId);
+        }
+        Long codeExecutionId = agentCodeExecutionService.getCodeExecutionIdByAgentId(id);
+        if (codeExecutionId != null) {
+            vo.setCodeExecutionConfigId(codeExecutionId);
         }
 
         if(entity.getAgentType() == AgentType.CUSTOM) {
@@ -131,6 +137,11 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
             } else {
                 agentStudioService.deleteAgentStudio(List.of(vo.getId()));
             }
+            if (vo.getCodeExecutionConfigId() != null) {
+                agentCodeExecutionService.saveAgentCodeExecution(vo.getId(), List.of(vo.getCodeExecutionConfigId()));
+            } else {
+                agentCodeExecutionService.deleteAgentCodeExecution(List.of(vo.getId()));
+            }
         } else {
             AgentA2A agentA2A = vo.getAgentA2A();
             agentA2A.setAgentDefinitionId(vo.getId());
@@ -158,6 +169,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         skillPackageService.deleteAgentSkillPackage(ids);
         agentKnowledgeBaseService.deleteAgentKnowledge(ids);
         agentStudioService.deleteAgentStudio(ids);
+        agentCodeExecutionService.deleteAgentCodeExecution(ids);
 
         return Boolean.TRUE;
     }

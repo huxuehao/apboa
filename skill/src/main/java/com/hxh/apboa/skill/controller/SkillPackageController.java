@@ -9,6 +9,7 @@ import com.hxh.apboa.common.mp.support.MP;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.vo.SkillPackageVO;
+import com.hxh.apboa.skill.SkillScriptLoadHelper;
 import com.hxh.apboa.skill.imports.SkillImportService;
 import com.hxh.apboa.skill.imports.config.GitImportConfig;
 import com.hxh.apboa.skill.imports.config.LocalImportConfig;
@@ -70,7 +71,10 @@ public class SkillPackageController {
     @PostMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> save(@RequestBody SkillPackage entity) {
-        return R.data(skillPackageService.save(entity));
+        boolean save = skillPackageService.save(entity);
+        // 尝试装载脚本到本地
+        SkillScriptLoadHelper.loadScripts(entity);
+        return R.data(save);
     }
 
     /**
@@ -79,7 +83,15 @@ public class SkillPackageController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody SkillPackage entity) {
-        return R.data(skillPackageService.updateById(entity));
+        boolean b = skillPackageService.updateById(entity);
+        // 尝试装载脚本到本地
+        if (entity.getScripts() == null || entity.getScripts().isNull() || entity.getScripts().isEmpty()) {
+            SkillScriptLoadHelper.removeScripts(entity);
+        } else {
+            SkillScriptLoadHelper.loadScripts(entity);
+        }
+
+        return R.data(b);
     }
 
     /**
@@ -88,7 +100,13 @@ public class SkillPackageController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.data(skillPackageService.deleteByIds(ids));
+        List<SkillPackage> skillPackages = skillPackageService.listByIds(ids);
+        for (SkillPackage skillPackage : skillPackages) {
+            // 尝试删除本地装载的脚本
+            SkillScriptLoadHelper.removeScripts(skillPackage);
+            skillPackageService.removeById(skillPackage.getId());
+        }
+        return R.data(true);
     }
 
     /**
