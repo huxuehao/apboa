@@ -200,11 +200,11 @@ function handleCancel() {
       <AFormItem label="工作目录">
         <AInput v-model:value="formData.workDir" placeholder="留空则使用临时目录" />
         <div class="text-placeholder text-xs mt-xs">
-          指定代码执行的工作目录，留空则使用系统临时目录
+          指定代码执行的工作目录，shell命令将在此目录下执行，留空则使用系统临时目录
         </div>
       </AFormItem>
 
-      <AFormItem label="Skill目录（只读）">
+      <AFormItem label="skill-scripts装载目录（只读）">
         <AInput v-model:value="formData.uploadDir" readonly/>
       </AFormItem>
 
