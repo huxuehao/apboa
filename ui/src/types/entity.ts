@@ -64,6 +64,7 @@ export interface AgentDefinition extends BaseEntity {
   maxSubtasks: number
   requirePlanConfirmation: boolean
   enableMemory: boolean
+  showToolProcess: boolean
   enableMemoryCompression: boolean
   memoryCompressionConfig: Record<string, any> | null
   structuredOutputEnabled: boolean

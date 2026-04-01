@@ -28,6 +28,7 @@ const { agentDetail, allowFileType } = useAgentDetail(agentId)
 const accountId = computed(() => accountStore.userInfo?.id)
 const enableMemory = computed(() => agentDetail.value?.enableMemory === true)
 const enablePlanning = computed(() => agentDetail.value?.enablePlanning === true)
+const showToolProcess = computed(() => agentDetail.value?.showToolProcess === true)
 
 // 记忆/规划/侧边栏状态：从 Pinia store 读取（持久化由 pinia-plugin-persistedstate 处理）
 const memoryActive = computed(() => {
@@ -39,6 +40,11 @@ const planActive = computed(() => {
   const id = agentDetail.value?.id ?? agentId.value
   chatStore.preferences
   return chatStore.getPlanActive(id, accountId.value, enablePlanning.value)
+})
+const toolProcessActive = computed(() => {
+  const id = agentDetail.value?.id ?? agentId.value
+  chatStore.preferences
+  return chatStore.getToolProcessActive(id, accountId.value, showToolProcess.value)
 })
 const sidebarCollapsed = computed({
   get: () => {
@@ -63,6 +69,11 @@ const handleMemoryChange = (v: boolean) => {
 const handlePlanChange = (v: boolean) => {
   const id = agentDetail.value?.id ?? agentId.value
   chatStore.setPlanActive(id, accountId.value, v)
+}
+
+const handelToolProcess = (v: boolean) => {
+  const id = agentDetail.value?.id ?? agentId.value
+  chatStore.setToolProcessActive(id, accountId.value, v)
 }
 
 // 会话列表管理
@@ -110,6 +121,7 @@ const {
   fileIds,
   memoryActive,
   planActive,
+  toolProcessActive,
   onMessageSaved: (chatMsg: ChatMessageVO) => {
     messagesList.value.push(chatMsg)
   },
@@ -333,10 +345,13 @@ onMounted(() => {
       :enable-planning="enablePlanning"
       :allow-upload-file-type="allowFileType"
       :agent-has-result="agentHasResult"
+      :show-tool-process="showToolProcess"
+      :tool-process-active="toolProcessActive"
       @update:input-value="inputText = $event"
       @update:uploaded-files="uploadedFiles = $event"
       @memory="handleMemoryChange"
       @plan="handlePlanChange"
+      @toolProcess="handelToolProcess"
       @toolContent="handelToolContent"
       @send="handleSend"
       @abort="abortRun"

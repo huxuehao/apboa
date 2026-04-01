@@ -97,6 +97,11 @@ public class AgentDefinition extends BaseEntity {
     private Boolean enablePlanning;
 
     /**
+     * 是否显示工具调用过程
+     */
+    private Boolean showToolProcess;
+
+    /**
      * 最大子任务数
      */
     private Integer maxSubtasks;

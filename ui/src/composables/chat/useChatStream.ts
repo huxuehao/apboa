@@ -13,9 +13,19 @@ export function useChatStream(options: {
   fileIds?: import('vue').Ref<string[]>
   memoryActive?: import('vue').Ref<boolean>
   planActive?: import('vue').Ref<boolean>
+  toolProcessActive?: import('vue').Ref<boolean>
   onMessageSaved?: (chatMsg: ChatMessageVO) => void
 }) {
-  const { agentId, agentDetail, currentSessionId, fileIds, memoryActive, planActive, onMessageSaved } = options
+  const {
+    agentId,
+    agentDetail,
+    currentSessionId,
+    fileIds,
+    memoryActive,
+    planActive,
+    toolProcessActive,
+    onMessageSaved
+  } = options
   const { userInfo } = useAccountStore()
 
   const getForwardedProps = () => ({
@@ -74,6 +84,10 @@ export function useChatStream(options: {
       },
       onToolCallResult: async (e) => {
         try {
+          // 判断是否开启了显示工具调用
+          if (!(toolProcessActive?.value ?? true)) {
+            return
+          }
           // 更新工具调用结果和耗时
           toolCallsInProgress.value = toolCallsInProgress.value.map((t) =>
             t.id === e.toolCallId ? { ...t, result: e.content, elapsed: Date.now() - t.startTime } : t

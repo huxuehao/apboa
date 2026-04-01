@@ -16,6 +16,7 @@ const STORAGE_KEY = 'chat_agent_preferences'
 export interface AgentPreference {
   memoryActive?: boolean
   planActive?: boolean
+  toolProcessActive?: boolean
   sidebarCollapsed?: boolean
 }
 
@@ -91,6 +92,34 @@ export const useChatStore = defineStore(
     }
 
     /**
+     * 获取当前 agent 的有效规划开关状态
+     */
+    function getToolProcessActive(
+      agentId: string,
+      accountId: string | undefined,
+      showToolProcess: boolean
+    ): boolean {
+      if (!agentId || !showToolProcess) return false
+      const key = preferenceKey(agentId, accountId)
+      const stored = preferences.value[key]?.toolProcessActive
+      return showToolProcess && (stored ?? true)
+    }
+
+    /**
+     * 设置规划开关
+     */
+    function setToolProcessActive(
+      agentId: string,
+      accountId: string | undefined,
+      value: boolean
+    ): void {
+      if (!agentId) return
+      const key = preferenceKey(agentId, accountId)
+      if (!preferences.value[key]) preferences.value[key] = {}
+      preferences.value[key].toolProcessActive = value
+    }
+
+    /**
      * 获取侧边栏折叠状态
      */
     function getSidebarCollapsed(
@@ -124,6 +153,8 @@ export const useChatStore = defineStore(
       setPlanActive,
       getSidebarCollapsed,
       setSidebarCollapsed,
+      getToolProcessActive,
+      setToolProcessActive
     }
   },
   {

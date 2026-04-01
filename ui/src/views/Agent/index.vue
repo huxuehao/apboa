@@ -186,6 +186,7 @@ async function handleView(id: string) {
       h('p', {}, [h('strong', 'MCP数量: '), data.mcp.length]),
       h('p', {}, [h('strong', '子智能体数量: '), data.subAgent.length]),
       h('p', {}, [h('strong', '启用敏感词: '), data.sensitiveFilterEnabled ? '是' : '否']),
+      h('p', {}, [h('strong', '显示工具调用历史: '), data.showToolProcess ? '是' : '否']),
       h('p', {}, [h('strong', '启用计划: '), data.enablePlanning ? '是' : '否']),
       h('p', {}, [h('strong', '启用记忆: '), data.enableMemory ? '是' : '否']),
       h('p', {}, [h('strong', '结构化输出: '), data.structuredOutputEnabled ? '是' : '否']),
