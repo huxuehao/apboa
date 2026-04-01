@@ -8,6 +8,7 @@ import {
   UnorderedListOutlined,
   ClockCircleOutlined,
   LoadingOutlined,
+  ThunderboltOutlined
 } from '@ant-design/icons-vue'
 import * as attachApi from '@/api/attach'
 import MediaPreview from '@/components/common/MediaPreview.vue'
@@ -23,9 +24,19 @@ const props = withDefaults(
     planActive?: boolean
     enableMemory?: boolean
     enablePlanning?: boolean
+    toolProcessActive?: boolean
+    showToolProcess?: boolean
     allowUploadFileType?: string[]
   }>(),
-  { uploadedFiles: () => [], memoryActive: false, planActive: false, enableMemory: false, enablePlanning: false }
+  {
+    uploadedFiles: () => [],
+    memoryActive: false,
+    planActive: false,
+    enableMemory: false,
+    enablePlanning: false,
+    toolProcessActive: false,
+    showToolProcess: false
+  }
 )
 
 const emit = defineEmits<{
@@ -35,6 +46,7 @@ const emit = defineEmits<{
   (e: 'abort'): void
   (e: 'memory', value: boolean): void
   (e: 'plan', value: boolean): void
+  (e: 'toolProcess', value: boolean): void
 }>()
 
 const textareaRef = ref<HTMLTextAreaElement | null>()
@@ -92,6 +104,10 @@ const toggleMemory = () => {
 const togglePlan = () => {
   if (!props.enablePlanning) return
   emit('plan', !props.planActive)
+}
+const toggleToolProcess = () => {
+  if (!props.showToolProcess) return
+  emit('toolProcess', !props.toolProcessActive)
 }
 const handleFileClick = () => {
   fileInputRef.value?.click()
@@ -286,16 +302,27 @@ watch(() => props.modelValue, () => {
           <UnorderedListOutlined />
         </button>
         <button
+          :disabled="!showToolProcess"
+          type="button"
+          class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"
+          title="工具调用记录"
+          :class="{ 'is-active': toolProcessActive && showToolProcess }"
+          @click="toggleToolProcess"
+        >
+          <ThunderboltOutlined />
+        </button>
+      </div>
+      <div class="chat-input-toolbar-right">
+        <button
           :disabled="!allowUploadFileType?.length"
           type="button"
           class="chat-toolbar-btn chat-toolbar-btn-icon chat-toolbar-btn-circle"
           title="文件"
+          style="margin-right: 15px"
           @click="handleFileClick"
         >
           <PaperClipOutlined />
         </button>
-      </div>
-      <div class="chat-input-toolbar-right">
         <button
           type="button"
           class="chat-send-btn-inner"

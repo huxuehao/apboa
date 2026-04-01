@@ -66,6 +66,7 @@ export interface AgentDefinitionVO {
   requirePlanConfirmation: boolean
   enableMemory: boolean
   enableMemoryCompression: boolean
+  showToolProcess: boolean
   memoryCompressionConfig: Record<string, unknown> | null
   structuredOutputEnabled: boolean
   structuredOutputSchema: Record<string, unknown> | null

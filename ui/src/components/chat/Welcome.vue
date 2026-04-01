@@ -11,6 +11,8 @@ defineProps<{
   planActive?: boolean
   enableMemory?: boolean
   enablePlanning?: boolean
+  toolProcessActive?: boolean
+  showToolProcess?: boolean
   allowUploadFileType?: string[]
 }>()
 
@@ -20,6 +22,7 @@ defineEmits<{
   (e: 'send'): void
   (e: 'memory', value: boolean): void
   (e: 'plan', value: boolean): void
+  (e: 'toolProcess', value: boolean): void
 }>()
 </script>
 
@@ -37,11 +40,14 @@ defineEmits<{
         :enable-memory="enableMemory"
         :enable-planning="enablePlanning"
         :allow-upload-file-type="allowUploadFileType"
+        :show-tool-process="showToolProcess"
+        :tool-process-active="toolProcessActive"
         placeholder="输入消息，Enter 发送，Shift+Enter 换行"
         @update:model-value="$emit('update:inputValue', $event)"
         @update:uploaded-files="$emit('update:uploadedFiles', $event)"
         @memory="$emit('memory', $event)"
         @plan="$emit('plan', $event)"
+        @toolProcess="$emit('toolProcess', $event)"
         @send="$emit('send')"
       />
     </div>

@@ -19,6 +19,8 @@ const props = defineProps<{
   planActive?: boolean
   enableMemory?: boolean
   enablePlanning?: boolean
+  toolProcessActive?: boolean
+  showToolProcess?: boolean
   allowUploadFileType?: string[]
   agentHasResult?: boolean
 }>()
@@ -32,6 +34,7 @@ const emit = defineEmits<{
   (e: 'abort'): void
   (e: 'memory', value: boolean): void
   (e: 'plan', value: boolean): void
+  (e: 'toolProcess', value: boolean): void
 }>()
 
 // 滚动容器 ref
@@ -125,10 +128,13 @@ defineExpose({
         :enable-memory="enableMemory"
         :enable-planning="enablePlanning"
         :allow-upload-file-type="allowUploadFileType"
+        :show-tool-process="showToolProcess"
+        :tool-process-active="toolProcessActive"
         @update:input-value="$emit('update:inputValue', $event)"
         @update:uploaded-files="$emit('update:uploadedFiles', $event)"
         @memory="$emit('memory', $event)"
         @plan="$emit('plan', $event)"
+        @toolProcess="$emit('toolProcess', $event)"
         @send="$emit('send')"
       />
     </div>
@@ -157,10 +163,13 @@ defineExpose({
             :enable-memory="enableMemory"
             :enable-planning="enablePlanning"
             :allow-upload-file-type="allowUploadFileType"
+            :show-tool-process="showToolProcess"
+            :tool-process-active="toolProcessActive"
             @update:model-value="$emit('update:inputValue', $event)"
             @update:uploaded-files="$emit('update:uploadedFiles', $event)"
             @memory="$emit('memory', $event)"
             @plan="$emit('plan', $event)"
+            @toolProcess="$emit('toolProcess', $event)"
             @send="$emit('send')"
             @abort="$emit('abort')"
           />

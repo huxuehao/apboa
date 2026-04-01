@@ -18,6 +18,7 @@ const props = defineProps<{
     maxSubtasks: number
     requirePlanConfirmation: boolean
     enableMemory: boolean
+    showToolProcess: boolean
     enableMemoryCompression: boolean
     memoryCompressionConfig: Record<string, unknown> | null
     structuredOutputEnabled: boolean
@@ -85,6 +86,13 @@ const rules = computed(() => {
 })
 
 /**
+ * 处理显示工具调用过程开关
+ */
+function handleShowToolProcessToggle(checked: boolean) {
+  formData.value.showToolProcess = checked
+}
+
+/**
  * 处理启用计划开关
  */
 function handleEnablePlanningToggle(checked: boolean) {
@@ -141,6 +149,16 @@ defineExpose({
 
 <template>
   <AForm ref="formRef" :model="formData" :rules="rules" layout="vertical">
+    <AFormItem label="显示工具调用历史">
+      <ASwitch
+        v-model:checked="formData.showToolProcess"
+        @change="handleShowToolProcessToggle"
+      />
+      <div class="text-placeholder text-xs mt-xs">
+        开启后,在对话过程中将会看到工具的调用历史，包括输入和输出
+      </div>
+    </AFormItem>
+
     <AFormItem label="启用计划">
       <ASwitch
         v-model:checked="formData.enablePlanning"

@@ -45,6 +45,7 @@ public class AgentDefinitionVO implements SerializableEnable {
     private Boolean enablePlanning;
     private Integer maxSubtasks;
     private Boolean requirePlanConfirmation;
+    private Boolean showToolProcess;
     private Boolean enableMemory;
     private Boolean enableMemoryCompression;
     private JsonNode memoryCompressionConfig;
