@@ -1,5 +1,7 @@
 package io.agentscope.spring.boot.agui.mvc;
 
+import com.hxh.apboa.common.util.JsonUtils;
+import com.hxh.apboa.common.vo.AccountVO;
 import com.hxh.apboa.core.agui.AgentContext;
 import io.agentscope.core.agui.AguiException;
 import io.agentscope.core.agui.adapter.AguiAdapterConfig;
@@ -12,6 +14,7 @@ import io.agentscope.core.session.Session;
 import io.agentscope.spring.boot.agui.common.DefaultAgentResolver;
 import io.agentscope.spring.boot.agui.common.ThreadSessionManager;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -88,6 +91,9 @@ public class AguiMvcController {
         SseEmitter emitter = new SseEmitter(sseTimeout);
         String threadId = input.getThreadId();
         String runId = input.getRunId();
+
+        // 初始化上下文
+        AgentContext.init(input, threadId);
 
         executorService.submit(
                 () -> {

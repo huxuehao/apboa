@@ -1,6 +1,9 @@
 package com.hxh.apboa.core.agui;
 
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.common.util.JsonUtils;
+import com.hxh.apboa.common.vo.AccountVO;
+import io.agentscope.core.agui.model.RunAgentInput;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,14 +20,40 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AgentContext {
-    private static final ThreadLocal<AgentContext> CONTEXT_HOLDER = new ThreadLocal<>();
+    private static final InheritableThreadLocal<AgentContext> CONTEXT_HOLDER = new InheritableThreadLocal<>();
 
     private String threadId;
     private String runId;
     private boolean memoryActive;
     private boolean planActive;
     private List<String> fileIds;
+    private AccountVO userInfo;
     private AgentDefinition agentDefinition;
+
+    public static void init(RunAgentInput input, String threadId) {
+        // 创建上下文
+        AgentContext agentContext = AgentContext.get();
+        agentContext.setThreadId(threadId);
+        agentContext.setRunId(input.getRunId());
+        boolean memoryActive = input.getForwardedProp("memoryActive") != null
+                ? (Boolean) input.getForwardedProp("memoryActive")
+                : false;
+        agentContext.setMemoryActive(memoryActive);
+        agentContext.setPlanActive(
+                input.getForwardedProp("planActive") != null
+                        ? (Boolean) input.getForwardedProp("planActive")
+                        : false);
+        @SuppressWarnings("unchecked")
+        List<String> fileIds = input.getForwardedProp("fileIds") != null
+                ? (List<String>) input.getForwardedProp("fileIds")
+                : List.of();
+        agentContext.setFileIds(fileIds);
+
+        AccountVO userInfo = input.getForwardedProp("userInfo") != null
+                ? JsonUtils.objectToBean(input.getForwardedProp("userInfo"), AccountVO.class)
+                : null;
+        agentContext.setUserInfo(userInfo);
+    }
 
     public static AgentContext get() {
         AgentContext agentContext = CONTEXT_HOLDER.get();

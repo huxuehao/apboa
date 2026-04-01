@@ -4,6 +4,7 @@ import { useAgentClient } from '@/composables/useAgentClient'
 import * as chatSessionApi from '@/api/chatSession'
 import { buildToolCallsContent } from '@/utils/chat/format'
 import type { ChatMessageVO } from '@/types'
+import { useAccountStore } from '@/stores'
 
 export function useChatStream(options: {
   agentId: import('vue').Ref<string>
@@ -15,6 +16,7 @@ export function useChatStream(options: {
   onMessageSaved?: (chatMsg: ChatMessageVO) => void
 }) {
   const { agentId, agentDetail, currentSessionId, fileIds, memoryActive, planActive, onMessageSaved } = options
+  const { userInfo } = useAccountStore()
 
   const getForwardedProps = () => ({
     agentId: agentId.value,
@@ -22,6 +24,7 @@ export function useChatStream(options: {
     fileIds: fileIds?.value ?? [],
     memoryActive: memoryActive?.value ?? false,
     planActive: planActive?.value ?? false,
+    userInfo: userInfo
   })
 
   // 流式内容

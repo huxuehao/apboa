@@ -3,6 +3,8 @@ package com.hxh.apboa.core.studio;
 import com.hxh.apboa.common.util.CryptoUtils;
 import com.hxh.apboa.common.util.TokenUtils;
 import com.hxh.apboa.common.util.UserUtils;
+import com.hxh.apboa.common.vo.AccountVO;
+import com.hxh.apboa.core.agui.AgentContext;
 import io.agentscope.core.studio.StudioManager;
 
 import java.util.ArrayList;
@@ -33,8 +35,11 @@ public class StudioManagerUtils {
     }
 
     private static String calculateRunName(String agentCode) {
-        String account = UserUtils.getAccount();
-        String token = TokenUtils.getToken();
-        return account + "_" + agentCode + "_" + CryptoUtils.md5(token, "token");
+        AgentContext agentContext = AgentContext.get();
+        AccountVO userInfo = agentContext.getUserInfo();
+        if (userInfo == null) {
+            return agentCode;
+        }
+        return userInfo.getUsername() + "_" + agentCode;
     }
 }

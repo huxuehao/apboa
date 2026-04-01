@@ -93,6 +93,9 @@ public class AguiWebFluxHandler {
         String threadId = input.getThreadId();
         String runId = input.getRunId();
 
+        // 初始化上下文
+        AgentContext.init(input, threadId);
+
         try {
             // Get header agent ID
             String headerAgentId = request.headers().firstHeader(agentIdHeader);

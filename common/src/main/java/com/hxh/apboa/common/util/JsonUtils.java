@@ -77,6 +77,10 @@ public class JsonUtils {
         }
     }
 
+    public static <T> T objectToBean(Object source, Class<T> clazz) {
+        return mapper.convertValue(source, clazz);
+    }
+
     public static String getStringValue(JsonNode node, String fieldName, String defaultValue) {
         String stringValue = getStringValue(node, fieldName, false);
         return stringValue == null ? defaultValue : stringValue;
