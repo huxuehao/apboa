@@ -25,7 +25,9 @@ function getToken(): string {
 function setToken(token: string) {
   Cookies.set(ACCESS_TOKEN_COOKIE_KEY, token, {
     secure: setting.cookieSecure,
-    sameSite: setting.cookieSameSite
+    sameSite: setting.cookieSameSite,
+    expires: 7, // 7天过期，关闭浏览器不消失
+    path: '/'    // 全站有效
   })
   cache.local.set(TokenKey, token);
 }
@@ -53,7 +55,9 @@ function getRefreshToken(): string {
 function setRefreshToken(refreshToken: string) {
   Cookies.set(REFRESH_TOKEN_COOKIE_KEY, refreshToken, {
     secure: setting.cookieSecure,
-    sameSite: setting.cookieSameSite
+    sameSite: setting.cookieSameSite,
+    expires: 7, // 7天过期，关闭浏览器不消失
+    path: '/'    // 全站有效
   })
   cache.local.set(refreshTokenKey, refreshToken);
 }

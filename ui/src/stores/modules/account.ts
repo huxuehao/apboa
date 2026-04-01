@@ -201,7 +201,7 @@ export const useAccountStore = defineStore('account', () => {
       return
     }
     try {
-      const data = await fetchAccountDetail(targetId)
+      const data = await fetchAccountDetail(targetId as string)
       setUserInfo(data)
     } catch (error) {
       throw error

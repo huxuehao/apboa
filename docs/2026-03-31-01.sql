@@ -26,3 +26,6 @@ KEY `idx_code_execution` (`code_execution_id`),
 KEY `idx_agent` (`agent_definition_id`),
 KEY `idx_agent_code_execution` (`agent_definition_id`,`code_execution_id`)
 ) COMMENT='智能体与代码执行环境配置关联表';
+
+INSERT INTO `skill_package` (`id`, `name`, `description`, `skill_content`, `category`, `references`, `examples`, `scripts`, `enabled`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES (2038859803983978498, 'doGetCurrentTime', '通过技能你可以获取当前时间', '执行下面的命令获取当前时间\npython doGetCurrentTime/scripts/getCurrentTime.py', '通用', NULL, NULL, '[{\"prefix\":\"scripts\",\"name\":\"getCurrentTime.py\",\"content\":\"from datetime import datetime\\n\\nnow = datetime.now()\\nweekdays = [\'星期一\', \'星期二\', \'星期三\', \'星期四\', \'星期五\', \'星期六\', \'星期日\']\\n\\nprint(f\\\"当前时间: {now.strftime(\'%Y-%m-%d %H:%M:%S\')}\\\")\\nprint(f\\\"星期: {weekdays[now.weekday()]}\\\")\"}]', 1, '2026-03-31 14:03:52', '2026-03-31 14:21:47', 1111111111111111111, 1111111111111111111);
+

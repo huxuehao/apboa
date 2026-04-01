@@ -25,7 +25,6 @@
     <module>a2a</module>
     <module>websocket</module>
     <module>job</module>
-    <module>starter</module>
     <module>studio</module>
   </modules>
 
