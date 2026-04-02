@@ -290,15 +290,7 @@ const handleSend = async () => {
     finalText,
     [{ role: 'user', content: finalText }] as ChatMessageVO[],
     fileIdsToSend
-  ).finally(() => {
-    uploadedFiles.value = []
-  })
-}
-
-const handleAbortRun = () => {
-  abortRun().finally(() => {
-    uploadedFiles.value = []
-  })
+  )
 }
 
 // 切换侧边栏（通过 computed setter 自动持久化到 store）
@@ -361,7 +353,7 @@ onMounted(() => {
       @toolProcess="handelToolProcess"
       @toolContent="handelToolContent"
       @send="handleSend"
-      @abort="handleAbortRun"
+      @abort="abortRun"
     />
   </div>
 </template>
