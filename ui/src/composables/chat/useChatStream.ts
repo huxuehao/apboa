@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { message } from 'ant-design-vue'
 import { useAgentClient } from '@/composables/useAgentClient'
 import * as chatSessionApi from '@/api/chatSession'
@@ -6,26 +6,16 @@ import { buildToolCallsContent } from '@/utils/chat/format'
 import type {ChatMessageVO, RawEvent} from '@/types'
 import { useAccountStore } from '@/stores'
 
-export function useChatStream(options: {
-  agentId: import('vue').Ref<string>
-  agentDetail: import('vue').Ref<any>
-  currentSessionId: import('vue').Ref<string | null>
-  fileIds?: import('vue').Ref<string[]>
-  memoryActive?: import('vue').Ref<boolean>
-  planActive?: import('vue').Ref<boolean>
-  toolProcessActive?: import('vue').Ref<boolean>
-  onMessageSaved?: (chatMsg: ChatMessageVO) => void
-}) {
-  const {
-    agentId,
-    agentDetail,
-    currentSessionId,
-    fileIds,
-    memoryActive,
-    planActive,
-    toolProcessActive,
-    onMessageSaved
-  } = options
+export function useChatStream(
+  agentId: import('vue').Ref<string>,
+  agentDetail: import('vue').Ref<any>,
+  currentSessionId: import('vue').Ref<string | null>,
+  fileIds?: import('vue').Ref<string[]>,
+  memoryActive?: import('vue').Ref<boolean>,
+  planActive?: import('vue').Ref<boolean>,
+  toolProcessActive?: import('vue').Ref<boolean>,
+  onMessageSaved?: (chatMsg: ChatMessageVO) => void) {
+
   const { userInfo } = useAccountStore()
 
   const getForwardedProps = () => ({

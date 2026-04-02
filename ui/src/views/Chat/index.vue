@@ -114,7 +114,7 @@ const {
   sendMessage,
   sendToolContent,
   abortRun
-} = useChatStream({
+} = useChatStream(
   agentId,
   agentDetail,
   currentSessionId,
@@ -122,10 +122,9 @@ const {
   memoryActive,
   planActive,
   toolProcessActive,
-  onMessageSaved: (chatMsg: ChatMessageVO) => {
+  (chatMsg: ChatMessageVO) => {
     messagesList.value.push(chatMsg)
-  },
-})
+  })
 
 // 输入框内容
 const inputText = ref('')
@@ -291,7 +290,15 @@ const handleSend = async () => {
     finalText,
     [{ role: 'user', content: finalText }] as ChatMessageVO[],
     fileIdsToSend
-  )
+  ).finally(() => {
+    uploadedFiles.value = []
+  })
+}
+
+const handleAbortRun = () => {
+  abortRun().finally(() => {
+    uploadedFiles.value = []
+  })
 }
 
 // 切换侧边栏（通过 computed setter 自动持久化到 store）
@@ -354,7 +361,7 @@ onMounted(() => {
       @toolProcess="handelToolProcess"
       @toolContent="handelToolContent"
       @send="handleSend"
-      @abort="abortRun"
+      @abort="handleAbortRun"
     />
   </div>
 </template>

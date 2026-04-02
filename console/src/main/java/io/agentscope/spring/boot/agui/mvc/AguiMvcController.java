@@ -92,11 +92,11 @@ public class AguiMvcController {
         String threadId = input.getThreadId();
         String runId = input.getRunId();
 
-        // 初始化上下文
-        AgentContext.init(input, threadId);
-
         executorService.submit(
                 () -> {
+                    // 初始化上下文
+                    AgentContext.init(input, threadId);
+
                     Disposable subscription = null;
                     try {
                         // Process request - returns both agent and event stream

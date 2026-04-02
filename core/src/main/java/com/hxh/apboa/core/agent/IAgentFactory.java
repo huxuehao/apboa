@@ -35,8 +35,9 @@ public class IAgentFactory {
                 case A2A -> getA2aAgent(definition);
                 default -> throw new IllegalArgumentException("未知的智能体类型");
             };
-        } finally {
+        } catch (Exception e) {
             AgentContext.clean();
+            throw new RuntimeException(e);
         }
     }
 
@@ -51,8 +52,9 @@ public class IAgentFactory {
                 case A2A -> getA2aAgent(definition);
                 default -> throw new IllegalArgumentException("未知的智能体类型");
             };
-        } finally {
+        } catch (Exception e) {
             AgentContext.clean();
+            throw new RuntimeException(e);
         }
     }
 
@@ -66,8 +68,9 @@ public class IAgentFactory {
             validAgentDefinition(definition);
 
             return a2aAgentHelper.getA2aAgent(definition);
-        } finally {
+        } catch (Exception e) {
             AgentContext.clean();
+            throw new RuntimeException(e);
         }
     }
 
@@ -79,8 +82,9 @@ public class IAgentFactory {
     public A2aAgent getA2aAgent(AgentDefinition definition) {
         try {
             return a2aAgentHelper.getA2aAgent(definition);
-        } finally {
+        } catch (Exception e) {
             AgentContext.clean();
+            throw new RuntimeException(e);
         }
     }
 
@@ -94,8 +98,9 @@ public class IAgentFactory {
             validAgentDefinition(definition);
 
             return reActAgentHelper.getReActAgent(definition);
-        } finally {
+        } catch (Exception e) {
             AgentContext.clean();
+            throw new RuntimeException(e);
         }
     }
 
@@ -106,8 +111,9 @@ public class IAgentFactory {
     public ReActAgent getReActAgent(AgentDefinition definition) {
         try {
             return reActAgentHelper.getReActAgent(definition);
-        } finally {
+        } catch (Exception e) {
             AgentContext.clean();
+            throw new RuntimeException(e);
         }
     }
 
