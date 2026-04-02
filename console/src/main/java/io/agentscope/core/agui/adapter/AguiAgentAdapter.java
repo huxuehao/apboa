@@ -15,6 +15,7 @@
  */
 package io.agentscope.core.agui.adapter;
 
+import com.hxh.apboa.core.agui.AgentContext;
 import io.agentscope.core.agent.Agent;
 import io.agentscope.core.agent.Event;
 import io.agentscope.core.agent.EventType;
