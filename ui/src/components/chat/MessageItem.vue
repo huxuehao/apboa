@@ -30,7 +30,7 @@ const getExtension = (fileName: string): string => {
 }
 
 const props = defineProps<{
-  role: 'user' | 'assistant' | 'system' | 'tool'
+  role: 'user' | 'assistant' | 'system' | 'tool' | 'error'
   content: string
   agentHasResult?: boolean
   isStreaming?: boolean
@@ -39,6 +39,7 @@ const props = defineProps<{
 const isUser = computed(() => props.role === 'user')
 const isAssistant = computed(() => props.role === 'assistant')
 const isTool = computed(() => props.role === 'tool')
+const isError = computed(() => props.role === 'error')
 
 const parsedUserContent = computed(() => parseUserContent(props.content))
 
@@ -85,6 +86,9 @@ const openPreview = (index: number) => {
       </template>
       <template v-else-if="isTool">
         <div class="chat-md-content" v-html="renderMarkdown(content)"></div>
+      </template>
+      <template v-else-if="isError">
+        <span style="color: tomato">{{content}}</span>
       </template>
     </div>
 

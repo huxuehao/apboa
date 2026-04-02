@@ -3,7 +3,7 @@ import { message } from 'ant-design-vue'
 import { useAgentClient } from '@/composables/useAgentClient'
 import * as chatSessionApi from '@/api/chatSession'
 import { buildToolCallsContent } from '@/utils/chat/format'
-import type { ChatMessageVO } from '@/types'
+import type {ChatMessageVO, RawEvent} from '@/types'
 import { useAccountStore } from '@/stores'
 
 export function useChatStream(options: {
@@ -107,11 +107,25 @@ export function useChatStream(options: {
         }
       },
       onRunFinished: (e) => {
+        streamingContent.value = ''
+        streamingMessageId.value = null
         agentHasResult.value = true
         if (toolCallsInProgress.value.length > 0) {
           toolCallsInProgress.value.forEach(item => item.needConfirm = true)
         }
-      }
+      },
+      onRaw: async (event) => {
+        const e = event as RawEvent
+        const rawEvent: any = e.rawEvent
+        if(rawEvent.error) {
+          streamingMessageId.value = new Date().getTime() + '' + Math.floor(Math.random() * 90000) + 10000
+          streamingContent.value = rawEvent.error
+          if (currentSessionId.value) {
+            const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'error', content: rawEvent.error })
+            onMessageSaved?.(res.data.data)
+          }
+        }
+     }
     }
   })
 
@@ -125,12 +139,15 @@ export function useChatStream(options: {
       toolCallId: content[0].id,
     }]
 
-    // 保存历史
-    const contentToSave = buildToolCallsContent([{ id, name, args, result, elapsed: 0 }])
-    if (contentToSave) {
-      const res = await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'tool', content: contentToSave })
-      toolCallsInProgress.value = toolCallsInProgress.value.filter(item => item.id != id)
-      onMessageSaved?.(res.data.data)
+    // 判断是否开启了显示工具调用
+    if ((toolProcessActive?.value ?? true)) {
+      // 保存历史
+      const contentToSave = buildToolCallsContent([{ id, name, args, result, elapsed: 0 }])
+      if (contentToSave) {
+        const res = await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'tool', content: contentToSave })
+        toolCallsInProgress.value = toolCallsInProgress.value.filter(item => item.id != id)
+        onMessageSaved?.(res.data.data)
+      }
     }
 
     await run({

@@ -149,7 +149,7 @@ export interface RawEvent extends BaseEvent {
 }
 
 /** 消息角色 */
-export type MessageRole = 'user' | 'assistant' | 'system' | 'tool' | 'activity'
+export type MessageRole = 'user' | 'assistant' | 'system' | 'tool' | 'activity' | 'error'
 
 /** 消息 */
 export interface Message {
