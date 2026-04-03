@@ -114,7 +114,7 @@ public interface InstanceLoader<T> extends SmartInitializingSingleton {
                     }
                 } catch (Exception ignored) {
                 }
-                if (beanObj != null) {
+                if (beanObj == null) {
                     beanObj = BeanUtils.getBean(declaredField.getType());
                 }
             }
