@@ -1,7 +1,7 @@
 package com.hxh.apboa.websocket.service;
 
+import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.websocket.cluster.ClusterMessage;
-import com.hxh.apboa.websocket.cluster.NodeIdHolder;
 import com.hxh.apboa.websocket.cluster.RedisSessionManager;
 import com.hxh.apboa.websocket.config.ApboaWebSocketSessionManager;
 import com.hxh.apboa.websocket.context.ApboaWebSocketSession;
@@ -21,11 +21,9 @@ import java.util.List;
 public class WebSocketPushService {
 
     private final RedisSessionManager redisSessionManager;
-    private final NodeIdHolder nodeIdHolder;
 
-    public WebSocketPushService(RedisSessionManager redisSessionManager, NodeIdHolder nodeIdHolder) {
+    public WebSocketPushService(RedisSessionManager redisSessionManager) {
         this.redisSessionManager = redisSessionManager;
-        this.nodeIdHolder = nodeIdHolder;
     }
 
     /**
@@ -84,12 +82,12 @@ public class WebSocketPushService {
                     .targetClientId(clientId)
                     .messageType(message.getType())
                     .content(message.getContent())
-                    .sourceNodeId(nodeIdHolder.getNodeId())
+                    .sourceNodeId(SysConst.CURRENT_NODE_ID)
                     .timestamp(System.currentTimeMillis())
                     .build();
 
             redisSessionManager.broadcastMessage("ws:cluster:message", clusterMsg);
-            log.info("通过集群广播推送消息：clientId={}, sourceNodeId={}", clientId, nodeIdHolder.getNodeId());
+            log.info("通过集群广播推送消息：clientId={}, sourceNodeId={}", clientId, SysConst.CURRENT_NODE_ID);
         } catch (Exception e) {
             log.error("集群推送消息失败：{}", e.getMessage(), e);
         }
@@ -108,12 +106,12 @@ public class WebSocketPushService {
                     .userId(userId)
                     .messageType(message.getType())
                     .content(message.getContent())
-                    .sourceNodeId(nodeIdHolder.getNodeId())
+                    .sourceNodeId(SysConst.CURRENT_NODE_ID)
                     .timestamp(System.currentTimeMillis())
                     .build();
 
             redisSessionManager.broadcastMessage("ws:cluster:user:" + userId, clusterMsg);
-            log.info("通过集群广播推送消息给用户：userId={}, sourceNodeId={}", userId, nodeIdHolder.getNodeId());
+            log.info("通过集群广播推送消息给用户：userId={}, sourceNodeId={}", userId, SysConst.CURRENT_NODE_ID);
         } catch (Exception e) {
             log.error("集群推送消息失败：{}", e.getMessage(), e);
         }
@@ -132,12 +130,12 @@ public class WebSocketPushService {
                     .userCode(userCode)
                     .messageType(message.getType())
                     .content(message.getContent())
-                    .sourceNodeId(nodeIdHolder.getNodeId())
+                    .sourceNodeId(SysConst.CURRENT_NODE_ID)
                     .timestamp(System.currentTimeMillis())
                     .build();
 
             redisSessionManager.broadcastMessage("ws:cluster:usercode:" + userCode, clusterMsg);
-            log.info("通过集群广播推送消息给用户编码：userCode={}, sourceNodeId={}", userCode, nodeIdHolder.getNodeId());
+            log.info("通过集群广播推送消息给用户编码：userCode={}, sourceNodeId={}", userCode, SysConst.CURRENT_NODE_ID);
         } catch (Exception e) {
             log.error("集群推送消息失败：{}", e.getMessage(), e);
         }
@@ -154,12 +152,12 @@ public class WebSocketPushService {
             ClusterMessage clusterMsg = ClusterMessage.builder()
                     .messageType(message.getType())
                     .content(message.getContent())
-                    .sourceNodeId(nodeIdHolder.getNodeId())
+                    .sourceNodeId(SysConst.CURRENT_NODE_ID)
                     .timestamp(System.currentTimeMillis())
                     .build();
 
             redisSessionManager.broadcastMessage("ws:cluster:broadcast", clusterMsg);
-            log.info("通过集群广播消息：messageType={}, sourceNodeId={}", message.getType(), nodeIdHolder.getNodeId());
+            log.info("通过集群广播消息：messageType={}, sourceNodeId={}", message.getType(), SysConst.CURRENT_NODE_ID);
         } catch (Exception e) {
             log.error("集群广播消息失败：{}", e.getMessage(), e);
         }

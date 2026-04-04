@@ -4,6 +4,7 @@ import com.hxh.apboa.common.config.auth.RoleNeed;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.entity.JobInfo;
+import com.hxh.apboa.job.core.cluster.JobMessagePublisher;
 import com.hxh.apboa.job.service.QuartzInfoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JobController {
     private final QuartzInfoService quartzInfoService;
+    private final JobMessagePublisher jobMessagePublisher;
 
     @GetMapping("list")
     public R<List<JobInfo>> list() {
@@ -31,6 +33,8 @@ public class JobController {
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> add(@RequestBody JobInfo jobInfo) throws ClassNotFoundException {
         quartzInfoService.addJob(jobInfo);
+        // 广播消息通知其他节点
+        jobMessagePublisher.publishAdd(jobInfo);
         return R.data(true);
     }
 
@@ -38,6 +42,8 @@ public class JobController {
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody JobInfo jobInfo) throws ClassNotFoundException {
         quartzInfoService.updateJob(jobInfo);
+        // 广播消息通知其他节点
+        jobMessagePublisher.publishUpdate(jobInfo);
         return R.data(true);
     }
 
@@ -45,19 +51,26 @@ public class JobController {
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> updateCron(@RequestParam("id") String id, @RequestParam("cron") String cron) throws ClassNotFoundException {
         quartzInfoService.updateJobCron(id, cron);
+        // 广播消息通知其他节点
+        jobMessagePublisher.publishUpdateCron(id, cron);
         return R.data(true);
     }
 
     @GetMapping("/delete")
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestParam("id") String id) throws ClassNotFoundException {
-        return R.data(quartzInfoService.deleteJob(id));
+        boolean result = quartzInfoService.deleteJob(id);
+        // 广播消息通知其他节点
+        jobMessagePublisher.publishDelete(id);
+        return R.data(result);
     }
 
     @GetMapping("/start")
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> start(@RequestParam("id") String id) throws ClassNotFoundException {
         quartzInfoService.startJob(id);
+        // 广播消息通知其他节点
+        jobMessagePublisher.publishStart(id);
         return R.data(true);
     }
 
@@ -65,6 +78,8 @@ public class JobController {
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> stop(@RequestParam("id") String id) throws ClassNotFoundException {
         quartzInfoService.stopJob(id);
+        // 广播消息通知其他节点
+        jobMessagePublisher.publishStop(id);
         return R.data(true);
     }
 
@@ -98,11 +113,15 @@ public class JobController {
                 .eq(JobInfo::getType, "AGENT")
                 .one();
         if (jobInfo != null) {
+            String jobId = jobInfo.getId();
             // 如果任务正在运行，先停止
             if (jobInfo.isEnabled()) {
-                quartzInfoService.stopJob(jobInfo.getId());
+                quartzInfoService.stopJob(jobId);
             }
-            return R.data(quartzInfoService.deleteJob(jobInfo.getId()));
+            boolean result = quartzInfoService.deleteJob(jobId);
+            // 广播消息通知其他节点
+            jobMessagePublisher.publishDelete(jobId);
+            return R.data(result);
         }
         return R.data(true);
     }

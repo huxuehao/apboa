@@ -13,11 +13,6 @@
     @cancel="handleCancel"
     @update:open="(val: boolean) => emit('update:visible', val)"
   >
-    <AAlert
-      message="说明：定时任务目前不支持集群部署，后面会进行改造升级~"
-      banner
-      closable
-    />
     <AForm
       ref="formRef"
       :model="formData"

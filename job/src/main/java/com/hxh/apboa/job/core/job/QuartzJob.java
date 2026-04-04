@@ -5,6 +5,7 @@ import com.hxh.apboa.common.util.FuncUtils;
 import com.hxh.apboa.job.core.enums.QuartzEnum;
 import com.hxh.apboa.job.core.enums.QuartzResult;
 import com.hxh.apboa.common.entity.JobLog;
+import com.hxh.apboa.job.core.cluster.JobDistributedLock;
 import com.hxh.apboa.job.service.QuartzLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
@@ -12,6 +13,8 @@ import org.quartz.*;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Date;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 描述：任务执行器
@@ -26,13 +29,65 @@ import java.util.Date;
 public abstract class QuartzJob implements Job {
     private JobExecutionContext context;
 
+    /**
+     * 锁默认过期时间（秒）
+     * 默认15分钟，防止任务执行时间过长导致锁过期
+     */
+    private static final long LOCK_EXPIRE_SECONDS = 1500;
+
     @Override
     public void execute(JobExecutionContext context) {
         this.context = context;
-        QuartzLogService quartzLogService = getBean(QuartzLogService.class);
 
         // 任务身份ID
         String identity = getDataMap(QuartzEnum.IDENTITY_KEY.value(), String.class);
+
+        // 随机延迟0-500ms，避免多节点同时抢占
+        randomDelay();
+
+        // 获取分布式锁
+        JobDistributedLock distributedLock = getBean(JobDistributedLock.class);
+        boolean locked = false;
+
+        try {
+            // 使用带负载均衡的锁获取
+            locked = distributedLock.tryLockWithBalance(identity, LOCK_EXPIRE_SECONDS, TimeUnit.SECONDS);
+            if (!locked) {
+                log.debug("任务已被其他节点执行或负载均衡放弃，跳过 - jobId: {}", identity);
+                return;
+            }
+
+            // 执行实际任务
+            doExecute(context, identity);
+
+            // 执行成功，记录执行历史
+            distributedLock.recordExecHistory(identity);
+
+        } finally {
+            if (locked) {
+                distributedLock.unlock(identity);
+            }
+        }
+    }
+
+    /**
+     * 随机延迟，用于负载均衡
+     */
+    private void randomDelay() {
+        try {
+            long delay = ThreadLocalRandom.current().nextLong(0, 500);
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * 实际执行任务逻辑
+     */
+    private void doExecute(JobExecutionContext context, String identity) {
+        QuartzLogService quartzLogService = getBean(QuartzLogService.class);
+
         // 开始时间毫秒
         long startTimeMillis = System.currentTimeMillis();
         // 开始时间
