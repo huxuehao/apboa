@@ -8,7 +8,13 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
 import javax.crypto.SecretKey;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * 描述：token工具类
@@ -138,11 +144,17 @@ public class TokenUtils {
      * 提取并验证Bearer Token格式
      */
     private static String extractBearerToken(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
-            throw new RuntimeException("Token格式错误，必须使用Bearer认证方案");
+        if (authHeader == null || authHeader.isEmpty()) {
+            throw new RuntimeException("未携带有效的 Authorization");
         }
 
-        String token = authHeader.substring(BEARER_PREFIX.length()).trim();
+        String token;
+        if (authHeader.startsWith(BEARER_PREFIX)) {
+            token = authHeader.substring(BEARER_PREFIX.length()).trim();
+        } else {
+            token = authHeader;
+        }
+
         if (FuncUtils.isEmpty(token)) {
             throw new RuntimeException("Token不能为空");
         }
@@ -181,6 +193,47 @@ public class TokenUtils {
         // 验证必要字段
         if (FuncUtils.isEmpty(claims.getId())) {
             throw new RuntimeException("Token缺少用户标识");
+        }
+    }
+
+    /**
+     * 将JWT字符串进行GZIP压缩后做Base64URL编码，用于缩短SK value的存储长度
+     *
+     * @param jwt 原始JWT字符串
+     * @return 压缩编码后的字符串
+     */
+    public static String compressJwt(String jwt) {
+        try {
+            ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+            try (GZIPOutputStream gzip = new GZIPOutputStream(byteOut)) {
+                gzip.write(jwt.getBytes(StandardCharsets.UTF_8));
+            }
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(byteOut.toByteArray());
+        } catch (IOException e) {
+            throw new RuntimeException("JWT压缩失败", e);
+        }
+    }
+
+    /**
+     * 将compressJwt压缩过的字符串还原为原始JWT字符串
+     *
+     * @param compressed 压缩编码后的字符串
+     * @return 原始JWT字符串
+     */
+    public static String decompressJwt(String compressed) {
+        try {
+            byte[] bytes = Base64.getUrlDecoder().decode(compressed);
+            try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(bytes));
+                 ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = gzip.read(buffer)) != -1) {
+                    out.write(buffer, 0, len);
+                }
+                return out.toString(StandardCharsets.UTF_8);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("JWT解压失败", e);
         }
     }
 }

@@ -5,7 +5,7 @@
  */
 <script setup lang="ts">
 import { computed } from 'vue'
-import { UserOutlined, TeamOutlined, InfoCircleOutlined, DatabaseOutlined, FolderOutlined, ClockCircleOutlined, ControlOutlined } from '@ant-design/icons-vue'
+import { UserOutlined, TeamOutlined, InfoCircleOutlined, DatabaseOutlined, FolderOutlined, ClockCircleOutlined, ControlOutlined, KeyOutlined } from '@ant-design/icons-vue'
 import { useAccountStore } from '@/stores'
 
 /**
@@ -53,21 +53,26 @@ const menuItems = computed(() => {
       icon: TeamOutlined
     })
     items.splice(2, 0, {
+      key: 'apiKeys',
+      label: 'API Keys',
+      icon: KeyOutlined
+    })
+    items.splice(3, 0, {
       key: 'storageConfig',
       label: '存储配置',
       icon: DatabaseOutlined
     })
-    items.splice(3, 0, {
+    items.splice(4, 0, {
       key: 'fileManager',
       label: '文件管理',
       icon: FolderOutlined
     })
-    items.splice(4, 0, {
+    items.splice(5, 0, {
       key: 'fileLog',
       label: '文件日志',
       icon: ClockCircleOutlined
     })
-    items.splice(5, 0, {
+    items.splice(6, 0, {
       key: 'systemParams',
       label: '系统参数',
       icon: ControlOutlined

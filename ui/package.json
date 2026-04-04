@@ -40,6 +40,7 @@
     "ant-design-vue": "^4.2.6",
     "axios": "^1.7.9",
     "codemirror": "^6.0.2",
+    "dayjs": "^1.11.20",
     "fast-json-patch": "^3.1.1",
     "js-cookie": "^3.0.5",
     "js-md5": "^0.8.3",

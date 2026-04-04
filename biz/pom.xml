@@ -24,6 +24,7 @@
         <module>params</module>
         <module>a2a</module>
         <module>studio</module>
+        <module>sk</module>
     </modules>
 
     <name>biz</name>

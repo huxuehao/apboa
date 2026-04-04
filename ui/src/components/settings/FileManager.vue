@@ -114,7 +114,6 @@ onMounted(() => {
           :key="item.id"
           class="file-list-item"
         >
-          <div class="file-list-index">{{ (page.current - 1) * page.size + index + 1 }}</div>
           <div class="file-list-avatar">
             {{ (item.originalName || item.name || '未命名').substring(0,1) }}
           </div>

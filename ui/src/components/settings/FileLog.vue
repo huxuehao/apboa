@@ -105,9 +105,6 @@ onMounted(() => {
           :key="item.id"
           class="file-log-item"
         >
-          <div class="file-log-index">
-            {{ (page.current - 1) * page.size + index + 1 }}
-          </div>
           <div class="file-log-avatar">
             {{ (item.originalName || '未命名').substring(0, 1) }}
           </div>
