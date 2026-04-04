@@ -6,7 +6,8 @@ import com.hxh.apboa.core.agent.IAgentFactory;
 import io.agentscope.core.agui.registry.AguiAgentRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -17,15 +18,16 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class AguiAgentConfiguration {
+public class AguiAgentConfiguration implements ApplicationRunner {
     private final AgentDefinitionService agentDefinitionService;
     private final IAgentFactory iAgentFactory;
+    private final AguiAgentRegistry registry;
 
-    private AguiAgentRegistry registry;
-
-    @Autowired
+    @Override
+    public void run(ApplicationArguments args) {
+        configureAgents(registry);
+    }
     public void configureAgents(AguiAgentRegistry registry) {
-        this.registry = registry;
         try {
             agentDefinitionService.list()
                     .stream()

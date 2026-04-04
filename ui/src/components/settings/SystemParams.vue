@@ -114,7 +114,6 @@ onMounted(() => {
           class="params-list-item"
           :class="{ editing: editingId === item.id }"
         >
-          <div class="params-list-index">{{ index + 1 }}</div>
           <div class="params-list-content">
             <div class="params-list-row params-list-name">
               <span class="params-list-label">名称</span>
@@ -262,7 +261,7 @@ onMounted(() => {
 .params-list-label {
   flex-shrink: 0;
   min-width: 42px;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-base);
   color: var(--color-text-placeholder);
 }
 
@@ -274,7 +273,6 @@ onMounted(() => {
 
 .params-list-key-value {
   font-size: var(--font-size-sm);
-  color: var(--color-primary);
 }
 
 .params-list-value-text {

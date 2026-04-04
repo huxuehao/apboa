@@ -272,18 +272,17 @@ const handleSend = async () => {
     if (!newSession) return
     currentSessionId.value = String(newSession.id)
     currentSessionTitle.value = newSession.title || '新对话'
-    await loadCurrentMessages()
   }
 
   // 保存用户消息
-  await chatSessionApi.appendMessage(currentSessionId.value, { role: 'user', content: finalText })
+  const userMsg = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'user', content: finalText })
   // 如果是新会话，更新标题
   if (messagesList.value.length === 0) {
     const title = formatSessionTitle(text || (hasFiles ? '附件' : '新对话'))
     await updateSessionTitle(currentSessionId.value, title)
     currentSessionTitle.value = title
   }
-  await loadCurrentMessages()
+  messagesList.value.push(userMsg.data.data)
 
   // 触发流式回复（传入 fileIdsToSend，因输入框已提前清空）
   await sendMessage(

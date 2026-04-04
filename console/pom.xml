@@ -29,6 +29,10 @@
             <groupId>com.hxh.apboa</groupId>
             <artifactId>job</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>sk</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

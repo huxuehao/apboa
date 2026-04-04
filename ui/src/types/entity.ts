@@ -427,6 +427,16 @@ export interface StudioConfig {
 }
 
 /**
+ * 访问秘钥
+ */
+export interface SecretKey extends BaseEntity {
+  name: string
+  value: string
+  expireTime: string | null
+  remark: string
+}
+
+/**
  * CodeExecutionConfig 实体 - 代码执行环境配置
  */
 export interface CodeExecutionConfig {

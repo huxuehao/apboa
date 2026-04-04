@@ -7,6 +7,11 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import Antd from 'ant-design-vue';
 import { message } from 'ant-design-vue'
 
+// dayjs 并设置为中文
+import * as dayjs from 'dayjs';
+import 'dayjs/locale/zh-cn';
+dayjs.locale('zh-cn');
+
 import App from './App.vue'
 import router from './router'
 import { useAccountStore } from '@/stores'

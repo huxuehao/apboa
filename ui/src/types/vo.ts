@@ -320,6 +320,23 @@ export interface StudioConfigVO {
 }
 
 /**
+ * 访问秘钥VO
+ */
+export interface SecretKeyVO {
+  id: string | number
+  name: string
+  /** value 在列表中已脱敏，创建时返回完整值 */
+  value: string
+  expireTime: string | null
+  remark: string
+  enabled: boolean
+  createdAt: string
+  updatedAt: string
+  createdBy: string
+  updatedBy: string
+}
+
+/**
  * 代码执行配置VO
  */
 export interface CodeExecutionConfigVO {

@@ -12,26 +12,37 @@ import java.time.Duration;
  * @author huxuehao
  **/
 public class JsonUtils {
-    private static final ObjectMapper mapper;
+    private static volatile ObjectMapper objectMapper;
 
-    static {
-        mapper = ApboaSpringContextHolder.getObjectMapper();
+    private static ObjectMapper getMapper() {
+        if (objectMapper == null) {
+            synchronized (JsonUtils.class) {
+                if (objectMapper == null) {
+                    objectMapper = ApboaSpringContextHolder.getObjectMapper();
+                }
+            }
+        }
+        return objectMapper;
     }
 
     public static String toJsonStr(Object obj) {
-        if (obj == null) {
-            return null;
-        }
-        if (obj instanceof String) {
-            return (String) obj;
-        }
-        if (obj instanceof JsonNode node) {
-            if (node.isNull()) {
+        switch (obj) {
+            case null -> {
                 return null;
+            }
+            case String s -> {
+                return s;
+            }
+            case JsonNode node -> {
+                if (node.isNull()) {
+                    return null;
+                }
+            }
+            default -> {
             }
         }
         try {
-            return mapper.writeValueAsString(obj);
+            return getMapper().writeValueAsString(obj);
         } catch (Exception e) {
             throw new RuntimeException("JSON序列化失败", e);
         }
@@ -41,7 +52,7 @@ public class JsonUtils {
             return null;
         }
         try {
-            return mapper.valueToTree(obj);
+            return getMapper().valueToTree(obj);
         } catch (Exception e) {
             throw new RuntimeException("JSON序列化失败", e);
         }
@@ -49,7 +60,7 @@ public class JsonUtils {
 
     public static JsonNode toJsonNode(Object obj) {
         try {
-            return mapper.valueToTree(obj);
+            return getMapper().valueToTree(obj);
         } catch (Exception e) {
             throw new RuntimeException("Failed to convert object to JsonNode", e);
         }
@@ -60,7 +71,7 @@ public class JsonUtils {
             return null;
         }
         try {
-            return mapper.readTree(json);
+            return getMapper().readTree(json);
         } catch (Exception e) {
             throw new RuntimeException("JSON反序列化失败", e);
         }
@@ -71,14 +82,14 @@ public class JsonUtils {
             return null;
         }
         try {
-            return mapper.readValue(json, clazz);
+            return getMapper().readValue(json, clazz);
         } catch (Exception e) {
             throw new RuntimeException("JSON反序列化失败", e);
         }
     }
 
     public static <T> T objectToBean(Object source, Class<T> clazz) {
-        return mapper.convertValue(source, clazz);
+        return getMapper().convertValue(source, clazz);
     }
 
     public static String getStringValue(JsonNode node, String fieldName, String defaultValue) {

@@ -8,6 +8,7 @@ import {ref, provide} from 'vue'
 import SettingsMenu from './SettingsMenu.vue'
 import MyAccount from './MyAccount.vue'
 import AllAccounts from './AllAccounts.vue'
+import ApiKeys from './ApiKeys.vue'
 import StorageConfig from './StorageConfig.vue'
 import FileManager from './FileManager.vue'
 import FileLog from './FileLog.vue'
@@ -41,6 +42,7 @@ defineExpose({
     <div class="settings-content">
       <MyAccount v-if="currentMenu === 'myAccount'" />
       <AllAccounts v-else-if="currentMenu === 'allAccounts'" v-permission="['EDIT','ADMIN']"/>
+      <ApiKeys v-else-if="currentMenu === 'apiKeys'" v-permission="['EDIT','ADMIN']" />
       <StorageConfig v-else-if="currentMenu === 'storageConfig'" v-permission="['EDIT','ADMIN']" />
       <FileManager v-else-if="currentMenu === 'fileManager'" v-permission="['EDIT','ADMIN']" />
       <FileLog v-else-if="currentMenu === 'fileLog'" v-permission="['EDIT','ADMIN']" />

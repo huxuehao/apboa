@@ -31,8 +31,8 @@ export function useCurrentSession(agentId: import('vue').Ref<string>) {
     messagesList.value = []
   }
 
-  watch(currentSessionId, () => {
-    if (currentSessionId.value) loadCurrentMessages()
+  watch(currentSessionId, async () => {
+    if (currentSessionId.value) await loadCurrentMessages()
     else messagesList.value = []
   })
 
