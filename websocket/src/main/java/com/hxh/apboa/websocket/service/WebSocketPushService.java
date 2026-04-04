@@ -1,6 +1,7 @@
 package com.hxh.apboa.websocket.service;
 
 import com.hxh.apboa.common.consts.SysConst;
+import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.websocket.cluster.ClusterMessage;
 import com.hxh.apboa.websocket.cluster.RedisSessionManager;
 import com.hxh.apboa.websocket.config.ApboaWebSocketSessionManager;
@@ -86,7 +87,8 @@ public class WebSocketPushService {
                     .timestamp(System.currentTimeMillis())
                     .build();
 
-            redisSessionManager.broadcastMessage("ws:cluster:message", clusterMsg);
+            String messageStr = JsonUtils.toJsonStr(clusterMsg);
+            redisSessionManager.broadcastMessage("ws:cluster:message", messageStr);
             log.info("通过集群广播推送消息：clientId={}, sourceNodeId={}", clientId, SysConst.CURRENT_NODE_ID);
         } catch (Exception e) {
             log.error("集群推送消息失败：{}", e.getMessage(), e);
@@ -110,7 +112,8 @@ public class WebSocketPushService {
                     .timestamp(System.currentTimeMillis())
                     .build();
 
-            redisSessionManager.broadcastMessage("ws:cluster:user:" + userId, clusterMsg);
+            String messageStr = JsonUtils.toJsonStr(clusterMsg);
+            redisSessionManager.broadcastMessage("ws:cluster:user:" + userId, messageStr);
             log.info("通过集群广播推送消息给用户：userId={}, sourceNodeId={}", userId, SysConst.CURRENT_NODE_ID);
         } catch (Exception e) {
             log.error("集群推送消息失败：{}", e.getMessage(), e);
@@ -134,7 +137,8 @@ public class WebSocketPushService {
                     .timestamp(System.currentTimeMillis())
                     .build();
 
-            redisSessionManager.broadcastMessage("ws:cluster:usercode:" + userCode, clusterMsg);
+            String messageStr = JsonUtils.toJsonStr(clusterMsg);
+            redisSessionManager.broadcastMessage("ws:cluster:usercode:" + userCode, messageStr);
             log.info("通过集群广播推送消息给用户编码：userCode={}, sourceNodeId={}", userCode, SysConst.CURRENT_NODE_ID);
         } catch (Exception e) {
             log.error("集群推送消息失败：{}", e.getMessage(), e);
@@ -156,7 +160,8 @@ public class WebSocketPushService {
                     .timestamp(System.currentTimeMillis())
                     .build();
 
-            redisSessionManager.broadcastMessage("ws:cluster:broadcast", clusterMsg);
+            String messageStr = JsonUtils.toJsonStr(clusterMsg);
+            redisSessionManager.broadcastMessage("ws:cluster:broadcast", messageStr);
             log.info("通过集群广播消息：messageType={}, sourceNodeId={}", message.getType(), SysConst.CURRENT_NODE_ID);
         } catch (Exception e) {
             log.error("集群广播消息失败：{}", e.getMessage(), e);

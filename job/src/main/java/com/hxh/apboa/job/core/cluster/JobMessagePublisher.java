@@ -1,5 +1,6 @@
 package com.hxh.apboa.job.core.cluster;
 
+import com.hxh.apboa.cluster.core.MessagePublisher;
 import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.job.consts.JobRedisChannel;
 import com.hxh.apboa.job.core.cluster.message.JobControlMessage;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class JobMessagePublisher {
 
-    private final StringRedisTemplate stringRedisTemplate;
+    private final MessagePublisher messagePublisher;
     private final NodeConfig nodeConfig;
 
     /**
@@ -30,7 +31,7 @@ public class JobMessagePublisher {
     public void publish(JobControlMessage message) {
         try {
             String jsonMessage = JsonUtils.toJsonStr(message);
-            stringRedisTemplate.convertAndSend(JobRedisChannel.JOB_CLUSTER_CONTROL, jsonMessage);
+            messagePublisher.publish(JobRedisChannel.JOB_CLUSTER_CONTROL, jsonMessage);
             log.debug("发布任务控制消息成功 - action: {}, jobId: {}, sourceNode: {}",
                     message.getAction(), message.getJobId(), message.getSourceNodeId());
         } catch (Exception e) {

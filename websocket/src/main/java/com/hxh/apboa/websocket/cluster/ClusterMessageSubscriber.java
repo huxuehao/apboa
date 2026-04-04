@@ -1,12 +1,13 @@
 package com.hxh.apboa.websocket.cluster;
 
+import com.hxh.apboa.cluster.core.ChannelSubscriber;
 import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.websocket.config.ApboaWebSocketSessionManager;
 import com.hxh.apboa.websocket.context.ApboaWebSocketSession;
 import com.hxh.apboa.websocket.model.WsServerMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.connection.Message;
-import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.listener.PatternTopic;
+import org.springframework.data.redis.listener.Topic;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,16 +19,20 @@ import java.util.List;
  **/
 @Slf4j
 @Component
-public class ClusterMessageSubscriber implements MessageListener {
+public class ClusterMessageSubscriber implements ChannelSubscriber {
 
     /** 允许处理的频道前缀，只接受 ws:cluster:* 消息 */
     private static final String CHANNEL_PREFIX = "ws:cluster:";
+    private static final String CHANNEL_PATTERN = "ws:cluster:*";
 
     @Override
-    public void onMessage(Message message, byte[] pattern) {
-        try {
-            String channel = new String(message.getChannel());
+    public Topic getTopic() {
+        return new PatternTopic(CHANNEL_PATTERN);
+    }
 
+    @Override
+    public void onMessage(String channel, String message) {
+        try {
             // 仅处理 ws:cluster:* 频道，拒绝非 WebSocket 集群消息
             if (!channel.startsWith(CHANNEL_PREFIX)) {
                 log.warn("忽略非 WebSocket 集群频道的消息：channel={}", channel);
@@ -36,7 +41,7 @@ public class ClusterMessageSubscriber implements MessageListener {
 
             log.debug("接收到集群消息：channel={}", channel);
 
-            ClusterMessage clusterMessage = JsonUtils.parse(new String(message.getBody()), ClusterMessage.class);
+            ClusterMessage clusterMessage = JsonUtils.parse(message, ClusterMessage.class);
 
             // 构建消息对象
             WsServerMessage wsMessage = new WsServerMessage(

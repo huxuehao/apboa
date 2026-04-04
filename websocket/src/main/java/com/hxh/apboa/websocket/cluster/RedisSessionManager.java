@@ -1,5 +1,6 @@
 package com.hxh.apboa.websocket.cluster;
 
+import com.hxh.apboa.cluster.core.MessagePublisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -12,10 +13,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class RedisSessionManager {
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final MessagePublisher messagePublisher;
 
-    public RedisSessionManager(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
+    public RedisSessionManager(MessagePublisher messagePublisher) {
+        this.messagePublisher = messagePublisher;
     }
 
     /**
@@ -24,9 +25,9 @@ public class RedisSessionManager {
      * @param channel 频道
      * @param message 消息内容
      */
-    public void broadcastMessage(String channel, Object message) {
+    public void broadcastMessage(String channel, String message) {
         try {
-            redisTemplate.convertAndSend(channel, message);
+            messagePublisher.publish(channel, message);
         } catch (Exception e) {
             log.error("广播消息失败：{}", e.getMessage(), e);
         }

@@ -1,5 +1,6 @@
 package com.hxh.apboa.job.core.cluster;
 
+import com.hxh.apboa.cluster.core.ChannelSubscriber;
 import com.hxh.apboa.common.entity.JobInfo;
 import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.job.consts.JobRedisChannel;
@@ -9,8 +10,8 @@ import com.hxh.apboa.job.init.JobInit;
 import com.hxh.apboa.job.service.QuartzInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.connection.Message;
-import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.Topic;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,26 +23,28 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class JobMessageSubscriber implements MessageListener {
+public class JobMessageSubscriber implements ChannelSubscriber {
 
     private final NodeConfig nodeConfig;
     private final QuartzClient quartzClient;
     private final QuartzInfoService quartzInfoService;
 
     @Override
-    public void onMessage(Message message, byte[] pattern) {
-        try {
-            String channel = new String(message.getChannel());
-            String body = new String(message.getBody());
+    public Topic getTopic() {
+        return new ChannelTopic(JobRedisChannel.JOB_CLUSTER_CONTROL);
+    }
 
+    @Override
+    public void onMessage(String channel, String message) {
+        try {
             // 只处理任务控制消息
             if (!channel.equals(JobRedisChannel.JOB_CLUSTER_CONTROL)) {
                 return;
             }
 
-            JobControlMessage controlMessage = JsonUtils.parse(body, JobControlMessage.class);
+            JobControlMessage controlMessage = JsonUtils.parse(message, JobControlMessage.class);
             if (controlMessage == null) {
-                log.warn("解析任务控制消息失败: {}", body);
+                log.warn("解析任务控制消息失败: {}", message);
                 return;
             }
 

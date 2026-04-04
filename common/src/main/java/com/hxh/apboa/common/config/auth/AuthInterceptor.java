@@ -8,8 +8,7 @@ import com.hxh.apboa.common.util.*;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -26,9 +25,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author huxuehao
  **/
+@Slf4j
 public class AuthInterceptor implements HandlerInterceptor {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthInterceptor.class);
     private static final int UNAUTHORIZED_STATUS = HttpServletResponse.SC_UNAUTHORIZED;
     private static final Map<Long, Role> ROLE_MAP = new ConcurrentHashMap<>();
     /** 存储有效的SK ID集合，用于快速校验SK是否有效 */
