@@ -258,7 +258,7 @@ onMounted(() => {
       width="800px"
       @cancel="createdKeyVisible = false"
     >
-      <div class="api-keys-created-tip">请立即复制并妥善保存，此key仅显示一次。在请求头的Authorization中使用。</div>
+      <div class="api-keys-created-tip">请立即复制并妥善保存，此key<strong>仅显示一次</strong>。使用时请携带在请求头的<strong>Authorization</strong>中。</div>
       <div class="api-keys-created-value">
         <span class="api-keys-created-text">{{ createdKeyValue }}</span>
         <AButton type="text" size="small" @click="handleCopy(createdKeyValue)">复制</AButton>
