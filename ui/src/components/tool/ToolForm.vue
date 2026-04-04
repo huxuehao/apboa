@@ -217,8 +217,7 @@ const rules = computed(() => {
       { max: 100, message: '名称长度不能超过100个字符', trigger: 'blur' }
     ],
     description: [
-      { required: true, message: '请输入描述', trigger: 'blur' },
-      { max: 200, message: '描述长度不能超过200个字符', trigger: 'blur' }
+      { required: true, message: '请输入描述', trigger: 'blur' }
     ],
     version: [
       { required: true, message: '请输入版本号', trigger: 'blur' }

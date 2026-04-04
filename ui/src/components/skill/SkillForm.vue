@@ -74,8 +74,7 @@ const rules = {
     { max: 6, message: '标签长度不能超过6个字符', trigger: 'blur' }
   ],
   description: [
-    { required: true, message: '请输入描述', trigger: 'blur' },
-    { max: 200, message: '描述长度不能超过200个字符', trigger: 'blur' }
+    { required: true, message: '请输入描述', trigger: 'blur' }
   ],
   skillContent: [{ required: true, message: '请输入技能内容', trigger: 'blur' }]
 }
