@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.hxh.apboa</groupId>
-        <artifactId>apboa</artifactId>
+        <artifactId>biz</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hook</artifactId>
+    <artifactId>knowledge</artifactId>
     <packaging>jar</packaging>
 
-    <name>hook</name>
+    <name>knowledge</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

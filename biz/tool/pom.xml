@@ -3,14 +3,15 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.hxh.apboa</groupId>
-        <artifactId>apboa</artifactId>
+        <artifactId>biz</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>a2a</artifactId>
+    <artifactId>tool</artifactId>
     <packaging>jar</packaging>
 
-    <name>a2a</name>
+    <name>tool</name>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -19,11 +20,6 @@
         <dependency>
             <groupId>com.hxh.apboa</groupId>
             <artifactId>common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba.nacos</groupId>
-            <artifactId>nacos-client</artifactId>
-            <version>3.1.1</version>
         </dependency>
     </dependencies>
 </project>

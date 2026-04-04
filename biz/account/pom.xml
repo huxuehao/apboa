@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.hxh.apboa</groupId>
-        <artifactId>apboa</artifactId>
+        <artifactId>biz</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>tool</artifactId>
+    <artifactId>account</artifactId>
     <packaging>jar</packaging>
 
-    <name>tool</name>
+    <name>account</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,7 +19,11 @@
     <dependencies>
         <dependency>
             <groupId>com.hxh.apboa</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>params</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>websocket</artifactId>
         </dependency>
     </dependencies>
 </project>

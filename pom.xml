@@ -7,25 +7,12 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
-    <module>model</module>
-    <module>prompt</module>
-    <module>sensitive</module>
-    <module>tool</module>
-    <module>mcp</module>
-    <module>skill</module>
-    <module>knowledge</module>
-    <module>hook</module>
-    <module>agent</module>
     <module>common</module>
     <module>console</module>
-    <module>account</module>
     <module>core</module>
-    <module>resource</module>
-    <module>params</module>
-    <module>a2a</module>
     <module>websocket</module>
     <module>job</module>
-    <module>studio</module>
+    <module>biz</module>
   </modules>
 
   <properties>
