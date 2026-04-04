@@ -1,12 +1,9 @@
 package com.hxh.apboa.websocket.config;
 
-import com.hxh.apboa.websocket.cluster.ClusterMessageSubscriber;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.PatternTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -38,22 +35,5 @@ public class ApboaRedisConfig {
 
         template.afterPropertiesSet();
         return template;
-    }
-
-    /**
-     * 配置 Redis 消息监听容器
-     */
-    @Bean
-    public RedisMessageListenerContainer redisMessageListenerContainer(
-            RedisConnectionFactory connectionFactory,
-            ClusterMessageSubscriber subscriber) {
-
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-
-        // 订阅集群消息频道
-        container.addMessageListener(subscriber, new PatternTopic("ws:cluster:*"));
-
-        return container;
     }
 }

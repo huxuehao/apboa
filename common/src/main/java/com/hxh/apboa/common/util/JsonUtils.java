@@ -1,5 +1,6 @@
 package com.hxh.apboa.common.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hxh.apboa.common.config.ApboaSpringContextHolder;
@@ -83,6 +84,17 @@ public class JsonUtils {
         }
         try {
             return getMapper().readValue(json, clazz);
+        } catch (Exception e) {
+            throw new RuntimeException("JSON反序列化失败", e);
+        }
+    }
+
+    public static <T> T parse(String json, TypeReference<T> typeReference) {
+        if (json == null || json.isEmpty()) {
+            return null;
+        }
+        try {
+            return getMapper().readValue(json, typeReference);
         } catch (Exception e) {
             throw new RuntimeException("JSON反序列化失败", e);
         }

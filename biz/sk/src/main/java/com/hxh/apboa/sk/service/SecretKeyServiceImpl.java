@@ -2,11 +2,13 @@ package com.hxh.apboa.sk.service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hxh.apboa.common.config.auth.AuthInterceptor;
+import com.hxh.apboa.common.config.auth.SkIdSyncPublisher;
 import com.hxh.apboa.common.entity.SecretKey;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.util.TokenUtils;
 import com.hxh.apboa.common.vo.SecretKeyVo;
 import com.hxh.apboa.sk.mapper.SecretKeyMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
@@ -18,7 +20,10 @@ import java.util.List;
  * @author huxuehao
  **/
 @Service
+@RequiredArgsConstructor
 public class SecretKeyServiceImpl extends ServiceImpl<SecretKeyMapper, SecretKey> implements SecretKeyService {
+
+    private final SkIdSyncPublisher skIdSyncPublisher;
 
     /** 秘钥前缀 */
     private static final String SK_PREFIX = "sk-";
@@ -55,8 +60,11 @@ public class SecretKeyServiceImpl extends ServiceImpl<SecretKeyMapper, SecretKey
 
         updateById(entity);
 
-        // 将SK ID添加到有效集合中
+        // 将SK ID添加到本地有效集合中
         AuthInterceptor.addSkId(entity.getId());
+
+        // 发布同步消息通知其他节点
+        skIdSyncPublisher.publishAdd(entity.getId());
 
         return BeanUtils.copy(entity, SecretKeyVo.class);
     }
@@ -73,8 +81,11 @@ public class SecretKeyServiceImpl extends ServiceImpl<SecretKeyMapper, SecretKey
     public boolean delete(List<Long> ids) {
         boolean success = removeByIds(ids);
         if (success) {
-            // 从有效集合中移除已删除的SK ID
+            // 从本地有效集合中移除已删除的SK ID
             AuthInterceptor.removeSkIds(ids);
+
+            // 发布同步消息通知其他节点
+            skIdSyncPublisher.publishRemove(ids);
         }
         return success;
     }

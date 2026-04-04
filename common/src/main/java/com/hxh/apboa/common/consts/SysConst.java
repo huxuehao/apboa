@@ -1,5 +1,7 @@
 package com.hxh.apboa.common.consts;
 
+import com.hxh.apboa.common.util.CryptoUtils;
+
 /**
  * 描述：系统常量
  *
@@ -36,4 +38,6 @@ public class SysConst {
     public static final String ALLOW_VIDEO_FILE_TYPE = "mp4,mpeg";
 
     public static final Long ADMIN_ACCOUNT_ID = 1111111111111111111L;
+
+    public static final String CURRENT_NODE_ID = CryptoUtils.uuid();
 }

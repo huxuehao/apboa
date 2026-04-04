@@ -18,6 +18,11 @@
     </properties>
 
     <dependencies>
+        <!--cluster模块：Redis发布订阅-->
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>cluster</artifactId>
+        </dependency>
         <!--agentscope核心包-->
         <dependency>
             <groupId>io.agentscope</groupId>
