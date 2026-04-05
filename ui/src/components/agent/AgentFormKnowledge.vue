@@ -104,7 +104,7 @@ async function loadAllKnowledgeBases() {
   try {
     loading.value = true
     const response = await knowledgeApi.page({ page: 1, size: 1000, enabled: true })
-    allKnowledgeBases.value = response.data.data.records || []
+    allKnowledgeBases.value = response.data.data.records.filter(item => item.enabled) || []
   } finally {
     loading.value = false
   }
@@ -115,7 +115,7 @@ async function loadAllKnowledgeBases() {
  */
 async function loadAllMcpServers() {
   const response = await mcpApi.page({ page: 1, size: 1000 })
-  allMcpServers.value = response.data.data.records || []
+  allMcpServers.value = response.data.data.records.filter(item => item.enabled) || []
 }
 
 /**
