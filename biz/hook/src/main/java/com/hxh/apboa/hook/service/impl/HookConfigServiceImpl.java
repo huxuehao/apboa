@@ -1,6 +1,8 @@
 package com.hxh.apboa.hook.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hxh.apboa.cluster.core.MessagePublisher;
+import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.AgentHook;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 public class HookConfigServiceImpl extends ServiceImpl<HookConfigMapper, HookConfig> implements HookConfigService {
     private final JdbcTemplate jdbcTemplate;
     private final AgentHookService agentHookService;
+    private final MessagePublisher messagePublisher;
 
     @Override
     public void SyncConfigToDatabase(List<HookConfigWrapper> configWrappers) {
@@ -76,8 +79,24 @@ public class HookConfigServiceImpl extends ServiceImpl<HookConfigMapper, HookCon
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteByIds(List<Long> ids) {
+        // 删除前先获取关联的智能体ID，以便后续触发重新注册
+        List<Long> agentIds = agentHookService.getAgentIds(ids);
         removeByIds(ids);
-        return agentHookService.remove(new LambdaQueryWrapper<AgentHook>().in(AgentHook::getHookConfigId, ids));
+        boolean result = agentHookService.remove(new LambdaQueryWrapper<AgentHook>().in(AgentHook::getHookConfigId, ids));
+        publishAgentReregister(agentIds);
+        return result;
+    }
+
+    @Override
+    public boolean doUpdate(HookConfig entity) {
+        boolean result = updateById(entity);
+        publishAgentReregister(agentHookService.getAgentIds(List.of(entity.getId())));
+        return result;
+    }
+
+    private void publishAgentReregister(List<Long> agentIds) {
+        agentIds.forEach(agentId ->
+                messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(agentId)));
     }
 
     private List<AgentDefinition> getAgentDefinitions(List<Long> agentIds) {

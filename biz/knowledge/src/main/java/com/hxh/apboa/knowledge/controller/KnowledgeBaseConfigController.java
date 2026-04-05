@@ -64,7 +64,7 @@ public class KnowledgeBaseConfigController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody KnowledgeBaseConfig entity) {
-        return R.data(knowledgeBaseConfigService.updateById(entity));
+        return R.data(knowledgeBaseConfigService.doUpdate(entity));
     }
 
     /**

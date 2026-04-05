@@ -1,6 +1,7 @@
 package com.hxh.apboa.common.config.auth;
 
 import com.hxh.apboa.cluster.core.MessagePublisher;
+import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.message.SkSyncMessage;
 import com.hxh.apboa.common.util.JsonUtils;
@@ -24,8 +25,6 @@ public class SkIdSyncPublisher {
     /**
      * Redis频道名称，用于SK ID同步
      */
-    public static final String SK_SYNC_CHANNEL = "sk:sync";
-
     private final MessagePublisher messagePublisher;
 
     /**
@@ -38,7 +37,7 @@ public class SkIdSyncPublisher {
             SkSyncMessage message = SkSyncMessage.createAddMessage(SysConst.CURRENT_NODE_ID, skId);
             String jsonMessage = JsonUtils.toJsonStr(message);
             if (jsonMessage != null) {
-                messagePublisher.publish(SK_SYNC_CHANNEL, jsonMessage);
+                messagePublisher.publish(RedisChannelTopic.SK_SYNC_CHANNEL, jsonMessage);
             }
             log.debug("发布SK ID添加消息成功 - skId: {}, node: {}", skId, SysConst.CURRENT_NODE_ID);
         } catch (Exception e) {
@@ -56,7 +55,7 @@ public class SkIdSyncPublisher {
             SkSyncMessage message = SkSyncMessage.createRemoveMessage(SysConst.CURRENT_NODE_ID, skIds);
             String jsonMessage = JsonUtils.toJsonStr(message);
             if (jsonMessage != null) {
-                messagePublisher.publish(SK_SYNC_CHANNEL, jsonMessage);
+                messagePublisher.publish(RedisChannelTopic.SK_SYNC_CHANNEL, jsonMessage);
             }
             log.debug("发布SK ID移除消息成功 - skIds: {}, node: {}", skIds, SysConst.CURRENT_NODE_ID);
         } catch (Exception e) {

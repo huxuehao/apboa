@@ -175,10 +175,10 @@ defineExpose({
 <template>
   <ASpin :spinning="loading">
     <AForm ref="formRef" :model="formData" layout="vertical">
-      <AFormItem label="启用记忆">
+      <AFormItem label="启用记忆持久化">
         <ASwitch v-model:checked="formData.enableMemory" />
         <div class="text-placeholder text-xs mt-xs">
-          开启后,智能体将能够记住对话历史
+          开启后,智能体将能够记住对话历史并持久化到数据库
         </div>
       </AFormItem>
       <AFormItem label="钩子配置">

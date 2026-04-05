@@ -6,13 +6,7 @@ package com.hxh.apboa.job.consts;
  *
  * @author huxuehao
  **/
-public class JobRedisChannel {
-
-    /**
-     * 任务控制消息通道
-     * 用于广播任务的增删改启停操作
-     */
-    public static final String JOB_CLUSTER_CONTROL = "apboa:job:cluster:control";
+public class JobRedisKey {
 
     /**
      * 节点心跳通道

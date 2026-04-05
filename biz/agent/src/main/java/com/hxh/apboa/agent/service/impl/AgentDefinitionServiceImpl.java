@@ -7,10 +7,11 @@ import com.hxh.apboa.agent.mapper.AgentDefinitionMapper;
 import com.hxh.apboa.agent.mapper.IJobInfoMapper;
 import com.hxh.apboa.agent.service.AgentDefinitionService;
 import com.hxh.apboa.agent.service.AgentSubAgentService;
+import com.hxh.apboa.cluster.core.MessagePublisher;
+import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.entity.*;
 import com.hxh.apboa.common.enums.AgentType;
 import com.hxh.apboa.common.enums.ModelType;
-import com.hxh.apboa.common.event.AgentReRegisterEvent;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.common.vo.AgentDefinitionVO;
@@ -25,7 +26,6 @@ import com.hxh.apboa.tool.service.AgentToolService;
 import com.hxh.apboa.agent.service.AgentCodeExecutionService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,12 +49,12 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
     private final AgentSubAgentService subAgentService;
     private final AgentKnowledgeBaseService agentKnowledgeBaseService;
     private final ModelConfigService modelConfigService;
-    private final ApplicationEventPublisher publisher;
     private final ParamsAdapter paramsAdapter;
     private final AgentA2aService agentA2aService;
     private final AgentStudioService agentStudioService;
     private final IJobInfoMapper iJobInfoMapper;
     private final AgentCodeExecutionService agentCodeExecutionService;
+    private final MessagePublisher messagePublisher;
 
     @Override
     public AgentDefinitionVO agentDefinitionDetail(Long id) {
@@ -96,8 +96,6 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         vo.setId(agentDefinition.getId());
 
         saveSubItems(vo);
-
-        publisher.publishEvent(new AgentReRegisterEvent(vo.getId()));
         return true;
     }
 
@@ -114,13 +112,19 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
             if (!agent.isEmpty() && agent.getFirst().isEnabled()) {
                 throw new RuntimeException("请先禁用定时任务");
             }
-            publisher.publishEvent(new AgentReRegisterEvent(vo.getId()));
+            if (vo.getEnabled()) {
+                messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(vo.getId()));
+            } else {
+                AgentDefinition agentDefinition = getById(vo.getId());
+                messagePublisher.publish(RedisChannelTopic.AGENT_UNREGISTER_CHANNEL, agentDefinition.getAgentCode());
+            }
+
             return true;
         }
 
         saveSubItems(vo);
 
-        publisher.publishEvent(new AgentReRegisterEvent(vo.getId()));
+        messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(vo.getId()));
         return true;
     }
 
@@ -160,6 +164,8 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
             throw new RuntimeException("请先解绑定时任务");
         }
 
+        List<AgentDefinition> agents = listByIds(ids);
+
         removeByIds(ids);
         agentA2aService.deleteA2aConfig(ids);
         subAgentService.deleteSubAgent(ids);
@@ -170,6 +176,10 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         agentKnowledgeBaseService.deleteAgentKnowledge(ids);
         agentStudioService.deleteAgentStudio(ids);
         agentCodeExecutionService.deleteAgentCodeExecution(ids);
+
+        for (AgentDefinition agent_ : agents) {
+            messagePublisher.publish(RedisChannelTopic.AGENT_UNREGISTER_CHANNEL, agent_.getAgentCode());
+        }
 
         return Boolean.TRUE;
     }

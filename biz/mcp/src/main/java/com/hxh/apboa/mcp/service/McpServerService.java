@@ -13,4 +13,12 @@ import java.util.List;
 public interface McpServerService extends IService<McpServer> {
     List<Object> usedWithAgent(List<Long> ids);
     boolean deleteByIds(List<Long> ids);
+
+    /**
+     * 更新MCP服务器配置并触发关联智能体重新注册
+     *
+     * @param entity MCP服务器配置
+     * @return 是否成功
+     */
+    boolean doUpdate(McpServer entity);
 }

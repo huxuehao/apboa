@@ -21,4 +21,12 @@ public interface SkillPackageService extends IService<SkillPackage> {
     List<String> listCategories();
 
     boolean deleteByIds(List<Long> ids);
+
+    /**
+     * 更新技能包并触发关联智能体重新注册
+     *
+     * @param entity 技能包
+     * @return 是否成功
+     */
+    boolean doUpdate(SkillPackage entity);
 }

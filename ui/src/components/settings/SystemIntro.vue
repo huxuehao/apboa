@@ -16,7 +16,11 @@
     </p>
 
     <p class="system-intro-paragraph">
-      平台为您提供了一站式的全链路解决方案：从保障对话安全的<strong>敏感词过滤</strong>，到塑造智能体个性的<strong>提示词工坊</strong>；从灵活配置的<strong>多模型供应商接入</strong>，到拓展能力的<strong>工具与技能包集成</strong>；再到沉淀专有知识的<strong>知识库系统</strong>，以及最终直观的<strong>智能体编排与管理</strong>。Apboa 将这些核心模块无缝整合，形成清晰的工作流。
+      平台为您提供了一站式的全链路解决方案：从保障对话安全的<strong>敏感词过滤</strong>，到塑造智能体个性的<strong>提示词工坊</strong>；从灵活配置的<strong>多模型供应商接入</strong>，到拓展能力的<strong>工具与技能包集成</strong>；再到沉淀专有知识的<strong>知识库系统</strong>，以及最终直观的<strong>智能体编排与管理</strong>。Apboa 将这些核心模块无缝整合，形成清晰的<strong>架构图</strong>。
+    </p>
+
+    <p class="system-intro-paragraph">
+      不仅如此，Apboa 进一步突破了智能体的能力边界。它支持<strong>多模态交互</strong>，能够同时理解文本、图像与音频，让智能体不再是"纸上谈兵"；你可以为智能体设定<strong>定时任务</strong>，让它按计划主动执行，而非被动响应；通过<strong>API Key</strong>的方式，智能体的能力可以轻松嵌入到你现有的业务系统中；而<strong>多节点部署</strong>能力，则保证了在高并发场景下依然稳定可靠、弹性伸缩。
     </p>
 
     <p class="system-intro-paragraph">

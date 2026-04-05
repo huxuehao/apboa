@@ -64,7 +64,7 @@ public class ModelConfigController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody ModelConfig entity) {
-        return R.data(modelConfigService.updateById(entity));
+        return R.data(modelConfigService.doUpdate(entity));
     }
 
     /**
@@ -73,7 +73,7 @@ public class ModelConfigController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.data(modelConfigService.removeByIds(ids));
+        return R.data(modelConfigService.deleteByIds(ids));
     }
 
     /**

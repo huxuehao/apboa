@@ -1,9 +1,9 @@
 package com.hxh.apboa.job.core.cluster;
 
 import com.hxh.apboa.cluster.core.ChannelSubscriber;
+import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.entity.JobInfo;
 import com.hxh.apboa.common.util.JsonUtils;
-import com.hxh.apboa.job.consts.JobRedisChannel;
 import com.hxh.apboa.job.core.client.QuartzClient;
 import com.hxh.apboa.job.core.cluster.message.JobControlMessage;
 import com.hxh.apboa.job.init.JobInit;
@@ -31,14 +31,14 @@ public class JobMessageSubscriber implements ChannelSubscriber {
 
     @Override
     public Topic getTopic() {
-        return new ChannelTopic(JobRedisChannel.JOB_CLUSTER_CONTROL);
+        return new ChannelTopic(RedisChannelTopic.JOB_CLUSTER_CONTROL);
     }
 
     @Override
     public void onMessage(String channel, String message) {
         try {
             // 只处理任务控制消息
-            if (!channel.equals(JobRedisChannel.JOB_CLUSTER_CONTROL)) {
+            if (!channel.equals(RedisChannelTopic.JOB_CLUSTER_CONTROL)) {
                 return;
             }
 

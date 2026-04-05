@@ -9,6 +9,7 @@ import io.agentscope.spring.boot.agui.mvc.AguiMvcController;
 import io.agentscope.spring.boot.agui.webflux.AguiWebFluxHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,8 @@ import javax.sql.DataSource;
 @Configuration
 @ConditionalOnClass({DataSource.class, MysqlSession.class})
 public class ApboaAgentSessionConfig {
+    @Value("${agentscope.agui.server-side-memory:true}")
+    private boolean serverSideMemory;
 
     private static final String DATABASE_NAME = "apboa";
 
@@ -58,10 +61,14 @@ public class ApboaAgentSessionConfig {
             return null;
         }
 
+        if (session != null) {
+            registry.setSessionManager(sessionManager);
+        }
+
         return AguiMvcController.builder()
                 .agentRegistry(registry)
                 .sessionManager(sessionManager)
-                .serverSideMemory(false)
+                .serverSideMemory(serverSideMemory)
                 .session(session)
                 .jdbcTemplate(jdbcTemplate)
                 .sseTimeout(600000L)
@@ -85,10 +92,14 @@ public class ApboaAgentSessionConfig {
             return null;
         }
 
+        if (session != null) {
+            registry.setSessionManager(sessionManager);
+        }
+
         return AguiWebFluxHandler.builder()
                 .agentRegistry(registry)
                 .sessionManager(sessionManager)
-                .serverSideMemory(false)
+                .serverSideMemory(serverSideMemory)
                 .session(session)
                 .jdbcTemplate(jdbcTemplate)
                 .build();
