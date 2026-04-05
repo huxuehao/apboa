@@ -525,7 +525,7 @@ onMounted(() => {
 
 <template>
   <div class="agent-architecture-diagram">
-    <Spin :spinning="loading" tip="正在加载架构数据...">
+    <Spin :spinning="loading" tip="正在加载架构数据..." style="background-color: transparent">
       <div class="diagram-container">
         <VueFlow
           :nodes="nodes"

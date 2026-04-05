@@ -17,10 +17,7 @@ import AgentCard from '@/components/agent/AgentCard.vue'
 import CreateCard from '@/components/agent/CreateCard.vue'
 import AgentForm from '@/components/agent/AgentForm.vue'
 import AgentA2aForm from '@/components/agent/AgentA2aForm.vue'
-import AgentArchitectureDiagram from '@/components/agent/architecture/AgentArchitectureDiagram.vue'
-import AgentJobForm from '@/components/agent/AgentJobForm.vue'
-import * as jobApi from '@/api/job'
-import type { JobInfo } from '@/types'
+import AgentConfigPanel from '@/components/agent/config/AgentConfigPanel.vue'
 import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
 
 const store = useAgentStore()
@@ -34,16 +31,12 @@ const loadMoreObserver = ref<IntersectionObserver>()
 const a2aFormVisible = ref<boolean>(false)
 /** A2A 类型（新建时传入） */
 const currentA2aType = ref<'WELLKNOWN' | 'NACOS' | undefined>(undefined)
-/** 架构图弹窗可见性 */
-const architectureVisible = ref<boolean>(false)
-/** 当前查看架构图的智能体ID */
-const currentArchitectureId = ref<string>('')
-/** 定时任务表单弹窗可见性 */
-const jobFormVisible = ref<boolean>(false)
-/** 当前编辑定时任务的智能体ID */
-const currentJobAgentId = ref<string>('')
-/** 当前智能体的定时任务信息 */
-const currentJobInfo = ref<JobInfo | null>(null)
+/** 配置面板可见性 */
+const configPanelVisible = ref<boolean>(false)
+/** 当前配置面板的智能体ID */
+const configPanelAgentId = ref<string>('')
+/** 当前配置面板的智能体数据 */
+const configPanelAgentData = ref<AgentDefinitionVO | undefined>(undefined)
 
 /**
  * 智能体类型选项
@@ -196,26 +189,6 @@ async function handleView(id: string) {
 }
 
 /**
- * 处理编辑 — 根据类型打开对应表单
- *
- * @param id 智能体 ID
- */
-async function handleEdit(id: string) {
-  const response = await agentApi.detail(id)
-  const data = response.data.data
-
-  if (data.agentType === 'A2A') {
-    currentData.value = data
-    currentA2aType.value = undefined
-    a2aFormVisible.value = true
-    return
-  }
-
-  currentData.value = data
-  formVisible.value = true
-}
-
-/**
  * 处理删除
  */
 async function handleDelete(id: string) {
@@ -282,46 +255,23 @@ function handleGoVisit(id: string) {
 }
 
 /**
- * 智能体对话历史（新开页）
- */
-function handleAccessLog(id: string) {
-  const hash = `#/chat/history/${encodeURIComponent(id)}`
-  const url = `${window.location.origin}${window.location.pathname}${hash}`
-  window.open(url, '_blank')
-}
-
-/**
- * 处理查看架构图
+ * 打开配置面板
  *
  * @param id 智能体 ID
  */
-function handleArchitecture(id: string) {
-  currentArchitectureId.value = id
-  architectureVisible.value = true
+async function handleConfigPanel(id: string) {
+  const response = await agentApi.detail(id)
+  configPanelAgentData.value = response.data.data
+  configPanelAgentId.value = id
+  configPanelVisible.value = true
 }
 
 /**
- * 处理定时任务配置
- *
- * @param id 智能体 ID
+ * 处理配置面板操作成功
  */
-async function handleTiming(id: string) {
-  currentJobAgentId.value = id
-  try {
-    const response = await jobApi.getByBizId(id)
-    currentJobInfo.value = response.data.data || null
-  } catch {
-    currentJobInfo.value = null
-  }
-  jobFormVisible.value = true
-}
-
-/**
- * 处理定时任务配置成功
- */
-function handleJobFormSuccess() {
-  jobFormVisible.value = false
+function handleConfigPanelSuccess() {
   store.resetAndFetch()
+  store.fetchTags()
 }
 
 /**
@@ -444,13 +394,10 @@ onUnmounted(() => {
           :key="item.id"
           :data="item"
           @view="handleView"
-          @edit="handleEdit"
+          @config-panel="handleConfigPanel"
           @enable="handleEnable"
           @delete="handleDelete"
           @go-visit="handleGoVisit"
-          @access-log="handleAccessLog"
-          @architecture="handleArchitecture"
-          @timing="handleTiming"
         />
       </div>
 
@@ -484,26 +431,13 @@ onUnmounted(() => {
       @success="handleFormSuccess"
     />
 
-    <!-- 架构图弹窗 -->
-    <AModal
-      v-model:open="architectureVisible"
-      title="智能体架构图"
-      :footer="null"
-      wrap-class-name="full-modal"
-      destroyOnClose
-    >
-      <AgentArchitectureDiagram
-        v-if="currentArchitectureId"
-        :agent-id="currentArchitectureId"
-      />
-    </AModal>
-
-    <!-- 定时任务表单 -->
-    <AgentJobForm
-      v-model:visible="jobFormVisible"
-      :agent-id="currentJobAgentId"
-      :job-info="currentJobInfo"
-      @success="handleJobFormSuccess"
+    <!-- 配置面板 -->
+    <AgentConfigPanel
+      v-model:visible="configPanelVisible"
+      :agent-id="configPanelAgentId"
+      :agent-data="configPanelAgentData"
+      :tags="tags"
+      @success="handleConfigPanelSuccess"
     />
   </div>
 </template>

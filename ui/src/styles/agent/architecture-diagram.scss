@@ -6,14 +6,15 @@
 
 .agent-architecture-diagram {
   width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+  height: calc(100vh - 90px);
+  //background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+  background-color: #ECEFF2;
   border-radius: 8px;
   position: relative;
 
   .diagram-container {
     width: 100%;
-    height: calc(100vh - 72px);
+    height: calc(100vh - 90px);
     min-height: 600px;
   }
 

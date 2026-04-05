@@ -10,13 +10,11 @@ import type { AgentDefinitionVO } from '@/types'
 import { useAccountStore } from '@/stores'
 import {
   createViewItem,
-  createEditItem,
+  createConfigPanelItem,
   createEnableItem,
   createDeleteItem,
   createGoVisitItem,
-  createAccessLogItem,
-  createArchitectureItem,
-  createDivider, createTimingItem,
+  createDivider,
 } from '@/composables/useCardMenuItems'
 
 const accountStore = useAccountStore()
@@ -33,13 +31,10 @@ const props = defineProps<{
  */
 const emit = defineEmits<{
   view: [id: string]
-  edit: [id: string]
+  configPanel: [id: string]
   delete: [id: string]
   enable: [id: string]
   goVisit: [id: string]
-  accessLog: [id: string]
-  architecture: [id: string]
-  timing: [id: string]
 }>()
 
 /**
@@ -62,29 +57,19 @@ const formattedTime = computed(() => {
  */
 const hasReadOnly = accountStore.roles.some(role => ['READ_ONLY'].includes(role))
 const menuItems = computed(() => {
-  // 架构图菜单项（仅自定义类型显示）
-  const architectureItem = props.data.agentType === 'CUSTOM'
-    ? [createArchitectureItem(), createDivider()]
-    : []
-
   if (hasReadOnly) {
     return [
       createViewItem(),
       createDivider(),
-      ...architectureItem,
       createGoVisitItem(),
-      createAccessLogItem(),
     ]
   }
   return [
     createViewItem(),
-    createEditItem(),
-    createTimingItem(),
+    createConfigPanelItem(),
     createEnableItem(props.data.enabled),
     createDivider(),
-    ...architectureItem,
     createGoVisitItem(),
-    createAccessLogItem(),
     createDivider(),
     createDeleteItem(),
   ]
@@ -99,37 +84,29 @@ function handleTitleClick() {
   // } else {
   //   emit('view', props.data.id)
   // }
-  emit('view', props.data.id)
+  emit('view', String(props.data.id))
 }
 
 /**
  * 处理菜单点击
  */
 function handleMenuClick({ key }: { key: string }) {
+  const id = String(props.data.id)
   switch (key) {
     case 'view':
-      emit('view', props.data.id)
+      emit('view', id)
       break
-    case 'edit':
-      emit('edit', props.data.id)
+    case 'configPanel':
+      emit('configPanel', id)
       break
     case 'enable':
-      emit('enable', props.data.id)
+      emit('enable', id)
       break
     case 'delete':
-      emit('delete', props.data.id)
+      emit('delete', id)
       break
     case 'goVisit':
-      emit('goVisit', props.data.id)
-      break
-    case 'accessLog':
-      emit('accessLog', props.data.id)
-      break
-    case 'architecture':
-      emit('architecture', props.data.id)
-      break
-    case 'timing':
-      emit('timing', props.data.id)
+      emit('goVisit', id)
       break
   }
 }
