@@ -12,7 +12,7 @@ import { message } from 'ant-design-vue'
 import {providerUpdate} from "@/api/model";
 
 export const useModelStore = defineStore('model', () => {
-  const providerList = ref<ModelProviderVO[]>([])
+  const list = ref<ModelProviderVO[]>([])
   const selectedProviderType = ref<string | null>(null)
   const keyword = ref<string>('')
   const loading = ref<boolean>(false)
@@ -41,12 +41,12 @@ export const useModelStore = defineStore('model', () => {
       const result = response.data.data
 
       if (page === 1) {
-        providerList.value = result.records || []
+        list.value = result.records || []
       } else {
-        providerList.value.push(...(result.records || []))
+        list.value.push(...(result.records || []))
       }
 
-      hasMore.value = providerList.value.length < result.total
+      hasMore.value = list.value.length < result.total
       currentPage.value = page
     } catch (error) {
       console.error('加载数据失败:', error)
@@ -87,7 +87,7 @@ export const useModelStore = defineStore('model', () => {
    * 重置并重新加载
    */
   function resetAndFetch() {
-    providerList.value = []
+    list.value = []
     currentPage.value = 1
     hasMore.value = true
     fetchProviderPage(1)
@@ -127,7 +127,7 @@ export const useModelStore = defineStore('model', () => {
    * @param enabled 启用状态
    */
   async function toggleEnabled(id: string, enabled: boolean) {
-    const item = providerList.value.find((x) => x.id === id)
+    const item = list.value.find((x) => x.id === id)
     if (!item) return
 
     const entity: ModelProvider = {
@@ -141,7 +141,7 @@ export const useModelStore = defineStore('model', () => {
   }
 
   return {
-    providerList,
+    list,
     selectedProviderType,
     keyword,
     loading,

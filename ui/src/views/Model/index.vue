@@ -7,7 +7,7 @@
 /* eslint-disable vue/multi-word-component-names */
 import { onMounted, ref, onUnmounted, computed, h } from 'vue'
 import { Modal, message } from 'ant-design-vue'
-import { SearchOutlined, ApiOutlined } from '@ant-design/icons-vue'
+import {SearchOutlined, ApiOutlined, LoadingOutlined} from '@ant-design/icons-vue'
 import { useModelStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as modelApi from '@/api/model'
@@ -19,7 +19,7 @@ import ModelConfigModal from '@/components/model/ModelConfigModal.vue'
 import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
 
 const store = useModelStore()
-const { providerList, selectedProviderType, keyword, loading, hasMore } = storeToRefs(store)
+const { list, selectedProviderType, keyword, loading, hasMore } = storeToRefs(store)
 
 const formVisible = ref<boolean>(false)
 const currentData = ref<ModelProviderVO | undefined>(undefined)
@@ -257,7 +257,7 @@ onUnmounted(() => {
         <CreateProviderCard @click="handleCreate" v-permission="['EDIT','ADMIN']" />
 
         <ModelProviderCard
-          v-for="item in providerList"
+          v-for="item in list"
           :key="item.id"
           :data="item"
           @view="handleView"
@@ -269,14 +269,14 @@ onUnmounted(() => {
       </div>
 
       <div v-if="loading" class="load-indicator mt-md">
-        <span class="ml-sm text-secondary">加载中...</span>
+        <span class="ml-sm text-secondary"><LoadingOutlined style="margin-right: 6px" />加载中</span>
       </div>
 
-      <div v-if="!hasMore && providerList.length > 0" class="no-more-indicator text-secondary mt-md">
+      <div v-if="!loading && !hasMore && list.length > 0" class="no-more-indicator text-secondary mt-md">
         没有更多数据了
       </div>
 
-      <div v-if="!loading && providerList.length === 0" class="empty-indicator mt-lg">
+      <div v-if="!loading && list.length === 0" class="empty-indicator mt-lg">
         <AEmpty description="暂无数据" />
       </div>
     </section>
