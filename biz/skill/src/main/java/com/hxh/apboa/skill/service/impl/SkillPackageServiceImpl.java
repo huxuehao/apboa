@@ -1,6 +1,8 @@
 package com.hxh.apboa.skill.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hxh.apboa.cluster.core.MessagePublisher;
+import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.AgentSkillPackage;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 public class SkillPackageServiceImpl extends ServiceImpl<SkillPackageMapper, SkillPackage> implements SkillPackageService {
     private final JdbcTemplate jdbcTemplate;
     private final AgentSkillPackageService agentSkillPackageService;
+    private final MessagePublisher messagePublisher;
 
     @Override
     public List<Object> usedWithAgent(List<Long> ids) {
@@ -55,8 +58,24 @@ public class SkillPackageServiceImpl extends ServiceImpl<SkillPackageMapper, Ski
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteByIds(List<Long> ids) {
+        // 删除前先获取关联的智能体ID，以便后续触发重新注册
+        List<Long> agentIds = agentSkillPackageService.getAgentIds(ids);
         removeByIds(ids);
-        return agentSkillPackageService.remove(new LambdaQueryWrapper<AgentSkillPackage>().in(AgentSkillPackage::getSkillPackageId, ids));
+        boolean result = agentSkillPackageService.remove(new LambdaQueryWrapper<AgentSkillPackage>().in(AgentSkillPackage::getSkillPackageId, ids));
+        publishAgentReregister(agentIds);
+        return result;
+    }
+
+    @Override
+    public boolean doUpdate(SkillPackage entity) {
+        boolean result = updateById(entity);
+        publishAgentReregister(agentSkillPackageService.getAgentIds(List.of(entity.getId())));
+        return result;
+    }
+
+    private void publishAgentReregister(List<Long> agentIds) {
+        agentIds.forEach(agentId ->
+                messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(agentId)));
     }
 
     private List<AgentDefinition> getAgentDefinitions(List<Long> agentIds) {

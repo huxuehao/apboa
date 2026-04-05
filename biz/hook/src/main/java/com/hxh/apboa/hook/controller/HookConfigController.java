@@ -64,7 +64,7 @@ public class HookConfigController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody HookConfig entity) {
-        return R.data(hookConfigService.updateById(entity));
+        return R.data(hookConfigService.doUpdate(entity));
     }
 
     /**

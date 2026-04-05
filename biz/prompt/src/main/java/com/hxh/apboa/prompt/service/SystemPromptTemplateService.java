@@ -19,4 +19,20 @@ public interface SystemPromptTemplateService extends IService<SystemPromptTempla
      * @return 分类列表
      */
     List<String> listCategories();
+
+    /**
+     * 删除提示词模板并触发关联智能体重新注册
+     *
+     * @param ids 模板ID列表
+     * @return 是否成功
+     */
+    boolean deleteByIds(List<Long> ids);
+
+    /**
+     * 更新提示词模板并触发关联智能体重新注册
+     *
+     * @param entity 提示词模板
+     * @return 是否成功
+     */
+    boolean doUpdate(SystemPromptTemplate entity);
 }

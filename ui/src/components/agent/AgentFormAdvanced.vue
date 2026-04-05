@@ -159,7 +159,7 @@ defineExpose({
       </div>
     </AFormItem>
 
-    <AFormItem label="启用计划">
+    <AFormItem label="启用计划能力">
       <ASwitch
         v-model:checked="formData.enablePlanning"
         @change="handleEnablePlanningToggle"
@@ -203,10 +203,10 @@ defineExpose({
       </AFormItem>
     </div>
 
-    <AFormItem label="启用记忆">
+    <AFormItem label="启用记忆持久化">
       <ASwitch v-model:checked="formData.enableMemory" />
       <div class="text-placeholder text-xs mt-xs">
-        开启后,智能体将能够记住对话历史
+        开启后,智能体将能够记住对话历史并持久化到数据库
       </div>
     </AFormItem>
 

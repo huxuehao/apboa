@@ -1,6 +1,8 @@
 package com.hxh.apboa.mcp.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hxh.apboa.cluster.core.MessagePublisher;
+import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.AgentMcpServer;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer> implements McpServerService {
     private final JdbcTemplate jdbcTemplate;
     private final AgentMcpServerService agentMcpServerService;
+    private final MessagePublisher messagePublisher;
 
     @Override
     public List<Object> usedWithAgent(List<Long> ids) {
@@ -42,8 +45,24 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteByIds(List<Long> ids) {
+        // 删除前先获取关联的智能体ID，以便后续触发重新注册
+        List<Long> agentIds = agentMcpServerService.getAgentIds(ids);
         removeByIds(ids);
-        return agentMcpServerService.remove(new LambdaQueryWrapper<AgentMcpServer>().in(AgentMcpServer::getMcpServerId, ids));
+        boolean result = agentMcpServerService.remove(new LambdaQueryWrapper<AgentMcpServer>().in(AgentMcpServer::getMcpServerId, ids));
+        publishAgentReregister(agentIds);
+        return result;
+    }
+
+    @Override
+    public boolean doUpdate(McpServer entity) {
+        boolean result = updateById(entity);
+        publishAgentReregister(agentMcpServerService.getAgentIds(List.of(entity.getId())));
+        return result;
+    }
+
+    private void publishAgentReregister(List<Long> agentIds) {
+        agentIds.forEach(agentId ->
+                messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(agentId)));
     }
 
     private List<AgentDefinition> getAgentDefinitions(List<Long> agentIds) {

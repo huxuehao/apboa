@@ -60,7 +60,7 @@ public class ModelProviderController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody ModelProvider entity) {
-        return R.data(modelProviderService.updateById(entity));
+        return R.data(modelProviderService.doUpdate(entity));
     }
 
     /**
@@ -69,7 +69,7 @@ public class ModelProviderController {
     @DeleteMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> delete(@RequestBody List<Long> ids) {
-        return R.data(modelProviderService.removeByIds(ids));
+        return R.data(modelProviderService.deleteByIds(ids));
     }
 
     /**

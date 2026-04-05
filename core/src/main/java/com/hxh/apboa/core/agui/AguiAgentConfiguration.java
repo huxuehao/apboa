@@ -47,13 +47,9 @@ public class AguiAgentConfiguration implements ApplicationRunner {
      */
     public void reRegisterAgent(AgentDefinition agentDefinition) {
         if (registry == null) return;
-        if (agentDefinition.getEnabled() == false) {
-            unregisterAgent(agentDefinition);
-            return;
-        }
 
         try {
-            unregisterAgent(agentDefinition);
+            unregisterAgent(agentDefinition.getAgentCode());
             registry.registerFactory(
                     agentDefinition.getAgentCode(),
                     () -> iAgentFactory.getAgent(agentDefinition));
@@ -66,11 +62,11 @@ public class AguiAgentConfiguration implements ApplicationRunner {
     /**
      * 注销单个智能体注册
      *
-     * @param agentDefinition 智能体
+     * @param agentCode 智能体Code
      */
-    private void unregisterAgent(AgentDefinition agentDefinition) {
+    public void unregisterAgent(String agentCode) {
         try {
-            registry.unregister(agentDefinition.getAgentCode());
+            registry.unregister(agentCode);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

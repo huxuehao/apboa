@@ -1,6 +1,8 @@
 package com.hxh.apboa.tool.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hxh.apboa.cluster.core.MessagePublisher;
+import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.AgentTool;
@@ -31,10 +33,13 @@ import java.util.stream.Collectors;
 public class ToolServiceImpl extends ServiceImpl<ToolMapper, ToolConfig> implements ToolService {
     private final JdbcTemplate jdbcTemplate;
     private final AgentToolService agentToolService;
+    private final MessagePublisher messagePublisher;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteTools(List<Long> ids) {
+        // 删除前先获取关联的智能体ID，以便后续触发重新注册
+        List<Long> agentIds = agentToolService.getAgentIds(ids);
         listByIds(ids).forEach(toolConfig -> {
             if (toolConfig.getToolType() != ToolType.BUILTIN) {
                 removeById(toolConfig.getId());
@@ -42,6 +47,7 @@ public class ToolServiceImpl extends ServiceImpl<ToolMapper, ToolConfig> impleme
         });
 
         agentToolService.remove(new LambdaQueryWrapper<AgentTool>().in(AgentTool::getToolId, ids));
+        publishAgentReregister(agentIds);
 
         return true;
     }
@@ -109,18 +115,26 @@ public class ToolServiceImpl extends ServiceImpl<ToolMapper, ToolConfig> impleme
 
     @Override
     public Boolean doUpdate(ToolConfig toolConfig) {
+        boolean result;
         if (toolConfig.getToolType() != ToolType.BUILTIN) {
-            return updateById(toolConfig);
+            result = updateById(toolConfig);
+        } else {
+            result = lambdaUpdate()
+                    .eq(ToolConfig::getId, toolConfig.getId())
+                    .set(ToolConfig::getName, toolConfig.getName())
+                    .set(ToolConfig::getCategory, toolConfig.getCategory())
+                    .set(ToolConfig::getDescription, toolConfig.getDescription())
+                    .set(ToolConfig::getNeedConfirm, toolConfig.getNeedConfirm())
+                    .set(ToolConfig::getVersion, toolConfig.getVersion())
+                    .update();
         }
+        publishAgentReregister(agentToolService.getAgentIds(List.of(toolConfig.getId())));
+        return result;
+    }
 
-        return lambdaUpdate()
-                .eq(ToolConfig::getId, toolConfig.getId())
-                .set(ToolConfig::getName, toolConfig.getName())
-                .set(ToolConfig::getCategory, toolConfig.getCategory())
-                .set(ToolConfig::getDescription, toolConfig.getDescription())
-                .set(ToolConfig::getNeedConfirm, toolConfig.getNeedConfirm())
-                .set(ToolConfig::getVersion, toolConfig.getVersion())
-                .update();
+    private void publishAgentReregister(List<Long> agentIds) {
+        agentIds.forEach(agentId ->
+                messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(agentId)));
     }
 
     private List<AgentDefinition> getAgentDefinitions(List<Long> agentIds) {

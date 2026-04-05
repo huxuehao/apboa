@@ -83,7 +83,7 @@ public class SkillPackageController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody SkillPackage entity) {
-        boolean b = skillPackageService.updateById(entity);
+        boolean b = skillPackageService.doUpdate(entity);
         // 尝试装载脚本到本地
         if (entity.getScripts() == null || entity.getScripts().isNull() || entity.getScripts().isEmpty()) {
             SkillScriptLoadHelper.removeScripts(entity);
@@ -104,9 +104,8 @@ public class SkillPackageController {
         for (SkillPackage skillPackage : skillPackages) {
             // 尝试删除本地装载的脚本
             SkillScriptLoadHelper.removeScripts(skillPackage);
-            skillPackageService.removeById(skillPackage.getId());
         }
-        return R.data(true);
+        return R.data(skillPackageService.deleteByIds(ids));
     }
 
     /**

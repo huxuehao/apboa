@@ -64,7 +64,7 @@ public class McpServerController {
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> update(@RequestBody McpServer entity) {
-        return R.data(mcpServerService.updateById(entity));
+        return R.data(mcpServerService.doUpdate(entity));
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.hxh.apboa.model.service.impl;
 
+import com.hxh.apboa.cluster.core.MessagePublisher;
+import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.ModelConfig;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 public class ModelConfigServiceImpl extends ServiceImpl<ModelConfigMapper, ModelConfig> implements ModelConfigService {
     private final JdbcTemplate jdbcTemplate;
     private final ModelProviderService modelProviderService;
+    private final MessagePublisher messagePublisher;
 
     @Override
     public ModelWrapper getModelWrapperById(Long id) {
@@ -62,6 +65,28 @@ public class ModelConfigServiceImpl extends ServiceImpl<ModelConfigMapper, Model
         });
 
         return names;
+    }
+
+    @Override
+    public boolean deleteByIds(List<Long> ids) {
+        // 删除前先获取关联的智能体ID，以便后续触发重新注册
+        List<Long> agentIds = getAgentDefinitions(ids).stream().map(AgentDefinition::getId).toList();
+        boolean result = removeByIds(ids);
+        publishAgentReregister(agentIds);
+        return result;
+    }
+
+    @Override
+    public boolean doUpdate(ModelConfig entity) {
+        boolean result = updateById(entity);
+        List<Long> agentIds = getAgentDefinitions(List.of(entity.getId())).stream().map(AgentDefinition::getId).toList();
+        publishAgentReregister(agentIds);
+        return result;
+    }
+
+    private void publishAgentReregister(List<Long> agentIds) {
+        agentIds.forEach(agentId ->
+                messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(agentId)));
     }
 
     private List<AgentDefinition> getAgentDefinitions(List<Long> systemPromptId) {

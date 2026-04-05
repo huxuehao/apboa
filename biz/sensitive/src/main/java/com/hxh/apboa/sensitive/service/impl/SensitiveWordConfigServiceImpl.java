@@ -1,5 +1,7 @@
 package com.hxh.apboa.sensitive.service.impl;
 
+import com.hxh.apboa.cluster.core.MessagePublisher;
+import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.SensitiveWordConfig;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SensitiveWordConfigServiceImpl extends ServiceImpl<SensitiveWordConfigMapper, SensitiveWordConfig> implements SensitiveWordConfigService {
     private final JdbcTemplate jdbcTemplate;
+    private final MessagePublisher messagePublisher;
 
     @Override
     public List<Object> usedWithAgent(List<Long> ids) {
@@ -45,6 +48,28 @@ public class SensitiveWordConfigServiceImpl extends ServiceImpl<SensitiveWordCon
                 .map(SensitiveWordConfig::getCategory)
                 .filter(category -> category != null && !category.isEmpty())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean deleteByIds(List<Long> ids) {
+        // 删除前先获取关联的智能体ID，以便后续触发重新注册
+        List<Long> agentIds = getAgentDefinitions(ids).stream().map(AgentDefinition::getId).toList();
+        boolean result = removeByIds(ids);
+        publishAgentReregister(agentIds);
+        return result;
+    }
+
+    @Override
+    public boolean doUpdate(SensitiveWordConfig entity) {
+        boolean result = updateById(entity);
+        List<Long> agentIds = getAgentDefinitions(List.of(entity.getId())).stream().map(AgentDefinition::getId).toList();
+        publishAgentReregister(agentIds);
+        return result;
+    }
+
+    private void publishAgentReregister(List<Long> agentIds) {
+        agentIds.forEach(agentId ->
+                messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(agentId)));
     }
 
     private List<AgentDefinition> getAgentDefinitions(List<Long> systemPromptId) {

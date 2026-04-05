@@ -285,7 +285,7 @@ watch(() => props.modelValue, () => {
           :disabled="!enableMemory"
           type="button"
           class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"
-          title="记忆"
+          :title="(memoryActive && enableMemory)?'点击关闭记忆持久化':'点击开启记忆持久化'"
           :class="{ 'is-active': memoryActive && enableMemory }"
           @click="toggleMemory"
         >
@@ -295,7 +295,7 @@ watch(() => props.modelValue, () => {
           :disabled="!enablePlanning"
           type="button"
           class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"
-          title="规划"
+          :title="(planActive && enablePlanning)?'点击关闭智能体计划能力':'点击开启智能体计划能力'"
           :class="{ 'is-active': planActive && enablePlanning }"
           @click="togglePlan"
         >
@@ -305,7 +305,7 @@ watch(() => props.modelValue, () => {
           :disabled="!showToolProcess"
           type="button"
           class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"
-          title="工具调用记录"
+          :title="(toolProcessActive && showToolProcess)?'点击关闭工具调用历史':'点击开启工具调用历史'"
           :class="{ 'is-active': toolProcessActive && showToolProcess }"
           @click="toggleToolProcess"
         >
@@ -317,7 +317,7 @@ watch(() => props.modelValue, () => {
           :disabled="!allowUploadFileType?.length"
           type="button"
           class="chat-toolbar-btn chat-toolbar-btn-icon chat-toolbar-btn-circle"
-          title="文件"
+          title="点击上传文件"
           style="margin-right: 15px"
           @click="handleFileClick"
         >

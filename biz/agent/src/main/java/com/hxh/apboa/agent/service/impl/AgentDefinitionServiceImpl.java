@@ -112,7 +112,13 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
             if (!agent.isEmpty() && agent.getFirst().isEnabled()) {
                 throw new RuntimeException("请先禁用定时任务");
             }
-            messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(vo.getId()));
+            if (vo.getEnabled()) {
+                messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(vo.getId()));
+            } else {
+                AgentDefinition agentDefinition = getById(vo.getId());
+                messagePublisher.publish(RedisChannelTopic.AGENT_UNREGISTER_CHANNEL, agentDefinition.getAgentCode());
+            }
+
             return true;
         }
 
@@ -158,6 +164,8 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
             throw new RuntimeException("请先解绑定时任务");
         }
 
+        List<AgentDefinition> agents = listByIds(ids);
+
         removeByIds(ids);
         agentA2aService.deleteA2aConfig(ids);
         subAgentService.deleteSubAgent(ids);
@@ -169,8 +177,8 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         agentStudioService.deleteAgentStudio(ids);
         agentCodeExecutionService.deleteAgentCodeExecution(ids);
 
-        for (Long id : ids) {
-            messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(id));
+        for (AgentDefinition agent_ : agents) {
+            messagePublisher.publish(RedisChannelTopic.AGENT_UNREGISTER_CHANNEL, agent_.getAgentCode());
         }
 
         return Boolean.TRUE;
