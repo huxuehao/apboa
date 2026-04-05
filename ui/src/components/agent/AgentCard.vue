@@ -79,8 +79,8 @@ const menuItems = computed(() => {
   return [
     createViewItem(),
     createEditItem(),
-    createEnableItem(props.data.enabled),
     createTimingItem(),
+    createEnableItem(props.data.enabled),
     createDivider(),
     ...architectureItem,
     createGoVisitItem(),
