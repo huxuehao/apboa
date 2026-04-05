@@ -1,6 +1,7 @@
 package com.hxh.apboa.common.config.auth;
 
 import com.hxh.apboa.cluster.core.ChannelSubscriber;
+import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.message.SkSyncMessage;
 import com.hxh.apboa.common.util.JsonUtils;
@@ -23,11 +24,15 @@ public class SkIdSyncSubscriber implements ChannelSubscriber {
 
     @Override
     public Topic getTopic() {
-        return new ChannelTopic(SkIdSyncPublisher.SK_SYNC_CHANNEL);
+        return new ChannelTopic(RedisChannelTopic.SK_SYNC_CHANNEL);
     }
 
     @Override
     public void onMessage(String channel, String message) {
+        if (!channel.equals(RedisChannelTopic.SK_SYNC_CHANNEL)) {
+            return;
+        }
+
         try {
             SkSyncMessage syncMessage = JsonUtils.parse(message, SkSyncMessage.class);
 

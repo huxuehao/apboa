@@ -1,6 +1,6 @@
 package com.hxh.apboa.job.core.cluster;
 
-import com.hxh.apboa.job.consts.JobRedisChannel;
+import com.hxh.apboa.job.consts.JobRedisKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -71,7 +71,7 @@ public class JobDistributedLock {
      */
     public boolean tryLock(String jobId, long expireTime, TimeUnit timeUnit) {
         try {
-            String lockKey = JobRedisChannel.getJobLockKey(jobId);
+            String lockKey = JobRedisKey.getJobLockKey(jobId);
             String lockValue = getLockValue();
 
             Boolean success = stringRedisTemplate.opsForValue()
@@ -120,7 +120,7 @@ public class JobDistributedLock {
      */
     public boolean unlock(String jobId) {
         try {
-            String lockKey = JobRedisChannel.getJobLockKey(jobId);
+            String lockKey = JobRedisKey.getJobLockKey(jobId);
             String lockValue = lockValueHolder.get();
 
             if (lockValue == null) {
@@ -160,7 +160,7 @@ public class JobDistributedLock {
      */
     public boolean isLockedByCurrentNode(String jobId) {
         try {
-            String lockKey = JobRedisChannel.getJobLockKey(jobId);
+            String lockKey = JobRedisKey.getJobLockKey(jobId);
             String lockValue = stringRedisTemplate.opsForValue().get(lockKey);
             return getLockValue().equals(lockValue);
         } catch (Exception e) {
@@ -176,7 +176,7 @@ public class JobDistributedLock {
      */
     public void recordExecHistory(String jobId) {
         try {
-            String key = JobRedisChannel.getJobExecHistoryKey(jobId);
+            String key = JobRedisKey.getJobExecHistoryKey(jobId);
             String nodeId = nodeConfig.getNodeId();
 
             // 追加到List尾部
@@ -202,7 +202,7 @@ public class JobDistributedLock {
      */
     public List<String> getExecHistory(String jobId) {
         try {
-            String key = JobRedisChannel.getJobExecHistoryKey(jobId);
+            String key = JobRedisKey.getJobExecHistoryKey(jobId);
             return stringRedisTemplate.opsForList().range(key, 0, -1);
         } catch (Exception e) {
             log.error("获取执行历史异常 - jobId: {}", jobId, e);
