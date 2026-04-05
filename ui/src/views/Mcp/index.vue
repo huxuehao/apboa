@@ -7,7 +7,7 @@
 /* eslint-disable vue/multi-word-component-names */
 import { onMounted, ref, onUnmounted, h, computed } from 'vue'
 import { Modal } from 'ant-design-vue'
-import { CloudServerOutlined, SearchOutlined } from '@ant-design/icons-vue'
+import {CloudServerOutlined, LoadingOutlined, SearchOutlined} from '@ant-design/icons-vue'
 import { useMcpStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as mcpApi from '@/api/mcp'
@@ -247,10 +247,10 @@ onUnmounted(() => {
       </div>
 
       <div v-if="loading" class="load-indicator mt-md">
-        <span class="ml-sm text-secondary">加载中...</span>
+        <span class="ml-sm text-secondary"><LoadingOutlined style="margin-right: 6px" />加载中</span>
       </div>
 
-      <div v-if="!hasMore && list.length > 0" class="no-more-indicator text-secondary mt-md">
+      <div v-if="!loading && !hasMore && list.length > 0" class="no-more-indicator text-secondary mt-md">
         没有更多数据了
       </div>
 

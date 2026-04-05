@@ -100,6 +100,13 @@ export function createTimingItem(): CardMenuItem {
 }
 
 /**
+ * 创建「配置」菜单项（聚合编辑/定时/架构图/历史等）
+ */
+export function createConfigPanelItem(): CardMenuItem {
+  return { key: 'configPanel', label: '设计', icon: () => h(SettingOutlined) }
+}
+
+/**
  * 创建分隔线
  */
 export function createDivider(): CardMenuItem {

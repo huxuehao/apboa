@@ -5,11 +5,14 @@ defineProps<{
   agentName?: string
   sessions: any[]
   currentSessionId: string | null
+  loading: boolean
+  hasMore: boolean
 }>()
 
 defineEmits<{
   (e: 'selectSession', session: any): void
   (e: 'deleteSession', session: any): void
+  (e: 'loadMore'): void
 }>()
 </script>
 
@@ -26,8 +29,11 @@ defineEmits<{
         <SessionList
           :sessions="sessions"
           :current-session-id="currentSessionId"
+          :loading="loading"
+          :has-more="hasMore"
           @select="(session) => $emit('selectSession', session)"
           @delete="(session) => $emit('deleteSession',session)"
+          @load-more="$emit('loadMore')"
         />
       </div>
     </div>

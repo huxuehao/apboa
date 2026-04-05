@@ -7,7 +7,7 @@
 /* eslint-disable vue/multi-word-component-names */
 import { onMounted, ref, onUnmounted, computed, h } from 'vue'
 import { Modal } from 'ant-design-vue'
-import { SearchOutlined, ToolOutlined } from '@ant-design/icons-vue'
+import {LoadingOutlined, SearchOutlined, ToolOutlined} from '@ant-design/icons-vue'
 import { useToolStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as toolApi from '@/api/tool'
@@ -291,10 +291,10 @@ onUnmounted(() => {
       </div>
 
       <div v-if="loading" class="load-indicator mt-md">
-        <span class="ml-sm text-secondary">加载中...</span>
+        <span class="ml-sm text-secondary"><LoadingOutlined style="margin-right: 6px" />加载中</span>
       </div>
 
-      <div v-if="!hasMore && list.length > 0" class="no-more-indicator text-secondary mt-md">
+      <div v-if="!loading && !hasMore && list.length > 0" class="no-more-indicator text-secondary mt-md">
         没有更多数据了
       </div>
 

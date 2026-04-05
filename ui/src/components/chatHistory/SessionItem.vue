@@ -25,10 +25,10 @@ const emit = defineEmits<{
       </span>
       <br>
       <span v-if="session.updatedAt" class="text-placeholder" style="display: inline-block;margin-top: 5px; font-size: 12px">
-        更新于 {{ session.updatedAt || '无' }}
+        最近变动于 {{ session.updatedAt || '无' }}
       </span>
-      <span v-else class="text-placeholder" style="display: inline-block;margin-top: 5px">
-        创建于 {{ session.updatedAt || '无' }}
+      <span v-else class="text-placeholder" style="display: inline-block; margin-top: 5px">
+        最近变动于 {{ session.createdAt || '无' }}
       </span>
 
     </span>

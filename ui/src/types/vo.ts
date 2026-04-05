@@ -350,3 +350,21 @@ export interface CodeExecutionConfigVO {
   enableWrite?: boolean
   command?: string[] | null
 }
+
+/**
+ * 趋势数据项
+ */
+export interface TrendItem {
+  date: string
+  value: number
+}
+
+/**
+ * 智能体统计分析VO
+ */
+export interface AgentStatisticsVO {
+  sessionTrend: TrendItem[]
+  activeUserTrend: TrendItem[]
+  messageTrend: TrendItem[]
+  avgRoundsTrend: TrendItem[]
+}

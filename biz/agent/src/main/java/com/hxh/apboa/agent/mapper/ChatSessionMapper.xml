@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hxh.apboa.agent.mapper.ChatSessionMapper">
+
+    <!-- 按日统计新增会话数 -->
+    <select id="countSessionsByDay" resultType="java.util.Map">
+        SELECT DATE(created_at) AS date, COUNT(*) AS value
+        FROM chat_session
+        WHERE agent_id = #{agentId}
+          AND created_at >= #{startDate}
+        GROUP BY DATE(created_at)
+        ORDER BY DATE(created_at)
+    </select>
+
+    <!-- 按日统计活跃用户数（去重） -->
+    <select id="countActiveUsersByDay" resultType="java.util.Map">
+        SELECT DATE(created_at) AS date, COUNT(DISTINCT user_id) AS value
+        FROM chat_session
+        WHERE agent_id = #{agentId}
+          AND created_at >= #{startDate}
+        GROUP BY DATE(created_at)
+        ORDER BY DATE(created_at)
+    </select>
+
+</mapper>

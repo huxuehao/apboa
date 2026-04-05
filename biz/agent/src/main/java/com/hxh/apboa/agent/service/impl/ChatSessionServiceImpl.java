@@ -13,7 +13,10 @@ import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.util.UserUtils;
 import com.hxh.apboa.common.vo.ChatMessageVO;
 import com.hxh.apboa.common.vo.ChatSessionVO;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hxh.apboa.common.mp.support.MP;
 import io.agentscope.spring.boot.agui.common.ThreadSessionManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -140,6 +143,18 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
                 .stream()
                 .map(this::toSessionVO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public IPage<ChatSessionVO> pageSessions(ChatSessionQueryDTO query) {
+        Long userId = query.getUserId() != null ? query.getUserId() : UserUtils.getId();
+        LambdaQueryWrapper<ChatSession> wrapper = new LambdaQueryWrapper<ChatSession>()
+                .eq(userId != null, ChatSession::getUserId, userId)
+                .eq(query.getAgentId() != null, ChatSession::getAgentId, query.getAgentId())
+                .eq(query.getIsPinned() != null, ChatSession::getIsPinned, query.getIsPinned())
+                .orderByDesc(ChatSession::getUpdatedAt);
+        IPage<ChatSession> page = page(MP.getPage(query), wrapper);
+        return BeanUtils.copyPage(page, ChatSessionVO.class);
     }
 
     @Override

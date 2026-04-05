@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hxh.apboa.agent.mapper.ChatMessageMapper">
+
+    <!-- 按日统计消息数（关联某智能体的会话） -->
+    <select id="countMessagesByDay" resultType="java.util.Map">
+        SELECT DATE(m.created_at) AS date, COUNT(*) AS value
+        FROM chat_message m
+        INNER JOIN chat_session s ON m.session_id = s.id
+        WHERE s.agent_id = #{agentId}
+          AND m.created_at >= #{startDate}
+          AND m.role IN ('user', 'assistant')
+        GROUP BY DATE(m.created_at)
+        ORDER BY DATE(m.created_at)
+    </select>
+
+    <!-- 按日统计平均对话轮次（每会话平均消息数） -->
+    <select id="avgRoundsByDay" resultType="java.util.Map">
+        SELECT t.date, IFNULL(AVG(t.msg_count), 0) AS value
+        FROM (
+            SELECT DATE(m.created_at) AS date, m.session_id, COUNT(*) AS msg_count
+            FROM chat_message m
+            INNER JOIN chat_session s ON m.session_id = s.id
+            WHERE s.agent_id = #{agentId}
+              AND m.created_at >= #{startDate}
+              AND m.role IN ('user', 'assistant')
+            GROUP BY DATE(m.created_at), m.session_id
+        ) t
+        GROUP BY t.date
+        ORDER BY t.date
+    </select>
+
+</mapper>

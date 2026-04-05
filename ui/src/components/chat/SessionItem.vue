@@ -2,7 +2,7 @@
 import { EllipsisOutlined } from '@ant-design/icons-vue'
 
 const props = defineProps<{
-  session: { id: string | number; title?: string; isPinned?: boolean }
+  session: { id: string | number; title?: string; isPinned?: boolean;updatedAt: string;createdAt:string }
   active: boolean
 }>()
 
