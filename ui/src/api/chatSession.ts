@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { ApiResponse } from '@/types'
+import type { ApiResponse, PageResult } from '@/types'
 import type {
   ChatSessionCreateDTO,
   ChatMessageAppendDTO,
@@ -58,6 +58,16 @@ export function getCurrentMessages(sessionId: string) {
  */
 export function listSessions(query?: ChatSessionQueryDTO) {
   return request.get<ApiResponse<ChatSessionVO[]>>(`${BASE}/list`, {
+    params: query
+  })
+}
+
+/**
+ * 分页查询会话
+ * GET /agent/chat/session/page
+ */
+export function pageSessions(query?: ChatSessionQueryDTO) {
+  return request.get<ApiResponse<PageResult<ChatSessionVO>>>(`${BASE}/page`, {
     params: query
   })
 }

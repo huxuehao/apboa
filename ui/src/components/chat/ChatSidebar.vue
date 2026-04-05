@@ -10,6 +10,8 @@ defineProps<{
   currentSessionId: string | null
   userNickname?: string
   isRunning: boolean
+  loading: boolean
+  hasMore: boolean
 }>()
 
 defineEmits<{
@@ -17,6 +19,7 @@ defineEmits<{
   (e: 'newSession'): void
   (e: 'selectSession', session: any): void
   (e: 'sessionMenu', key: string, session: any): void
+  (e: 'loadMore'): void
 }>()
 </script>
 
@@ -54,8 +57,11 @@ defineEmits<{
           :pinned-sessions="pinnedSessions"
           :other-sessions="otherSessions"
           :current-session-id="currentSessionId"
+          :loading="loading"
+          :has-more="hasMore"
           @select="(session) => $emit('selectSession', session)"
           @menu="(k, session) => $emit('sessionMenu', k, session)"
+          @load-more="$emit('loadMore')"
         />
       </div>
     </div>

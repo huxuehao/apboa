@@ -80,12 +80,15 @@ const handelToolProcess = (v: boolean) => {
 const {
   pinnedSessions,
   otherSessions,
+  loading: sessionsLoading,
+  hasMore: sessionsHasMore,
   createSession,
   updateSessionTitle,
   pinSession,
   unpinSession,
   deleteSession,
   loadSessions,
+  loadMoreSessions,
 } = useSessions(agentId)
 
 // 当前会话管理
@@ -313,10 +316,13 @@ onMounted(() => {
       :current-session-id="currentSessionId"
       :user-nickname="userInfo?.nickname"
       :is-running="isRunning"
+      :loading="sessionsLoading"
+      :has-more="sessionsHasMore"
       @toggle-collapse="toggleSidebar"
       @new-session="handleNewSession"
       @select-session="handleSelectSession"
       @session-menu="handleSessionMenu"
+      @load-more="loadMoreSessions"
     />
 
     <RenameModal

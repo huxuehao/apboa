@@ -8,6 +8,7 @@ import com.hxh.apboa.common.dto.ChatSessionQueryDTO;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.vo.ChatMessageVO;
 import com.hxh.apboa.common.vo.ChatSessionVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -78,6 +79,15 @@ public class ChatSessionController {
     @GetMapping("/list")
     public R<List<ChatSessionVO>> list(ChatSessionQueryDTO query) {
         return R.data(chatSessionService.listSessions(query));
+    }
+
+    /**
+     * 分页查询会话（支持 isPinned 筛选）
+     */
+    @SkAccess
+    @GetMapping("/page")
+    public R<IPage<ChatSessionVO>> page(ChatSessionQueryDTO query) {
+        return R.data(chatSessionService.pageSessions(query));
     }
 
     /**

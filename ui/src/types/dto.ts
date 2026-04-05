@@ -217,4 +217,7 @@ export interface ChatMessageAppendDTO {
 export interface ChatSessionQueryDTO {
   userId?: string
   agentId?: string
+  isPinned?: boolean
+  current?: number
+  size?: number
 }

@@ -6,6 +6,7 @@ import com.hxh.apboa.common.dto.ChatSessionQueryDTO;
 import com.hxh.apboa.common.entity.ChatSession;
 import com.hxh.apboa.common.vo.ChatMessageVO;
 import com.hxh.apboa.common.vo.ChatSessionVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -66,6 +67,14 @@ public interface ChatSessionService extends IService<ChatSession> {
      * @return 会话 VO 列表
      */
     List<ChatSessionVO> listSessions(ChatSessionQueryDTO query);
+
+    /**
+     * 分页查询会话（支持 isPinned 筛选）
+     *
+     * @param query 分页查询条件
+     * @return 分页会话 VO
+     */
+    IPage<ChatSessionVO> pageSessions(ChatSessionQueryDTO query);
 
     /**
      * 会话详情

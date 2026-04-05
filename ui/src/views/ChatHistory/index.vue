@@ -19,8 +19,11 @@ const { agentDetail } = useAgentDetail(agentId)
 // 会话列表管理
 const {
   sessions,
-  deleteSession,
-  loadSessions,
+  loading: sessionsLoading,
+  hasMore: sessionsHasMore,
+  deleteSessionForAll,
+  loadMoreAllSessions,
+  resetAndReloadAll,
 } = useSessions(agentId)
 
 // 当前会话管理
@@ -59,7 +62,7 @@ const handleDeleteSession = async (session: any) => {
     title: '确认删除',
     content: '删除后无法恢复，是否继续？',
     onOk: async () => {
-      await deleteSession(id)
+      await deleteSessionForAll(id)
       if (currentSessionId.value === id) {
         resetSession()
       }
@@ -70,7 +73,7 @@ const handleDeleteSession = async (session: any) => {
 
 // 初始化加载会话列表
 onMounted(() => {
-  loadSessions()
+  resetAndReloadAll()
 })
 </script>
 
@@ -80,8 +83,11 @@ onMounted(() => {
       :agent-name="agentDetail?.name"
       :sessions="sessions"
       :current-session-id="currentSessionId"
+      :loading="sessionsLoading"
+      :has-more="sessionsHasMore"
       @select-session="handleSelectSession"
       @delete-session="handleDeleteSession"
+      @load-more="loadMoreAllSessions"
     />
 
     <ChatMain
