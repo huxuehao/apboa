@@ -5,7 +5,7 @@
  * @component
  */
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import {ref, computed, watch, onMounted, nextTick} from 'vue'
 import { message, Modal } from 'ant-design-vue'
 import type { JobInfo } from '@/types'
 import * as jobApi from '@/api/job'
@@ -133,7 +133,9 @@ function initFormData() {
     formData.value.enabled = true
   }
   parseCronToParts()
-  isDirty.value = false
+  nextTick(() => {
+    isDirty.value = false
+  })
 }
 
 watch(formData, () => { isDirty.value = true }, { deep: true })
