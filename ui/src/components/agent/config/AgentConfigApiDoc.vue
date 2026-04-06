@@ -347,7 +347,7 @@ const endpoints = [
           <CopyOutlined v-else style="color: #a6adc8;" />
         </span></div>
         <div style="font-size: 12px; color: #795548; margin-top: 8px;">
-          API Key 可在系统设置 > 访问秘钥 中创建和管理。请妥善保管您的 API Key，不要在客户端代码中暴露。
+          API Key 可在系统设置 > API Keys 中创建和管理。请妥善保管您的 API Key，不要在客户端代码中暴露。
         </div>
       </div>
     </div>
