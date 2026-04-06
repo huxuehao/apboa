@@ -13,7 +13,7 @@
 
 /* ===================== 左侧导航 ===================== */
 .config-nav {
-  width: 80px;
+  width: 60px;
   flex-shrink: 0;
   padding: 0;
   margin-right: 20px;
@@ -30,7 +30,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .config-nav-item {
@@ -39,9 +39,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 3px;
   width: 100%;
-  padding: 10px 4px;
+  padding: 6px;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -49,10 +49,15 @@
 
   &:hover {
     background-color: #F2F4F7;
+    //.nav-icon {
+    //  color: #1677FF;
+    //}
+    //.nav-label {
+    //  color: #1677FF;
+    //}
   }
 
   &.active {
-    background-color: #EAEFFC;
     .nav-icon {
       color: #1677FF;
     }
@@ -71,14 +76,14 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  font-size: 18px;
+  font-size: 20px;
   color: #495464;
   flex-shrink: 0;
   transition: all 0.2s ease;
 }
 
 .nav-label {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: #495464;
   line-height: 1;

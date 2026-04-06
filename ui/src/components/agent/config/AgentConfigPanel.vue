@@ -40,19 +40,19 @@ const emit = defineEmits<{
  */
 const navItems = computed(() => {
   const items = [
-    { key: 'edit', label: 'Agent配置', icon: SettingOutlined },
-    { key: 'schedule', label: '定时任务', icon: ClockCircleOutlined }
+    { key: 'edit', label: '配置', icon: SettingOutlined },
+    { key: 'schedule', label: '定时', icon: ClockCircleOutlined }
   ]
 
   // 架构图仅对自定义智能体显示
   if (props.agentData?.agentType === 'CUSTOM') {
-    items.push({ key: 'architecture', label: 'Agent架构', icon: ApartmentOutlined })
+    items.push({ key: 'architecture', label: '架构', icon: ApartmentOutlined })
   }
 
   items.push(
-    { key: 'history', label: '对话日志', icon: HistoryOutlined },
-    { key: 'api', label: '访问 API', icon: ApiOutlined },
-    { key: 'statistics', label: '统计监测', icon: BarChartOutlined }
+    { key: 'history', label: '日志', icon: HistoryOutlined },
+    { key: 'api', label: 'API', icon: ApiOutlined },
+    { key: 'statistics', label: '统计', icon: BarChartOutlined }
   )
 
   return items

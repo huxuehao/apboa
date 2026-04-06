@@ -298,7 +298,7 @@ defineExpose({ isDirty })
 .config-edit {
   height: 100%;
   background-color: #FFFFFF;
-  padding: 12px 24px;
+  padding: 12px;
 }
 .config-edit-form {
   height: calc(100vh - 280px);
