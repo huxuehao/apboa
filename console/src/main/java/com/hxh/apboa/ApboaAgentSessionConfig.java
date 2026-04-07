@@ -81,7 +81,7 @@ public class ApboaAgentSessionConfig {
      */
     @Bean
     @Primary
-    @ConditionalOnClass(name = "io.agentscope.spring.boot.agui.mvc.AguiWebFluxHandler")
+    @ConditionalOnClass(name = "io.agentscope.spring.boot.agui.webflux.AguiWebFluxHandler")
     public AguiWebFluxHandler aguiWebFluxHandler(
             @Autowired JdbcTemplate jdbcTemplate,
             @Autowired(required = false) AguiAgentRegistry registry,
