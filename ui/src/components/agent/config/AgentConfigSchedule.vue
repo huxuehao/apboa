@@ -288,12 +288,31 @@ defineExpose({ isDirty })
             <div class="cron-presets">
               <span class="preset-label">常用：</span>
               <ASpace wrap>
-                <AButton type="link" size="small" @click="applyPreset('0 0 * * * ?')">每小时</AButton>
-                <AButton type="link" size="small" @click="applyPreset('0 0 0 * * ?')">每天零点</AButton>
-                <AButton type="link" size="small" @click="applyPreset('0 0 8 ? * MON-FRI')">工作日早8点</AButton>
-                <AButton type="link" size="small" @click="applyPreset('0 0 9,18 ? * MON-FRI')">工作日早晚</AButton>
-                <AButton type="link" size="small" @click="applyPreset('0 0 0 1 * ?')">每月1号</AButton>
+                <!-- 分钟级 -->
                 <AButton type="link" size="small" @click="applyPreset('0 */5 * * * ?')">每5分钟</AButton>
+                <AButton type="link" size="small" @click="applyPreset('0 */10 * * * ?')">每10分钟</AButton>
+                <AButton type="link" size="small" @click="applyPreset('0 */30 * * * ?')">每30分钟</AButton>
+                <!-- 小时级 -->
+                <AButton type="link" size="small" @click="applyPreset('0 0 * * * ?')">每小时整点</AButton>
+                <AButton type="link" size="small" @click="applyPreset('0 0 */2 * * ?')">每2小时</AButton>
+                <!-- 每日固定时间 -->
+                <AButton type="link" size="small" @click="applyPreset('0 0 0 * * ?')">每天零点</AButton>
+                <AButton type="link" size="small" @click="applyPreset('0 0 8 * * ?')">每天早8点</AButton>
+                <AButton type="link" size="small" @click="applyPreset('0 0 12 * * ?')">每天中午12点</AButton>
+                <AButton type="link" size="small" @click="applyPreset('0 0 18 * * ?')">每天晚6点</AButton>
+                <AButton type="link" size="small" @click="applyPreset('0 0 22 * * ?')">每天晚10点</AButton>
+                <!-- 工作日 -->
+                <AButton type="link" size="small" @click="applyPreset('0 0 8 ? * MON-FRI')">工作日早8点</AButton>
+                <AButton type="link" size="small" @click="applyPreset('0 0 9,18 ? * MON-FRI')">工作日早晚9/18点</AButton>
+                <AButton type="link" size="small" @click="applyPreset('0 30 9 ? * MON-FRI')">工作日早9:30</AButton>
+                <!-- 周末 -->
+                <AButton type="link" size="small" @click="applyPreset('0 0 10 ? * SUN,SAT')">周末早10点</AButton>
+                <!-- 指定周 -->
+                <AButton type="link" size="small" @click="applyPreset('0 0 9 ? * MON')">周一早9点</AButton>
+                <AButton type="link" size="small" @click="applyPreset('0 0 18 ? * FRI')">周五晚6点</AButton>
+                <!-- 月份 -->
+                <AButton type="link" size="small" @click="applyPreset('0 0 0 1 * ?')">每月1号零点</AButton>
+                <AButton type="link" size="small" @click="applyPreset('0 0 0 1 1,4,7,10 ?')">每季度首日零点</AButton>
               </ASpace>
             </div>
           </div>
@@ -316,7 +335,7 @@ defineExpose({ isDirty })
 .config-schedule {
   height: 100%;
   background-color: #FFFFFF;
-  padding: 12px 300px;
+  padding: 12px;
 }
 .config-schedule-form {
   height: calc(100vh - 180px);

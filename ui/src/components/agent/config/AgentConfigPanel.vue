@@ -18,6 +18,7 @@ import {
 } from '@ant-design/icons-vue'
 import type { AgentDefinitionVO } from '@/types'
 import AgentConfigEdit from './AgentConfigEdit.vue'
+import AgentConfigEditA2a from './AgentConfigEditA2a.vue'
 import AgentConfigSchedule from './AgentConfigSchedule.vue'
 import AgentConfigArchitecture from './AgentConfigArchitecture.vue'
 import AgentConfigHistory from './AgentConfigHistory.vue'
@@ -60,13 +61,22 @@ const navItems = computed(() => {
 
 const activeKey = ref('edit')
 const editRef = ref<InstanceType<typeof AgentConfigEdit>>()
+const editA2aRef = ref<InstanceType<typeof AgentConfigEditA2a>>()
 const scheduleRef = ref<InstanceType<typeof AgentConfigSchedule>>()
+
+/**
+ * 是否为A2A智能体
+ */
+const isA2aAgent = computed(() => props.agentData?.agentType === 'A2A')
 
 /**
  * 检查是否有未保存的数据
  */
 function checkUnsaved(): boolean {
-  if (activeKey.value === 'edit' && editRef.value?.isDirty) return true
+  if (activeKey.value === 'edit') {
+    if (isA2aAgent.value && editA2aRef.value?.isDirty) return true
+    if (!isA2aAgent.value && editRef.value?.isDirty) return true
+  }
   if (activeKey.value === 'schedule' && scheduleRef.value?.isDirty) return true
   return false
 }
@@ -159,9 +169,19 @@ const agentCode = computed(() => props.agentData?.agentCode || '')
 
       <!-- 右侧内容 -->
       <div class="config-content">
+        <!-- 自定义智能体配置 -->
         <AgentConfigEdit
-          v-if="activeKey === 'edit' && agentData"
+          v-if="activeKey === 'edit' && agentData && !isA2aAgent"
           ref="editRef"
+          :agent-data="agentData"
+          :tags="tags"
+          @success="handleSuccess"
+        />
+
+        <!-- A2A智能体配置 -->
+        <AgentConfigEditA2a
+          v-if="activeKey === 'edit' && agentData && isA2aAgent"
+          ref="editA2aRef"
           :agent-data="agentData"
           :tags="tags"
           @success="handleSuccess"
