@@ -14,7 +14,7 @@ CREATE TABLE `secret_key` (
 `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
 `remark` varchar(255) DEFAULT NULL COMMENT '备注',
 PRIMARY KEY (`id`),
-KEY `idx_value` (`vlaue`),
+KEY `idx_value` (`value`),
 KEY `idx_status` (`enabled`),
 KEY `idx_expire_time` (`expire_time`)
 ) COMMENT='访问秘钥';
