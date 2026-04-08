@@ -231,6 +231,7 @@ export interface SkillPackage extends BaseEntity {
   references: any[]| null
   examples: any[] | null
   scripts: any[] | null
+  tools?: string[]
 }
 
 /**

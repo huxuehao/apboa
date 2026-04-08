@@ -224,6 +224,7 @@ export interface SkillPackageVO {
   createdBy: string
   updatedBy: string
   used: string[]
+  tools:string[]
 }
 
 /**

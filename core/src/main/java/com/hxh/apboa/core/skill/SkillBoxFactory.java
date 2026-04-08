@@ -8,10 +8,12 @@ import com.hxh.apboa.common.entity.SkillPackage;
 import com.hxh.apboa.common.key.SkillExampleKey;
 import com.hxh.apboa.common.key.SkillReferencesKey;
 import com.hxh.apboa.common.key.SkillScriptKey;
+import com.hxh.apboa.core.tool.ToolkitFactory;
 import com.hxh.apboa.skill.SkillScriptLoadHelper;
 import com.hxh.apboa.skill.service.AgentSkillPackageService;
 import com.hxh.apboa.skill.service.SkillPackageService;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.hxh.apboa.skill.service.SkillToolService;
 import io.agentscope.core.skill.AgentSkill;
 import io.agentscope.core.skill.SkillBox;
 import io.agentscope.core.tool.Toolkit;
@@ -31,6 +33,8 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class SkillBoxFactory {
+    private final ToolkitFactory toolkitFactory;
+    private final SkillToolService skillToolService;
     private final SkillPackageService skillPackageService;
     private final AgentSkillPackageService agentSkillPackageService;
     private final AgentCodeExecutionService agentCodeExecutionService;
@@ -93,7 +97,10 @@ public class SkillBoxFactory {
         addResources(skillBuilder, skillPackage.getScripts(), SkillScriptKey.prefix,
                 SkillScriptKey.name, SkillScriptKey.content);
 
-        skillBox.registerSkill(skillBuilder.build());
+        // 获取关联的工具
+        Toolkit toolkit = toolkitFactory.getToolkit(skillToolService.getToolIds(skillPackage.getId()));
+
+        skillBox.registration().skill(skillBuilder.build()).tool(toolkit).apply();
     }
 
     /**

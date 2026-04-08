@@ -4,13 +4,15 @@
  * @author huxuehao
  */
 <script setup lang="ts">
-import { ref, computed, watch, defineComponent } from 'vue'
+import { ref, computed, watch, defineComponent, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import { AppstoreOutlined } from '@ant-design/icons-vue'
+import { AppstoreOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
 import SmartCodeEditor from '@/components/editor/SmartCodeEditor.vue'
 import ResourceEditor from './ResourceEditor.vue'
-import type { SkillPackageVO, SkillPackage } from '@/types'
+import type { SkillPackage, SkillPackageVO, ToolVO } from '@/types'
 import * as skillApi from '@/api/skill'
+import * as toolApi from '@/api/tool'
+import { RoutePaths } from '@/router/constants.ts'
 
 /**
  * 资源项接口
@@ -48,6 +50,7 @@ const form = ref<{
   references: ResourceItem[]
   examples: ResourceItem[]
   scripts: ResourceItem[]
+  tools: string[]
 }>({
   name: '',
   category: '',
@@ -55,13 +58,66 @@ const form = ref<{
   skillContent: '',
   references: [],
   examples: [],
-  scripts: []
+  scripts: [],
+  tools: []
 })
 
 const loading = ref<boolean>(false)
+const toolsLoading = ref<boolean>(false)
 const referencesEditorRef = ref()
 const examplesEditorRef = ref()
 const scriptsEditorRef = ref()
+
+// 工具相关数据
+const toolCategories = ref<string[]>([])
+const allTools = ref<ToolVO[]>([])
+// 左右两侧独立搜索
+const leftSearchText = ref<string>('')
+const rightSearchText = ref<string>('')
+
+/**
+ * Transfer 穿梭框数据源
+ */
+const transferDataSource = computed(() => {
+  return allTools.value.map(tool => ({
+    key: String(tool.id),
+    title: tool.name,
+    description: tool.description,
+    category: tool.category
+  }))
+})
+
+/**
+ * 根据搜索过滤后的 Transfer 数据源（左侧可选列表，排除已选工具）
+ */
+const filteredLeftDataSource = computed(() => {
+  const unselected = transferDataSource.value.filter(t => !form.value.tools.includes(t.key))
+  if (!leftSearchText.value) {
+    return unselected
+  }
+  const searchLower = leftSearchText.value.toLowerCase()
+  return unselected.filter(item =>
+    item.title.toLowerCase().includes(searchLower) ||
+    item.description?.toLowerCase().includes(searchLower) ||
+    item.category?.toLowerCase().includes(searchLower)
+  )
+})
+
+/**
+ * 已选工具列表（右侧，支持搜索过滤）
+ */
+const filteredRightDataSource = computed(() => {
+  const selected = transferDataSource.value.filter(t => form.value.tools.includes(t.key))
+  if (!rightSearchText.value) {
+    return selected
+  }
+  const searchLower = rightSearchText.value.toLowerCase()
+  return selected.filter(item =>
+    item.title.toLowerCase().includes(searchLower) ||
+    item.description?.toLowerCase().includes(searchLower) ||
+    item.category?.toLowerCase().includes(searchLower)
+  )
+})
 
 
 /**
@@ -127,7 +183,8 @@ function initForm() {
       skillContent: props.data.skillContent || '',
       references: props.data.references || [],
       examples: props.data.examples || [],
-      scripts: props.data.scripts || []
+      scripts: props.data.scripts || [],
+      tools: (props.data.tools || []).map(String)
     }
   } else {
     form.value = {
@@ -137,7 +194,8 @@ function initForm() {
       skillContent: '',
       references: [],
       examples: [],
-      scripts: []
+      scripts: [],
+      tools: []
     }
   }
 }
@@ -158,6 +216,94 @@ function openScriptsEditor() {
 }
 
 /**
+ * 加载工具分类
+ */
+async function loadToolCategories() {
+  const response = await toolApi.listCategories()
+  toolCategories.value = response.data.data || []
+}
+
+/**
+ * 加载所有工具
+ */
+async function loadAllTools() {
+  try {
+    toolsLoading.value = true
+    const response = await toolApi.page({ page: 1, size: 1000, enabled: true })
+    allTools.value = response.data.data.records || []
+  } finally {
+    toolsLoading.value = false
+  }
+}
+
+/**
+ * Transfer 穿梭框选择变化
+ */
+function handleTransferChange(targetKeys: string[]) {
+  form.value.tools = targetKeys
+}
+
+/**
+ * Transfer 渲染项
+ */
+function transferRender(item: TransferItem) {
+  return item.title
+}
+
+/**
+ * Transfer 搜索过滤
+ */
+function transferFilterOption(inputValue: string, option: TransferItem) {
+  const searchLower = inputValue.toLowerCase()
+  return (
+    option.title.toLowerCase().includes(searchLower) ||
+    option.description?.toLowerCase().includes(searchLower) ||
+    option.category?.toLowerCase().includes(searchLower)
+  )
+}
+
+/**
+ * Transfer 搜索事件处理（左右独立搜索）
+ */
+function handleTransferSearch(direction: 'left' | 'right', value: string) {
+  if (direction === 'left') {
+    leftSearchText.value = value
+  } else {
+    rightSearchText.value = value
+  }
+}
+
+/**
+ * 切换工具选择状态（点击即移动）
+ * @param direction 当前方向
+ * @param key 工具key
+ */
+function handleToolClick(direction: 'left' | 'right', key: string) {
+  if (direction === 'left') {
+    // 左侧点击：添加到已选
+    if (!form.value.tools.includes(key)) {
+      form.value.tools.push(key)
+    }
+  } else {
+    // 右侧点击：从已选移除
+    const index = form.value.tools.indexOf(key)
+    if (index > -1) {
+      form.value.tools.splice(index, 1)
+    }
+  }
+}
+
+/**
+ * Transfer 数据项类型
+ */
+interface TransferItem {
+  key: string
+  title: string
+  description?: string
+  category?: string
+}
+
+/**
  * 提交表单
  */
 async function handleSubmit() {
@@ -173,11 +319,12 @@ async function handleSubmit() {
       skillContent: form.value.skillContent,
       references: form.value.references.length > 0 ? form.value.references : null,
       examples: form.value.examples.length > 0 ? form.value.examples : null,
-      scripts: form.value.scripts.length > 0 ? form.value.scripts : null
+      scripts: form.value.scripts.length > 0 ? form.value.scripts : null,
+      tools: form.value.tools
     } as SkillPackage
 
     if (isEdit.value && props.data) {
-      entity.id = props.data.id as string
+      entity.id = String(props.data.id)
       await skillApi.update(entity)
       message.success('修改成功')
     } else {
@@ -213,7 +360,7 @@ const VNodes = defineComponent({
   },
 });
 
-const addItem = (e: any) => {
+const addItem = (e: Event) => {
   e.preventDefault();
 
   if (!name.value)  return
@@ -235,6 +382,11 @@ watch(() => props.visible, (val) => {
     formRef.value?.resetFields()
   }
 }, { immediate: true })
+
+onMounted(() => {
+  loadToolCategories()
+  loadAllTools()
+})
 </script>
 
 <template>
@@ -243,6 +395,7 @@ watch(() => props.visible, (val) => {
     :title-icon="AppstoreOutlined"
     :title="title"
     :confirm-loading="loading"
+    defaultWidth="800px"
     destroyOnClose
     @ok="handleSubmit"
     @cancel="handleCancel"
@@ -328,6 +481,73 @@ watch(() => props.visible, (val) => {
           </AFormItem>
         </ACol>
       </ARow>
+
+      <!-- 关联工具选择器 -->
+      <AFormItem>
+        <template #label>
+          <div class="flex items-center gap-xs">
+
+            <ATooltip title="避免预先注册所有 Tool，仅在 Skill 被 LLM 使用时才传递相关 Tool。">
+              <span>关联工具</span><InfoCircleOutlined class="text-secondary cursor-pointer" />
+            </ATooltip>
+          </div>
+        </template>
+        <ASpin :spinning="toolsLoading">
+          <div v-if="allTools.length === 0" class="empty-tools">
+            <span class="text-secondary">暂无可用工具</span>
+            <AButton type="link" :href="`/#/${RoutePaths.TOOL}`" target="_blank">去配置</AButton>
+            <AButton type="link" @click="loadToolCategories();loadAllTools()">刷新</AButton>
+          </div>
+          <ATransfer
+            v-else
+            v-model:target-keys="form.tools"
+            :data-source="transferDataSource"
+            :titles="['可选工具', '已选工具']"
+            :render="transferRender"
+            :list-style="{ width: '280px', height: '360px' }"
+            show-search
+            :filter-option="transferFilterOption"
+            :search-placeholder="'搜索工具名称、描述或分类'"
+            @change="handleTransferChange"
+            @search="handleTransferSearch"
+          >
+            <template #children="{ direction }">
+              <template v-if="direction === 'left'">
+                <div class="transfer-tools-list">
+                  <div
+                    v-for="item in filteredLeftDataSource"
+                    :key="item.key"
+                    class="transfer-tool-item"
+                    @click="handleToolClick('left', item.key)"
+                  >
+                    <div class="tool-item-header">
+                      <span class="tool-item-name" :title="item.title">{{ item.title }}</span>
+                      <ATag size="small" color="blue" class="tool-item-tag">{{ item.category }}</ATag>
+                    </div>
+                    <div class="tool-item-desc" :title="item.description || '暂无描述'">{{ item.description || '暂无描述' }}</div>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <div class="transfer-tools-list">
+                  <div
+                    v-for="item in filteredRightDataSource"
+                    :key="item.key"
+                    class="transfer-tool-item transfer-tool-item-selected"
+                    @click="handleToolClick('right', item.key)"
+                  >
+                    <div class="tool-item-header">
+                      <span class="tool-item-name" :title="item.title">{{ item.title }}</span>
+                      <ATag size="small" color="blue" class="tool-item-tag">{{ item.category }}</ATag>
+                    </div>
+                    <div class="tool-item-desc" :title="item.description || '暂无描述'">{{ item.description || '暂无描述' }}</div>
+                  </div>
+                </div>
+              </template>
+            </template>
+          </ATransfer>
+        </ASpin>
+      </AFormItem>
     </AForm>
 
     <ResourceEditor
@@ -349,4 +569,83 @@ watch(() => props.visible, (val) => {
 </template>
 
 <style scoped lang="scss">
+.selected-tools-section {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-bg-light);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border-base);
+}
+
+.selected-tools-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.selected-tools-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.empty-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-lg);
+  background-color: var(--color-bg-light);
+  border-radius: var(--border-radius-md);
+}
+
+.transfer-tools-list {
+  height: 260px;
+  overflow-y: auto;
+  padding: var(--spacing-xs);
+}
+
+.transfer-tool-item {
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+
+  &:hover {
+    background-color: var(--color-bg-light);
+  }
+}
+
+.transfer-tool-item-selected {
+  background-color: var(--color-primary-bg);
+}
+
+.tool-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  gap: var(--spacing-xs);
+}
+
+.tool-item-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tool-item-tag {
+  flex-shrink: 0;
+}
+
+.tool-item-desc {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 </style>

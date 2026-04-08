@@ -145,6 +145,7 @@ async function handleView(id: string) {
       h('p', {}, [h('strong', '分类: '), data.category]),
       h('p', {}, [h('strong', '名称: '), data.name]),
       h('p', {}, [h('strong', '描述: '), data.description]),
+      h('p', {}, [h('strong', '是否关联工具: '), data.tools?.length ? '是' : '否']),
       h('div', { style: { marginTop: '16px' } }, [
         h(Collapse, {
           defaultActiveKey: []

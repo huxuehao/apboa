@@ -6,10 +6,12 @@ import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.AgentTool;
+import com.hxh.apboa.common.entity.SkillTool;
 import com.hxh.apboa.common.entity.ToolConfig;
 import com.hxh.apboa.common.enums.ToolType;
 import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.common.wrapper.ToolInfoWrapper;
+import com.hxh.apboa.tool.mapper.ISkillToolMapper;
 import com.hxh.apboa.tool.mapper.ToolMapper;
 import com.hxh.apboa.tool.service.AgentToolService;
 import com.hxh.apboa.tool.service.ToolService;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ToolServiceImpl extends ServiceImpl<ToolMapper, ToolConfig> implements ToolService {
     private final JdbcTemplate jdbcTemplate;
+    private final ISkillToolMapper iSkillToolMapper;
     private final AgentToolService agentToolService;
     private final MessagePublisher messagePublisher;
 
@@ -47,6 +50,7 @@ public class ToolServiceImpl extends ServiceImpl<ToolMapper, ToolConfig> impleme
         });
 
         agentToolService.remove(new LambdaQueryWrapper<AgentTool>().in(AgentTool::getToolId, ids));
+        iSkillToolMapper.delete(new LambdaQueryWrapper<SkillTool>().in(SkillTool::getToolId, ids));
         publishAgentReregister(agentIds);
 
         return true;

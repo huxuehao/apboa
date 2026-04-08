@@ -15,6 +15,7 @@ import com.hxh.apboa.skill.imports.config.GitImportConfig;
 import com.hxh.apboa.skill.imports.config.LocalImportConfig;
 import com.hxh.apboa.skill.imports.config.UploadImportConfig;
 import com.hxh.apboa.skill.service.SkillPackageService;
+import com.hxh.apboa.skill.service.SkillToolService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +43,7 @@ public class SkillPackageController {
 
     private final SkillImportService skillImportService;
     private final SkillPackageService skillPackageService;
+    private final SkillToolService skillToolService;
 
     /**
      * 分页查询
@@ -57,11 +59,10 @@ public class SkillPackageController {
      */
     @GetMapping("/{id}")
     public R<SkillPackageVO> detail(@PathVariable("id") Long id) {
-        SkillPackage entity = skillPackageService.getById(id);
-
-        SkillPackageVO vo = BeanUtils.copy(entity, SkillPackageVO.class);
-        vo.setUsed(skillPackageService.usedWithAgent(List.of(id)));
-
+        SkillPackageVO vo = skillPackageService.getDetail(id);
+        if (vo != null) {
+            vo.setUsed(skillPackageService.usedWithAgent(List.of(id)));
+        }
         return R.data(vo);
     }
 
@@ -70,8 +71,13 @@ public class SkillPackageController {
      */
     @PostMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
-    public R<Boolean> save(@RequestBody SkillPackage entity) {
+    public R<Boolean> save(@RequestBody SkillPackageVO vo) {
+        SkillPackage entity = BeanUtils.copy(vo, SkillPackage.class);
         boolean save = skillPackageService.save(entity);
+        // 保存技能与工具的关联
+        if (vo.getTools() != null && !vo.getTools().isEmpty()) {
+            skillToolService.saveSkillTool(entity.getId(), vo.getTools());
+        }
         // 尝试装载脚本到本地
         SkillScriptLoadHelper.loadScripts(entity);
         return R.data(save);
@@ -82,8 +88,11 @@ public class SkillPackageController {
      */
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
-    public R<Boolean> update(@RequestBody SkillPackage entity) {
+    public R<Boolean> update(@RequestBody SkillPackageVO vo) {
+        SkillPackage entity = BeanUtils.copy(vo, SkillPackage.class);
         boolean b = skillPackageService.doUpdate(entity);
+        // 更新技能与工具的关联
+        skillToolService.saveSkillTool(entity.getId(), vo.getTools());
         // 尝试装载脚本到本地
         if (entity.getScripts() == null || entity.getScripts().isNull() || entity.getScripts().isEmpty()) {
             SkillScriptLoadHelper.removeScripts(entity);

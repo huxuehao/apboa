@@ -7,9 +7,11 @@ import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.AgentSkillPackage;
 import com.hxh.apboa.common.entity.SkillPackage;
+import com.hxh.apboa.common.vo.SkillPackageVO;
 import com.hxh.apboa.skill.mapper.SkillPackageMapper;
 import com.hxh.apboa.skill.service.AgentSkillPackageService;
 import com.hxh.apboa.skill.service.SkillPackageService;
+import com.hxh.apboa.skill.service.SkillToolService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 public class SkillPackageServiceImpl extends ServiceImpl<SkillPackageMapper, SkillPackage> implements SkillPackageService {
     private final JdbcTemplate jdbcTemplate;
     private final AgentSkillPackageService agentSkillPackageService;
+    private final SkillToolService skillToolService;
     private final MessagePublisher messagePublisher;
 
     @Override
@@ -61,9 +64,12 @@ public class SkillPackageServiceImpl extends ServiceImpl<SkillPackageMapper, Ski
         // 删除前先获取关联的智能体ID，以便后续触发重新注册
         List<Long> agentIds = agentSkillPackageService.getAgentIds(ids);
         removeByIds(ids);
-        boolean result = agentSkillPackageService.remove(new LambdaQueryWrapper<AgentSkillPackage>().in(AgentSkillPackage::getSkillPackageId, ids));
+        // 删除技能包与智能体的关联
+        agentSkillPackageService.remove(new LambdaQueryWrapper<AgentSkillPackage>().in(AgentSkillPackage::getSkillPackageId, ids));
+        // 删除技能包与工具的关联
+        skillToolService.deleteSkillTool(ids);
         publishAgentReregister(agentIds);
-        return result;
+        return true;
     }
 
     @Override
@@ -71,6 +77,31 @@ public class SkillPackageServiceImpl extends ServiceImpl<SkillPackageMapper, Ski
         boolean result = updateById(entity);
         publishAgentReregister(agentSkillPackageService.getAgentIds(List.of(entity.getId())));
         return result;
+    }
+
+    @Override
+    public SkillPackageVO getDetail(Long id) {
+        SkillPackage entity = getById(id);
+        if (entity == null) {
+            return null;
+        }
+        SkillPackageVO vo = new SkillPackageVO();
+        vo.setId(entity.getId());
+        vo.setName(entity.getName());
+        vo.setDescription(entity.getDescription());
+        vo.setSkillContent(entity.getSkillContent());
+        vo.setCategory(entity.getCategory());
+        vo.setReferences(entity.getReferences());
+        vo.setExamples(entity.getExamples());
+        vo.setScripts(entity.getScripts());
+        vo.setEnabled(entity.getEnabled());
+        vo.setCreatedAt(entity.getCreatedAt());
+        vo.setUpdatedAt(entity.getUpdatedAt());
+        vo.setCreatedBy(entity.getCreatedBy());
+        vo.setUpdatedBy(entity.getUpdatedBy());
+        // 查询关联的工具ID列表
+        vo.setTools(skillToolService.getToolIds(id));
+        return vo;
     }
 
     private void publishAgentReregister(List<Long> agentIds) {
