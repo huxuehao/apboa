@@ -325,7 +325,7 @@ defineExpose({
                 :key="model.id"
                 :value="model.id"
                 class="model-radio"
-                @change="handleModelChange(model.id)"
+                @change="handleModelChange(model.id as string)"
               >
                 <div class="model-info">
                   <div class="model-name">{{ model.name }}</div>
@@ -453,7 +453,7 @@ defineExpose({
                 :key="prompt.id"
                 :value="prompt.id"
                 class="prompt-radio"
-                @change="handlePromptChange(prompt.id)"
+                @change="handlePromptChange(prompt.id as string)"
               >
                 <div class="prompt-info">
                   <div class="prompt-name">{{ prompt.name }}</div>

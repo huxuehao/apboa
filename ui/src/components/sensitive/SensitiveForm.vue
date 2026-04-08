@@ -162,7 +162,7 @@ async function handleSubmit() {
     } as SensitiveWordConfig
 
     if (isEdit.value && props.data) {
-      entity.id = props.data.id
+      entity.id = props.data.id as string
       await sensitiveApi.update(entity)
       message.success('更新成功')
     } else {

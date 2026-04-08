@@ -35,7 +35,7 @@ const advancedFormRef = ref()
 /**
  * 当前A2A类型
  */
-const a2aType = ref<'WELLKNOWN' | 'NACOS'>('WELLKNOWN')
+const a2aType = ref<A2aType>(A2aType.WELLKNOWN)
 
 /**
  * 基本信息表单数据
@@ -97,8 +97,8 @@ function initFormData() {
   // 初始化 A2A 配置
   const a2aRecord = data.agentA2A
   if (a2aRecord) {
-    a2aType.value = a2aRecord.a2aType as 'WELLKNOWN' | 'NACOS'
-    if (a2aRecord.a2aType === 'WELLKNOWN' || a2aRecord.a2aType === A2aType.WELLKNOWN) {
+    a2aType.value = a2aRecord.a2aType
+    if (a2aRecord.a2aType === A2aType.WELLKNOWN) {
       const config = a2aRecord.a2aConfig as WellKnownAgentConfig
       wellknownData.value = {
         agentName: config.agentName || '',
@@ -139,7 +139,7 @@ watch([basicData, advancedData, wellknownData, nacosData], () => {
  * 当前A2A表单ref
  */
 const currentA2aFormRef = computed(() => {
-  return a2aType.value === 'WELLKNOWN' ? wellknownFormRef.value : nacosFormRef.value
+  return a2aType.value === A2aType.WELLKNOWN ? wellknownFormRef.value : nacosFormRef.value
 })
 
 /**
@@ -169,7 +169,7 @@ async function handleSubmit() {
       hook: advancedData.value.hook ?? [],
       enableMemory: advancedData.value.enableMemory ?? false,
       agentA2A: {
-        a2aType: a2aType.value === 'WELLKNOWN' ? A2aType.WELLKNOWN : A2aType.NACOS,
+        a2aType: a2aType.value === A2aType.WELLKNOWN ? A2aType.WELLKNOWN : A2aType.NACOS,
         a2aConfig: a2aConfigData
       }
     }
@@ -205,13 +205,13 @@ defineExpose({ isDirty })
       <div class="form-section">
         <div class="section-title">
           A2A 配置
-          <ATag :color="a2aType === 'WELLKNOWN' ? 'blue' : 'red'" class="ml-sm" :bordered="false">
-            {{ a2aType === 'WELLKNOWN' ? 'WellKnown' : 'Nacos' }}
+          <ATag :color="a2aType === A2aType.WELLKNOWN ? 'blue' : 'red'" class="ml-sm" :bordered="false">
+            {{ a2aType === A2aType.WELLKNOWN ? 'WellKnown' : 'Nacos' }}
           </ATag>
         </div>
 
         <AgentA2aFormWellknown
-          v-if="a2aType === 'WELLKNOWN'"
+          v-if="a2aType === A2aType.WELLKNOWN"
           ref="wellknownFormRef"
           v-model="wellknownData"
         />

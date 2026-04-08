@@ -18,7 +18,7 @@ import type {
   SensitiveWordAction,
   RAGMode
 } from './enums'
-import type {AgentA2A, JobInfo} from "@/types/entity.ts";
+import type {AgentA2A, HookConfig, JobInfo} from "@/types/entity.ts";
 
 /**
  * 账号VO
@@ -88,19 +88,7 @@ export interface AgentDefinitionVO {
 /**
  * Hook配置VO
  */
-export interface HookConfigVO {
-  id: string | number
-  name: string
-  hookType: HookType
-  description: string
-  classPath: string
-  code: string
-  priority: number
-  enabled: boolean
-  createdAt: string
-  updatedAt: string
-  createdBy: string
-  updatedBy: string
+export interface HookConfigVO extends HookConfig{
   used: string[]
 }
 

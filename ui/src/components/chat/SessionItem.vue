@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { EllipsisOutlined } from '@ant-design/icons-vue'
 
+interface MenuClickEvent {
+  key: string
+}
+
 const props = defineProps<{
   session: { id: string | number; title?: string; isPinned?: boolean;updatedAt: string;createdAt:string }
   active: boolean
@@ -22,7 +26,7 @@ const emit = defineEmits<{
         <EllipsisOutlined />
       </AButton>
       <template #overlay>
-        <AMenu @click="({ key }) => emit('menu', key as string)">
+        <AMenu @click="({ key }:MenuClickEvent) => emit('menu', key as string)">
           <AMenuItem key="rename">重命名</AMenuItem>
           <AMenuItem :key="session.isPinned ? 'unpin' : 'pin'">
             {{ session.isPinned ? '取消置顶' : '置顶' }}

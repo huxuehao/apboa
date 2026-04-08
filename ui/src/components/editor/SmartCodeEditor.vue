@@ -315,11 +315,7 @@ const getCachedLanguageExtension = async (lang: string) => {
         break
       case 'json':
         const { json } = await import('@codemirror/lang-json')
-        // 修复：为 JSON 语言添加更宽松的解析配置
-        extension = json({
-          allowComments: true,
-          allowTrailingComma: true
-        })
+        extension = json()
         break
       case 'markdown':
         const { markdown } = await import('@codemirror/lang-markdown')

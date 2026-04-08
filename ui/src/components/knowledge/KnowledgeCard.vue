@@ -76,16 +76,16 @@ const menuItems = computed(() => [
 function handleMenuClick({ key }: { key: string }) {
   switch (key) {
     case 'view':
-      emit('view', props.data.id)
+      emit('view', props.data.id as string)
       break
     case 'edit':
-      emit('edit', props.data.id)
+      emit('edit', props.data.id as string)
       break
     case 'enable':
-      emit('enable', props.data.id)
+      emit('enable', props.data.id as string)
       break
     case 'delete':
-      emit('delete', props.data.id)
+      emit('delete', props.data.id as string)
       break
   }
 }
@@ -95,7 +95,7 @@ function handleMenuClick({ key }: { key: string }) {
   <div class="knowledge-card">
     <div class="card-header flex items-center gap-sm">
       <div class="card-avatar flex-center" :class="{ disabled: !data.enabled }"><DatabaseOutlined /></div>
-      <div class="card-name flex-1 truncate" :title="data.name" @click="emit('view', data.id)">{{ data.name }}</div>
+      <div class="card-name flex-1 truncate" :title="data.name" @click="emit('view', data.id as string)">{{ data.name }}</div>
       <ADropdown :trigger="['hover']">
         <AButton type="text" size="small" v-permission="['EDIT','ADMIN']">
           <EllipsisOutlined />

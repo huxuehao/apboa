@@ -53,7 +53,7 @@ const modelTypeLabels: Record<string, string> = {
 /**
  * 表格列定义
  */
-const columns = [
+const columns:any = [
   {
     title: '名称',
     dataIndex: 'name',
@@ -162,7 +162,7 @@ function handleCreate() {
  * 处理编辑
  */
 async function handleEdit(record: ModelConfigVO) {
-  const response = await modelApi.configDetail(record.id)
+  const response = await modelApi.configDetail(record.id as string)
   currentData.value = response.data.data
   formVisible.value = true
 }
@@ -171,14 +171,14 @@ async function handleEdit(record: ModelConfigVO) {
  * 处理删除
  */
 async function handleDelete(record: ModelConfigVO) {
-  const used = await checkUsedWithAgent(record.id)
+  const used = await checkUsedWithAgent(record.id as string)
   if (used.length > 0) {
     Modal.confirm({
       title: '二次确认',
       content: `该模型正在被 [ ${used.join('、')} ] 智能体引用，删除后可能会影响上述智能体的正常使用！`,
       okText: '确认并继续删除',
       onOk: async () => {
-        await modelApi.configRemove([record.id])
+        await modelApi.configRemove([record.id] as string[])
         await fetchModelList()
       }
     })
@@ -189,7 +189,7 @@ async function handleDelete(record: ModelConfigVO) {
     title: '确认删除',
     content: '删除后无法恢复,是否继续?',
     onOk: async () => {
-      await modelApi.configRemove([record.id])
+      await modelApi.configRemove([record.id] as string[])
       message.success('删除成功')
       await fetchModelList()
     }
