@@ -15,6 +15,10 @@ import type { AgentDefinitionVO, WellKnownAgentConfig, NacosAgentConfig } from '
 import { A2aType } from '@/types'
 import * as agentApi from '@/api/agent'
 
+interface advancedDataType {
+  hook: string[],
+  enableMemory: boolean
+}
 /**
  * Props定义
  */
@@ -61,7 +65,7 @@ const basicData = ref({
 /**
  * 增强配置
  */
-const advancedData = ref({
+const advancedData = ref<advancedDataType>({
   hook: [],
   enableMemory: false
 })

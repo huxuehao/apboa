@@ -134,7 +134,7 @@ async function handleSubmit() {
     } as SystemPromptTemplate
 
     if (isEdit.value && props.data) {
-      entity.id = props.data.id
+      entity.id = props.data.id as string
       await promptApi.update(entity)
       message.success('更新成功')
     } else {

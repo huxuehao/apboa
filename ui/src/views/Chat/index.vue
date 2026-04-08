@@ -34,27 +34,27 @@ const showToolProcess = computed(() => agentDetail.value?.showToolProcess === tr
 const memoryActive = computed(() => {
   const id = agentDetail.value?.id ?? agentId.value
   chatStore.preferences // 依赖以保持响应性
-  return chatStore.getMemoryActive(id, accountId.value, enableMemory.value)
+  return chatStore.getMemoryActive(id as string, accountId.value as string, enableMemory.value)
 })
 const planActive = computed(() => {
   const id = agentDetail.value?.id ?? agentId.value
   chatStore.preferences
-  return chatStore.getPlanActive(id, accountId.value, enablePlanning.value)
+  return chatStore.getPlanActive(id as string, accountId.value as string, enablePlanning.value)
 })
 const toolProcessActive = computed(() => {
   const id = agentDetail.value?.id ?? agentId.value
   chatStore.preferences
-  return chatStore.getToolProcessActive(id, accountId.value, showToolProcess.value)
+  return chatStore.getToolProcessActive(id as string, accountId.value as string, showToolProcess.value)
 })
 const sidebarCollapsed = computed({
   get: () => {
     const id = agentDetail.value?.id ?? agentId.value
     chatStore.preferences
-    return chatStore.getSidebarCollapsed(id, accountId.value)
+    return chatStore.getSidebarCollapsed(id as string, accountId.value as string)
   },
   set: (v: boolean) => {
     const id = agentDetail.value?.id ?? agentId.value
-    chatStore.setSidebarCollapsed(id, accountId.value, v)
+    chatStore.setSidebarCollapsed(id as string, accountId.value as string, v)
   },
 })
 
@@ -63,17 +63,17 @@ const handleMemoryChange = (v: boolean) => {
     message.warning("关闭记忆后，所有工具调用将无需人工确认，自动执行")
   }
   const id = agentDetail.value?.id ?? agentId.value
-  chatStore.setMemoryActive(id, accountId.value, v)
+  chatStore.setMemoryActive(id as string, accountId.value as string, v)
 }
 
 const handlePlanChange = (v: boolean) => {
   const id = agentDetail.value?.id ?? agentId.value
-  chatStore.setPlanActive(id, accountId.value, v)
+  chatStore.setPlanActive(id as string, accountId.value as string, v)
 }
 
 const handelToolProcess = (v: boolean) => {
   const id = agentDetail.value?.id ?? agentId.value
-  chatStore.setToolProcessActive(id, accountId.value, v)
+  chatStore.setToolProcessActive(id as string, accountId.value as string, v)
 }
 
 // 会话列表管理

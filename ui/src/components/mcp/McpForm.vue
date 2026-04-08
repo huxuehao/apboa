@@ -258,7 +258,7 @@ async function handleSubmit() {
     }
 
     if (isEdit.value) {
-      entity.id = props.data!.id
+      entity.id = props.data!.id as string
       entity.enabled = props.data!.enabled
       entity.healthStatus = props.data!.healthStatus
       entity.lastHealthCheck = props.data!.lastHealthCheck

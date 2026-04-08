@@ -169,7 +169,7 @@ async function handleToggleEnabled(account: AccountVO) {
     content: `确定要${action}账户 "${account.nickname}" 吗？`,
     onOk: async () => {
       try {
-        await accountApi.toggleEnabled(account.id, !account.enabled)
+        await accountApi.toggleEnabled(account.id as string, !account.enabled)
         message.success(`${action}成功`)
         await fetchAccounts()
       } catch {
@@ -247,7 +247,7 @@ function handleDelete(account: AccountVO) {
     icon: null,
     onOk: async () => {
       try {
-        await accountApi.remove([account.id])
+        await accountApi.remove([account.id] as string[])
         message.success('删除成功')
         await fetchAccounts()
       } catch {
@@ -345,7 +345,7 @@ onMounted(() => {
             <AButton
               type="text"
               size="small"
-              @click="openResetPasswordModal(account.id)"
+              @click="openResetPasswordModal(account.id as string)"
             >
               重置密码
             </AButton>
@@ -354,7 +354,7 @@ onMounted(() => {
                 角色
               </AButton>
               <template #overlay>
-                <AMenu @click="(e:any) => handleMenuClick(e, account.id)">
+                <AMenu @click="(e:any) => handleMenuClick(e, account.id as string)">
                   <AMenuItem v-for="item in menuItems" :key="item.key">
                      <span style="display: flex; align-items: center; gap: 8px;">
                        {{ item.label }}

@@ -8,12 +8,12 @@
  * 基础实体类型
  */
 export interface BaseEntity {
-  id: string
-  enabled: boolean
-  createdAt: string
-  updatedAt: string
-  createdBy: string
-  updatedBy: string
+  id?: string
+  enabled?: boolean
+  createdAt?: string
+  updatedAt?: string
+  createdBy?: string
+  updatedBy?: string
 }
 
 /**

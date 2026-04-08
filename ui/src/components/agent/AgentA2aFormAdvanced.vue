@@ -190,8 +190,8 @@ defineExpose({
             <div class="checkbox-grid">
               <ACheckbox
                 v-for="hook in hooks"
-                :checked="formData.hook.includes(hook.id)"
-                @change="(e: any) => handleHookChange(hook.id, e.target.checked)"
+                :checked="formData.hook.includes(hook.id as string)"
+                @change="(e: any) => handleHookChange(hook.id as string, e.target.checked)"
                 :key="hook.id"
                 :value="hook.id"
                 class="checkbox-item"

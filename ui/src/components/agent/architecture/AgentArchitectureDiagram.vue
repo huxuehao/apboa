@@ -65,7 +65,7 @@ const nodeTypes = {
   'prompt': markRaw(PromptNode),
   'advanced-config': markRaw(AdvancedConfigNode),
   'sensitive-item': markRaw(SensitiveItemNode)
-}
+} as any
 
 /**
  * 布局配置

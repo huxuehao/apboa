@@ -196,7 +196,7 @@ async function handleSubmit() {
     } as ModelProvider
 
     if (isEdit.value && props.data) {
-      entity.id = props.data.id
+      entity.id = props.data.id as string
       await modelApi.providerUpdate(entity)
       message.success('更新成功')
     } else {

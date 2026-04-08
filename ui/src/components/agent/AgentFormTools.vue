@@ -115,7 +115,7 @@ const sensitivesByCategory = computed(() => {
  * 已选择的工具列表
  */
 const selectedTools = computed(() => {
-  return allTools.value.filter(t => formData.value.tool.includes(t.id))
+  return allTools.value.filter(t => formData.value.tool.includes(t.id as string))
 })
 
 /**
@@ -346,8 +346,8 @@ defineExpose({
             <div class="checkbox-grid">
               <ACheckbox
                 v-for="hook in hooks"
-                :checked="formData.hook.includes(hook.id)"
-                @change="(e: any) => handleHookChange(hook.id, e.target.checked)"
+                :checked="formData.hook.includes(hook.id as string)"
+                @change="(e: any) => handleHookChange(hook.id as string, e.target.checked)"
                 :key="hook.id"
                 :value="hook.id"
                 class="checkbox-item"
@@ -394,8 +394,8 @@ defineExpose({
             <div class="checkbox-grid">
               <ACheckbox
                 v-for="tool in toolsByCategory[category]"
-                :checked="formData.tool.includes(tool.id)"
-                @change="(e: any) => handleToolChange(tool.id, e.target.checked)"
+                :checked="formData.tool.includes(tool.id as string)"
+                @change="(e: any) => handleToolChange(tool.id as string, e.target.checked)"
                 :key="tool.id"
                 :value="tool.id"
                 class="checkbox-item"
@@ -438,8 +438,8 @@ defineExpose({
             <div class="checkbox-grid">
               <ACheckbox
                 v-for="skill in skillsByCategory[category]"
-                :checked="formData.skill.includes(skill.id)"
-                @change="(e: any) => handleSkillChange(skill.id, e.target.checked)"
+                :checked="formData.skill.includes(skill.id as string)"
+                @change="(e: any) => handleSkillChange(skill.id as string, e.target.checked)"
                 :key="skill.id"
                 :value="skill.id"
                 class="checkbox-item"
@@ -476,7 +476,7 @@ defineExpose({
               <ACheckbox
                 v-for="sensitive in sensitivesByCategory[category]"
                 :checked="formData.sensitiveWordConfigId === sensitive.id"
-                @change="(e: any) => handleSensitiveChange(sensitive.id, e.target.checked)"
+                @change="(e: any) => handleSensitiveChange(sensitive.id as string, e.target.checked)"
                 :key="sensitive.id"
                 :value="sensitive.id"
                 class="checkbox-item"

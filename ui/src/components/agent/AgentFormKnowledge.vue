@@ -194,8 +194,8 @@ defineExpose({
             <div class="checkbox-grid">
               <ACheckbox
                 v-for="kb in knowledgeBasesByType[type]"
-                :checked="formData.knowledgeBase.includes(kb.id)"
-                @change="(e: any) => handleKBChange(kb.id, e.target.checked)"
+                :checked="formData.knowledgeBase.includes(kb.id as string)"
+                @change="(e: any) => handleKBChange(kb.id as string, e.target.checked)"
                 :key="kb.id"
                 :value="kb.id"
                 class="checkbox-item"
@@ -224,8 +224,8 @@ defineExpose({
             <div class="checkbox-grid">
               <ACheckbox
                 v-for="mcp in mcpServersByProtocol[protocol]"
-                :checked="formData.mcp.includes(mcp.id)"
-                @change="(e: any) => handleMcpChange(mcp.id, e.target.checked)"
+                :checked="formData.mcp.includes(mcp.id as string)"
+                @change="(e: any) => handleMcpChange(mcp.id as string, e.target.checked)"
                 :key="mcp.id"
                 :value="mcp.id"
                 class="checkbox-item"
@@ -250,10 +250,10 @@ defineExpose({
           <div class="checkbox-grid">
             <ACheckbox
               v-for="agent in availableAgents"
-              :checked="formData.subAgent.includes(agent.id)"
+              :checked="formData.subAgent.includes(agent.id as string)"
               :key="agent.id"
               :value="agent.id"
-              @change="(e: any) => handleSubAgentChange(agent.id, e.target.checked)"
+              @change="(e: any) => handleSubAgentChange(agent.id as string, e.target.checked)"
               class="checkbox-item"
             >
               <div class="item-info">

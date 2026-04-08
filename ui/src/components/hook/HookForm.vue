@@ -127,7 +127,7 @@ async function handleSubmit() {
     } as HookConfig
 
     if (isEdit.value && props.data) {
-      entity.id = props.data.id
+      entity.id = props.data.id as string
       entity.enabled = props.data.enabled
       entity.classPath = props.data.classPath || ''
       entity.priority = props.data.priority ?? 0

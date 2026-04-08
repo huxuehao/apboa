@@ -96,19 +96,19 @@ const menuItems = computed(() => {
 function handleMenuClick({ key }: { key: string }) {
   switch (key) {
     case 'view':
-      emit('view', props.data.id)
+      emit('view', props.data.id as string)
       break
     case 'edit':
-      emit('edit', props.data.id)
+      emit('edit', props.data.id as string)
       break
     case 'enable':
-      emit('enable', props.data.id)
+      emit('enable', props.data.id as string)
       break
     case 'config':
-      emit('configModels', props.data.id, props.data.name, props.data.type)
+      emit('configModels', props.data.id as string, props.data.name, props.data.type)
       break
     case 'delete':
-      emit('delete', props.data.id)
+      emit('delete', props.data.id as string)
       break
   }
 }
@@ -117,7 +117,7 @@ function handleMenuClick({ key }: { key: string }) {
  * 处理配置模型按钮点击
  */
 function handleConfigClick() {
-  emit('configModels', props.data.id, props.data.name, props.data.type)
+  emit('configModels', props.data.id as string, props.data.name, props.data.type)
 }
 </script>
 
@@ -125,7 +125,7 @@ function handleConfigClick() {
   <div class="provider-card">
     <div class="card-header flex items-center gap-sm">
       <div class="card-avatar flex-center" :class="{ disabled: !data.enabled }"><ApiOutlined /></div>
-      <div class="card-name flex-1 truncate" :title="data.name" @click="emit('view', data.id)">{{ data.name }}</div>
+      <div class="card-name flex-1 truncate" :title="data.name" @click="emit('view', data.id as string)">{{ data.name }}</div>
       <ADropdown :trigger="['hover']">
         <AButton type="text" size="small">
           <EllipsisOutlined />

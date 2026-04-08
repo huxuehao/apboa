@@ -177,7 +177,7 @@ async function handleSubmit() {
     } as SkillPackage
 
     if (isEdit.value && props.data) {
-      entity.id = props.data.id
+      entity.id = props.data.id as string
       await skillApi.update(entity)
       message.success('修改成功')
     } else {
