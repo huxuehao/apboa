@@ -1,6 +1,7 @@
 package com.hxh.apboa.skill.service;
 
 import com.hxh.apboa.common.entity.SkillPackage;
+import com.hxh.apboa.common.vo.SkillPackageVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -29,4 +30,12 @@ public interface SkillPackageService extends IService<SkillPackage> {
      * @return 是否成功
      */
     boolean doUpdate(SkillPackage entity);
+
+    /**
+     * 获取技能包详情（包含关联的工具ID列表）
+     *
+     * @param id 技能包ID
+     * @return 技能包VO
+     */
+    SkillPackageVO getDetail(Long id);
 }

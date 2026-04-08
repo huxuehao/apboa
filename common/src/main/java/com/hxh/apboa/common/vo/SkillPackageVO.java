@@ -30,4 +30,5 @@ public class SkillPackageVO implements SerializableEnable {
     private Long createdBy;
     private Long updatedBy;
     private List<Object> used;
+    private List<Long> tools;
 }

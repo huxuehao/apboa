@@ -57,8 +57,7 @@ public class ToolkitFactory {
 
     public Toolkit getToolkit(AgentDefinition agentDefinition) {
         List<Long> toolIds = agentToolService.getToolIds(agentDefinition.getId());
-
-        Toolkit toolkit = new Toolkit();
+        Toolkit toolkit = getToolkit(toolIds);
         if (!toolIds.isEmpty()) {
             // 获取是否开启记忆
             Boolean isMemoryActive = AgentContext.getIfExists().map(AgentContext::isMemoryActive).orElse(false);
@@ -94,6 +93,35 @@ public class ToolkitFactory {
             registerSubAgents(toolkit, subAgentIds);
         }
 
+        return toolkit;
+    }
+
+    public Toolkit getToolkit(List<Long> toolIds) {
+        Toolkit toolkit = new Toolkit();
+        if (!toolIds.isEmpty()) {
+            // 获取是否开启记忆
+            Boolean isMemoryActive = AgentContext.getIfExists().map(AgentContext::isMemoryActive).orElse(false);
+            // 注册工具
+            toolService.listByIds(toolIds)
+                    .stream()
+                    .filter(ToolConfig::getEnabled)
+                    .forEach(toolConfig -> {
+                        // 内置工具注册
+                        if (toolConfig.getToolType() == ToolType.BUILTIN) {
+                            toolkit.registerTool(ToolsRegister.getTool(toolConfig.getClassPath()));
+                        }
+                        // 动态工具注册
+                        else {
+                            toolkit.registerTool(new DynamicAgentTool(toolConfig));
+                        }
+
+                        if (toolConfig.getNeedConfirm() && isMemoryActive) {
+                            IConfirmationHook.setNeedConfirmTool(toolConfig.getToolId());
+                        } else {
+                            IConfirmationHook.removeNeedConfirmTool(toolConfig.getToolId());
+                        }
+                    });
+        }
         return toolkit;
     }
 
