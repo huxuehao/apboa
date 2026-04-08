@@ -299,39 +299,36 @@ watch(() => props.visible, (val) => {
           v-if="visible"
           v-model="form.skillContent"
           language="markdown"
-          height="350px"
+          height="300px"
         />
       </AFormItem>
-
-      <AFormItem label="参考资料">
-        <div class="flex items-center gap-sm">
-          <span class="text-secondary" :class="{'text-success': referencesCount > 0}">{{ referencesCount }} 项</span>
-          <AButton type="text" @click="openReferencesEditor">编辑</AButton>
-        </div>
-      </AFormItem>
-
-      <AFormItem label="示例代码">
-        <div class="flex items-center gap-sm">
-          <span class="text-secondary" :class="{'text-success': examplesCount > 0}">{{ examplesCount }} 项</span>
-          <AButton type="text" @click="openExamplesEditor">编辑</AButton>
-        </div>
-      </AFormItem>
-
-      <AFormItem label="执行脚本">
-        <div class="flex items-center gap-sm">
-          <span class="text-secondary" :class="{'text-success': scriptsCount > 0}">{{ scriptsCount }} 项</span>
-          <AButton type="text" @click="openScriptsEditor">编辑</AButton>
-        </div>
-      </AFormItem>
+      <ARow :gutter="16">
+        <ACol :span="8">
+          <AFormItem label="参考资料">
+            <div class="flex items-center gap-sm">
+              <span class="text-secondary" :class="{'text-success': referencesCount > 0}">{{ referencesCount }} 项</span>
+              <AButton type="text" @click="openReferencesEditor">编辑</AButton>
+            </div>
+          </AFormItem>
+        </ACol>
+        <ACol :span="8">
+          <AFormItem label="示例代码">
+            <div class="flex items-center gap-sm">
+              <span class="text-secondary" :class="{'text-success': examplesCount > 0}">{{ examplesCount }} 项</span>
+              <AButton type="text" @click="openExamplesEditor">编辑</AButton>
+            </div>
+          </AFormItem>
+        </ACol>
+        <ACol :span="8">
+          <AFormItem label="执行脚本">
+            <div class="flex items-center gap-sm">
+              <span class="text-secondary" :class="{'text-success': scriptsCount > 0}">{{ scriptsCount }} 项</span>
+              <AButton type="text" @click="openScriptsEditor">编辑</AButton>
+            </div>
+          </AFormItem>
+        </ACol>
+      </ARow>
     </AForm>
-
-    <ResourceEditor
-      ref="referencesEditorRef"
-      v-model="form.references"
-      title="编辑参考资料"
-      prefix="references"
-      :show-language-selector="false"
-    />
 
     <ResourceEditor
       ref="examplesEditorRef"
