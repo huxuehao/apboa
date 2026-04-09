@@ -522,7 +522,7 @@ onMounted(() => {
                   >
                     <div class="tool-item-header">
                       <span class="tool-item-name" :title="item.title">{{ item.title }}</span>
-                      <ATag size="small" color="blue" class="tool-item-tag">{{ item.category }}</ATag>
+                      <ATag :bordered="false" size="small" color="blue" class="tool-item-tag">{{ item.category }}</ATag>
                     </div>
                     <div class="tool-item-desc" :title="item.description || '暂无描述'">{{ item.description || '暂无描述' }}</div>
                   </div>
@@ -538,7 +538,7 @@ onMounted(() => {
                   >
                     <div class="tool-item-header">
                       <span class="tool-item-name" :title="item.title">{{ item.title }}</span>
-                      <ATag size="small" color="blue" class="tool-item-tag">{{ item.category }}</ATag>
+                      <ATag :bordered="false" size="small" color="blue" class="tool-item-tag">{{ item.category }}</ATag>
                     </div>
                     <div class="tool-item-desc" :title="item.description || '暂无描述'">{{ item.description || '暂无描述' }}</div>
                   </div>
@@ -551,11 +551,19 @@ onMounted(() => {
     </AForm>
 
     <ResourceEditor
+      ref="referencesEditorRef"
+      v-model="form.references"
+      title="编辑参考资料"
+      prefix="references"
+      :show-language-selector="false"
+    />
+
+    <ResourceEditor
       ref="examplesEditorRef"
       v-model="form.examples"
       title="编辑示例代码"
       prefix="examples"
-      :show-language-selector="true"
+      :show-language-selector="false"
     />
 
     <ResourceEditor
@@ -563,7 +571,7 @@ onMounted(() => {
       v-model="form.scripts"
       title="编辑执行脚本"
       prefix="scripts"
-      :show-language-selector="true"
+      :show-language-selector="false"
     />
   </ApboaModal>
 </template>
