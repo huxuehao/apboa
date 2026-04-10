@@ -2,7 +2,9 @@ package com.hxh.apboa.resource.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.hxh.apboa.common.config.auth.ChatKeyAccess;
 import com.hxh.apboa.common.config.auth.RoleNeed;
+import com.hxh.apboa.common.config.auth.SkAccess;
 import com.hxh.apboa.common.entity.Attach;
 import com.hxh.apboa.common.entity.AttachLog;
 import com.hxh.apboa.common.enums.Role;
@@ -70,6 +72,8 @@ public class AttachController {
     /**
      * 上传
      */
+    @SkAccess
+    @ChatKeyAccess
     @PostMapping(value = "/upload", name = "上传")
     public R<String> upload(@RequestParam("file") MultipartFile file) {
         final Attach attach = attachService.upload(file, file.getOriginalFilename());
@@ -94,6 +98,8 @@ public class AttachController {
     /**
      * 下载
      */
+    @SkAccess
+    @ChatKeyAccess
     @GetMapping(value = "download/{id}", name = "下载")
     public void download(@PathVariable("id") Long id, HttpServletResponse response) {
         Attach attach = attachService.getById(id);

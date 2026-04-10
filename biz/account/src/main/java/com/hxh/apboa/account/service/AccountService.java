@@ -83,4 +83,12 @@ public interface AccountService extends IService<Account> {
      * @param roles 角色
      */
     boolean changeRole(Long id, List<Role> roles);
+
+    /**
+     * 通过ChatKey换取Token
+     *
+     * @param chatKey 对话Key
+     * @return token，如果验证失败返回null
+     */
+    LoginResponse chatKeyToken(String chatKey);
 }

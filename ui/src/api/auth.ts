@@ -68,3 +68,11 @@ export function updateProfile(data: UpdateProfileRequest) {
 export function adminCreateAccount(data: RegisterRequest) {
   return request.post<ApiResponse<boolean>>('/api/auth/admin/create-account', data)
 }
+
+/**
+ * 通过ChatKey换取Token
+ * POST /auth/chat-key-token/{chatKey}
+ */
+export function chatKeyToken(chatKey: String) {
+  return request.post<ApiResponse<LoginResponse>>(`/api/auth/chat-key-token/${chatKey}`)
+}

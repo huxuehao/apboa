@@ -14,12 +14,20 @@ import RenameModal from '@/components/chat/RenameModal.vue'
 import type { DisplayMessage, ChatMessageVO, UploadedFileItem } from '@/types'
 import * as chatSessionApi from '@/api/chatSession'
 
+const props = withDefaults(defineProps<{
+  showAccount: boolean
+  chatAgentId: string | null | undefined
+}>(), {
+  showAccount: true,
+  chatAgentId: null
+})
+
 const route = useRoute()
 const accountStore = useAccountStore()
 const chatStore = useChatStore()
 const userInfo = computed(() => accountStore.userInfo)
 
-const agentId = computed(() => (route.params.agentId as string) || '')
+const agentId = computed(() => (props.chatAgentId || route.params.agentId) as string || '')
 
 // 智能体详情
 const { agentDetail, allowFileType } = useAgentDetail(agentId)
@@ -318,6 +326,7 @@ onMounted(() => {
       :is-running="isRunning"
       :loading="sessionsLoading"
       :has-more="sessionsHasMore"
+      :show-account="showAccount"
       @toggle-collapse="toggleSidebar"
       @new-session="handleNewSession"
       @select-session="handleSelectSession"

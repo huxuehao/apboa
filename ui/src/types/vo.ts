@@ -30,10 +30,10 @@ export interface AccountVO {
   username: string
   enabled: boolean
   roles: Role[]
-  createdAt: string
-  updatedAt: string
-  createdBy: string
-  updatedBy: string
+  createdAt?: string
+  updatedAt?: string
+  createdBy?: string
+  updatedBy?: string
 }
 
 /**

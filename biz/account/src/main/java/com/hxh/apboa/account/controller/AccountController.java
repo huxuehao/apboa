@@ -2,7 +2,9 @@ package com.hxh.apboa.account.controller;
 
 import com.hxh.apboa.account.service.AccountRoleService;
 import com.hxh.apboa.account.service.AccountService;
+import com.hxh.apboa.common.config.auth.ChatKeyAccess;
 import com.hxh.apboa.common.config.auth.RoleNeed;
+import com.hxh.apboa.common.config.auth.SkAccess;
 import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.dto.AccountDTO;
 import com.hxh.apboa.common.dto.RegisterRequest;
@@ -54,6 +56,8 @@ public class AccountController {
     /**
      * 详情
      */
+    @SkAccess
+    @ChatKeyAccess
     @GetMapping("/{id}")
     public R<AccountVO> detail(@PathVariable("id") Long id) {
         Account entity = accountService.getById(id);

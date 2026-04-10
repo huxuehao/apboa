@@ -166,7 +166,9 @@ export interface UserDetail {
  */
 export interface LoginResponse {
   accessToken: string
+  accessTokenTTL: string
   refreshToken: string
+  refreshTokenTTL: string
   userDetail: UserDetail
 }
 

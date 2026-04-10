@@ -3,7 +3,9 @@ package com.hxh.apboa.agent.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hxh.apboa.agent.mapper.IJobInfoMapper;
 import com.hxh.apboa.agent.service.AgentDefinitionService;
+import com.hxh.apboa.common.config.auth.ChatKeyAccess;
 import com.hxh.apboa.common.config.auth.RoleNeed;
+import com.hxh.apboa.common.config.auth.SkAccess;
 import com.hxh.apboa.common.dto.AgentDefinitionDTO;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.AgentStudio;
@@ -70,6 +72,8 @@ public class AgentDefinitionController {
     /**
      * 详情
      */
+    @SkAccess
+    @ChatKeyAccess
     @GetMapping("/{id}")
     public R<AgentDefinitionVO> detail(@PathVariable("id") Long id) {
         AgentDefinitionVO vo = agentDefinitionService.agentDefinitionDetail(id);
@@ -128,6 +132,8 @@ public class AgentDefinitionController {
         return R.data(agentDefinitionService.listTags());
     }
 
+    @SkAccess
+    @ChatKeyAccess
     @GetMapping("/{id}/allow/file-type")
     public R<List<String>> allowFileType(@PathVariable("id") Long id) {
         return R.data(agentDefinitionService.allowFileType(id));
