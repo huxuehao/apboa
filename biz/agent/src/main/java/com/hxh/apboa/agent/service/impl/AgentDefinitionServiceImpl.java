@@ -96,6 +96,12 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         vo.setId(agentDefinition.getId());
 
         saveSubItems(vo);
+
+        if (vo.getEnabled()) {
+            messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(vo.getId()));
+        } else {
+            messagePublisher.publish(RedisChannelTopic.AGENT_UNREGISTER_CHANNEL, vo.getAgentCode());
+        }
         return true;
     }
 
