@@ -150,10 +150,18 @@ instance.interceptors.response.use(
         const refreshResponse = await refreshTokenApi(refreshToken);
 
         const newToken = refreshResponse.data.data.accessToken;
+        const newTokenTTL = refreshResponse.data.data.accessTokenTTL;
         const newRefreshToken = refreshResponse.data.data.refreshToken;
+        const newRefreshTokenTTL = refreshResponse.data.data.refreshTokenTTL;
 
-        setToken(newToken);
-        setRefreshToken(newRefreshToken);
+        setToken({
+          value: newToken,
+          ttl: newTokenTTL
+        });
+        setRefreshToken({
+          value: newRefreshToken,
+          ttl: newRefreshTokenTTL
+        });
 
         // 更新原请求的令牌
         originalRequest.headers[setting.tokenHeader] = `Bearer ${newToken}`;
