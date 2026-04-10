@@ -45,3 +45,9 @@ export interface ApiResponse<T = unknown> {
   data: T
   msg: string
 }
+
+
+export interface TokenType {
+  value: string,
+  ttl: string
+}

@@ -1,6 +1,8 @@
 package com.hxh.apboa.core.endpoint;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hxh.apboa.common.config.auth.ChatKeyAccess;
+import com.hxh.apboa.common.config.auth.SkAccess;
 import com.hxh.apboa.common.entity.ToolConfig;
 import com.hxh.apboa.common.enums.ToolType;
 import com.hxh.apboa.common.r.R;
@@ -28,6 +30,8 @@ public class EndPoint {
     private final ToolService toolService;
     private final ToolReflectionInvoker toolReflectionInvoker;
 
+    @SkAccess
+    @ChatKeyAccess
     @PostMapping("/do/{toolName}/tool")
     public R<?> doTool(@PathVariable("toolName") String toolName , @RequestBody LinkedHashMap<String, Object> args) {
         ToolConfig toolConfig = toolService.getOne(new LambdaQueryWrapper<ToolConfig>().eq(ToolConfig::getToolId, toolName));

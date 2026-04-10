@@ -57,6 +57,7 @@ export const RouteNames = {
   // 智能体对话
   CHAT: 'Chat',
   CHAT_HISTORY: 'ChatHistory',
+  COMMUNICATION: 'Communication',
 
   // 错误页面
   NOT_FOUND: 'NotFound'
@@ -110,6 +111,7 @@ export const RoutePaths = {
   // 智能体对话
   CHAT: '/chat',
   CHAT_HISTORY: '/chat/history',
+  COMMUNICATION: '/communication',
 
   // 错误页面
   NOT_FOUND: '/:pathMatch(.*)*',

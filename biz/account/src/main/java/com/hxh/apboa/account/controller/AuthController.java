@@ -6,8 +6,6 @@ import com.hxh.apboa.common.config.auth.RoleNeed;
 import com.hxh.apboa.common.dto.*;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.r.R;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,9 +26,8 @@ public class AuthController {
      */
     @PassAuth
     @PostMapping("/login")
-    public R<LoginResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public R<LoginResponse> login(@RequestBody LoginRequest request) {
         LoginResponse res = accountService.login(request);
-//        setCookie(response, res.getAccessToken());
         return R.data(res, "登录成功");
     }
 
@@ -49,9 +46,8 @@ public class AuthController {
      */
     @PassAuth
     @PostMapping("/refresh-token")
-    public R<LoginResponse> refreshToken(@RequestBody RefreshTokenRequest request, HttpServletResponse response) {
+    public R<LoginResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
         LoginResponse res = accountService.refreshToken(request);
-//        setCookie(response, res.getAccessToken());
         return R.data(res, "刷新成功");
     }
 
@@ -91,12 +87,12 @@ public class AuthController {
         return R.data(accountService.register(request));
     }
 
-//    private void setCookie(HttpServletResponse response, String accessToken) {
-//        Cookie accessTokenCookie = new Cookie("apboa-access-token", accessToken);
-//        accessTokenCookie.setHttpOnly(true);  // 防止XSS攻击
-//        accessTokenCookie.setSecure(true);    // 仅HTTPS传输
-//        accessTokenCookie.setPath("/");       // 整个应用有效
-//        accessTokenCookie.setMaxAge(-1);      // -1 表示会话级Cookie，浏览器关闭前一直有效
-//        response.addCookie(accessTokenCookie);
-//    }
+    /**
+     * 通过ChatKey换取Token
+     */
+    @PassAuth
+    @PostMapping("/chat-key-token/{chatKey}")
+    public R<LoginResponse> chatKeyToken(@PathVariable("chatKey") String chatKey) {
+        return R.data(accountService.chatKeyToken(chatKey));
+    }
 }

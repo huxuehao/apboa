@@ -169,11 +169,19 @@ export class AgentClient {
 
               const data = await refreshResponse.json()
               const newToken = data.data?.accessToken || data.accessToken
+              const newTokenTTL = data.data?.accessToken || data.accessToken
               const newRefreshToken = data.data?.refreshToken || data.refreshToken
+              const newRefreshTokenTTL = data.data?.refreshToken || data.refreshToken
 
               if (newToken && newRefreshToken) {
-                setToken(newToken);
-                setRefreshToken(newRefreshToken);
+                setToken({
+                  value: newToken,
+                  ttl: newTokenTTL
+                });
+                setRefreshToken({
+                  value: newRefreshToken,
+                  ttl: newRefreshTokenTTL
+                });
                 // 重试原始请求
                 await executeRequest()
                 return

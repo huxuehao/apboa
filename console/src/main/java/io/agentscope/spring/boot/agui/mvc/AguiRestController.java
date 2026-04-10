@@ -15,6 +15,7 @@
  */
 package io.agentscope.spring.boot.agui.mvc;
 
+import com.hxh.apboa.common.config.auth.ChatKeyAccess;
 import com.hxh.apboa.common.config.auth.SkAccess;
 import io.agentscope.core.agui.model.RunAgentInput;
 import org.springframework.http.MediaType;
@@ -68,6 +69,7 @@ public class AguiRestController {
      * @return An SseEmitter for streaming AG-UI events
      */
     @SkAccess
+    @ChatKeyAccess
     @PostMapping(
             value = "${agentscope.agui.path-prefix:/agui}/run",
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -92,6 +94,7 @@ public class AguiRestController {
      * @return An SseEmitter for streaming AG-UI events
      */
     @SkAccess
+    @ChatKeyAccess
     @PostMapping(
             value = "${agentscope.agui.path-prefix:/agui}/run/{agentId}",
             consumes = MediaType.APPLICATION_JSON_VALUE,

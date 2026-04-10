@@ -5,7 +5,7 @@
  */
 <script setup lang="ts">
 import { ref, computed, defineComponent } from 'vue'
-import { PlusOutlined } from '@ant-design/icons-vue'
+import {InfoCircleOutlined, PlusOutlined} from '@ant-design/icons-vue'
 
 /**
  * Props定义
@@ -160,7 +160,12 @@ defineExpose({
       <AInput v-model:value="formData.name" placeholder="请输入智能体名称" />
     </AFormItem>
 
-    <AFormItem label="智能体编号" name="agentCode">
+    <AFormItem name="agentCode">
+      <template #label>
+        <ATooltip title="“智能体编号”将会在agui接口和外置对话界面中使用，请谨慎填写。您修改“智能体编号”后需要重新生成“外置对话链接”。">
+          <span>智能体编号</span><InfoCircleOutlined class="text-secondary cursor-pointer" />
+        </ATooltip>
+      </template>
       <AInput v-model:value="formData.agentCode" placeholder="请输入智能体编号，如: my-agent-001" />
     </AFormItem>
 

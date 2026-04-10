@@ -72,15 +72,29 @@ export const useAccountStore = defineStore('account', () => {
 
 
   /**
+   * 刷新访问凭证
+   * @param data
+   */
+  function setAccessInfo(data: LoginResponse) {
+    // 保存token
+    accessToken.value = data.accessToken
+    refreshToken.value = data.refreshToken
+    setToken({
+      value: data.accessToken,
+      ttl: data.accessTokenTTL
+    })
+    setRefreshToken({
+      value: data.refreshToken,
+      ttl: data.refreshTokenTTL
+    })
+  }
+
+  /**
    * 刷新登录
    * @param data
    */
   async function refreshLogin(data: LoginResponse) {
-    // 保存token
-    accessToken.value = data.accessToken
-    refreshToken.value = data.refreshToken
-    setToken(data.accessToken)
-    setRefreshToken(data.refreshToken)
+    setAccessInfo(data)
 
     // 如果需要完整的用户信息，可以调用详情接口
     if (data.userDetail?.id) {
@@ -259,12 +273,16 @@ export const useAccountStore = defineStore('account', () => {
   function initStore(): void {
     const token = getToken()
     const refresh = getRefreshToken()
+    const user = getUser()
 
     if (token) {
       accessToken.value = token
     }
     if (refresh) {
       refreshToken.value = refresh
+    }
+    if (user) {
+      userInfo.value = user
     }
   }
 
@@ -287,6 +305,7 @@ export const useAccountStore = defineStore('account', () => {
     getRefresh,
     login,
     register,
+    refreshLogin,
     refreshAccessToken,
     logout,
     changePassword,
@@ -294,6 +313,7 @@ export const useAccountStore = defineStore('account', () => {
     fetchAccountDetail,
     fetchCurrentUserInfo,
     setUserInfo,
+    setAccessInfo,
     clearUserData,
     hasRole,
     hasAnyRole,

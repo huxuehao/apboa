@@ -28,9 +28,19 @@ public class LoginResponse implements Serializable {
     private String accessToken;
 
     /**
+     * 到期时间（毫秒）
+     */
+    private Long accessTokenTTL;
+
+    /**
      * 刷新令牌
      */
     private String refreshToken;
+
+    /**
+     * 到期时间（毫秒）
+     */
+    private Long refreshTokenTTL;
 
     /**
      * 用户详情

@@ -34,6 +34,15 @@ const commonRoutes: AppRouteRecordRaw[] = [
     },
   },
   {
+    path: `${RoutePaths.COMMUNICATION}/:chatKey`,
+    name: RouteNames.COMMUNICATION,
+    component: () => import('@/views/Communication/index.vue'),
+    meta: {
+      title: '对话',
+      hidden: true,
+    },
+  },
+  {
     path: RoutePaths.PREVIEW,
     name: RouteNames.PREVIEW,
     component: () => import('@/pages/AntdPreview.vue'),

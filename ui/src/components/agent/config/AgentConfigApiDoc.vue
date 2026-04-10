@@ -4,13 +4,79 @@
  * @component
  */
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { CopyOutlined, CheckOutlined, DownOutlined, RightOutlined, KeyOutlined, LinkOutlined, ThunderboltOutlined } from '@ant-design/icons-vue'
-import { message } from 'ant-design-vue'
+import { ref, computed, watch } from 'vue'
+import { CopyOutlined, CheckOutlined, DownOutlined, RightOutlined, KeyOutlined, LinkOutlined, ThunderboltOutlined, SyncOutlined, GlobalOutlined } from '@ant-design/icons-vue'
+import { message, Modal } from 'ant-design-vue'
+import { getChatKey } from '@/api/agentChatKey'
 
 const props = defineProps<{
+  agentId?: string | number
   agentCode: string
 }>()
+
+/**
+ * 外置对话链接的chatKey
+ */
+const chatKey = ref<string>('')
+const chatKeyLoading = ref(false)
+
+/**
+ * 外置对话链接
+ */
+const externalChatUrl = computed(() => {
+  if (!chatKey.value) return ''
+  const loc = window.location
+  return `${loc.protocol}//${loc.host}/#/communication/${chatKey.value}`
+})
+
+/**
+ * 加载chatKey
+ */
+async function loadChatKey(refresh: boolean = false) {
+  if (!props.agentId) return
+  
+  chatKeyLoading.value = true
+  try {
+    const res = await getChatKey(props.agentId, refresh)
+    if (res.data.data) {
+      chatKey.value = res.data.data
+    }
+  } catch (error) {
+    console.error('获取chatKey失败:', error)
+    message.error('获取对话链接失败')
+  } finally {
+    chatKeyLoading.value = false
+  }
+}
+
+/**
+ * 刷新chatKey（带确认提示）
+ */
+function handleRefreshChatKey() {
+  Modal.confirm({
+    title: '刷新确认',
+    content: '刷新后，之前的对话链接将失效，已分享的链接将无法继续访问。确定要刷新吗？',
+    okText: '确定刷新',
+    cancelText: '取消',
+    okButtonProps: { danger: true },
+    onOk: () => {
+      loadChatKey(true)
+    }
+  })
+}
+
+/**
+ * 监听agentId变化，自动加载chatKey
+ */
+watch(
+  () => props.agentId,
+  (newVal) => {
+    if (newVal) {
+      loadChatKey()
+    }
+  },
+  { immediate: true }
+)
 
 /**
  * 访问路径
@@ -46,6 +112,16 @@ function toggleEndpoint(id: string) {
     expandedEndpoints.value.add(id)
   }
 }
+
+/**
+ * 智能体对话接口 Request Body 折叠状态
+ */
+const aguiBodyExpanded = ref(false)
+
+/**
+ * 智能体对话接口 Request Example 折叠状态
+ */
+const aguiExampleExpanded = ref(false)
 
 /**
  * 智能体对话接口请求体示例
@@ -235,6 +311,52 @@ const endpoints = [
 
 <template>
   <div class="api-doc">
+    <!-- 外置对话链接 -->
+    <div class="api-doc-section">
+      <div class="api-doc-title">
+        <GlobalOutlined style="margin-right: 8px;" />外置对话链接
+      </div>
+
+      <div class="api-info-box success">
+        <div style="margin-bottom: 8px; font-weight: 600;">外置对话入口</div>
+        <div v-if="chatKeyLoading" style="padding: 12px 0;">
+          <ASpin size="small" />
+          <span style="margin-left: 8px; color: var(--color-text-secondary);">加载中...</span>
+        </div>
+        <template v-else-if="externalChatUrl">
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <code style="font-size: 13px; word-break: break-all; flex: 1;">{{ externalChatUrl }}</code>
+            <AButton
+              type="text"
+              size="small"
+              @click="copyToClipboard(externalChatUrl, 'external-url')"
+            >
+              <template #icon>
+                <CheckOutlined v-if="copiedKey === 'external-url'" style="color: #52c41a;" />
+                <CopyOutlined v-else />
+              </template>
+            </AButton>
+            <ATooltip title="刷新链接（原链接将失效）">
+              <AButton
+                type="text"
+                size="small"
+                :loading="chatKeyLoading"
+                @click="handleRefreshChatKey"
+              >
+                <template #icon><SyncOutlined /></template>
+              </AButton>
+            </ATooltip>
+          </div>
+        </template>
+        <div v-else style="padding: 12px 0; color: var(--color-text-secondary);">
+          暂无对话链接
+        </div>
+        <div style="font-size: 12px; color: #546e7a; margin-top: 8px;">
+          该链接可直接在外部浏览器中打开进行对话，无需登录即可使用。
+        </div>
+      </div>
+    </div>
+
     <!-- 访问入口 -->
     <div class="api-doc-section">
       <div class="api-doc-title">
@@ -261,7 +383,20 @@ const endpoints = [
           该接口为智能体的主要对话入口，支持流式和非流式响应。
         </div>
 
-        <div class="endpoint-detail-title" style="margin-top: 12px;">Request Body</div>
+        <div
+          class="agui-collapse-header"
+          style="margin-top: 12px;"
+          @click="aguiBodyExpanded = !aguiBodyExpanded"
+        >
+          <component
+            :is="aguiBodyExpanded ? DownOutlined : RightOutlined"
+            class="agui-collapse-arrow"
+          />
+          <span class="agui-collapse-title">{{aguiBodyExpanded ? '折叠' : '展开'}} Request Body</span>
+        </div>
+
+        <template v-if="aguiBodyExpanded">
+        <div class="endpoint-detail-title">Request Body</div>
         <table class="param-table">
           <thead>
             <tr>
@@ -317,7 +452,22 @@ const endpoints = [
           </tbody>
         </table>
 
-        <div class="endpoint-detail-title" style="margin-top: 12px;">Request Example</div>
+        </template>
+
+        <div
+          class="agui-collapse-header"
+          style="margin-top: 12px;"
+          @click="aguiExampleExpanded = !aguiExampleExpanded"
+        >
+          <component
+            :is="aguiExampleExpanded ? DownOutlined : RightOutlined"
+            class="agui-collapse-arrow"
+          />
+          <span class="agui-collapse-title">{{aguiExampleExpanded ? '折叠' : '展开'}} Request Example</span>
+        </div>
+
+        <template v-if="aguiExampleExpanded">
+        <div class="endpoint-detail-title">Request Example</div>
         <div class="code-block" style="margin: 0;">{{ aguiBodyExample }}<span
           class="code-copy-btn"
           style="position: absolute; top: 8px; right: 8px; cursor: pointer;"
@@ -326,6 +476,7 @@ const endpoints = [
           <CheckOutlined v-if="copiedKey === 'agui-body'" style="color: #a6e3a1;" />
           <CopyOutlined v-else style="color: #a6adc8;" />
         </span></div>
+        </template>
       </div>
     </div>
 
@@ -434,4 +585,27 @@ const endpoints = [
 
 <style scoped lang="scss">
 @use '@/styles/agent/config-panel.scss' as *;
+
+.agui-collapse-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.agui-collapse-arrow {
+  font-size: 10px;
+}
+
+.agui-collapse-title {
+  font-size: 13px;
+  font-weight: 600;
+}
 </style>

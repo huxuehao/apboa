@@ -12,6 +12,7 @@ defineProps<{
   isRunning: boolean
   loading: boolean
   hasMore: boolean
+  showAccount: boolean
 }>()
 
 defineEmits<{
@@ -65,7 +66,7 @@ defineEmits<{
         />
       </div>
     </div>
-    <div class="chat-sidebar-footer">
+    <div class="chat-sidebar-footer" v-if="showAccount">
       <div class="chat-sidebar-user-avatar" :title="userNickname || '用户'">
         {{ (userNickname || 'U').charAt(0).toUpperCase() }}
       </div>

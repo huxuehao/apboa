@@ -41,6 +41,13 @@ export function setupRouterGuard(router: Router): void {
     // 设置页面标题
     setPageTitle(to.meta?.title as string)
 
+    // 放行“外置对话链接”
+    if (to.path.startsWith('/communication/')) {
+      next()
+      NProgress.done()
+      return
+    }
+
     const accountStore = useAccountStore()
     const hasToken = accountStore.isLoggedIn
 

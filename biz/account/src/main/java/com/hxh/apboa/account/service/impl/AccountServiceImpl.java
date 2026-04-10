@@ -1,14 +1,18 @@
 package com.hxh.apboa.account.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.hxh.apboa.account.mapper.AccountMapper;
 import com.hxh.apboa.account.service.AccountRoleService;
 import com.hxh.apboa.account.service.AccountService;
+import com.hxh.apboa.agent.service.AgentChatKeyService;
+import com.hxh.apboa.agent.service.AgentDefinitionService;
 import com.hxh.apboa.common.UserDetail;
 import com.hxh.apboa.common.config.auth.AuthInterceptor;
 import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.dto.*;
 import com.hxh.apboa.common.entity.Account;
 import com.hxh.apboa.common.entity.AccountRole;
+import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.enums.Role;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -18,11 +22,6 @@ import com.hxh.apboa.common.message.AccountRoleChangeMessage;
 import com.hxh.apboa.common.util.*;
 import com.hxh.apboa.websocket.model.WsServerMessage;
 import com.hxh.apboa.websocket.service.WebSocketPushService;
-//import com.hxh.apboa.ws.config.ApboaWebSocketSessionManager;
-//import com.hxh.apboa.ws.context.ApboaWebSocketSession;
-//import com.hxh.apboa.ws.handler.ServiceMessageHandlerAdapter;
-//import com.hxh.apboa.ws.handler.server.ServerMessageHandler;
-//import com.hxh.apboa.ws.model.WsServerMessage;
 import com.hxh.apboa.params.core.ParamsAdapter;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +45,8 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     private final ParamsAdapter paramsAdapter;
     private final AccountRoleService accountRoleService;
     private final WebSocketPushService webSocketPushService;
+    private final AgentChatKeyService agentChatKeyService;
+    private final AgentDefinitionService agentDefinitionService;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -279,6 +280,44 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         return true;
     }
 
+    @Override
+    public LoginResponse chatKeyToken(String chatKey) {
+        if (FuncUtils.isEmpty(chatKey)) {
+            return null;
+        }
+
+        String agentCode = agentChatKeyService.getAgentCodeByChatKey(chatKey);
+        if (FuncUtils.isEmpty(agentCode)) {
+            return null;
+        }
+
+        AgentDefinition agent = agentDefinitionService.lambdaQuery()
+                .eq(AgentDefinition::getAgentCode, agentCode)
+                .one();
+        if (agent == null || !Boolean.TRUE.equals(agent.getEnabled())) {
+            return null;
+        }
+
+        UserDetail userDetail = UserDetail.builder()
+                .id(IdWorker.getId())
+                .name(agent.getName())
+                .username(agent.getAgentCode())
+                .build();
+        long neverExpireTtl = 100L * 365 * 24 * 60 * 60 * 1000;
+        String token = TokenUtils.createToken(chatKey, userDetail, neverExpireTtl);
+
+        // 存储到Redis（无过期时间）
+        redisUtils.set(SysConst.LOGIN_USER_KEY + token, JsonUtils.toJsonStr(userDetail));
+
+        return LoginResponse.builder()
+                .accessToken(token)
+                .accessTokenTTL(-1L)
+                .refreshToken(token)
+                .refreshTokenTTL(-1L)
+                .userDetail(userDetail)
+                .build();
+    }
+
     /**
      * 生成Token响应
      *
@@ -307,9 +346,12 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         redisUtils.setEx(SysConst.LOGIN_USER_KEY + accessToken, userDetailStr, accessTokenTtl, TimeUnit.MILLISECONDS);
 
         // 返回登录响应
+        long currentTime = System.currentTimeMillis();
         return LoginResponse.builder()
                 .accessToken(accessToken)
+                .accessTokenTTL(currentTime + accessTokenTtl)
                 .refreshToken(refreshToken)
+                .refreshTokenTTL(currentTime + refreshTokenTtl)
                 .userDetail(userDetail)
                 .build();
     }
@@ -349,20 +391,6 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
                                     .accountId(accountId)
                                     .role(role)
                                     .build()));
-
-//            List<ApboaWebSocketSession> sessions = ApboaWebSocketSessionManager.getSessionByAccountId(accountId);
-//            ServerMessageHandler messageHandler = ServiceMessageHandlerAdapter.getHandler(WsMessageType.ACCOUNT_ROLE_CHANGE);
-//            sessions.forEach(session -> {
-//                WsServerMessage message = new WsServerMessage(
-//                        WsMessageType.ACCOUNT_ROLE_CHANGE,
-//                        AccountRoleChangeMessage
-//                                .builder()
-//                                .accountId(accountId)
-//                                .role(role)
-//                                .build());
-//
-//                messageHandler.handle(session, message);
-//            });
         } catch (Exception ignored) {}
     }
 }

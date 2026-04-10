@@ -51,8 +51,8 @@ const navItems = computed(() => {
   }
 
   items.push(
-    { key: 'history', label: '日志', icon: HistoryOutlined },
     { key: 'api', label: 'API', icon: ApiOutlined },
+    { key: 'history', label: '日志', icon: HistoryOutlined },
     { key: 'statistics', label: '统计', icon: BarChartOutlined }
   )
 
@@ -206,6 +206,7 @@ const agentCode = computed(() => props.agentData?.agentCode || '')
 
         <AgentConfigApiDoc
           v-if="activeKey === 'api' && agentCode"
+          :agent-id="agentId"
           :agent-code="agentCode"
         />
 

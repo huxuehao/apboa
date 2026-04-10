@@ -40,4 +40,6 @@ public class SysConst {
     public static final Long ADMIN_ACCOUNT_ID = 1111111111111111111L;
 
     public static final String CURRENT_NODE_ID = CryptoUtils.uuid();
+
+    public static final String CHAT_KEY_TO_AGENT_CODE_PREFIX = "apboa:chatkey:";
 }
