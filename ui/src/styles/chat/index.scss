@@ -745,52 +745,6 @@ $small-mobile-breakpoint: 375px;
   }
 }
 
-.chat-md-content {
-  :deep(pre) {
-    background-color: var(--color-bg-light);
-    padding: var(--spacing-base);
-    border-radius: var(--border-radius-md);
-    overflow-x: auto;
-    margin: var(--spacing-sm) 0;
-
-    /* 移动端适配：调整代码块 */
-    @media (max-width: $mobile-breakpoint) {
-      padding: var(--spacing-sm);
-      font-size: var(--font-size-xs);
-    }
-  }
-
-  :deep(code) {
-    font-size: 0.9em;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background-color: var(--color-bg-base);
-  }
-
-  :deep(pre code) {
-    padding: 0;
-    background: none;
-  }
-
-  :deep(p) {
-    margin: 0 0 var(--spacing-sm);
-  }
-
-  :deep(p:last-child) {
-    margin-bottom: 0;
-  }
-
-  :deep(ul), :deep(ol) {
-    margin: var(--spacing-sm) 0;
-    padding-left: 1.5em;
-
-    /* 移动端适配：调整列表间距 */
-    @media (max-width: $mobile-breakpoint) {
-      padding-left: 1.2em;
-    }
-  }
-}
-
 .chat-loading-dots {
   display: inline-flex;
   gap: 4px;

@@ -1,0 +1,384 @@
+/**
+ * Markdown 渲染样式
+ * 用于 chat-md-content 容器内的 Markdown 内容渲染
+ *
+ * @author huxuehao
+ */
+
+$md-primary: #0F74FF;
+$mobile-breakpoint: 768px;
+
+.chat-md-content {
+  line-height: 1.7;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+
+  // ==================== 标题 ====================
+  .md-heading {
+    position: relative;
+    margin: 1em 0 0.6em;
+    font-weight: 600;
+    line-height: 1.35;
+
+    .md-heading-anchor {
+      position: absolute;
+      left: -1.2em;
+      color: transparent;
+      text-decoration: none;
+      font-weight: 400;
+      transition: color 0.2s;
+    }
+
+    &:hover .md-heading-anchor {
+      color: $md-primary;
+    }
+  }
+
+  .md-h1 { font-size: 1.6em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+  .md-h2 { font-size: 1.35em; border-bottom: 1px solid #f0f0f0; padding-bottom: 0.25em; }
+  .md-h3 { font-size: 1.15em; }
+  .md-h4 { font-size: 1.05em; }
+  .md-h5 { font-size: 1em; }
+  .md-h6 { font-size: 0.95em; color: #666; }
+
+  // ==================== 段落 & 文本 ====================
+  p {
+    margin: 0 0 0.75em;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  mark {
+    background-color: #fff3bf;
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+  }
+
+  // ==================== 文本样式 ====================
+  strong {
+    font-weight: 700 !important;
+    color: #1a1a1a;
+  }
+
+  em {
+    font-style: italic;
+    color: #444;
+  }
+
+  del {
+    text-decoration: line-through;
+    opacity: 0.55;
+    color: #888;
+  }
+
+  // ==================== 代码块 ====================
+  .md-code-block {
+    position: relative;
+    margin: 0.8em 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+    .md-code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 14px;
+      background-color: #f1f3f5;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .md-code-lang {
+      font-size: 0.75em;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+
+    .md-code-copy-btn {
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      color: #666;
+      font-size: 0.72em;
+      padding: 2px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background-color: #fafafa;
+        color: #333;
+        border-color: #bbb;
+      }
+
+      &.copied {
+        color: #52c41a;
+        border-color: #52c41a;
+        background-color: #f6ffed;
+      }
+    }
+
+    pre {
+      margin: 0;
+      padding: 14px 16px;
+      overflow-x: auto;
+      background: none !important;
+
+      code {
+        font-size: 0.88em;
+        line-height: 1.6;
+        padding: 0 !important;
+        background: none !important;
+        font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+        color: #24292e;
+      }
+    }
+
+    @media (max-width: $mobile-breakpoint) {
+      border-radius: 6px;
+
+      .md-code-header {
+        padding: 4px 10px;
+      }
+
+      pre {
+        padding: 10px 12px;
+        font-size: 0.82em;
+      }
+    }
+  }
+
+  // ==================== 行内代码 ====================
+  .md-inline-code {
+    font-size: 0.88em;
+    padding: 0.15em 0.45em;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.06);
+    color: #d63384;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    word-break: break-word;
+  }
+
+  // ==================== 引用块 ====================
+  .md-blockquote {
+    margin: 0.8em 0;
+    padding: 0.6em 1em;
+    border-left: 4px solid $md-primary;
+    background-color: rgba(15, 116, 255, 0.04);
+    border-radius: 0 6px 6px 0;
+    color: #555;
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // ==================== 表格 ====================
+  .md-table-wrapper {
+    overflow-x: auto;
+    margin: 0.8em 0;
+    border-radius: 8px;
+    border: 1px solid #e8e8e8;
+
+    .md-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92em;
+
+      th {
+        background-color: #fafafa;
+        font-weight: 600;
+        text-align: left;
+        padding: 10px 14px;
+        border-bottom: 2px solid #e8e8e8;
+        white-space: nowrap;
+      }
+
+      td {
+        padding: 8px 14px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      tbody tr:hover {
+        background-color: rgba(15, 116, 255, 0.03);
+      }
+
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+    }
+  }
+
+  // ==================== 列表 ====================
+  ul, ol {
+    margin: 0.5em 0;
+    padding-left: 1.6em;
+
+    li {
+      margin: 0.25em 0;
+    }
+
+    @media (max-width: $mobile-breakpoint) {
+      padding-left: 1.2em;
+    }
+  }
+
+  ul {
+    list-style-type: disc;
+
+    ul { list-style-type: circle; }
+    ul ul { list-style-type: square; }
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  // ==================== 任务列表 ====================
+  .md-task-item {
+    list-style: none;
+    margin-left: -1.5em;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4em;
+
+    .md-task-checkbox {
+      margin-top: 0.35em;
+      accent-color: $md-primary;
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+
+    &.md-task-checked {
+      color: #999;
+      text-decoration: line-through;
+    }
+  }
+
+  // ==================== 分割线 ====================
+  .md-hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #ddd, transparent);
+    margin: 1.5em 0;
+  }
+
+  // ==================== 链接 ====================
+  .md-link {
+    color: $md-primary;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+
+    &:hover {
+      border-bottom-color: $md-primary;
+    }
+
+    .md-external-icon {
+      margin-left: 2px;
+      vertical-align: middle;
+      opacity: 0.6;
+    }
+  }
+
+  // ==================== 图片 ====================
+  .md-figure {
+    margin: 0.8em 0;
+    text-align: center;
+
+    .md-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      cursor: zoom-in;
+      transition: transform 0.2s;
+
+      &:hover {
+        transform: scale(1.01);
+      }
+    }
+
+    .md-figcaption {
+      margin-top: 0.4em;
+      font-size: 0.85em;
+      color: #888;
+      font-style: italic;
+    }
+  }
+
+  // ==================== 数学公式 ====================
+  .katex-block {
+    margin: 0.8em 0;
+    padding: 0.6em 1em;
+    overflow-x: auto;
+    background-color: #fafbfc;
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  .katex-error {
+    color: #ff4d4f;
+    font-size: 0.85em;
+  }
+
+  .katex {
+    font-size: 1.05em;
+  }
+
+  // ==================== 自定义容器 ====================
+  .md-container {
+    margin: 0.8em 0;
+    padding: 12px 16px;
+    border-radius: 8px;
+
+    .md-container-title {
+      font-weight: 600;
+      margin-bottom: 0.4em;
+      font-size: 0.95em;
+    }
+
+    .md-container-content {
+      font-size: 0.93em;
+
+      p:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    &.md-container-tip {
+      background-color: rgba(82, 196, 26, 0.06);
+    }
+
+    &.md-container-warning {
+      background-color: rgba(250, 173, 20, 0.06);
+    }
+
+    &.md-container-danger {
+      background-color: rgba(255, 77, 79, 0.06);
+    }
+
+    &.md-container-info {
+      background-color: rgba(15, 116, 255, 0.04);
+    }
+
+    &.md-container-success {
+      background-color: rgba(82, 196, 26, 0.04);
+    }
+  }
+
+  // ==================== 脚注 ====================
+  .footnotes {
+    margin-top: 2em;
+    padding-top: 1em;
+    border-top: 1px solid #eee;
+    font-size: 0.85em;
+    color: #666;
+  }
+}
