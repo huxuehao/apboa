@@ -8,7 +8,8 @@ import Chat from '@/views/Chat/index.vue'
 
 export default defineComponent({
   name: 'ChatWrapper',
-  async setup() {
+  emits: ['error'],
+  async setup(props, { emit }) {
     const chatAgentId = ref<string>()
     const route = useRoute()
     const chatKey = computed(() => (route.params.chatKey as string) || '')
@@ -39,8 +40,9 @@ export default defineComponent({
       const res = await getAgentIdByChatKey(chatKey.value)
       chatAgentId.value = res.data.data
     } catch (error) {
+      // 使用 h 函数返回虚拟节点
       console.error('初始化失败:', error)
-      throw error
+      emit('error', error)
     }
 
     // 使用 h 函数返回虚拟节点

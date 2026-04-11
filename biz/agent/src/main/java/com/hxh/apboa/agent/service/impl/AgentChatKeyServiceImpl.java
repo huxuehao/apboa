@@ -78,6 +78,12 @@ public class AgentChatKeyServiceImpl extends ServiceImpl<AgentChatKeyMapper, Age
             item.setChatKey(newChatKey);
             save(item);
 
+            // 删除旧的 ChatKey -> AgentCode 的映射关系
+            if (existingKey != null) {
+                String oldRedisKey = buildChatKeyRedisKey(existingKey.getChatKey());
+                redisUtils.delete(oldRedisKey);
+            }
+
             // 将 ChatKey -> AgentCode 的映射关系存储到Redis
             String redisKey = buildChatKeyRedisKey(newChatKey);
             redisUtils.setEx(redisKey, agentCode, CACHE_EXPIRE_DAYS, TimeUnit.DAYS);
