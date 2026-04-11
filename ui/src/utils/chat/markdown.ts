@@ -160,6 +160,75 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#39;')
 }
 
+/**
+ * 判断是否为完整的 HTML 代码
+ * 检测标准：
+ * 1. 包含 DOCTYPE 声明
+ * 2. 包含完整的 html 标签对
+ * 3. 包含完整的 body 标签对
+ * 4. 包含完整的 head 标签对且有 body
+ *
+ * @param code 代码内容
+ * @returns 是否为完整的 HTML
+ */
+function isCompleteHtml(code: string): boolean {
+  const normalizedCode = code.trim().toLowerCase()
+
+  // 检查 DOCTYPE
+  if (normalizedCode.startsWith('<!doctype html')) {
+    return true
+  }
+
+  // 检查完整的 html 标签
+  if (/<html[\s>][\s\S]*<\/html\s*>/i.test(code)) {
+    return true
+  }
+
+  // 检查完整的 head + body 结构
+  if (/<head[\s>][\s\S]*<\/head\s*>/i.test(code) && /<body[\s>][\s\S]*<\/body\s*>/i.test(code)) {
+    return true
+  }
+
+  return false
+}
+
+/**
+ * 切换 HTML 代码块的显示模式（代码/预览）
+ */
+function toggleHtmlView(btn: HTMLElement, mode: 'code' | 'preview'): void {
+  const codeBlock = btn.closest('.md-code-block') as HTMLElement
+  if (!codeBlock) return
+
+  // 更新 Tab 状态
+  const tabs = codeBlock.querySelectorAll('.md-code-tab')
+  tabs.forEach((tab) => tab.classList.remove('active'))
+  btn.classList.add('active')
+
+  // 获取元素
+  const codeView = codeBlock.querySelector('.md-code-view')
+  const previewView = codeBlock.querySelector('.md-code-preview')
+
+  if (mode === 'code') {
+    codeView?.classList.remove('hidden')
+    previewView?.classList.add('hidden')
+  } else {
+    codeView?.classList.add('hidden')
+    previewView?.classList.remove('hidden')
+
+    // 首次切换到预览时渲染 iframe
+    const iframe = previewView?.querySelector('iframe') as HTMLIFrameElement
+    if (iframe && !iframe.dataset.loaded) {
+      // 从 data 属性读取 base64 编码的原始 HTML 内容
+      const rawHtmlBase64 = codeBlock.dataset.rawHtml
+      if (rawHtmlBase64) {
+        const rawHtml = decodeURIComponent(escape(atob(rawHtmlBase64)))
+        iframe.srcdoc = rawHtml
+      }
+      iframe.dataset.loaded = 'true'
+    }
+  }
+}
+
 // ==================== 自定义渲染器 ====================
 
 /**
@@ -201,7 +270,7 @@ const customRenderer: import('marked').MarkedExtension = {
       </div>`
     },
 
-    // 代码块：语言标签 + 复制按钮
+    // 代码块：Tab 切换模式（HTML 支持代码/预览切换）
     code({ text, lang }) {
       const id = `code-${++copyIdCounter}`
       const language = lang || 'text'
@@ -211,10 +280,37 @@ const customRenderer: import('marked').MarkedExtension = {
       } else {
         highlighted = hljs.highlightAuto(text).value
       }
+
+      // 判断是否为完整的 HTML 代码
+      const isHtml = (lang === 'html' || lang === 'htm') && isCompleteHtml(text)
+      const copyBtn = `<button class="md-code-copy-btn" onclick="(function(btn){var code=btn.closest('.md-code-block').querySelector('code');if(navigator.clipboard){navigator.clipboard.writeText(code.textContent).then(function(){btn.textContent='已复制';btn.classList.add('copied');setTimeout(function(){btn.textContent='复制';btn.classList.remove('copied')},2000)})}else{var t=document.createElement('textarea');t.value=code.textContent;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);btn.textContent='已复制';btn.classList.add('copied');setTimeout(function(){btn.textContent='复制';btn.classList.remove('copied')},2000)}})(this)">复制</button>`
+
+      if (isHtml) {
+        // HTML 代码块：Tab 切换模式
+        // 将原始内容 base64 编码存储，避免 HTML 转义问题
+        const rawHtmlBase64 = btoa(unescape(encodeURIComponent(text)))
+        return `<div class="md-code-block md-code-block-html" id="${id}" data-raw-html="${rawHtmlBase64}">
+          <div class="md-code-header">
+            <div class="md-code-tabs">
+              <button class="md-code-tab active" onclick="window.__toggleHtmlView__(this,'code')">代码</button>
+              <button class="md-code-tab" onclick="window.__toggleHtmlView__(this,'preview')">预览</button>
+            </div>
+            ${copyBtn}
+          </div>
+          <div class="md-code-view">
+            <pre><code class="hljs language-${escapeHtml(language)}">${highlighted}</code></pre>
+          </div>
+          <div class="md-code-preview hidden">
+            <iframe class="md-code-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+          </div>
+        </div>`
+      }
+
+      // 普通代码块
       return `<div class="md-code-block" id="${id}">
         <div class="md-code-header">
           <span class="md-code-lang">${escapeHtml(language)}</span>
-          <button class="md-code-copy-btn" onclick="(function(btn){var code=btn.closest('.md-code-block').querySelector('code');if(navigator.clipboard){navigator.clipboard.writeText(code.textContent).then(function(){btn.textContent='已复制';btn.classList.add('copied');setTimeout(function(){btn.textContent='复制';btn.classList.remove('copied')},2000)})}else{var t=document.createElement('textarea');t.value=code.textContent;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);btn.textContent='已复制';btn.classList.add('copied');setTimeout(function(){btn.textContent='复制';btn.classList.remove('copied')},2000)}})(this)">复制</button>
+          ${copyBtn}
         </div>
         <pre><code class="hljs language-${escapeHtml(language)}">${highlighted}</code></pre>
       </div>`
@@ -339,7 +435,7 @@ const purifyConfig = {
     'math', 'mrow', 'mi', 'mo', 'mn', 'msup', 'msub', 'mfrac',
     'munderover', 'mover', 'munder', 'msqrt', 'mroot', 'mtable',
     'mtr', 'mtd', 'mtext', 'mspace', 'semantics', 'annotation',
-    'figure', 'figcaption',
+    'figure', 'figcaption', 'iframe',
   ],
   ADD_ATTR: [
     'target', 'rel', 'class', 'id', 'loading', 'onclick',
@@ -348,6 +444,7 @@ const purifyConfig = {
     'rowspacing', 'fence', 'stretchy', 'symmetric', 'lspace',
     'rspace', 'accent', 'accentunder', 'scriptlevel', 'movablelimits',
     'separator', 'width', 'height', 'depth', 'voffset', 'style',
+    'data-raw-html', 'sandbox', 'srcdoc',
   ],
   ALLOW_DATA_ATTR: false,
 }
@@ -370,3 +467,6 @@ export function renderMarkdown(text: string): string {
     return escapeHtml(text)
   }
 }
+
+// 挂载切换函数到全局对象，供 onclick 调用
+;(window as unknown as Record<string, unknown>).__toggleHtmlView__ = toggleHtmlView

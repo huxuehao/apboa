@@ -429,16 +429,18 @@ $small-mobile-breakpoint: 375px;
 }
 
 .chat-message-bubble {
-  max-width: 75%;
+  max-width: 100%;
   padding: var(--spacing-base) var(--spacing-md);
   border-radius: var(--border-radius-xl);
   font-size: var(--font-size-base);
   line-height: 1.6;
   word-break: break-word;
 
+
+
   /* 移动端适配：调整消息气泡 */
   @media (max-width: $mobile-breakpoint) {
-    max-width: 85%;
+    // max-width: 85%;
     padding: var(--spacing-sm) var(--spacing-base);
     font-size: var(--font-size-sm);
     line-height: 1.5;
@@ -449,6 +451,11 @@ $small-mobile-breakpoint: 375px;
     max-width: 90%;
     padding: var(--spacing-sm);
   }
+}
+
+.chat-message-bubble_user {
+  max-width: 85%;
+  color: red;
 }
 
 .chat-message-user .chat-message-bubble {

@@ -100,6 +100,35 @@ $mobile-breakpoint: 768px;
       font-weight: 500;
     }
 
+    // Tab 切换（HTML 代码块）
+    .md-code-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .md-code-tab {
+      background: transparent;
+      border: none;
+      color: #666;
+      font-size: 0.78em;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+        color: #333;
+      }
+
+      &.active {
+        background-color: $md-primary;
+        color: #fff;
+      }
+    }
+
     .md-code-copy-btn {
       background: #fff;
       border: 1px solid #d9d9d9;
@@ -139,6 +168,30 @@ $mobile-breakpoint: 768px;
       }
     }
 
+    // 代码视图和预览视图
+    .md-code-view {
+      &.hidden {
+        display: none;
+      }
+    }
+
+    .md-code-preview {
+      background: #fff;
+      aspect-ratio: 16 / 9;
+      width: 100%;
+
+      &.hidden {
+        display: none;
+      }
+    }
+
+    .md-code-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #fff;
+    }
+
     @media (max-width: $mobile-breakpoint) {
       border-radius: 6px;
 
@@ -149,6 +202,11 @@ $mobile-breakpoint: 768px;
       pre {
         padding: 10px 12px;
         font-size: 0.82em;
+      }
+
+      .md-code-tab {
+        padding: 3px 10px;
+        font-size: 0.72em;
       }
     }
   }
