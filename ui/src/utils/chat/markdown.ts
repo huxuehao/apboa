@@ -258,13 +258,36 @@ const customRenderer: import('marked').MarkedExtension = {
       return '<hr class="md-hr" />'
     },
 
-    // 列表项：支持任务列表，正确解析行内元素
+    // 列表项：支持任务列表，正确解析行内元素和嵌套列表
     listitem({ text, task, checked, tokens }) {
-      // 使用 tokens 解析行内元素（粗体、链接等）
       let parsedText: string
       try {
-        // 使用 this.parser.parseInline 或回退到原始文本
-        parsedText = (tokens && this.parser) ? this.parser.parseInline(tokens) : (text ?? '')
+        if (tokens && this.parser) {
+          // 分离行内 token 和块级 token
+          const inlineTokens: typeof tokens = []
+          const blockTokens: typeof tokens = []
+          for (const token of tokens) {
+            if (token.type === 'list' || token.type === 'code' || token.type === 'heading') {
+              blockTokens.push(token)
+            } else {
+              inlineTokens.push(token)
+            }
+          }
+          // 解析行内元素
+          const inlineHtml = inlineTokens.length > 0 ? this.parser.parseInline(inlineTokens) : ''
+          // 解析块级元素（如嵌套列表）
+          const blockHtml = blockTokens.map(t => {
+            // 使用内部方法渲染单个块级 token
+            if (t.type === 'list') {
+              // 递归渲染嵌套列表
+              return this.parser.parse([t])
+            }
+            return this.parser.parse([t])
+          }).join('')
+          parsedText = inlineHtml + blockHtml
+        } else {
+          parsedText = text ?? ''
+        }
       } catch {
         parsedText = text ?? ''
       }
