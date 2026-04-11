@@ -58,8 +58,9 @@ const openPreview = (index: number) => {
 
 <template>
   <div class="chat-message" :class="[isUser ? 'chat-message-user' : 'chat-message-assistant']">
-    <div class="chat-message-bubble">
-      <template v-if="isUser">
+    <template v-if="isUser">
+      <div class="chat-message-bubble chat-message-bubble_user">
+        <!-- 文件列表 -->
         <div v-if="parsedUserContent.files.length > 0" class="chat-message-files">
           <div
             v-for="(item, index) in parsedUserContent.files"
@@ -74,24 +75,32 @@ const openPreview = (index: number) => {
             <span class="chat-message-file-size">{{ item.size }}</span>
           </div>
         </div>
+        <!-- 文本内容 -->
         <span v-if="parsedUserContent.text" class="chat-message-user-content">
           {{ parsedUserContent.text }}
         </span>
-      </template>
-      <template v-else-if="isAssistant">
+      </div>
+    </template>
+    <template v-else-if="isAssistant">
+      <div class="chat-message-bubble">
         <div v-if="!agentHasResult && !content" class="chat-loading-dots">
           <span></span><span></span><span></span>
         </div>
         <div v-else class="chat-md-content" v-html="renderMarkdown(content)"></div>
-      </template>
-      <template v-else-if="isTool">
+      </div>
+    </template>
+    <template v-else-if="isTool">
+      <div class="chat-message-bubble">
         <div class="chat-md-content" v-html="renderMarkdown(content)"></div>
-      </template>
-      <template v-else-if="isError">
-        <span style="color: tomato">{{content}}</span>
-      </template>
-    </div>
-
+      </div>
+    </template>
+    <template v-else-if="isError">
+      <div class="chat-message-bubble">
+        <div class="chat-md-content">
+          <span style="color: tomato">{{content}}</span>
+        </div>
+      </div>
+    </template>
     <!-- 媒体预览组件 -->
     <MediaPreview
       v-model:visible="previewVisible"

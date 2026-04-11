@@ -57,8 +57,8 @@ const openPreview = (index: number) => {
 
 <template>
   <div class="chat-message" :class="[isUser ? 'chat-message-user' : 'chat-message-assistant']">
-    <div class="chat-message-bubble">
-      <template v-if="isUser">
+    <template v-if="isUser">
+      <div class="chat-message-bubble chat-message-bubble_user">
         <!-- 文件列表 -->
         <div v-if="parsedUserContent.files.length > 0" class="chat-message-files">
           <div
@@ -78,19 +78,26 @@ const openPreview = (index: number) => {
         <span v-if="parsedUserContent.text" class="chat-message-user-content">
           {{ parsedUserContent.text }}
         </span>
-      </template>
-      <template v-else-if="isAssistant">
+      </div>
+    </template>
+    <template v-else-if="isAssistant">
+      <div class="chat-message-bubble">
         <div class="chat-md-content" v-html="renderMarkdown(content)"></div>
-      </template>
-      <template v-else-if="isTool">
+      </div>
+    </template>
+    <template v-else-if="isTool">
+      <div class="chat-message-bubble">
         <div class="chat-md-content" v-html="renderMarkdown(content)"></div>
-      </template>
-      <template v-else-if="isError">
+      </div>
+    </template>
+    <template v-else-if="isError">
+      <div class="chat-message-bubble">
         <div class="chat-md-content">
           <span style="color: tomato">{{content}}</span>
         </div>
-      </template>
-    </div>
+      </div>
+    </template>
+
 
     <!-- 媒体预览组件 -->
     <MediaPreview

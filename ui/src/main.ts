@@ -1,4 +1,7 @@
 import 'ant-design-vue/dist/reset.css';
+import 'highlight.js/styles/github.min.css';
+import 'katex/dist/katex.min.css';
+import './styles/markdown.scss';
 import './assets/main.css'
 
 import { createApp } from 'vue'
