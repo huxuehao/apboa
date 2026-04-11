@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, nextTick, watch, onMounted } from 'vue'
+import { MenuOutlined } from '@ant-design/icons-vue'
 import MessageList from './MessageList.vue'
 import ChatInput from './ChatInput.vue'
 import Welcome from './Welcome.vue'
@@ -35,6 +36,7 @@ const emit = defineEmits<{
   (e: 'memory', value: boolean): void
   (e: 'plan', value: boolean): void
   (e: 'toolProcess', value: boolean): void
+  (e: 'toggleSidebar'): void
 }>()
 
 // 滚动容器 ref
@@ -113,6 +115,15 @@ defineExpose({
 <template>
   <main class="chat-main">
     <header class="chat-main-header">
+      <!-- 移动端菜单按钮 -->
+      <button
+        type="button"
+        class="chat-mobile-menu-btn"
+        title="打开会话列表"
+        @click="$emit('toggleSidebar')"
+      >
+        <MenuOutlined />
+      </button>
       <h1 class="chat-main-title" :title="title">{{ title }}</h1>
     </header>
 

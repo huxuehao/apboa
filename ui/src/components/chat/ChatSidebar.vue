@@ -15,17 +15,67 @@ defineProps<{
   showAccount: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'toggleCollapse'): void
   (e: 'newSession'): void
   (e: 'selectSession', session: any): void
   (e: 'sessionMenu', key: string, session: any): void
   (e: 'loadMore'): void
 }>()
+
+/**
+ * 检测是否为移动端
+ */
+const isMobile = () => window.innerWidth <= 768
+
+/**
+ * 处理遮罩层点击事件（移动端关闭侧边栏）
+ */
+const handleMaskClick = () => {
+  emit('toggleCollapse')
+}
+
+/**
+ * 处理选择会话
+ */
+const handleSelectSession = (session: any) => {
+  emit('selectSession', session)
+  if (isMobile()) {
+    emit('toggleCollapse')
+  }
+}
+
+
+/**
+ * 处理选择会话
+ */
+const handleSelect = (k: any, session: any) => {
+  emit('sessionMenu', k, session)
+  if (isMobile() && ['rename','delete'].includes(k)) {
+    emit('toggleCollapse')
+  }
+}
+
+
+/**
+ * 处理开启新对话
+ */
+const handleNewSession = () => {
+  emit('newSession')
+  if (isMobile()) {
+    emit('toggleCollapse')
+  }
+}
 </script>
 
 <template>
   <aside class="chat-sidebar" :class="{ collapsed }">
+    <!-- 移动端遮罩层（点击关闭侧边栏） -->
+    <div
+      v-if="!collapsed"
+      class="chat-sidebar-mask"
+      @click="handleMaskClick"
+    />
     <div class="chat-sidebar-header">
       <div class="chat-sidebar-brand">
         <img src="@/assets/images/logo/logo.png" alt="logo" class="chat-sidebar-logo" />
@@ -38,7 +88,7 @@ defineEmits<{
     </div>
     <div class="chat-sidebar-body">
       <div v-show="!collapsed" class="chat-sidebar-new-wrap">
-        <button type="button" class="chat-sidebar-new-btn" :disabled="isRunning" title="开启新对话" @click="$emit('newSession')">
+        <button type="button" class="chat-sidebar-new-btn" :disabled="isRunning" title="开启新对话" @click="handleNewSession">
           <MessageOutlined /><span>开启新对话</span>
         </button>
       </div>
@@ -60,8 +110,8 @@ defineEmits<{
           :current-session-id="currentSessionId"
           :loading="loading"
           :has-more="hasMore"
-          @select="(session) => $emit('selectSession', session)"
-          @menu="(k, session) => $emit('sessionMenu', k, session)"
+          @select="handleSelectSession"
+          @menu="(k, session) => handleSelect(k, session)"
           @load-more="$emit('loadMore')"
         />
       </div>

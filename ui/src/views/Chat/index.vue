@@ -308,6 +308,8 @@ const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
 }
 
+
+
 // 初始化加载会话列表
 onMounted(() => {
   loadSessions()
@@ -368,6 +370,7 @@ onMounted(() => {
       @toolContent="handelToolContent"
       @send="handleSend"
       @abort="abortRun"
+      @toggle-sidebar="toggleSidebar"
     />
   </div>
 </template>

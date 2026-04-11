@@ -208,6 +208,10 @@ const handleInput = (e: Event) => {
 }
 
 const handleKeydown = (e: KeyboardEvent) => {
+  // 移动端不处理Enter发送，使用发送按钮
+  const isMobile = window.innerWidth <= 768
+  if (isMobile) return
+
   if (e.key === 'Enter' && !e.shiftKey) {
     if (props.isRunning) {
       message.info('停止生成后再发送')
@@ -272,7 +276,7 @@ watch(() => props.modelValue, () => {
       <textarea
         ref="textareaRef"
         :value="modelValue"
-        :placeholder="placeholder || '输入消息，Enter 发送，Shift+Enter 换行'"
+        :placeholder="placeholder || '输入消息...'"
         rows="1"
         class="chat-input-textarea"
         @input="handleInput"
