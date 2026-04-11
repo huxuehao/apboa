@@ -12,12 +12,41 @@ $chat-bg-main: #ffffff;
 $chat-transition: 0.25s ease;
 $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
 
+/**
+ * 移动端响应式断点
+ * 参考主流设备尺寸：
+ * - 小型手机：<= 375px (iPhone SE/mini)
+ * - 中型手机：376px - 414px (iPhone 12/13/14/15)
+ * - 大型手机：415px - 428px (iPhone 14/15 Pro Max)
+ * - 平板：429px - 768px (iPad mini/Air)
+ */
+$mobile-breakpoint: 768px;
+$small-mobile-breakpoint: 375px;
+
+/**
+ * 移动端安全区域变量
+ * 适配刘海屏、灵动岛等现代设备
+ */
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+}
+
 .chat-page {
   display: flex;
   height: 100vh;
   width: 100%;
   overflow: hidden;
   background-color: $chat-bg-sidebar;
+
+  /* 移动端适配：处理安全区域 */
+  @media (max-width: $mobile-breakpoint) {
+    height: 100dvh; /* 使用动态视口高度，适配移动端浏览器地址栏变化 */
+    padding-top: var(--safe-area-top);
+    padding-bottom: var(--safe-area-bottom);
+  }
 }
 
 .chat-sidebar {
@@ -28,7 +57,7 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   flex-direction: column;
   background-color: $chat-bg-sidebar;
   border-right: 1px solid var(--color-border-extra-light);
-  transition: width $chat-transition, min-width $chat-transition;
+  transition: width $chat-transition, min-width $chat-transition, transform $chat-transition;
   overflow: hidden;
 
   &.collapsed {
@@ -63,6 +92,47 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
 
     .chat-sidebar-user-name {
       display: none;
+    }
+  }
+
+  /* 移动端适配：侧边栏变为抽屉式 */
+  @media (max-width: $mobile-breakpoint) {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: var(--z-index-fixed, 1030);
+    width: 280px;
+    min-width: 280px;
+    height: 100%;
+
+    &.collapsed {
+      transform: translateX(-100%);
+      width: 280px;
+      min-width: 280px;
+    }
+
+    /* 未折叠时显示遮罩层 */
+    &:not(.collapsed)::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 280px;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+      opacity: 1;
+    }
+  }
+
+  /* 小型手机适配 */
+  @media (max-width: $small-mobile-breakpoint) {
+    width: 260px;
+    min-width: 260px;
+
+    &:not(.collapsed)::before {
+      left: 260px;
     }
   }
 }
@@ -271,6 +341,12 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   min-width: 0;
   background-color: $chat-bg-main;
   transition: margin-left $chat-transition;
+
+  /* 移动端适配：主区域全屏显示 */
+  @media (max-width: $mobile-breakpoint) {
+    width: 100%;
+    position: relative;
+  }
 }
 
 .chat-main-header {
@@ -279,6 +355,15 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   text-align: center;
   flex-shrink: 0;
   min-width: 0;
+
+  /* 移动端适配：调整头部间距 */
+  @media (max-width: $mobile-breakpoint) {
+    padding: var(--spacing-sm) var(--spacing-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+  }
 }
 
 .chat-main-title {
@@ -289,6 +374,12 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
+
+  /* 移动端适配：调整标题大小 */
+  @media (max-width: $mobile-breakpoint) {
+    font-size: var(--font-size-base);
+    max-width: calc(100% - 80px); /* 为菜单按钮留出空间 */
+  }
 }
 
 .chat-main-messages-scroll {
@@ -296,6 +387,12 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   min-height: 0;
   overflow-y: auto;
   width: 100%;
+  -webkit-overflow-scrolling: touch; /* iOS 平滑滚动 */
+
+  /* 移动端适配：优化滚动体验 */
+  @media (max-width: $mobile-breakpoint) {
+    overscroll-behavior: contain; /* 防止滚动穿透 */
+  }
 }
 
 .chat-main-messages {
@@ -307,6 +404,19 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   margin: 0 auto;
   width: 100%;
   box-sizing: content-box;
+
+  /* 移动端适配：调整消息区域间距 */
+  @media (max-width: $mobile-breakpoint) {
+    padding: var(--spacing-md) var(--spacing-sm);
+    gap: var(--spacing-md);
+    max-width: calc(100% - 16px);
+  }
+
+  /* 小型手机适配 */
+  @media (max-width: $small-mobile-breakpoint) {
+    padding: var(--spacing-sm) var(--spacing-xs);
+    gap: var(--spacing-sm);
+  }
 }
 
 .chat-message {
@@ -325,6 +435,20 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   font-size: var(--font-size-base);
   line-height: 1.6;
   word-break: break-word;
+
+  /* 移动端适配：调整消息气泡 */
+  @media (max-width: $mobile-breakpoint) {
+    max-width: 85%;
+    padding: var(--spacing-sm) var(--spacing-base);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+  }
+
+  /* 小型手机适配 */
+  @media (max-width: $small-mobile-breakpoint) {
+    max-width: 90%;
+    padding: var(--spacing-sm);
+  }
 }
 
 .chat-message-user .chat-message-bubble {
@@ -430,11 +554,23 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   padding: 0 $chat-main-padding-h;
   flex-shrink: 0;
   //border-top: 1px solid var(--color-border-extra-light);
+
+  /* 移动端适配：底部固定输入区域 */
+  @media (max-width: $mobile-breakpoint) {
+    padding: 0 var(--spacing-sm);
+    padding-bottom: var(--safe-area-bottom);
+    background-color: $chat-bg-main;
+  }
 }
 
 .chat-input-outer {
   max-width: 800px;
   margin: 0 auto;
+
+  /* 移动端适配：输入框全宽 */
+  @media (max-width: $mobile-breakpoint) {
+    max-width: 100%;
+  }
 }
 
 .chat-input-textarea-wrap {
@@ -452,6 +588,13 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   &:focus-within {
     border-color: $chat-primary;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 0 0 2px rgba($chat-primary, 0.1);
+  }
+
+  /* 移动端适配：调整输入框 */
+  @media (max-width: $mobile-breakpoint) {
+    padding: 8px;
+    border-radius: 20px;
+    max-height: 200px;
   }
 }
 
@@ -471,6 +614,18 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
 
   &::placeholder {
     color: var(--color-text-placeholder);
+  }
+
+  /* 移动端适配：调整输入框 */
+  @media (max-width: $mobile-breakpoint) {
+    max-height: 150px;
+    font-size: var(--font-size-sm);
+    padding: 4px;
+
+    /* 防止iOS缩放 */
+    @supports (-webkit-touch-callout: none) {
+      font-size: 16px;
+    }
   }
 }
 
@@ -497,6 +652,13 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
     opacity: 0.5;
     cursor: not-allowed;
   }
+
+  /* 移动端适配：增大点击区域 */
+  @media (max-width: $mobile-breakpoint) {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
 }
 
 .chat-welcome {
@@ -508,6 +670,19 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   padding: 150px $chat-main-padding-h;
   text-align: center;
   min-width: 0;
+
+  /* 移动端适配：调整欢迎页 */
+  @media (max-width: $mobile-breakpoint) {
+    padding: var(--spacing-xl) var(--spacing-md);
+    justify-content: flex-start;
+    padding-top: 20vh;
+  }
+
+  /* 小型手机适配 */
+  @media (max-width: $small-mobile-breakpoint) {
+    padding: var(--spacing-lg) var(--spacing-sm);
+    padding-top: 15vh;
+  }
 }
 
 .chat-welcome-title {
@@ -519,6 +694,18 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  /* 移动端适配：调整标题大小 */
+  @media (max-width: $mobile-breakpoint) {
+    font-size: var(--font-size-xl);
+    white-space: normal;
+    line-height: 1.4;
+  }
+
+  /* 小型手机适配 */
+  @media (max-width: $small-mobile-breakpoint) {
+    font-size: var(--font-size-lg);
+  }
 }
 
 .chat-welcome-desc {
@@ -533,6 +720,14 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
   word-break: break-word;
+
+  /* 移动端适配：调整描述样式 */
+  @media (max-width: $mobile-breakpoint) {
+    font-size: var(--font-size-sm);
+    max-width: 100%;
+    margin-bottom: var(--spacing-lg);
+    -webkit-line-clamp: 3;
+  }
 }
 
 .chat-welcome-input {
@@ -541,6 +736,13 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
+
+  /* 移动端适配：全宽输入 */
+  @media (max-width: $mobile-breakpoint) {
+    max-width: 100%;
+    margin-top: var(--spacing-md);
+    padding: 0 var(--spacing-xs);
+  }
 }
 
 .chat-md-content {
@@ -550,6 +752,12 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
     border-radius: var(--border-radius-md);
     overflow-x: auto;
     margin: var(--spacing-sm) 0;
+
+    /* 移动端适配：调整代码块 */
+    @media (max-width: $mobile-breakpoint) {
+      padding: var(--spacing-sm);
+      font-size: var(--font-size-xs);
+    }
   }
 
   :deep(code) {
@@ -575,6 +783,11 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   :deep(ul), :deep(ol) {
     margin: var(--spacing-sm) 0;
     padding-left: 1.5em;
+
+    /* 移动端适配：调整列表间距 */
+    @media (max-width: $mobile-breakpoint) {
+      padding-left: 1.2em;
+    }
   }
 }
 
@@ -609,5 +822,263 @@ $chat-main-padding-h: calc(var(--spacing-lg, 24px) * 1 / 3);
   40% {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+/**
+ * 移动端专用样式
+ * 包含工具栏、菜单按钮等移动端特有组件
+ */
+
+/* 移动端遮罩层 */
+.chat-sidebar-mask {
+  display: none;
+
+  @media (max-width: $mobile-breakpoint) {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    //background: rgba(0, 0, 0, 0.3);
+    z-index: -1;
+  }
+}
+
+/* 移动端弹框层级修复：确保弹框显示在侧边栏遮罩层之上 */
+@media (max-width: $mobile-breakpoint) {
+  .ant-modal-wrap,
+  .ant-modal-mask {
+    z-index: calc(var(--z-index-modal, 1050) + 100) !important;
+  }
+
+  .ant-modal {
+    z-index: calc(var(--z-index-modal, 1050) + 101) !important;
+  }
+}
+
+/* 移动端菜单按钮 */
+.chat-mobile-menu-btn {
+  display: none;
+  position: absolute;
+  left: var(--spacing-sm);
+  top: 24px;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  z-index: 10;
+
+  @media (max-width: $mobile-breakpoint) {
+    display: inline-flex;
+  }
+
+  &:hover {
+    background-color: rgba($chat-primary, 0.08);
+  }
+
+  &:active {
+    background-color: rgba($chat-primary, 0.12);
+  }
+}
+
+/* 移动端工具栏按钮 */
+.chat-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: color 0.2s ease, background-color 0.2s ease;
+  border-radius: var(--border-radius-md);
+
+  &:hover {
+    color: $chat-primary;
+    background-color: rgba($chat-primary, 0.06);
+  }
+
+  &.is-active {
+    color: $chat-primary;
+    background-color: rgba($chat-primary, 0.1);
+    font-weight: 500;
+  }
+
+  &:disabled,
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    &:hover {
+      color: var(--color-text-secondary);
+      background-color: transparent;
+    }
+  }
+
+  /* 移动端适配：增大点击区域 */
+  @media (max-width: $mobile-breakpoint) {
+    min-width: 36px;
+    min-height: 36px;
+  }
+}
+
+.chat-toolbar-btn-icon {
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+
+  @media (max-width: $mobile-breakpoint) {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+}
+
+.chat-toolbar-btn-circle {
+  border-radius: 50%;
+}
+
+/* 移动端文件项样式 */
+.chat-input-file-item {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 280px;
+  padding: 6px 10px;
+  background: rgba($chat-primary, 0.06);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba($chat-primary, 0.1);
+    border-color: rgba($chat-primary, 0.25);
+  }
+
+  @media (max-width: $mobile-breakpoint) {
+    max-width: 220px;
+    padding: 5px 8px;
+  }
+
+  @media (max-width: $small-mobile-breakpoint) {
+    max-width: 180px;
+  }
+}
+
+/* 移动端工具调用卡片 */
+.chat-tool-call {
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-base);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border-extra-light);
+
+  @media (max-width: $mobile-breakpoint) {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  &--loading {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+}
+
+/* 移动端历史记录项 */
+.chat-history-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-base);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: background-color $chat-transition;
+  position: relative;
+  font-size: 15px;
+
+  &:hover {
+    background-color: var(--color-bg-base);
+  }
+
+  &.active {
+    background-color: rgba($chat-primary, 0.08);
+    color: $chat-primary;
+  }
+
+  .chat-history-item-more {
+    opacity: 0;
+    transition: opacity $chat-transition;
+
+    /* 移动端始终显示更多按钮 */
+    @media (max-width: $mobile-breakpoint) {
+      opacity: 1;
+    }
+  }
+
+  &:hover .chat-history-item-more {
+    opacity: 1;
+  }
+
+  @media (max-width: $mobile-breakpoint) {
+    padding: var(--spacing-base) var(--spacing-sm);
+    font-size: var(--font-size-base);
+  }
+}
+
+/* 移动端触摸优化 */
+@media (max-width: $mobile-breakpoint) {
+  /* 禁用文本选择（除输入框外） */
+  .chat-page {
+    user-select: none;
+  }
+
+  .chat-input-textarea,
+  .chat-md-content {
+    user-select: text;
+  }
+
+  /* 优化触摸反馈 */
+  .chat-history-item,
+  .chat-toolbar-btn,
+  .chat-send-btn-inner {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 优化滚动 */
+  .chat-sidebar,
+  .chat-main-messages-scroll,
+  .chat-history-list,
+  .chat-pinned-list,
+  .chat-history-scroll-area {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* 横屏模式适配 */
+@media (max-width: $mobile-breakpoint) and (orientation: landscape) {
+  .chat-welcome {
+    padding-top: 10vh;
+  }
+
+  .chat-welcome-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .chat-input-textarea {
+    max-height: 100px;
   }
 }
