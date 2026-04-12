@@ -129,14 +129,20 @@ const openMarkdownDoc = () => {
         {{ (userNickname || 'U').charAt(0).toUpperCase() }}
       </div>
       <span class="chat-sidebar-user-name" :title="userNickname || '用户'">{{ userNickname || '用户' }}</span>
-      <AButton
-        type="text"
-        class="chat-sidebar-doc-btn"
-        title="Markdown 扩展指南"
-        @click="openMarkdownDoc"
-      >
-        <BookOutlined />
-      </AButton>
+
+      <ATooltip placement="top">
+        <template #title>
+          <span>Markdown 扩展指南</span>
+        </template>
+        <AButton
+          type="text"
+          class="chat-sidebar-doc-btn"
+          @click="openMarkdownDoc"
+        >
+          <BookOutlined />
+        </AButton>
+      </ATooltip>
+
     </div>
   </aside>
 </template>
