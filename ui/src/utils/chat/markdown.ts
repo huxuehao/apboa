@@ -2,6 +2,7 @@ import { Marked, type Tokens } from 'marked'
 import hljs from 'highlight.js'
 import katex from 'katex'
 import DOMPurify from 'dompurify'
+import { ImagePreviewApi } from '@/utils/chat/ImagePreviewApi'
 
 /**
  * 高级 Markdown 渲染器
@@ -256,6 +257,19 @@ function toggleCodeFullscreen(btn: HTMLElement): void {
   }
 }
 
+/**
+ * 打开图片预览
+ * @param img 图片元素
+ */
+function openImagePreview(img: HTMLImageElement): void {
+  const src = img.getAttribute('src') || ''
+  const alt = img.getAttribute('alt') || '图片预览'
+  ImagePreviewApi.open({
+    url: src,
+    title: alt,
+  })
+}
+
 // ==================== 自定义渲染器 ====================
 
 /**
@@ -279,7 +293,7 @@ const customRenderer: import('marked').MarkedExtension = {
       const titleAttr = title ? ` title="${escapeHtml(title)}"` : ''
       const altAttr = text ? ` alt="${escapeHtml(text)}"` : ''
       return `<figure class="md-figure">
-        <img src="${href}"${altAttr}${titleAttr} loading="lazy" class="md-image" />
+        <img src="${href}"${altAttr}${titleAttr} loading="lazy" class="md-image" onclick="window.__openImagePreview__(this)" />
         ${text ? `<figcaption class="md-figcaption">${escapeHtml(text)}</figcaption>` : ''}
       </figure>`
     },
@@ -500,3 +514,4 @@ export function renderMarkdown(text: string): string {
 // 挂载切换函数到全局对象，供 onclick 调用
 ;(window as unknown as Record<string, unknown>).__toggleHtmlView__ = toggleHtmlView
 ;(window as unknown as Record<string, unknown>).__toggleCodeFullscreen__ = toggleCodeFullscreen
+;(window as unknown as Record<string, unknown>).__openImagePreview__ = openImagePreview
