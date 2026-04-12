@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { MessageOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue'
+import { MessageOutlined, MenuFoldOutlined, MenuUnfoldOutlined, BookOutlined } from '@ant-design/icons-vue'
 import SessionList from './SessionList.vue'
+import { RoutePaths } from '@/router/constants'
 
 defineProps<{
   collapsed: boolean
@@ -66,6 +67,13 @@ const handleNewSession = () => {
     emit('toggleCollapse')
   }
 }
+
+/**
+ * 打开 Markdown 扩展文档
+ */
+const openMarkdownDoc = () => {
+  window.open('/#' + RoutePaths.MARKDOWN_EXTENSION_DOC, '_blank')
+}
 </script>
 
 <template>
@@ -121,6 +129,14 @@ const handleNewSession = () => {
         {{ (userNickname || 'U').charAt(0).toUpperCase() }}
       </div>
       <span class="chat-sidebar-user-name" :title="userNickname || '用户'">{{ userNickname || '用户' }}</span>
+      <AButton
+        type="text"
+        class="chat-sidebar-doc-btn"
+        title="Markdown 扩展指南"
+        @click="openMarkdownDoc"
+      >
+        <BookOutlined />
+      </AButton>
     </div>
   </aside>
 </template>

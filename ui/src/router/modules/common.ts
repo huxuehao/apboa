@@ -52,6 +52,15 @@ const commonRoutes: AppRouteRecordRaw[] = [
     },
   },
   {
+    path: RoutePaths.MARKDOWN_EXTENSION_DOC,
+    name: RouteNames.MARKDOWN_EXTENSION_DOC,
+    component: () => import('@/views/Doc/MarkdownExtensionDoc.vue'),
+    meta: {
+      title: 'Markdown 扩展指南',
+      hidden: true,
+    },
+  },
+  {
     path: RoutePaths.NOT_FOUND,
     name: RouteNames.NOT_FOUND,
     component: () => import('@/pages/NotFound.vue'),

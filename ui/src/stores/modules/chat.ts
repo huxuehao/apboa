@@ -128,7 +128,7 @@ export const useChatStore = defineStore(
     ): boolean {
       if (!agentId) return false
       const key = preferenceKey(agentId, accountId)
-      return preferences.value[key]?.sidebarCollapsed ?? false
+      return preferences.value[key]?.sidebarCollapsed ?? true
     }
 
     /**
