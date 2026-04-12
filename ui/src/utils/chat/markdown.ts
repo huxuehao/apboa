@@ -229,6 +229,33 @@ function toggleHtmlView(btn: HTMLElement, mode: 'code' | 'preview'): void {
   }
 }
 
+/**
+ * 切换代码块的全屏模式
+ * @param btn 触发按钮
+ */
+function toggleCodeFullscreen(btn: HTMLElement): void {
+  const codeBlock = btn.closest('.md-code-block') as HTMLElement
+  if (!codeBlock) return
+
+  const isFullscreen = codeBlock.classList.contains('md-code-fullscreen')
+
+  if (isFullscreen) {
+    // 退出全屏
+    codeBlock.classList.remove('md-code-fullscreen')
+    document.body.style.overflow = ''
+    // 更新按钮文字
+    btn.textContent = '全屏'
+    btn.title = '全屏'
+  } else {
+    // 进入全屏
+    codeBlock.classList.add('md-code-fullscreen')
+    document.body.style.overflow = 'hidden'
+    // 更新按钮文字
+    btn.textContent = '退出'
+    btn.title = '退出全屏'
+  }
+}
+
 // ==================== 自定义渲染器 ====================
 
 /**
@@ -283,7 +310,9 @@ const customRenderer: import('marked').MarkedExtension = {
 
       // 判断是否为完整的 HTML 代码
       const isHtml = (lang === 'html' || lang === 'htm') && isCompleteHtml(text)
+      const fullscreenBtn = `<button class="md-code-fullscreen-btn" title="全屏" onclick="window.__toggleCodeFullscreen__(this)">全屏</button>`
       const copyBtn = `<button class="md-code-copy-btn" onclick="(function(btn){var code=btn.closest('.md-code-block').querySelector('code');if(navigator.clipboard){navigator.clipboard.writeText(code.textContent).then(function(){btn.textContent='已复制';btn.classList.add('copied');setTimeout(function(){btn.textContent='复制';btn.classList.remove('copied')},2000)})}else{var t=document.createElement('textarea');t.value=code.textContent;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);btn.textContent='已复制';btn.classList.add('copied');setTimeout(function(){btn.textContent='复制';btn.classList.remove('copied')},2000)}})(this)">复制</button>`
+      const btnGroup = `<div class="md-code-btn-group">${fullscreenBtn}${copyBtn}</div>`
 
       if (isHtml) {
         // HTML 代码块：Tab 切换模式
@@ -295,7 +324,7 @@ const customRenderer: import('marked').MarkedExtension = {
               <button class="md-code-tab active" onclick="window.__toggleHtmlView__(this,'code')">代码</button>
               <button class="md-code-tab" onclick="window.__toggleHtmlView__(this,'preview')">预览</button>
             </div>
-            ${copyBtn}
+            ${btnGroup}
           </div>
           <div class="md-code-view">
             <pre><code class="hljs language-${escapeHtml(language)}">${highlighted}</code></pre>
@@ -310,7 +339,7 @@ const customRenderer: import('marked').MarkedExtension = {
       return `<div class="md-code-block" id="${id}">
         <div class="md-code-header">
           <span class="md-code-lang">${escapeHtml(language)}</span>
-          ${copyBtn}
+          ${btnGroup}
         </div>
         <pre><code class="hljs language-${escapeHtml(language)}">${highlighted}</code></pre>
       </div>`
@@ -470,3 +499,4 @@ export function renderMarkdown(text: string): string {
 
 // 挂载切换函数到全局对象，供 onclick 调用
 ;(window as unknown as Record<string, unknown>).__toggleHtmlView__ = toggleHtmlView
+;(window as unknown as Record<string, unknown>).__toggleCodeFullscreen__ = toggleCodeFullscreen
