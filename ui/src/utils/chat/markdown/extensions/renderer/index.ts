@@ -4,5 +4,14 @@
  * @author huxuehao
  **/
 
-export { createRendererExtension, rendererExtension } from './renderer-extension'
+export {
+  createRendererExtension,
+  rendererExtension,
+  RendererHandlerRegistry,
+  globalHandlerRegistry,
+  type RendererExtensionConfig,
+  type HandlerConfig,
+  type HandlerFunctions,
+  type HandlerName,
+} from './renderer-extension'
 export * from './handlers'

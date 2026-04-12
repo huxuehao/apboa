@@ -11,6 +11,7 @@ import type {
   ContainerToken,
   ContainerType,
   ContainerExtensionConfig,
+  ExtensionModule,
 } from './types'
 import {
   defaultContainerConfigs,
@@ -150,3 +151,31 @@ export function createContainerExtension(
  * 默认容器扩展实例
  */
 export const containerExtension = new ContainerExtension()
+
+/**
+ * 容器扩展模块定义
+ *
+ * 用于自动发现和注册系统
+ */
+export const extensionModule: ExtensionModule<ContainerExtension> = {
+  meta: {
+    name: 'container',
+    description: '自定义容器扩展，支持 tip/warning/danger/info/success 语法',
+    version: '1.0.0',
+    author: 'huxuehao',
+    enabled: true,
+    priority: 60,
+  },
+  extension: containerExtension,
+  /**
+   * 初始化函数：设置内部渲染器
+   *
+   * @param engine Markdown 引擎实例
+   */
+  setup: (engine: unknown) => {
+    // engine 参数由注册系统传入，用于设置嵌套渲染
+    if (engine && typeof engine === 'object' && 'render' in engine) {
+      containerExtension.setInnerRender((text) => (engine as { render: (t: string) => string }).render(text))
+    }
+  },
+}

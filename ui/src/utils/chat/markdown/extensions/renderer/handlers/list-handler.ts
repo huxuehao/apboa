@@ -1,7 +1,8 @@
 /**
- * 描述：列表项渲染处理器
+ * 描述：列表和列表项渲染处理器
  *
- * 提供增强的列表项渲染功能：
+ * 提供增强的列表渲染功能：
+ * - 支持有序和无序列表
  * - 支持任务列表（checkbox）
  * - 正确解析行内元素和嵌套列表
  *
@@ -9,6 +10,35 @@
  **/
 
 import type { Tokens } from 'marked'
+
+/**
+ * 列表渲染处理器
+ *
+ * @param token 列表 Token
+ * @param parser 解析器对象
+ * @returns 渲染后的 HTML
+ */
+export function listHandler(
+  token: Tokens.List,
+  parser: { parseInline: (tokens: Tokens.Generic[]) => string; parse: (tokens: Tokens.Generic[]) => string }
+): string {
+  const { ordered, start, loose, items } = token
+
+  // 渲染列表项
+  const itemsHtml = items
+    .map((item) => listitemHandler(item, parser))
+    .join('')
+
+  // 根据是否有 start 属性决定是否添加 start 属性
+  const startAttr = ordered && start !== 1 && start !== '' ? ` start="${start}"` : ''
+  // 根据 loose 决定是否添加 loose 类
+  const looseClass = loose ? 'md-list-loose' : ''
+
+  if (ordered) {
+    return `<ol class="md-list md-ol-list ${looseClass}"${startAttr}>${itemsHtml}</ol>`
+  }
+  return `<ul class="md-list md-ul-list ${looseClass}">${itemsHtml}</ul>`
+}
 
 /**
  * 列表项渲染处理器
@@ -21,7 +51,7 @@ export function listitemHandler(
   token: Tokens.ListItem,
   parser: { parseInline: (tokens: Tokens.Generic[]) => string; parse: (tokens: Tokens.Generic[]) => string }
 ): string {
-  const { text, task, checked, tokens } = token
+  const { task, checked, tokens } = token
 
   let parsedText: string
 
@@ -51,17 +81,16 @@ export function listitemHandler(
 
       parsedText = inlineHtml + blockHtml
     } else {
-      parsedText = text ?? ''
+      parsedText = token.text ?? ''
     }
   } catch {
-    parsedText = text ?? ''
+    parsedText = token.text ?? ''
   }
 
   if (task) {
     const checkedClass = checked ? 'md-task-checked' : ''
-    const checkedAttr = checked ? 'checked disabled' : 'disabled'
     return `<li class="md-task-item ${checkedClass}">
-      <input type="checkbox" ${checkedAttr} class="md-task-checkbox" />${parsedText}
+      <div class="md-task-content">${parsedText}</div>
     </li>`
   }
 

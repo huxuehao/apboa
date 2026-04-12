@@ -378,9 +378,25 @@ $mobile-breakpoint: 768px;
       flex-shrink: 0;
     }
 
+    .md-task-content {
+      flex: 1;
+      min-width: 0;
+
+      // 嵌套列表样式
+      ul, ol {
+        margin: 0.25em 0 0 0;
+      }
+    }
+
     &.md-task-checked {
       color: #999;
       text-decoration: line-through;
+
+      // 嵌套列表不添加删除线
+      ul, ol {
+        text-decoration: none;
+        color: inherit;
+      }
     }
   }
 

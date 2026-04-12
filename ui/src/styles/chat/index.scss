@@ -334,6 +334,23 @@ $small-mobile-breakpoint: 375px;
   transition: opacity $chat-transition;
 }
 
+.chat-sidebar-doc-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+
+  &:hover {
+    color: $chat-primary;
+    background-color: rgba($chat-primary, 0.06);
+  }
+}
+
 .chat-main {
   flex: 1;
   display: flex;
