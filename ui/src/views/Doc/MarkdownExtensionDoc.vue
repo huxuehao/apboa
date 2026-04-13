@@ -97,8 +97,9 @@ onMounted(() => {
   <div class="doc-page">
     <aside class="doc-sidebar">
       <div class="doc-sidebar-header">
-        <BookOutlined class="doc-sidebar-icon" />
-        <span class="doc-sidebar-title">扩展开发指南</span>
+<!--        <BookOutlined class="doc-sidebar-icon" />-->
+        <img src="@/assets/images/logo/logo.png" alt="logo" class="doc-sidebar-icon" />
+        <span class="doc-sidebar-title">Markdown 扩展开发指南</span>
       </div>
       <nav class="doc-toc">
         <template v-for="h1 in tocItems" :key="h1.id">
@@ -474,11 +475,11 @@ export function imageHandler(token: Tokens.Image): string {
 
   // 👇 这里改成你想要的 HTML 结构
   return `&lt;figure class="md-figure"&gt;
-    &lt;img 
-      src="${href}"${altAttr}${titleAttr} 
-      loading="lazy" 
-      class="md-image" 
-      onclick="window.__openImagePreview__(this)" 
+    &lt;img
+      src="${href}"${altAttr}${titleAttr}
+      loading="lazy"
+      class="md-image"
+      onclick="window.__openImagePreview__(this)"
     /&gt;
     ${text ? `&lt;figcaption&gt;${escapeHtml(text)}&lt;/figcaption&gt;` : ''}
   &lt;/figure&gt;`
@@ -510,17 +511,17 @@ export function imageHandler(token: Tokens.Image): string {
         <div class="doc-code-block">
           <pre><code>// 在你的 Vue 组件或 .ts 文件中
 
-import { 
-  MarkdownEngine, 
-  createRendererExtension 
+import {
+  MarkdownEngine,
+  createRendererExtension
 } from '@/utils/chat/markdown'
 import type { Tokens } from 'marked'
 
 // 定义你的处理器
 function myImageHandler(token: Tokens.Image): string {
-  return `&lt;img 
-    src="${token.href}" 
-    alt="${token.text || ''}" 
+  return `&lt;img
+    src="${token.href}"
+    alt="${token.text || ''}"
     class="my-custom-image"
     loading="lazy"
   /&gt;`
@@ -573,7 +574,7 @@ const html = engine.render('# Hello')</code></pre>
           <pre><code>const myRenderer = createRendererExtension({
   handlers: {
     image: (token) => `&lt;img src="${token.href}" loading="lazy" /&gt;`,
-    
+
     link: (token) => {
       const isExternal = token.href.startsWith('http')
       return `&lt;a href="${token.href}" ${isExternal ? 'target="_blank"' : ''}&gt;${token.text}&lt;/a&gt;`
@@ -710,6 +711,12 @@ if (globalHandlerRegistry.has('image')) {
 
 <style scoped lang="scss">
 @use '@/styles/doc/index.scss' as *;
+
+.doc-sidebar-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
 
 .doc-intro {
   font-size: 1.1rem;

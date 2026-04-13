@@ -72,7 +72,7 @@ export function toggleCodeFullscreen(btn: HTMLElement): void {
     codeBlock.classList.add('md-code-fullscreen')
     document.body.style.overflow = 'hidden'
     // 更新按钮文字
-    btn.textContent = '退出'
+    btn.textContent = '退出全屏'
     btn.title = '退出全屏'
   }
 }
