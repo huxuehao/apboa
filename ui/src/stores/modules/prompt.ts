@@ -119,7 +119,6 @@ export const usePromptStore = defineStore('prompt', () => {
   async function deleteTemplate(id: string) {
     await promptApi.remove([id])
     message.success('删除成功')
-    await resetAndFetch()
   }
 
   /**

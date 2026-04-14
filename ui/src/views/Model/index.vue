@@ -125,6 +125,16 @@ function handleConfigModels(id: string, name: string, type?: string) {
 }
 
 /**
+ * 重置列表状态并重建 InfiniteLoading 组件
+ */
+function resetListAndRebuild() {
+  list.value = [];
+  store.resetPagination();
+  isFirstLoad.value = true;
+  infiniteLoadingKey.value++;
+}
+
+/**
  * 处理删除
  */
 async function handleDelete(id: string) {
@@ -139,6 +149,7 @@ async function handleDelete(id: string) {
     content: '删除后无法恢复,是否继续?',
     onOk: async () => {
       await store.deleteProvider(id)
+      resetListAndRebuild()
     }
   })
 }
@@ -147,7 +158,7 @@ async function handleDelete(id: string) {
  * 处理表单提交成功
  */
 function handleFormSuccess() {
-  store.resetAndFetch()
+  resetListAndRebuild()
 }
 
 /**

@@ -107,7 +107,6 @@ export const useModelStore = defineStore('model', () => {
   async function deleteProvider(id: string) {
     await modelApi.providerRemove([id])
     message.success('删除成功')
-    await resetAndFetch()
   }
 
   /**

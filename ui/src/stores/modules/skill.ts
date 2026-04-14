@@ -119,7 +119,6 @@ export const useSkillStore = defineStore('skill', () => {
   async function deleteConfig(id: string) {
     await skillApi.remove([id])
     message.success('删除成功')
-    await resetAndFetch()
   }
 
   /**

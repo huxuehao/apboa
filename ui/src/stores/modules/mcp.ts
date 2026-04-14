@@ -107,7 +107,6 @@ export const useMcpStore = defineStore('mcp', () => {
   async function deleteConfig(id: string) {
     await mcpApi.remove([id])
     message.success('删除成功')
-    await resetAndFetch()
   }
 
   /**

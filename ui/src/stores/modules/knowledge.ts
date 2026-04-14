@@ -107,7 +107,6 @@ export const useKnowledgeStore = defineStore('knowledge', () => {
   async function deleteConfig(id: string) {
     await knowledgeApi.remove([id])
     message.success('删除成功')
-    await resetAndFetch()
   }
 
   /**

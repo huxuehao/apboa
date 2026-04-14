@@ -139,7 +139,6 @@ export const useSensitiveStore = defineStore('sensitive', () => {
   async function deleteConfig(id: string) {
     await sensitiveApi.remove([id])
     message.success('删除成功')
-    await resetAndFetch()
   }
 
   /**

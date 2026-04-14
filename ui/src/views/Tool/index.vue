@@ -144,6 +144,16 @@ async function handleEnable(id: string) {
 }
 
 /**
+ * 重置列表状态并重建 InfiniteLoading 组件
+ */
+function resetListAndRebuild() {
+  list.value = [];
+  store.resetPagination();
+  isFirstLoad.value = true;
+  infiniteLoadingKey.value++;
+}
+
+/**
  * 处理删除
  */
 async function handleDelete(id: string) {
@@ -155,6 +165,7 @@ async function handleDelete(id: string) {
       okText: '确认并继续删除',
       onOk: async () => {
         await store.deleteConfig(id)
+        resetListAndRebuild()
       }
     })
     return
@@ -165,6 +176,7 @@ async function handleDelete(id: string) {
     content: '删除后无法恢复,是否继续?',
     onOk: async () => {
       await store.deleteConfig(id)
+      resetListAndRebuild()
     }
   })
 }
@@ -173,7 +185,7 @@ async function handleDelete(id: string) {
  * 处理表单提交成功
  */
 function handleFormSuccess() {
-  store.resetAndFetch()
+  resetListAndRebuild()
   store.fetchCategories()
 }
 

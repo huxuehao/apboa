@@ -126,7 +126,6 @@ export const useHookStore = defineStore('hook', () => {
   async function deleteConfig(id: string) {
     await hookApi.remove([id])
     message.success('删除成功')
-    await resetAndFetch()
   }
 
   /**

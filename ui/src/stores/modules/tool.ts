@@ -151,7 +151,6 @@ export const useToolStore = defineStore('tool', () => {
   async function deleteConfig(id: string) {
     await toolApi.remove([id])
     message.success('删除成功')
-    await resetAndFetch()
   }
 
   /**
