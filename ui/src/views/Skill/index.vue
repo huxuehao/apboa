@@ -5,7 +5,7 @@
  */
 <script setup lang="ts">
 /* eslint-disable vue/multi-word-component-names */
-import { onMounted, ref, onUnmounted, computed, h } from 'vue'
+import { onMounted, ref, computed, h, watch } from 'vue'
 import { Modal, Collapse } from 'ant-design-vue'
 import {SearchOutlined, AppstoreOutlined, LoadingOutlined} from '@ant-design/icons-vue'
 import { useSkillStore } from '@/stores'
@@ -19,6 +19,8 @@ import ImportLocalForm from '@/components/skill/ImportLocalForm.vue'
 import ImportGitForm from '@/components/skill/ImportGitForm.vue'
 import ImportUploadForm from '@/components/skill/ImportUploadForm.vue'
 import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
+import InfiniteLoading from "v3-infinite-loading";
+import "v3-infinite-loading/lib/style.css";
 
 /**
  * 资源项接口
@@ -34,12 +36,15 @@ const { list, categories, selectedCategory, keyword, loading, hasMore } = storeT
 
 const formVisible = ref<boolean>(false)
 const currentData = ref<SkillPackageVO | undefined>(undefined)
-const scrollContainer = ref<HTMLElement>()
-const loadMoreObserver = ref<IntersectionObserver>()
 
 const importLocalVisible = ref(false)
 const importGitVisible = ref(false)
 const importUploadVisible = ref(false)
+
+/**
+ * 用于强制重建 InfiniteLoading 组件的 key
+ */
+const infiniteLoadingKey = ref(0)
 
 /**
  * 分类选项列表
@@ -244,13 +249,6 @@ function handleImportSuccess() {
 }
 
 /**
- * 处理分类切换
- */
-function handleCategoryChange(value: string | null) {
-  store.setCategory(value)
-}
-
-/**
  * 处理搜索
  */
 function handleSearch() {
@@ -281,38 +279,74 @@ async function handleEnable(id: string) {
 }
 
 /**
- * 初始化无限滚动观察器
+ * 处理无限加载
+ *
+ * @param $state 加载状态对象
  */
-function initIntersectionObserver() {
-  if (!scrollContainer.value) return
-
-  const sentinel = document.createElement('div')
-  sentinel.className = 'scroll-sentinel'
-  scrollContainer.value.appendChild(sentinel)
-
-  loadMoreObserver.value = new IntersectionObserver(
-    (entries) => {
-      const entry = entries[0]
-      if (entry && entry.isIntersecting && hasMore.value && !loading.value) {
-        store.loadMore()
+async function handleInfiniteLoading($state: {
+  loaded: () => void;
+  complete: () => void;
+  error: () => void;
+}) {
+  // 首次加载使用 page=1，后续使用 loadMore
+  if (isFirstLoad.value) {
+    isFirstLoad.value = false;
+    if (list.value.length > 0) {
+      // 如果已有数据（如从缓存恢复），直接完成
+      $state.loaded();
+      return;
+    }
+    try {
+      await store.fetchPage(1);
+      if (hasMore.value) {
+        $state.loaded();
+      } else {
+        $state.complete();
       }
-    },
-    { threshold: 0.1 }
-  )
+    } catch {
+      $state.error();
+    }
+    return;
+  }
 
-  loadMoreObserver.value.observe(sentinel)
+  // 非首次加载，使用 loadMore 加载下一页
+  if (!hasMore.value || loading.value) {
+    $state.complete();
+    return;
+  }
+
+  try {
+    await store.loadMore();
+    if (hasMore.value) {
+      $state.loaded();
+    } else {
+      $state.complete();
+    }
+  } catch {
+    $state.error();
+  }
 }
+
+/**
+ * 是否首次加载
+ */
+const isFirstLoad = ref(true);
+
+/**
+ * 监听筛选条件变化，重置状态并重建 InfiniteLoading
+ */
+watch([selectedCategory, keyword], () => {
+  // 重置列表和分页状态
+  list.value = [];
+  store.resetPagination();
+  // 重置首次加载标志
+  isFirstLoad.value = true;
+  // 强制重建 InfiniteLoading 组件
+  infiniteLoadingKey.value++;
+});
 
 onMounted(() => {
   store.fetchCategories()
-  store.fetchPage(1)
-  setTimeout(() => {
-    initIntersectionObserver()
-  }, 100)
-})
-
-onUnmounted(() => {
-  loadMoreObserver.value?.disconnect()
 })
 </script>
 
@@ -329,7 +363,6 @@ onUnmounted(() => {
       <ASegmented
         v-model:value="selectedCategory"
         :options="categoryOptions"
-        @change="handleCategoryChange"
       />
 
       <AInput
@@ -346,7 +379,7 @@ onUnmounted(() => {
       </AInput>
     </section>
 
-    <section ref="scrollContainer" class="card-section">
+    <section class="card-section">
       <div class="card-grid">
         <CreateCard
           @click="handleCreate"
@@ -367,17 +400,26 @@ onUnmounted(() => {
         />
       </div>
 
-      <div v-if="loading" class="load-indicator mt-md">
-        <span class="ml-sm text-secondary"><LoadingOutlined style="margin-right: 6px" />加载中</span>
-      </div>
-
-      <div v-if="!loading && !hasMore && list.length > 0" class="no-more-indicator text-secondary mt-md">
-        没有更多数据了
-      </div>
-
-      <div v-if="!loading && list.length === 0" class="empty-indicator mt-lg">
-        <AEmpty description="暂无数据" />
-      </div>
+      <InfiniteLoading
+        :key="infiniteLoadingKey"
+        @infinite="handleInfiniteLoading"
+      >
+        <template #spinner>
+          <div class="load-indicator mt-md">
+            <span class="ml-sm text-secondary"><LoadingOutlined style="margin-right: 6px" />加载中</span>
+          </div>
+        </template>
+        <template #complete>
+          <div class="no-more-indicator text-secondary mt-md">
+            没有更多数据了
+          </div>
+        </template>
+        <template #empty>
+          <div class="empty-indicator mt-lg">
+            <AEmpty description="暂无数据" />
+          </div>
+        </template>
+      </InfiniteLoading>
     </section>
 
     <SkillForm

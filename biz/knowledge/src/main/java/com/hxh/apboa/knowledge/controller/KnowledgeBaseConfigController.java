@@ -5,6 +5,7 @@ import com.hxh.apboa.common.dto.KnowledgeBaseConfigDTO;
 import com.hxh.apboa.common.entity.KnowledgeBaseConfig;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.mp.support.MP;
+import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.vo.KnowledgeBaseConfigVO;
@@ -31,8 +32,8 @@ public class KnowledgeBaseConfigController {
      * 分页查询
      */
     @GetMapping("/page")
-    public R<IPage<KnowledgeBaseConfigVO>> page(KnowledgeBaseConfigDTO query) {
-        IPage<KnowledgeBaseConfig> page = knowledgeBaseConfigService.page(MP.<KnowledgeBaseConfig>getPage(query), MP.getQueryWrapper(query));
+    public R<IPage<KnowledgeBaseConfigVO>> page(PageParams pageParams, KnowledgeBaseConfigDTO query) {
+        IPage<KnowledgeBaseConfig> page = knowledgeBaseConfigService.page(MP.getPage(pageParams), MP.getQueryWrapper(query));
         return R.data(BeanUtils.copyPage(page, KnowledgeBaseConfigVO.class));
     }
 

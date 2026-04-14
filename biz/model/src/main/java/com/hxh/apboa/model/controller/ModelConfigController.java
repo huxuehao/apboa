@@ -5,6 +5,7 @@ import com.hxh.apboa.common.dto.ModelConfigDTO;
 import com.hxh.apboa.common.entity.ModelConfig;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.mp.support.MP;
+import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.vo.ModelConfigVO;
@@ -31,8 +32,8 @@ public class ModelConfigController {
      * 分页查询
      */
     @GetMapping("/page")
-    public R<IPage<ModelConfigVO>> page(ModelConfigDTO query) {
-        IPage<ModelConfig> page = modelConfigService.page(MP.<ModelConfig>getPage(query), MP.getQueryWrapper(query));
+    public R<IPage<ModelConfigVO>> page(PageParams pageParams, ModelConfigDTO query) {
+        IPage<ModelConfig> page = modelConfigService.page(MP.getPage(pageParams), MP.getQueryWrapper(query));
         return R.data(BeanUtils.copyPage(page, ModelConfigVO.class));
     }
 

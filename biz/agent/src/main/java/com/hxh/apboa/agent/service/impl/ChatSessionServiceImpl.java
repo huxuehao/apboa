@@ -9,6 +9,7 @@ import com.hxh.apboa.common.dto.ChatSessionCreateDTO;
 import com.hxh.apboa.common.dto.ChatSessionQueryDTO;
 import com.hxh.apboa.common.entity.ChatMessage;
 import com.hxh.apboa.common.entity.ChatSession;
+import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.util.UserUtils;
 import com.hxh.apboa.common.vo.ChatMessageVO;
@@ -146,14 +147,14 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     }
 
     @Override
-    public IPage<ChatSessionVO> pageSessions(ChatSessionQueryDTO query) {
+    public IPage<ChatSessionVO> pageSessions(PageParams pageParams, ChatSessionQueryDTO query) {
         Long userId = query.getUserId() != null ? query.getUserId() : UserUtils.getId();
         LambdaQueryWrapper<ChatSession> wrapper = new LambdaQueryWrapper<ChatSession>()
                 .eq(userId != null, ChatSession::getUserId, userId)
                 .eq(query.getAgentId() != null, ChatSession::getAgentId, query.getAgentId())
                 .eq(query.getIsPinned() != null, ChatSession::getIsPinned, query.getIsPinned())
                 .orderByDesc(ChatSession::getUpdatedAt);
-        IPage<ChatSession> page = page(MP.getPage(query), wrapper);
+        IPage<ChatSession> page = page(MP.getPage(pageParams), wrapper);
         return BeanUtils.copyPage(page, ChatSessionVO.class);
     }
 

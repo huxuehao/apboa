@@ -5,6 +5,7 @@ import com.hxh.apboa.common.dto.ModelProviderDTO;
 import com.hxh.apboa.common.entity.ModelProvider;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.mp.support.MP;
+import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.vo.ModelProviderVO;
@@ -31,8 +32,8 @@ public class ModelProviderController {
      * 分页查询
      */
     @GetMapping("/page")
-    public R<IPage<ModelProviderVO>> page(ModelProviderDTO query) {
-        IPage<ModelProvider> page = modelProviderService.page(MP.<ModelProvider>getPage(query), MP.getQueryWrapper(query));
+    public R<IPage<ModelProviderVO>> page(PageParams pageParams, ModelProviderDTO query) {
+        IPage<ModelProvider> page = modelProviderService.page(MP.getPage(pageParams), MP.getQueryWrapper(query));
         return R.data(BeanUtils.copyPage(page, ModelProviderVO.class));
     }
 

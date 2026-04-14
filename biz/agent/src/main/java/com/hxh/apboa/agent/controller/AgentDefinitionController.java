@@ -12,6 +12,7 @@ import com.hxh.apboa.common.entity.AgentStudio;
 import com.hxh.apboa.common.entity.JobInfo;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.mp.support.MP;
+import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.vo.AgentDefinitionVO;
@@ -42,8 +43,8 @@ public class AgentDefinitionController {
      * 分页查询
      */
     @GetMapping("/page")
-    public R<IPage<AgentDefinitionVO>> page(AgentDefinitionDTO query) {
-        IPage<AgentDefinition> page = agentDefinitionService.page(MP.<AgentDefinition>getPage(query), MP.getQueryWrapper(query));
+    public R<IPage<AgentDefinitionVO>> page(PageParams pageParams, AgentDefinitionDTO query) {
+        IPage<AgentDefinition> page = agentDefinitionService.page(MP.getPage(pageParams), MP.getQueryWrapper(query));
         IPage<AgentDefinitionVO> pageVo = BeanUtils.copyPage(page, AgentDefinitionVO.class);
         List<JobInfo> agent = iJobInfoMapper.selectList(new LambdaQueryWrapper<JobInfo>().eq(JobInfo::getType, "AGENT"));
         List<AgentStudio> agentStudios = agentStudioMapper.selectList(null);

@@ -64,33 +64,39 @@ export const useKnowledgeStore = defineStore('knowledge', () => {
   }
 
   /**
-   * 设置知识库类型
+   * 设置知识库类型（仅更新状态，不触发加载）
    *
    * @param kbType 知识库类型
    */
   function setKbType(kbType: string | null) {
     selectedKbType.value = kbType
-    resetAndFetch()
   }
 
   /**
-   * 设置搜索关键词
+   * 设置搜索关键词（仅更新状态，不触发加载）
    *
    * @param value 关键词
    */
   function setKeyword(value: string) {
     keyword.value = value
-    resetAndFetch()
   }
 
   /**
    * 重置并重新加载
    */
-  function resetAndFetch() {
+  async function resetAndFetch() {
     list.value = []
     currentPage.value = 1
     hasMore.value = true
-    fetchPage(1)
+    await fetchPage(1)
+  }
+
+  /**
+   * 重置分页状态（不加载数据）
+   */
+  function resetPagination() {
+    currentPage.value = 1
+    hasMore.value = true
   }
 
   /**
@@ -101,7 +107,7 @@ export const useKnowledgeStore = defineStore('knowledge', () => {
   async function deleteConfig(id: string) {
     await knowledgeApi.remove([id])
     message.success('删除成功')
-    resetAndFetch()
+    await resetAndFetch()
   }
 
   /**
@@ -146,6 +152,7 @@ export const useKnowledgeStore = defineStore('knowledge', () => {
     setKbType,
     setKeyword,
     resetAndFetch,
+    resetPagination,
     deleteConfig,
     checkUsedWithAgent,
     toggleEnabled

@@ -5,6 +5,7 @@ import com.hxh.apboa.common.dto.HookConfigDTO;
 import com.hxh.apboa.common.entity.HookConfig;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.mp.support.MP;
+import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.vo.HookConfigVO;
@@ -31,8 +32,8 @@ public class HookConfigController {
      * 分页查询
      */
     @GetMapping("/page")
-    public R<IPage<HookConfigVO>> page(HookConfigDTO query) {
-        IPage<HookConfig> page = hookConfigService.page(MP.<HookConfig>getPage(query), MP.getQueryWrapper(query));
+    public R<IPage<HookConfigVO>> page(PageParams pageParams, HookConfigDTO query) {
+        IPage<HookConfig> page = hookConfigService.page(MP.getPage(pageParams), MP.getQueryWrapper(query));
         return R.data(BeanUtils.copyPage(page, HookConfigVO.class));
     }
 

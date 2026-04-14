@@ -5,7 +5,7 @@
  */
 <script setup lang="ts">
 /* eslint-disable vue/multi-word-component-names */
-import { onMounted, ref, onUnmounted, computed, h } from 'vue'
+import { onMounted, ref, computed, h, watch } from 'vue'
 import { Modal } from 'ant-design-vue'
 import {LoadingOutlined, SearchOutlined, ToolOutlined} from '@ant-design/icons-vue'
 import { useToolStore } from '@/stores'
@@ -16,14 +16,18 @@ import ToolCard from '@/components/tool/ToolCard.vue'
 import CreateCard from '@/components/tool/CreateCard.vue'
 import ToolForm from '@/components/tool/ToolForm.vue'
 import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
+import InfiniteLoading from "v3-infinite-loading";
+import "v3-infinite-loading/lib/style.css";
 
 const store = useToolStore()
 const { list, categories, selectedToolType, selectedCategory, keyword, loading, hasMore } = storeToRefs(store)
 
 const formVisible = ref<boolean>(false)
 const currentData = ref<ToolVO | undefined>(undefined)
-const scrollContainer = ref<HTMLElement>()
-const loadMoreObserver = ref<IntersectionObserver>()
+/** 用于强制重建 InfiniteLoading 组件的 key */
+const infiniteLoadingKey = ref(0)
+/** 是否首次加载 */
+const isFirstLoad = ref(true)
 
 /**
  * 工具类型选项
@@ -174,20 +178,6 @@ function handleFormSuccess() {
 }
 
 /**
- * 处理工具类型切换
- */
-function handleToolTypeChange(value: string | null) {
-  store.setToolType(value)
-}
-
-/**
- * 处理分类切换
- */
-function handleCategoryChange(value: string | null) {
-  store.setCategory(value)
-}
-
-/**
  * 处理搜索
  */
 function handleSearch() {
@@ -195,38 +185,63 @@ function handleSearch() {
 }
 
 /**
- * 初始化无限滚动观察器
+ * 处理无限加载
+ *
+ * @param $state 加载状态对象
  */
-function initIntersectionObserver() {
-  if (!scrollContainer.value) return
-
-  const sentinel = document.createElement('div')
-  sentinel.className = 'scroll-sentinel'
-  scrollContainer.value.appendChild(sentinel)
-
-  loadMoreObserver.value = new IntersectionObserver(
-    (entries) => {
-      const entry = entries[0]
-      if (entry && entry.isIntersecting && hasMore.value && !loading.value) {
-        store.loadMore()
+async function handleInfiniteLoading($state: {
+  loaded: () => void;
+  complete: () => void;
+  error: () => void;
+}) {
+  if (isFirstLoad.value) {
+    isFirstLoad.value = false;
+    if (list.value.length > 0) {
+      $state.loaded();
+      return;
+    }
+    try {
+      await store.fetchPage(1);
+      if (hasMore.value) {
+        $state.loaded();
+      } else {
+        $state.complete();
       }
-    },
-    { threshold: 0.1 }
-  )
+    } catch {
+      $state.error();
+    }
+    return;
+  }
 
-  loadMoreObserver.value.observe(sentinel)
+  if (!hasMore.value || loading.value) {
+    $state.complete();
+    return;
+  }
+
+  try {
+    await store.loadMore();
+    if (hasMore.value) {
+      $state.loaded();
+    } else {
+      $state.complete();
+    }
+  } catch {
+    $state.error();
+  }
 }
+
+/**
+ * 监听筛选条件变化，重置状态并重建 InfiniteLoading
+ */
+watch([selectedToolType, selectedCategory, keyword], () => {
+  list.value = [];
+  store.resetPagination();
+  isFirstLoad.value = true;
+  infiniteLoadingKey.value++;
+});
 
 onMounted(() => {
   store.fetchCategories()
-  store.fetchPage(1)
-  setTimeout(() => {
-    initIntersectionObserver()
-  }, 100)
-})
-
-onUnmounted(() => {
-  loadMoreObserver.value?.disconnect()
 })
 </script>
 
@@ -244,7 +259,6 @@ onUnmounted(() => {
         <ASegmented
           v-model:value="selectedToolType"
           :options="toolTypeOptions"
-          @change="handleToolTypeChange"
         />
       </div>
 
@@ -253,7 +267,6 @@ onUnmounted(() => {
           v-model:value="selectedCategory"
           placeholder="选择分类"
           style="width: 200px; border: rgba(14,14,14,0.1) solid 1px !important; border-radius: 6px;"
-          @change="handleCategoryChange"
         >
           <ASelectOption v-for="opt in categoryOptions" :key="opt.value" :value="opt.value">
             {{ opt.label }}
@@ -275,7 +288,7 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <section ref="scrollContainer" class="card-section">
+    <section class="card-section">
       <div class="card-grid">
         <CreateCard v-if="showCreateCard" @click="handleCreate" v-permission="['EDIT','ADMIN']" />
 
@@ -290,17 +303,26 @@ onUnmounted(() => {
         />
       </div>
 
-      <div v-if="loading" class="load-indicator mt-md">
-        <span class="ml-sm text-secondary"><LoadingOutlined style="margin-right: 6px" />加载中</span>
-      </div>
-
-      <div v-if="!loading && !hasMore && list.length > 0" class="no-more-indicator text-secondary mt-md">
-        没有更多数据了
-      </div>
-
-      <div v-if="!loading && list.length === 0" class="empty-indicator mt-lg">
-        <AEmpty description="暂无数据" />
-      </div>
+      <InfiniteLoading
+        :key="infiniteLoadingKey"
+        @infinite="handleInfiniteLoading"
+      >
+        <template #spinner>
+          <div class="load-indicator mt-md">
+            <span class="ml-sm text-secondary"><LoadingOutlined style="margin-right: 6px" />加载中</span>
+          </div>
+        </template>
+        <template #complete>
+          <div class="no-more-indicator text-secondary mt-md">
+            没有更多数据了
+          </div>
+        </template>
+        <template #empty>
+          <div class="empty-indicator mt-lg">
+            <AEmpty description="暂无数据" />
+          </div>
+        </template>
+      </InfiniteLoading>
     </section>
 
     <ToolForm

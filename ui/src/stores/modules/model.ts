@@ -64,33 +64,39 @@ export const useModelStore = defineStore('model', () => {
   }
 
   /**
-   * 设置供应商类型
+   * 设置供应商类型（仅更新状态，不触发加载）
    *
    * @param type 供应商类型
    */
   function setProviderType(type: string | null) {
     selectedProviderType.value = type
-    resetAndFetch()
   }
 
   /**
-   * 设置搜索关键词
+   * 设置搜索关键词（仅更新状态，不触发加载）
    *
    * @param value 关键词
    */
   function setKeyword(value: string) {
     keyword.value = value
-    resetAndFetch()
   }
 
   /**
    * 重置并重新加载
    */
-  function resetAndFetch() {
+  async function resetAndFetch() {
     list.value = []
     currentPage.value = 1
     hasMore.value = true
-    fetchProviderPage(1)
+    await fetchProviderPage(1)
+  }
+
+  /**
+   * 重置分页状态（不加载数据）
+   */
+  function resetPagination() {
+    currentPage.value = 1
+    hasMore.value = true
   }
 
   /**
@@ -101,7 +107,7 @@ export const useModelStore = defineStore('model', () => {
   async function deleteProvider(id: string) {
     await modelApi.providerRemove([id])
     message.success('删除成功')
-    resetAndFetch()
+    await resetAndFetch()
   }
 
   /**
@@ -151,6 +157,7 @@ export const useModelStore = defineStore('model', () => {
     setProviderType,
     setKeyword,
     resetAndFetch,
+    resetPagination,
     deleteProvider,
     checkUsedWithModel,
     toggleEnabled

@@ -6,6 +6,7 @@ import com.hxh.apboa.common.config.auth.SkAccess;
 import com.hxh.apboa.common.dto.ChatMessageAppendDTO;
 import com.hxh.apboa.common.dto.ChatSessionCreateDTO;
 import com.hxh.apboa.common.dto.ChatSessionQueryDTO;
+import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.vo.ChatMessageVO;
 import com.hxh.apboa.common.vo.ChatSessionVO;
@@ -94,8 +95,8 @@ public class ChatSessionController {
     @SkAccess
     @ChatKeyAccess
     @GetMapping("/page")
-    public R<IPage<ChatSessionVO>> page(ChatSessionQueryDTO query) {
-        return R.data(chatSessionService.pageSessions(query));
+    public R<IPage<ChatSessionVO>> page(PageParams pageParams, ChatSessionQueryDTO query) {
+        return R.data(chatSessionService.pageSessions(pageParams, query));
     }
 
     /**

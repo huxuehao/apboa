@@ -78,42 +78,47 @@ export const useAgentStore = defineStore('agent', () => {
   }
 
   /**
-   * 设置智能体类型
+   * 设置智能体类型（仅更新状态，不触发加载）
    *
    * @param agentType 智能体类型
    */
   function setAgentType(agentType: string | null) {
     selectedAgentType.value = agentType
-    resetAndFetch()
   }
 
   /**
-   * 设置当前标签
+   * 设置当前标签（仅更新状态，不触发加载）
    *
    * @param tag 标签名称
    */
   function setTag(tag: string | null) {
     selectedTag.value = tag
-    resetAndFetch()
   }
 
   /**
-   * 设置搜索关键词
+   * 设置搜索关键词（仅更新状态，不触发加载）
    *
    * @param value 关键词
    */
   function setKeyword(value: string) {
     keyword.value = value
-    resetAndFetch()
   }
 
   /**
    * 重置并重新加载
    */
-  function resetAndFetch() {
+  async function resetAndFetch() {
     currentPage.value = 1
     hasMore.value = true
-    fetchPage(1)
+    await fetchPage(1)
+  }
+
+  /**
+   * 重置分页状态（不加载数据）
+   */
+  function resetPagination() {
+    currentPage.value = 1
+    hasMore.value = true
   }
 
   /**
@@ -172,6 +177,7 @@ export const useAgentStore = defineStore('agent', () => {
     setTag,
     setKeyword,
     resetAndFetch,
+    resetPagination,
     deleteConfig,
     checkUsedWithAgent,
     toggleEnabled

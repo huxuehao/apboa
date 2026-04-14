@@ -4,6 +4,7 @@ import com.hxh.apboa.common.dto.ChatMessageAppendDTO;
 import com.hxh.apboa.common.dto.ChatSessionCreateDTO;
 import com.hxh.apboa.common.dto.ChatSessionQueryDTO;
 import com.hxh.apboa.common.entity.ChatSession;
+import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.vo.ChatMessageVO;
 import com.hxh.apboa.common.vo.ChatSessionVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -74,7 +75,7 @@ public interface ChatSessionService extends IService<ChatSession> {
      * @param query 分页查询条件
      * @return 分页会话 VO
      */
-    IPage<ChatSessionVO> pageSessions(ChatSessionQueryDTO query);
+    IPage<ChatSessionVO> pageSessions(PageParams pageParams, ChatSessionQueryDTO query);
 
     /**
      * 会话详情

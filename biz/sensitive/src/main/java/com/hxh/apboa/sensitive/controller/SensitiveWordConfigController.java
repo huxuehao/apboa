@@ -5,6 +5,7 @@ import com.hxh.apboa.common.dto.SensitiveWordConfigDTO;
 import com.hxh.apboa.common.entity.SensitiveWordConfig;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.mp.support.MP;
+import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.vo.SensitiveWordConfigVO;
@@ -31,8 +32,8 @@ public class SensitiveWordConfigController {
      * 分页查询
      */
     @GetMapping("/page")
-    public R<IPage<SensitiveWordConfigVO>> page(SensitiveWordConfigDTO query) {
-        IPage<SensitiveWordConfig> page = sensitiveWordConfigService.page(MP.<SensitiveWordConfig>getPage(query), MP.getQueryWrapper(query));
+    public R<IPage<SensitiveWordConfigVO>> page(PageParams pageParams, SensitiveWordConfigDTO query) {
+        IPage<SensitiveWordConfig> page = sensitiveWordConfigService.page(MP.getPage(pageParams), MP.getQueryWrapper(query));
         return R.data(BeanUtils.copyPage(page, SensitiveWordConfigVO.class));
     }
 
