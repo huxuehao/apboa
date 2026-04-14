@@ -18,7 +18,7 @@ export const useSkillStore = defineStore('skill', () => {
   const loading = ref<boolean>(false)
   const hasMore = ref<boolean>(true)
   const currentPage = ref<number>(1)
-  const pageSize = ref<number>(20)
+  const pageSize = ref<number>(50)
 
   /**
    * 获取分类列表
