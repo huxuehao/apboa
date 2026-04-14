@@ -81,7 +81,6 @@ $mobile-breakpoint: 768px;
     overflow: hidden;
     background-color: #f8f9fa;
     border: 1px solid #e9ecef;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 
     .md-code-header {
       display: flex;
@@ -89,7 +88,6 @@ $mobile-breakpoint: 768px;
       justify-content: space-between;
       padding: 6px 14px;
       background-color: #f1f3f5;
-      border-bottom: 1px solid #e9ecef;
     }
 
     .md-code-lang {
@@ -119,36 +117,51 @@ $mobile-breakpoint: 768px;
       font-weight: 500;
 
       &:hover {
-        background-color: rgba(0, 0, 0, 0.04);
-        color: #333;
+        color: #111827;
+        background-color: #e5e7eb;
       }
 
       &.active {
-        background-color: $md-primary;
-        color: #fff;
+        background-color: #ffffff;
+        color: #2563eb;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+    }
+
+    .md-code-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 4px 12px;
+      font-size: 0.78em;
+      color: #4b5563;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      font-weight: 500;
+
+      &:hover {
+        color: #111827;
+        background-color: #e5e7eb;
       }
     }
 
     .md-code-copy-btn {
-      background: #fff;
-      border: 1px solid #d9d9d9;
-      color: #666;
-      font-size: 0.72em;
-      padding: 2px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
 
-      &:hover {
-        background-color: #fafafa;
-        color: #333;
-        border-color: #bbb;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
       &.copied {
-        color: #52c41a;
-        border-color: #52c41a;
-        background-color: #f6ffed;
+        color: #10b981;
+        border-color: #10b981;
+        background-color: #f0fdf4;
       }
     }
 
@@ -157,24 +170,6 @@ $mobile-breakpoint: 768px;
       display: flex;
       align-items: center;
       gap: 8px;
-    }
-
-    // 全屏按钮
-    .md-code-fullscreen-btn {
-      background: #fff;
-      border: 1px solid #d9d9d9;
-      color: #666;
-      font-size: 0.72em;
-      padding: 2px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-
-      &:hover {
-        background-color: #fafafa;
-        color: #333;
-        border-color: #bbb;
-      }
     }
 
     pre {
@@ -251,8 +246,8 @@ $mobile-breakpoint: 768px;
 
       .md-code-header {
         flex-shrink: 0;
-        padding: 10px 16px;
-        background-color: #e8eaed;
+        background-color: #F1F3F5;
+        border-bottom: 1px solid #e9ecef;
       }
 
       .md-code-view,
@@ -318,7 +313,7 @@ $mobile-breakpoint: 768px;
         font-weight: 600;
         text-align: left;
         padding: 10px 14px;
-        border-bottom: 2px solid #e8e8e8;
+        border-bottom: 1px solid #e8e8e8;
         white-space: nowrap;
       }
 
@@ -519,5 +514,22 @@ $mobile-breakpoint: 768px;
     border-top: 1px solid #eee;
     font-size: 0.85em;
     color: #666;
+  }
+}
+
+// Mermaid 加载动画
+@keyframes mermaid-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+// Mermaid 淡入动画（用于缓存的 SVG）
+@keyframes mermaid-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

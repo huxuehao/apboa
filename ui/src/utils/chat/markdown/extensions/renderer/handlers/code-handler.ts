@@ -12,7 +12,12 @@
 
 import hljs from 'highlight.js'
 import type { Tokens } from 'marked'
-import { escapeHtml, isCompleteHtml, encodeToBase64, generateUniqueId } from '@/utils/chat/markdown'
+import {
+  escapeHtml,
+  isCompleteHtml,
+  encodeToBase64,
+  generateUniqueId,
+} from '@/utils/chat/markdown'
 
 /**
  * 代码块渲染选项
@@ -55,9 +60,9 @@ function highlightCode(code: string, lang?: string): string {
  * @returns 按钮组 HTML
  */
 function generateButtonGroup(): string {
-  const fullscreenBtn = `<button class="md-code-fullscreen-btn" title="全屏" onclick="window.__toggleCodeFullscreen__(this)">全屏</button>`
-  const copyBtn = `<button class="md-code-copy-btn" onclick="window.__copyCodeToClipboard__(this)">复制</button>`
-  return `<div class="md-code-btn-group">${fullscreenBtn}${copyBtn}</div>`
+  const copyBtn = `<button class="md-code-btn md-code-copy-btn" onclick="window.__copyCodeToClipboard__(this)">复制</button>`
+  const fullscreenBtn = `<button class="md-code-btn" title="全屏" onclick="window.__toggleCodeFullscreen__(this)">全屏</button>`
+  return `<div class="md-code-btn-group">${copyBtn}${fullscreenBtn}</div>`
 }
 
 /**
@@ -120,6 +125,12 @@ function renderNormalCodeBlock(text: string, lang: string, highlighted: string):
 export function codeHandler(token: Tokens.Code): string {
   const { text, lang } = token
   const language = lang || 'text'
+
+  // mermaid代码处理
+  if (lang === 'mermaid') {
+    return `<pre class="mermaid">${escapeHtml(text)}</pre>`
+  }
+
   const highlighted = highlightCode(text, lang)
 
   // 判断是否为完整的 HTML 代码

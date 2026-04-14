@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { renderMarkdown } from '@/utils/chat/markdown'
 import MediaPreview from '@/components/common/MediaPreview.vue'
 import type { UploadedFileItem } from '@/types'
+import MarkdownRenderer from "@/components/markdown/MarkdownRenderer.vue";
 
 const FILE_SEP = '@==##::::##==@'
 
@@ -86,12 +86,16 @@ const openPreview = (index: number) => {
         <div v-if="!agentHasResult && !content" class="chat-loading-dots">
           <span></span><span></span><span></span>
         </div>
-        <div v-else class="chat-md-content" v-html="renderMarkdown(content)"></div>
+        <div v-else class="chat-md-content">
+          <MarkdownRenderer :content="content" />
+        </div>
       </div>
     </template>
     <template v-else-if="isTool">
       <div class="chat-message-bubble">
-        <div class="chat-md-content" v-html="renderMarkdown(content)"></div>
+        <div class="chat-md-content">
+          <MarkdownRenderer :content="content" />
+        </div>
       </div>
     </template>
     <template v-else-if="isError">

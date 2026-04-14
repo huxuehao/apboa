@@ -13,7 +13,7 @@ export {
   MarkdownEngine,
   createMarkdownEngine,
 
-  // 扩展系统
+  // 拓展系统
   MarkdownExtensionBase,
   createExtension,
   ExtensionRegistry,

@@ -486,6 +486,7 @@ $small-mobile-breakpoint: 375px;
 }
 
 .chat-message-assistant .chat-message-bubble {
+  width: 100%;
   background-color: transparent;
   color: var(--color-text-primary);
 }

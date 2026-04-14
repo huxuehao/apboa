@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onUnmounted, nextTick } from 'vue'
 import { Modal, Spin } from 'ant-design-vue'
 import {
   FileImageOutlined,
@@ -59,6 +59,18 @@ const scale = ref(1)
 // 图片旋转角度
 const rotate = ref(0)
 
+// 拖拽相关状态
+const translateX = ref(0)
+const translateY = ref(0)
+const isDragging = ref(false)
+const dragStartX = ref(0)
+const dragStartY = ref(0)
+const dragStartTranslateX = ref(0)
+const dragStartTranslateY = ref(0)
+
+// 图片元素引用
+const imageRef = ref<HTMLImageElement | null>(null)
+
 // 当前媒体项
 const currentItem = computed(() => props.items[currentIdx.value])
 
@@ -77,8 +89,7 @@ watch(currentIdx, async () => {
 // 监听可见性变化
 watch(() => props.visible, (val) => {
   if (val) {
-    scale.value = 1
-    rotate.value = 0
+    resetImageTransform()
     loadMedia()
   } else {
     // 清理URL对象
@@ -132,11 +143,29 @@ async function loadMedia() {
     const res = await download(currentItem.value.id)
     const blob = new Blob([res.data])
     mediaUrl.value = URL.createObjectURL(blob)
+
+    // 等待图片加载完成后重置拖拽位置
+    await nextTick()
+    if (isImage.value && imageRef.value) {
+      imageRef.value.addEventListener('load', () => {
+        resetImageTransform()
+      })
+    }
   } catch (error) {
     console.error('加载媒体失败:', error)
   } finally {
     loading.value = false
   }
+}
+
+/**
+ * 重置图片变换参数
+ */
+function resetImageTransform() {
+  scale.value = 1
+  rotate.value = 0
+  translateX.value = 0
+  translateY.value = 0
 }
 
 /**
@@ -153,8 +182,7 @@ function handleClose() {
 function handlePrev() {
   if (hasPrev.value) {
     currentIdx.value--
-    scale.value = 1
-    rotate.value = 0
+    resetImageTransform()
   }
 }
 
@@ -164,8 +192,7 @@ function handlePrev() {
 function handleNext() {
   if (hasNext.value) {
     currentIdx.value++
-    scale.value = 1
-    rotate.value = 0
+    resetImageTransform()
   }
 }
 
@@ -209,6 +236,9 @@ function handleZoomOut() {
  */
 function handleRotateLeft() {
   rotate.value -= 90
+  // 旋转后重置位置，避免偏移
+  translateX.value = 0
+  translateY.value = 0
 }
 
 /**
@@ -216,7 +246,57 @@ function handleRotateLeft() {
  */
 function handleRotateRight() {
   rotate.value += 90
+  // 旋转后重置位置，避免偏移
+  translateX.value = 0
+  translateY.value = 0
 }
+
+/**
+ * 图片拖拽 - 鼠标按下
+ */
+function onImageMouseDown(e: MouseEvent) {
+  e.preventDefault()
+  e.stopPropagation()
+  isDragging.value = true
+  dragStartX.value = e.clientX
+  dragStartY.value = e.clientY
+  dragStartTranslateX.value = translateX.value
+  dragStartTranslateY.value = translateY.value
+}
+
+/**
+ * 图片拖拽 - 鼠标移动
+ */
+function onImageMouseMove(e: MouseEvent) {
+  if (!isDragging.value) return
+
+  e.preventDefault()
+
+  const deltaX = e.clientX - dragStartX.value
+  const deltaY = e.clientY - dragStartY.value
+
+  translateX.value = dragStartTranslateX.value + deltaX
+  translateY.value = dragStartTranslateY.value + deltaY
+}
+
+/**
+ * 图片拖拽 - 鼠标松开
+ */
+function onImageMouseUp(e: MouseEvent) {
+  if (!isDragging.value) return
+  isDragging.value = false
+}
+
+// 绑定全局事件
+watch(isDragging, (dragging) => {
+  if (dragging) {
+    window.addEventListener('mousemove', onImageMouseMove)
+    window.addEventListener('mouseup', onImageMouseUp)
+  } else {
+    window.removeEventListener('mousemove', onImageMouseMove)
+    window.removeEventListener('mouseup', onImageMouseUp)
+  }
+})
 
 /**
  * 获取文件图标
@@ -229,6 +309,12 @@ function getFileIcon(ext: string) {
   if (videoExts.includes(ext.toLowerCase())) return PlayCircleOutlined
   return FileTextOutlined
 }
+
+// 清理全局事件监听
+onUnmounted(() => {
+  window.removeEventListener('mousemove', onImageMouseMove)
+  window.removeEventListener('mouseup', onImageMouseUp)
+})
 </script>
 
 <template>
@@ -285,20 +371,24 @@ function getFileIcon(ext: string) {
           <Spin size="large" />
         </div>
 
-        <!-- 图片预览 -->
+        <!-- 图片预览（支持拖拽） -->
         <div
           v-else-if="isImage && mediaUrl"
           class="media-preview-image-wrapper"
           @click.self="handleClose"
         >
           <img
+            ref="imageRef"
             :src="mediaUrl"
             :alt="currentItem?.name"
             class="media-preview-image"
             :style="{
-              transform: `scale(${scale}) rotate(${rotate}deg)`,
-              transition: 'transform 0.3s ease'
+              transform: `translate(${translateX}px, ${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
+              transition: isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              cursor: isDragging ? 'grabbing' : 'grab'
             }"
+            @mousedown="onImageMouseDown"
+            @dragstart.prevent
             @click.stop
           />
         </div>
@@ -405,6 +495,7 @@ function getFileIcon(ext: string) {
   padding: 12px 16px;
   background: rgb(0, 0, 0);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .media-preview-title {
@@ -486,6 +577,7 @@ function getFileIcon(ext: string) {
   position: relative;
   overflow: hidden;
   padding: 20px;
+  min-height: 0;
 }
 
 .media-preview-loading {
@@ -494,7 +586,7 @@ function getFileIcon(ext: string) {
   justify-content: center;
 }
 
-// 图片预览
+// 图片预览（支持拖拽）
 .media-preview-image-wrapper {
   display: flex;
   align-items: center;
@@ -508,7 +600,9 @@ function getFileIcon(ext: string) {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: none;
+  will-change: transform;
 
   &:active {
     cursor: grabbing;
@@ -632,6 +726,26 @@ function getFileIcon(ext: string) {
   background: rgba(0, 0, 0, 0.5);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   overflow-x: auto;
+  flex-shrink: 0;
+
+  // 滚动条样式
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+  }
 }
 
 .media-preview-thumbnail {

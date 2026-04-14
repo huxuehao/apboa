@@ -12,8 +12,8 @@
 
 import {Marked, type MarkedExtension} from 'marked'
 import type {EngineConfig, MarkdownExtension,} from './types'
-import {ExtensionRegistry} from '../extensions/base-extension'
-import {defaultPurifyConfig, sanitizeHtml} from '../utils/security-utils'
+import {ExtensionRegistry} from '@/utils/chat/markdown'
+import {defaultPurifyConfig, sanitizeHtml} from '@/utils/chat/markdown'
 import {resetIdCounter} from '../utils/html-utils'
 import {mountGlobalDomHandlers} from '../utils/dom-utils'
 
