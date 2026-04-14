@@ -17,7 +17,7 @@ export const useHookStore = defineStore('hook', () => {
   const loading = ref<boolean>(false)
   const hasMore = ref<boolean>(true)
   const currentPage = ref<number>(1)
-  const pageSize = ref<number>(20)
+  const pageSize = ref<number>(50)
 
   /**
    * 加载分页数据

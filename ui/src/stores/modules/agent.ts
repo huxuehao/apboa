@@ -19,7 +19,7 @@ export const useAgentStore = defineStore('agent', () => {
   const loading = ref<boolean>(false)
   const hasMore = ref<boolean>(true)
   const currentPage = ref<number>(1)
-  const pageSize = ref<number>(20)
+  const pageSize = ref<number>(50)
 
   /**
    * 获取标签列表
