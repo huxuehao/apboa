@@ -63,33 +63,39 @@ export const useHookStore = defineStore('hook', () => {
   }
 
   /**
-   * 设置钩子类型
+   * 设置钩子类型（仅更新状态，不触发加载）
    *
    * @param hookType 钩子类型
    */
   function setHookType(hookType: HookType | null) {
     selectedHookType.value = hookType
-    resetAndFetch()
   }
 
   /**
-   * 设置搜索关键词
+   * 设置搜索关键词（仅更新状态，不触发加载）
    *
    * @param value 关键词
    */
   function setKeyword(value: string) {
     keyword.value = value
-    resetAndFetch()
   }
 
   /**
    * 重置并重新加载
    */
-  function resetAndFetch() {
+  async function resetAndFetch() {
     list.value = []
     currentPage.value = 1
     hasMore.value = true
-    fetchPage(1)
+    await fetchPage(1)
+  }
+
+  /**
+   * 重置分页状态（不加载数据）
+   */
+  function resetPagination() {
+    currentPage.value = 1
+    hasMore.value = true
   }
 
   /**
@@ -120,7 +126,6 @@ export const useHookStore = defineStore('hook', () => {
   async function deleteConfig(id: string) {
     await hookApi.remove([id])
     message.success('删除成功')
-    resetAndFetch()
   }
 
   /**
@@ -145,6 +150,7 @@ export const useHookStore = defineStore('hook', () => {
     setHookType,
     setKeyword,
     resetAndFetch,
+    resetPagination,
     toggleEnabled,
     deleteConfig,
     checkUsedWithAgent

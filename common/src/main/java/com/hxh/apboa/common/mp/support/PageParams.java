@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @Getter
 public class PageParams implements SerializableEnable {
-    private Integer current;
+    private Integer page;
     private Integer size;
 
     private List<String> asc;

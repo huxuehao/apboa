@@ -5,6 +5,7 @@ import com.hxh.apboa.common.dto.McpServerDTO;
 import com.hxh.apboa.common.entity.McpServer;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.mp.support.MP;
+import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.vo.McpServerVO;
@@ -31,8 +32,8 @@ public class McpServerController {
      * 分页查询
      */
     @GetMapping("/page")
-    public R<IPage<McpServerVO>> page(McpServerDTO query) {
-        IPage<McpServer> page = mcpServerService.page(MP.<McpServer>getPage(query), MP.getQueryWrapper(query));
+    public R<IPage<McpServerVO>> page(PageParams pageParams, McpServerDTO query) {
+        IPage<McpServer> page = mcpServerService.page(MP.getPage(pageParams), MP.getQueryWrapper(query));
         return R.data(BeanUtils.copyPage(page, McpServerVO.class));
     }
 

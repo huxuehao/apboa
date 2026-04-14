@@ -6,6 +6,7 @@ import com.hxh.apboa.common.entity.ToolConfig;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.enums.ToolType;
 import com.hxh.apboa.common.mp.support.MP;
+import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.vo.ToolVO;
@@ -32,8 +33,8 @@ public class ToolController {
      * 分页查询
      */
     @GetMapping("/page")
-    public R<IPage<ToolVO>> page(ToolDTO query) {
-        IPage<ToolConfig> page = toolService.page(MP.<ToolConfig>getPage(query), MP.getQueryWrapper(query));
+    public R<IPage<ToolVO>> page(PageParams pageParams, ToolDTO query) {
+        IPage<ToolConfig> page = toolService.page(MP.getPage(pageParams), MP.getQueryWrapper(query));
         return R.data(BeanUtils.copyPage(page, ToolVO.class));
     }
 

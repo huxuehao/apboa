@@ -5,7 +5,7 @@
  */
 <script setup lang="ts">
 /* eslint-disable vue/multi-word-component-names */
-import { onMounted, ref, onUnmounted, h, computed } from 'vue'
+import { ref, h, computed, watch } from 'vue'
 import { Modal } from 'ant-design-vue'
 import {CloudServerOutlined, LoadingOutlined, SearchOutlined} from '@ant-design/icons-vue'
 import { useMcpStore } from '@/stores'
@@ -16,6 +16,8 @@ import McpCard from '@/components/mcp/McpCard.vue'
 import CreateCard from '@/components/mcp/CreateCard.vue'
 import McpForm from '@/components/mcp/McpForm.vue'
 import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
+import InfiniteLoading from "v3-infinite-loading";
+import "v3-infinite-loading/lib/style.css";
 
 const store = useMcpStore()
 const { list, selectedProtocol, keyword, loading, hasMore } = storeToRefs(store)
@@ -23,8 +25,10 @@ const { list, selectedProtocol, keyword, loading, hasMore } = storeToRefs(store)
 const formVisible = ref<boolean>(false)
 const currentData = ref<McpServerVO | undefined>(undefined)
 const initialProtocol = ref<McpProtocol | undefined>(undefined)
-const scrollContainer = ref<HTMLElement>()
-const loadMoreObserver = ref<IntersectionObserver>()
+/** 用于强制重建 InfiniteLoading 组件的 key */
+const infiniteLoadingKey = ref(0)
+/** 是否首次加载 */
+const isFirstLoad = ref(true)
 
 /**
  * 当前选中的协议(类型转换)
@@ -93,6 +97,16 @@ async function handleEdit(id: string) {
 }
 
 /**
+ * 重置列表状态并重建 InfiniteLoading 组件
+ */
+function resetListAndRebuild() {
+  list.value = [];
+  store.resetPagination();
+  isFirstLoad.value = true;
+  infiniteLoadingKey.value++;
+}
+
+/**
  * 处理删除
  */
 async function handleDelete(id: string) {
@@ -104,6 +118,7 @@ async function handleDelete(id: string) {
       okText: '确认并继续删除',
       onOk: async () => {
         await store.deleteConfig(id)
+        resetListAndRebuild()
       }
     })
     return
@@ -114,6 +129,7 @@ async function handleDelete(id: string) {
     content: '删除后无法恢复,是否继续?',
     onOk: async () => {
       await store.deleteConfig(id)
+      resetListAndRebuild()
     }
   })
 }
@@ -122,14 +138,7 @@ async function handleDelete(id: string) {
  * 处理表单提交成功
  */
 function handleFormSuccess() {
-  store.resetAndFetch()
-}
-
-/**
- * 处理协议类型切换
- */
-function handleProtocolChange(value: string | null) {
-  store.setProtocol(value)
+  resetListAndRebuild()
 }
 
 /**
@@ -163,38 +172,60 @@ async function handleEnable(id: string) {
 }
 
 /**
- * 初始化无限滚动观察器
+ * 处理无限加载
+ *
+ * @param $state 加载状态对象
  */
-function initIntersectionObserver() {
-  if (!scrollContainer.value) return
-
-  const sentinel = document.createElement('div')
-  sentinel.className = 'scroll-sentinel'
-  scrollContainer.value.appendChild(sentinel)
-
-  loadMoreObserver.value = new IntersectionObserver(
-    (entries) => {
-      const entry = entries[0]
-      if (entry && entry.isIntersecting && hasMore.value && !loading.value) {
-        store.loadMore()
+async function handleInfiniteLoading($state: {
+  loaded: () => void;
+  complete: () => void;
+  error: () => void;
+}) {
+  if (isFirstLoad.value) {
+    isFirstLoad.value = false;
+    if (list.value.length > 0) {
+      $state.loaded();
+      return;
+    }
+    try {
+      await store.fetchPage(1);
+      if (hasMore.value) {
+        $state.loaded();
+      } else {
+        $state.complete();
       }
-    },
-    { threshold: 0.1 }
-  )
+    } catch {
+      $state.error();
+    }
+    return;
+  }
 
-  loadMoreObserver.value.observe(sentinel)
+  if (!hasMore.value || loading.value) {
+    $state.complete();
+    return;
+  }
+
+  try {
+    await store.loadMore();
+    if (hasMore.value) {
+      $state.loaded();
+    } else {
+      $state.complete();
+    }
+  } catch {
+    $state.error();
+  }
 }
 
-onMounted(() => {
-  store.fetchPage(1)
-  setTimeout(() => {
-    initIntersectionObserver()
-  }, 100)
-})
-
-onUnmounted(() => {
-  loadMoreObserver.value?.disconnect()
-})
+/**
+ * 监听筛选条件变化，重置状态并重建 InfiniteLoading
+ */
+watch([selectedProtocol, keyword], () => {
+  list.value = [];
+  store.resetPagination();
+  isFirstLoad.value = true;
+  infiniteLoadingKey.value++;
+});
 </script>
 
 <template>
@@ -211,7 +242,6 @@ onUnmounted(() => {
         <ASegmented
           v-model:value="selectedProtocol"
           :options="protocolOptions"
-          @change="handleProtocolChange"
         />
       </div>
 
@@ -231,7 +261,7 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <section ref="scrollContainer" class="card-section">
+    <section class="card-section">
       <div class="card-grid">
         <CreateCard :protocol="currentProtocol" @create="handleCreate" v-permission="['EDIT','ADMIN']" />
 
@@ -246,17 +276,26 @@ onUnmounted(() => {
         />
       </div>
 
-      <div v-if="loading" class="load-indicator mt-md">
-        <span class="ml-sm text-secondary"><LoadingOutlined style="margin-right: 6px" />加载中</span>
-      </div>
-
-      <div v-if="!loading && !hasMore && list.length > 0" class="no-more-indicator text-secondary mt-md">
-        没有更多数据了
-      </div>
-
-      <div v-if="!loading && list.length === 0" class="empty-indicator mt-lg">
-        <AEmpty description="暂无数据" />
-      </div>
+      <InfiniteLoading
+        :key="infiniteLoadingKey"
+        @infinite="handleInfiniteLoading"
+      >
+        <template #spinner>
+          <div class="load-indicator mt-md">
+            <span class="ml-sm text-secondary"><LoadingOutlined style="margin-right: 6px" />加载中</span>
+          </div>
+        </template>
+        <template #complete>
+          <div class="no-more-indicator text-secondary mt-md">
+            没有更多数据了
+          </div>
+        </template>
+        <template #empty>
+          <div class="empty-indicator mt-lg">
+            <AEmpty description="暂无数据" />
+          </div>
+        </template>
+      </InfiniteLoading>
     </section>
 
     <McpForm

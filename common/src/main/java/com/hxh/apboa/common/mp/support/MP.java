@@ -18,7 +18,7 @@ public class MP {
      * 获取IPage
      */
     public static <T> IPage<T> getPage(PageParams query) {
-        Page<T> page = new Page<>(query.getCurrent() == null ? 1 : query.getCurrent(), query.getSize() == null ? 20 : query.getSize());
+        Page<T> page = new Page<>(query.getPage() == null ? 1 : query.getPage(), query.getSize() == null ? 20 : query.getSize());
 
         List<String> ascList = query.getAsc();
         if (ascList != null) {

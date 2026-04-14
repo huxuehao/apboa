@@ -5,6 +5,7 @@ import com.hxh.apboa.common.dto.SystemPromptTemplateDTO;
 import com.hxh.apboa.common.entity.SystemPromptTemplate;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.mp.support.MP;
+import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.vo.SystemPromptTemplateVO;
@@ -31,8 +32,8 @@ public class SystemPromptTemplateController {
      * 分页查询
      */
     @GetMapping("/page")
-    public R<IPage<SystemPromptTemplateVO>> page(SystemPromptTemplateDTO query) {
-        IPage<SystemPromptTemplate> page = systemPromptTemplateService.page(MP.<SystemPromptTemplate>getPage(query), MP.getQueryWrapper(query));
+    public R<IPage<SystemPromptTemplateVO>> page(PageParams pageParams, SystemPromptTemplateDTO query) {
+        IPage<SystemPromptTemplate> page = systemPromptTemplateService.page(MP.getPage(pageParams), MP.getQueryWrapper(query));
         return R.data(BeanUtils.copyPage(page, SystemPromptTemplateVO.class));
     }
 

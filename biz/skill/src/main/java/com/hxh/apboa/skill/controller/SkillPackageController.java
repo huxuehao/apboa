@@ -6,6 +6,7 @@ import com.hxh.apboa.common.dto.SkillPackageDTO;
 import com.hxh.apboa.common.entity.SkillPackage;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.mp.support.MP;
+import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.vo.SkillPackageVO;
@@ -49,8 +50,8 @@ public class SkillPackageController {
      * 分页查询
      */
     @GetMapping("/page")
-    public R<IPage<SkillPackageVO>> page(SkillPackageDTO query) {
-        IPage<SkillPackage> page = skillPackageService.page(MP.<SkillPackage>getPage(query), MP.getQueryWrapper(query));
+    public R<IPage<SkillPackageVO>> page(PageParams pageParams, SkillPackageDTO query) {
+        IPage<SkillPackage> page = skillPackageService.page(MP.getPage(pageParams), MP.getQueryWrapper(query));
         return R.data(BeanUtils.copyPage(page, SkillPackageVO.class));
     }
 
@@ -194,7 +195,7 @@ public class SkillPackageController {
         } catch (IOException e) {
             // 解压失败时清理已创建的临时目录，避免泄漏
             FileUtil.del(extractDir.toFile());
-            throw e;
+            throw new RuntimeException(e);
         }
 
         // 构建导入配置，templatePath 指向解压目录中的 skills/ 子目录

@@ -79,43 +79,48 @@ export const useToolStore = defineStore('tool', () => {
   }
 
   /**
-   * 设置工具类型
+   * 设置工具类型（仅更新状态，不触发加载）
    *
    * @param toolType 工具类型
    */
   function setToolType(toolType: string | null) {
     selectedToolType.value = toolType
-    resetAndFetch()
   }
 
   /**
-   * 设置当前分类
+   * 设置当前分类（仅更新状态，不触发加载）
    *
    * @param category 分类名称
    */
   function setCategory(category: string | null) {
     selectedCategory.value = category
-    resetAndFetch()
   }
 
   /**
-   * 设置搜索关键词
+   * 设置搜索关键词（仅更新状态，不触发加载）
    *
    * @param value 关键词
    */
   function setKeyword(value: string) {
     keyword.value = value
-    resetAndFetch()
   }
 
   /**
    * 重置并重新加载
    */
-  function resetAndFetch() {
+  async function resetAndFetch() {
     list.value = []
     currentPage.value = 1
     hasMore.value = true
-    fetchPage(1)
+    await fetchPage(1)
+  }
+
+  /**
+   * 重置分页状态（不加载数据）
+   */
+  function resetPagination() {
+    currentPage.value = 1
+    hasMore.value = true
   }
 
   /**
@@ -146,7 +151,6 @@ export const useToolStore = defineStore('tool', () => {
   async function deleteConfig(id: string) {
     await toolApi.remove([id])
     message.success('删除成功')
-    resetAndFetch()
   }
 
   /**
@@ -175,6 +179,7 @@ export const useToolStore = defineStore('tool', () => {
     setCategory,
     setKeyword,
     resetAndFetch,
+    resetPagination,
     toggleEnabled,
     deleteConfig,
     checkUsedWithAgent
