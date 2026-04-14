@@ -50,6 +50,15 @@ export const ImagePreviewApi = {
     const scale = ref(1)
     const rotate = ref(0)
 
+    // 拖拽相关状态
+    const translateX = ref(0)
+    const translateY = ref(0)
+    const isDragging = ref(false)
+    const dragStartX = ref(0)
+    const dragStartY = ref(0)
+    const dragStartTranslateX = ref(0)
+    const dragStartTranslateY = ref(0)
+
     function handleZoomIn() {
       scale.value = Math.min(scale.value + 0.25, 3)
     }
@@ -60,10 +69,46 @@ export const ImagePreviewApi = {
 
     function handleRotateLeft() {
       rotate.value -= 90
+      // 旋转后重置位置，避免偏移
+      translateX.value = 0
+      translateY.value = 0
     }
 
     function handleRotateRight() {
       rotate.value += 90
+      // 旋转后重置位置，避免偏移
+      translateX.value = 0
+      translateY.value = 0
+    }
+
+    // 拖拽开始
+    function onMouseDown(e: MouseEvent) {
+      // 只允许在图片上拖拽
+      if ((e.target as HTMLElement).tagName !== 'IMG') return
+
+      isDragging.value = true
+      dragStartX.value = e.clientX
+      dragStartY.value = e.clientY
+      dragStartTranslateX.value = translateX.value
+      dragStartTranslateY.value = translateY.value
+
+      e.preventDefault()
+    }
+
+    // 拖拽中
+    function onMouseMove(e: MouseEvent) {
+      if (!isDragging.value) return
+
+      const deltaX = e.clientX - dragStartX.value
+      const deltaY = e.clientY - dragStartY.value
+
+      translateX.value = dragStartTranslateX.value + deltaX
+      translateY.value = dragStartTranslateY.value + deltaY
+    }
+
+    // 拖拽结束
+    function onMouseUp() {
+      isDragging.value = false
     }
 
     const PreviewComponent = defineComponent({
@@ -150,10 +195,13 @@ export const ImagePreviewApi = {
                       alt: options.title || '图片',
                       class: 'image-preview-img',
                       style: {
-                        transform: `scale(${scale.value}) rotate(${rotate.value}deg)`,
-                        transition: 'transform 0.3s ease',
+                        transform: `translate(${translateX.value}px, ${translateY.value}px) scale(${scale.value}) rotate(${rotate.value}deg)`,
+                        transition: isDragging.value ? 'none' : 'transform 0.3s ease',
+                        cursor: isDragging.value ? 'grabbing' : 'grab',
                       },
-                      onClick: (e: MouseEvent) => e.stopPropagation(),
+                      onMousedown: onMouseDown,
+                      onMousemove: onMouseMove,
+                      onMouseup: onMouseUp,
                     }),
                   ]),
                 ]),
@@ -164,5 +212,125 @@ export const ImagePreviewApi = {
 
     const appInstance = createApp(PreviewComponent)
     appInstance.mount(container)
+
+    // 全局监听鼠标事件
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+
+    // 清理函数
+    const originalUnmount = unmountApp
+    window.unmountApp = () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+      originalUnmount()
+    }
   },
+}
+
+// 添加必要的样式
+const style = document.createElement('style')
+style.textContent = `
+  .image-preview-modal .ant-modal {
+    max-width: 100vw;
+    top: 0;
+    padding-bottom: 0;
+  }
+
+  .image-preview-modal .ant-modal-content {
+    background: rgba(0, 0, 0, 0.85);
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  .image-preview-modal .ant-modal-body {
+    padding: 0;
+    height: 100%;
+  }
+
+  .image-preview-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+  }
+
+  .image-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    backdrop-filter: blur(10px);
+    z-index: 1;
+  }
+
+  .image-preview-title {
+    font-size: 16px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+
+  .image-preview-actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  .image-preview-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 16px;
+  }
+
+  .image-preview-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+  }
+
+  .image-preview-btn:active {
+    transform: scale(0.95);
+  }
+
+  .image-preview-btn-close:hover {
+    background: #ff4d4f;
+  }
+
+  .image-preview-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .image-preview-img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+    transition: transform 0.3s ease;
+  }
+`
+
+document.head.appendChild(style)
+
+// 修复 TypeScript 类型声明
+declare global {
+  interface Window {
+    unmountApp: () => void
+  }
 }
