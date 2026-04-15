@@ -26,34 +26,24 @@ export function escapeHtml(str: string): string {
 /**
  * 判断是否为完整的 HTML 代码
  *
- * 检测标准：
- * 1. 包含 DOCTYPE 声明
- * 2. 包含完整的 html 标签对
- * 3. 包含完整的 body 标签对
- * 4. 包含完整的 head 标签对且有 body
- *
  * @param code 代码内容
  * @returns 是否为完整的 HTML
  */
 export function isCompleteHtml(code: string): boolean {
-  const normalizedCode = code.trim().toLowerCase()
+  const normalizedCode = code.trim()
 
-  // 检查 DOCTYPE
-  if (normalizedCode.startsWith('<!doctype html')) {
-    return true
-  }
+  if (!normalizedCode) return false
 
-  // 检查完整的 html 标签
-  if (/<html[\s>][\s\S]*<\/html\s*>/i.test(code)) {
-    return true
-  }
+  // 标准完整 HTML 结构
+  const hasCompleteStructure = /<html[\s>][\s\S]*<\/html\s*>/i.test(normalizedCode) &&
+    /<head[\s>][\s\S]*<\/head\s*>/i.test(normalizedCode) &&
+    /<body[\s>][\s\S]*<\/body\s*>/i.test(normalizedCode)
 
-  // 检查完整的 head + body 结构
-  if (/<head[\s>][\s\S]*<\/head\s*>/i.test(code) && /<body[\s>][\s\S]*<\/body\s*>/i.test(code)) {
-    return true
-  }
+  // 至少有 body 标签（最简可用）
+  const hasBody = /<body[\s>][\s\S]*<\/body\s*>/i.test(normalizedCode)
 
-  return false
+  // 或者有完整的 html/head/body 结构
+  return hasBody || hasCompleteStructure
 }
 
 /**

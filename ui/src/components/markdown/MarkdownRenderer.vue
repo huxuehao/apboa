@@ -10,7 +10,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, nextTick } from 'vue'
-import { renderMarkdown } from '@/utils/chat/markdown.ts'
+import { renderMarkdown } from '@/utils/chat/markdown'
+import { initAutoPreviewIframes } from '@/utils/chat/markdown/utils'
 import MermaidRenderer from '@/components/markdown/MermaidRenderer.vue'
 
 const props = defineProps<{
@@ -56,7 +57,6 @@ const parseContent = () => {
 
   // 先渲染为 HTML
   const html = renderMarkdown(props.content)
-  console.log('html===>', html)
 
   // 提取 mermaid 块
   const mermaidBlocks = extractMermaidBlocks(html)
@@ -64,6 +64,12 @@ const parseContent = () => {
   if (mermaidBlocks.length === 0) {
     // 没有 mermaid 块，直接使用 HTML
     parts.value = [{ type: 'html', content: html }]
+    // DOM 更新后初始化自动预览的 iframe
+    nextTick(() => {
+      if (container.value) {
+        initAutoPreviewIframes(container.value)
+      }
+    })
     return
   }
 
@@ -99,6 +105,13 @@ const parseContent = () => {
   }
 
   parts.value = newParts
+
+  // DOM 更新后初始化自动预览的 iframe
+  nextTick(() => {
+    if (container.value) {
+      initAutoPreviewIframes(container.value)
+    }
+  })
 }
 
 onMounted(() => {

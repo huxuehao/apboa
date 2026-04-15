@@ -18,6 +18,7 @@ import {
   encodeToBase64,
   generateUniqueId,
 } from '@/utils/chat/markdown'
+import { decodeFromBase64 } from '@/utils/chat/markdown'
 
 /**
  * 代码块渲染选项
@@ -71,26 +72,41 @@ function generateButtonGroup(): string {
  * @param text 代码内容
  * @param lang 语言
  * @param highlighted 高亮后的代码
+ * @param showPreviewFirst 是否优先显示预览
  * @returns HTML 字符串
  */
-function renderHtmlCodeBlock(text: string, lang: string, highlighted: string): string {
+function renderHtmlCodeBlock(
+  text: string,
+  lang: string,
+  highlighted: string,
+  showPreviewFirst: boolean = false
+): string {
   const id = generateUniqueId('code')
   const rawHtmlBase64 = encodeToBase64(text)
   const btnGroup = generateButtonGroup()
 
+  // 根据 showPreviewFirst 决定默认显示的 Tab
+  const codeTabClass = showPreviewFirst ? 'md-code-tab' : 'md-code-tab active'
+  const previewTabClass = showPreviewFirst ? 'md-code-tab active' : 'md-code-tab'
+  const codeViewClass = showPreviewFirst ? 'md-code-view hidden' : 'md-code-view'
+  const previewClass = showPreviewFirst ? 'md-code-preview' : 'md-code-preview hidden'
+
+  // 当默认显示预览时，标记 iframe 需要自动加载（绕过 DOMPurify 对 srcdoc 的清理）
+  const autoPreviewAttr = showPreviewFirst ? ' data-auto-preview="true"' : ''
+
   return `<div class="md-code-block md-code-block-html" id="${id}" data-raw-html="${rawHtmlBase64}">
     <div class="md-code-header">
       <div class="md-code-tabs">
-        <button class="md-code-tab active" onclick="window.__toggleHtmlView__(this,'code')">代码</button>
-        <button class="md-code-tab" onclick="window.__toggleHtmlView__(this,'preview')">预览</button>
+        <button class="${previewTabClass}" onclick="window.__toggleHtmlView__(this,'preview')">预览</button>
+        <button class="${codeTabClass}" onclick="window.__toggleHtmlView__(this,'code')">代码</button>
       </div>
       ${btnGroup}
     </div>
-    <div class="md-code-view">
+    <div class="${codeViewClass}">
       <pre><code class="hljs language-${escapeHtml(lang)}">${highlighted}</code></pre>
     </div>
-    <div class="md-code-preview hidden">
-      <iframe class="md-code-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+    <div class="${previewClass}">
+      <iframe class="md-code-iframe" sandbox="allow-scripts allow-same-origin"${autoPreviewAttr}></iframe>
     </div>
   </div>`
 }
@@ -137,7 +153,8 @@ export function codeHandler(token: Tokens.Code): string {
   const isHtml = (lang === 'html' || lang === 'htm') && isCompleteHtml(text)
 
   if (isHtml) {
-    return renderHtmlCodeBlock(text, language, highlighted)
+    // 完整HTML优先显示预览效果
+    return renderHtmlCodeBlock(text, language, highlighted, true)
   }
 
   return renderNormalCodeBlock(text, language, highlighted)
