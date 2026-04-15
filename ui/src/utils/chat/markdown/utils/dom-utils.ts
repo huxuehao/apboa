@@ -6,8 +6,8 @@
  * @author huxuehao
  **/
 
-import { decodeFromBase64 } from './html-utils'
-import { ImagePreviewApi } from '@/utils/chat/ImagePreviewApi'
+import {decodeFromBase64} from './html-utils'
+import {ImagePreviewApi} from '@/utils/chat/ImagePreviewApi'
 
 /**
  * 切换 HTML 代码块的显示模式（代码/预览）
@@ -41,8 +41,7 @@ export function toggleHtmlView(btn: HTMLElement, mode: 'code' | 'preview'): void
       // 从 data 属性读取 base64 编码的原始 HTML 内容
       const rawHtmlBase64 = codeBlock.dataset.rawHtml
       if (rawHtmlBase64) {
-        const rawHtml = decodeFromBase64(rawHtmlBase64)
-        iframe.srcdoc = rawHtml
+        iframe.srcdoc = decodeFromBase64(rawHtmlBase64)
       }
       iframe.dataset.loaded = 'true'
     }
@@ -160,6 +159,29 @@ function fallbackCopy(text: string): boolean {
 
   document.body.removeChild(textarea)
   return success
+}
+
+/**
+ * 处理需要自动预览的 HTML 代码块
+ *
+ * 查找所有标记为 data-auto-preview 的 iframe 并设置 srcdoc
+ *
+ * @param container DOM 容器元素，默认为 document
+ */
+export function initAutoPreviewIframes(container: Element | Document = document): void {
+  const iframes = container.querySelectorAll<HTMLIFrameElement>('iframe[data-auto-preview="true"]')
+  iframes.forEach((iframe) => {
+    if (iframe.dataset.loaded) return
+
+    const codeBlock = iframe.closest('.md-code-block') as HTMLElement
+    if (!codeBlock) return
+
+    const rawHtmlBase64 = codeBlock.dataset.rawHtml
+    if (rawHtmlBase64) {
+      iframe.srcdoc = decodeFromBase64(rawHtmlBase64)
+      iframe.dataset.loaded = 'true'
+    }
+  })
 }
 
 /**

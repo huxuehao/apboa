@@ -27,7 +27,7 @@ export const defaultPurifyConfig = {
     'rowspacing', 'fence', 'stretchy', 'symmetric', 'lspace',
     'rspace', 'accent', 'accentunder', 'scriptlevel', 'movablelimits',
     'separator', 'width', 'height', 'depth', 'voffset', 'style',
-    'data-raw-html', 'sandbox', 'srcdoc',
+    'data-raw-html', 'sandbox', 'srcdoc', 'data-loaded', 'data-auto-preview',
   ],
   ALLOW_DATA_ATTR: false,
 }

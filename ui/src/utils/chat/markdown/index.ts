@@ -137,6 +137,7 @@ import {
   openImagePreview,
   copyCodeToClipboard,
   mountGlobalDomHandlers,
+  initAutoPreviewIframes,
 
   // 安全工具
   sanitizeHtml,
@@ -160,6 +161,7 @@ export {
   openImagePreview,
   copyCodeToClipboard,
   mountGlobalDomHandlers,
+  initAutoPreviewIframes,
 
   // 安全工具
   sanitizeHtml,

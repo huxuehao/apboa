@@ -58,11 +58,24 @@ export function listitemHandler(
   try {
     if (tokens && parser) {
       // 分离行内 token 和块级 token
+      // 块级元素类型列表：这些元素需要使用 parse() 而不是 parseInline()
+      const blockTypes = new Set([
+        'list',       // 列表
+        'code',       // 缩进代码块
+        'fence',      // 围栏代码块
+        'heading',    // 标题
+        'paragraph',  // 段落
+        'blockquote', // 引用块
+        'table',      // 表格
+        'hr',         // 分割线
+        'html',       // HTML 块
+      ])
+
       const inlineTokens: typeof tokens = []
       const blockTokens: typeof tokens = []
 
       for (const t of tokens) {
-        if (t.type === 'list' || t.type === 'code' || t.type === 'heading') {
+        if (blockTypes.has(t.type)) {
           blockTokens.push(t)
         } else {
           inlineTokens.push(t)
