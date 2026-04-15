@@ -97,7 +97,7 @@ function renderHtmlCodeBlock(
   return `<div class="md-code-block md-code-block-html" id="${id}" data-raw-html="${rawHtmlBase64}">
     <div class="md-code-header">
       <div class="md-code-tabs">
-        <button class="${previewTabClass}" onclick="window.__toggleHtmlView__(this,'preview')">预览</button>
+        <button class="${previewTabClass}" onclick="window.__toggleHtmlView__(this,'preview')">视图</button>
         <button class="${codeTabClass}" onclick="window.__toggleHtmlView__(this,'code')">代码</button>
       </div>
       ${btnGroup}
