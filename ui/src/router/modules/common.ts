@@ -5,7 +5,7 @@
  */
 
 import type { AppRouteRecordRaw } from '../types'
-import { RouteNames, RoutePaths } from '../constants'
+import { RouteNames, RoutePaths } from '@/router'
 
 /**
  * 公共页面路由配置
@@ -15,6 +15,16 @@ const commonRoutes: AppRouteRecordRaw[] = [
     path: RoutePaths.ROOT,
     redirect: RoutePaths.AGENT,
   },
+  {
+    path: '/test',
+    name: 'Test',
+    component: () => import('@/views/Test.vue'),
+    meta: {
+      title: '测试',
+      hidden: true,
+    },
+  },
+
   {
     path: `${RoutePaths.CHAT}/:agentId`,
     name: RouteNames.CHAT,

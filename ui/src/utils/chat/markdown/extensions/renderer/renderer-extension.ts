@@ -10,12 +10,19 @@
 import type { MarkedExtension, Tokens } from 'marked'
 import {
   codeHandler,
+  codespanHandler,
   linkHandler,
   imageHandler,
   tableHandler,
   headingHandler,
   listHandler,
   listitemHandler,
+  strongHandler,
+  emHandler,
+  blockquoteHandler,
+  hrHandler,
+  paragraphHandler,
+  brHandler,
   RendererHandlerRegistry,
   globalHandlerRegistry,
   type HandlerConfig,
@@ -34,15 +41,22 @@ let initialized = false
 function ensureInitialized(): void {
   if (initialized) return
   initialized = true
-  
+
   globalHandlerRegistry
     .register('code', codeHandler as HandlerFunctions['code'], { isDefault: true, description: '代码块渲染' })
+    .register('codespan', codespanHandler as HandlerFunctions['codespan'], { isDefault: true, description: '行内代码渲染' })
     .register('link', linkHandler as HandlerFunctions['link'], { isDefault: true, description: '链接渲染' })
     .register('image', imageHandler as HandlerFunctions['image'], { isDefault: true, description: '图片渲染' })
     .register('table', tableHandler as HandlerFunctions['table'], { isDefault: true, description: '表格渲染' })
     .register('heading', headingHandler as HandlerFunctions['heading'], { isDefault: true, description: '标题渲染' })
     .register('list', listHandler as HandlerFunctions['list'], { isDefault: true, description: '列表渲染' })
     .register('listitem', listitemHandler as HandlerFunctions['listitem'], { isDefault: true, description: '列表项渲染' })
+    .register('strong', strongHandler as HandlerFunctions['strong'], { isDefault: true, description: '加粗文本渲染' })
+    .register('em', emHandler as HandlerFunctions['em'], { isDefault: true, description: '斜体文本渲染' })
+    .register('blockquote', blockquoteHandler as HandlerFunctions['blockquote'], { isDefault: true, description: '引用块渲染' })
+    .register('hr', hrHandler as HandlerFunctions['hr'], { isDefault: true, description: '分割线渲染' })
+    .register('paragraph', paragraphHandler as HandlerFunctions['paragraph'], { isDefault: true, description: '段落渲染' })
+    .register('br', brHandler as HandlerFunctions['br'], { isDefault: true, description: '换行渲染' })
 }
 
 /**
@@ -79,7 +93,7 @@ export interface RendererExtensionConfig {
 export function createRendererExtension(config: RendererExtensionConfig = {}): MarkedExtension {
   // 确保默认处理器已初始化
   ensureInitialized()
-  
+
   // 克隆全局注册表，避免修改全局状态
   const registry = globalHandlerRegistry.clone()
 
@@ -107,7 +121,8 @@ function buildRendererExtension(registry: RendererHandlerRegistry): MarkedExtens
 
       // 行内代码
       codespan(token: Tokens.Codespan) {
-        return `<code class="md-inline-code">${token.text}</code>`
+        const handler = registry.get('codespan')
+        return handler ? handler(token) : ''
       },
 
       // 链接：外链新窗口打开
@@ -153,36 +168,42 @@ function buildRendererExtension(registry: RendererHandlerRegistry): MarkedExtens
 
       // 加粗文本
       strong(token: Tokens.Strong) {
+        const handler = registry.get('strong')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return `<strong>${(this as any).parser.parseInline(token.tokens)}</strong>`
+        return handler ? handler(token, (this as any).parser) : ''
       },
 
       // 斜体文本
       em(token: Tokens.Em) {
+        const handler = registry.get('em')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return `<em>${(this as any).parser.parseInline(token.tokens)}</em>`
+        return handler ? handler(token, (this as any).parser) : ''
       },
 
       // 引用块
       blockquote(token: Tokens.Blockquote) {
+        const handler = registry.get('blockquote')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return `<blockquote class="md-blockquote">${(this as any).parser.parse(token.tokens)}</blockquote>`
+        return handler ? handler(token, (this as any).parser) : ''
       },
 
       // 分割线
       hr() {
-        return '<hr class="md-hr" />'
+        const handler = registry.get('hr')
+        return handler ? handler() : ''
       },
 
       // 段落
       paragraph(token: Tokens.Paragraph) {
+        const handler = registry.get('paragraph')
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return `<p>${(this as any).parser.parseInline(token.tokens)}</p>`
+        return handler ? handler(token, (this as any).parser) : ''
       },
 
       // 换行
       br() {
-        return '<br />'
+        const handler = registry.get('br')
+        return handler ? handler() : ''
       },
     },
   }

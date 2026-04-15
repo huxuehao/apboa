@@ -56,11 +56,10 @@ const parseContent = () => {
 
   // 先渲染为 HTML
   const html = renderMarkdown(props.content)
+  console.log('html===>', html)
 
   // 提取 mermaid 块
   const mermaidBlocks = extractMermaidBlocks(html)
-
-  console.log('mermaidBlocks===>', mermaidBlocks)
 
   if (mermaidBlocks.length === 0) {
     // 没有 mermaid 块，直接使用 HTML
