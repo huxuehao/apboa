@@ -16,16 +16,6 @@ const commonRoutes: AppRouteRecordRaw[] = [
     redirect: RoutePaths.AGENT,
   },
   {
-    path: '/test',
-    name: 'Test',
-    component: () => import('@/views/Test.vue'),
-    meta: {
-      title: '测试',
-      hidden: true,
-    },
-  },
-
-  {
     path: `${RoutePaths.CHAT}/:agentId`,
     name: RouteNames.CHAT,
     component: () => import('@/views/Chat/index.vue'),
