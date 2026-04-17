@@ -184,7 +184,7 @@ onMounted(() => {
             <pre><code>utils/chat/markdown/extensions/container/
 ├── index.ts                    # 自动发现逻辑
 ├── types.ts                    # 类型定义
-├── container-extension.ts      # 容器扩展 ✓ 自动发现
+├── info-extension.ts      # 容器扩展 ✓ 自动发现
 └── your-extension.ts           # 你的扩展 ✓ 自动发现（需以 -extension.ts 结尾）</code></pre>
           </div>
         </div>

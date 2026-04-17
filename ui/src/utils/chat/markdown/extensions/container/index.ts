@@ -15,17 +15,17 @@ import type {
 } from './types'
 
 // 导出原有内容
-export { ContainerExtension, createContainerExtension, containerExtension } from './container-extension'
+export { InfoExtension, createInfoExtension, infoExtension } from './info-extension.ts'
 export type {
-  ContainerType,
-  ContainerTypeConfig,
-  ContainerToken,
-  ContainerExtensionConfig,
+  InfoType,
+  InfoTypeConfig,
+  InfoToken,
+  InfoExtensionConfig,
   ExtensionMetadata,
   ExtensionModule,
   ExtensionModuleExport,
 } from './types'
-export { defaultContainerConfigs } from './types'
+export { defaultInfoConfigs } from './types'
 
 /**
  * 自动发现所有扩展模块

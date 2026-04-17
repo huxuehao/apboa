@@ -54,7 +54,7 @@ export type {
   EngineConfig,
   RenderContext,
   ExtensionMetadata,
-  ContainerToken,
+  InfoToken,
   KatexToken,
   MarkedExtensionAdapter,
 } from './core'
@@ -76,9 +76,9 @@ export {
   renderKatexInline,
 
   // 容器扩展（含自动发现）
-  ContainerExtension,
-  createContainerExtension,
-  containerExtension,
+  InfoExtension,
+  createInfoExtension,
+  infoExtension,
   // 自动发现相关
   discoveredModules,
   getEnabledExtensions,
@@ -105,9 +105,9 @@ export {
 
 export type {
   KatexRenderOptions,
-  ContainerType,
-  ContainerTypeConfig,
-  ContainerExtensionConfig,
+  InfoType,
+  InfoTypeConfig,
+  InfoExtensionConfig,
   ExtensionModule,
   ExtensionModuleExport,
   // 渲染器相关类型
@@ -118,7 +118,7 @@ export type {
   HandlerMetadata,
 } from './extensions'
 
-export { defaultContainerConfigs } from './extensions'
+export { defaultInfoConfigs } from './extensions'
 
 // ==================== 工具函数 ====================
 import {

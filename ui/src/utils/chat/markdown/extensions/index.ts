@@ -25,9 +25,9 @@ export type { KatexRenderOptions } from './katex'
 
 // 容器扩展（含自动发现功能）
 export {
-  ContainerExtension,
-  createContainerExtension,
-  containerExtension,
+  InfoExtension,
+  createInfoExtension,
+  infoExtension,
   // 自动发现相关
   discoveredModules,
   getEnabledExtensions,
@@ -38,15 +38,15 @@ export {
   createAutoLoader,
 } from './container'
 export type {
-  ContainerType,
-  ContainerTypeConfig,
-  ContainerToken,
-  ContainerExtensionConfig,
+  InfoType,
+  InfoTypeConfig,
+  InfoToken,
+  InfoExtensionConfig,
   ExtensionMetadata,
   ExtensionModule,
   ExtensionModuleExport,
 } from './container'
-export { defaultContainerConfigs } from './container'
+export { defaultInfoConfigs } from './container'
 
 // 渲染器扩展（含处理器覆盖机制）
 export {

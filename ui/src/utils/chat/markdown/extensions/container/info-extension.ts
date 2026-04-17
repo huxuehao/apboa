@@ -8,15 +8,15 @@
 
 import type { MarkdownExtension } from '../../core/types'
 import type {
-  ContainerToken,
-  ContainerType,
-  ContainerExtensionConfig,
+  InfoToken,
+  InfoType,
+  InfoExtensionConfig,
   ExtensionModule,
 } from './types'
 import {
-  defaultContainerConfigs,
+  defaultInfoConfigs,
 } from './types'
-import { escapeHtml } from '../../utils/html-utils'
+import { escapeHtml } from '@/utils/chat/markdown'
 
 /**
  * 自定义容器扩展
@@ -30,15 +30,15 @@ import { escapeHtml } from '../../utils/html-utils'
  * 警告内容
  * :::
  */
-export class ContainerExtension implements MarkdownExtension {
-  readonly name = 'container'
+export class InfoExtension implements MarkdownExtension {
+  readonly name = 'info'
   readonly level = 'block' as const
   readonly priority = 60
 
   /**
    * 配置
    */
-  private config: Required<ContainerExtensionConfig>
+  private config: Required<InfoExtensionConfig>
 
   /**
    * 内部渲染函数引用（用于嵌套解析）
@@ -52,12 +52,12 @@ export class ContainerExtension implements MarkdownExtension {
    * @param innerRender 内部渲染函数（用于容器内容嵌套解析）
    */
   constructor(
-    config: ContainerExtensionConfig = {},
+    config: InfoExtensionConfig = {},
     innerRender: (text: string) => string = (text) => text
   ) {
     this.config = {
       enabledTypes: config.enabledTypes ??
-        (Object.keys(defaultContainerConfigs) as ContainerType[]),
+        (Object.keys(defaultInfoConfigs) as InfoType[]),
       typeConfigs: config.typeConfigs ?? {},
       customRenderer: config.customRenderer ?? this.defaultRenderer.bind(this),
     }
@@ -83,7 +83,7 @@ export class ContainerExtension implements MarkdownExtension {
   /**
    * Tokenizer：解析 :::type 语法
    */
-  tokenizer(src: string): ContainerToken | undefined {
+  tokenizer(src: string): InfoToken | undefined {
     // 构建类型正则
     const types = this.config.enabledTypes.join('|')
     const regex = new RegExp(`^:::(${types})(.*?)\\n([\\s\\S]*?):::\\s*(?:\\n|$)`)
@@ -91,9 +91,9 @@ export class ContainerExtension implements MarkdownExtension {
     const match = src.match(regex)
     if (match) {
       return {
-        type: 'container',
+        type: 'info',
         raw: match[0],
-        containerType: match[1] as ContainerType,
+        infoType: match[1] as InfoType,
         title: match[2]!.trim(),
         text: match[3]!.trim(),
       }
@@ -104,8 +104,8 @@ export class ContainerExtension implements MarkdownExtension {
   /**
    * Renderer：渲染为 HTML
    */
-  renderer(token: ContainerToken | { type: string; raw: string; text?: string }): string {
-    return this.config.customRenderer(token as ContainerToken)
+  renderer(token: InfoToken | { type: string; raw: string; text?: string }): string {
+    return this.config.customRenderer(token as InfoToken)
   }
 
   /**
@@ -114,19 +114,19 @@ export class ContainerExtension implements MarkdownExtension {
    * @param token 容器 Token
    * @returns HTML 字符串
    */
-  private defaultRenderer(token: ContainerToken): string {
+  private defaultRenderer(token: InfoToken): string {
     const typeConfig = {
-      ...defaultContainerConfigs[token.containerType],
-      ...this.config.typeConfigs[token.containerType],
+      ...defaultInfoConfigs[token.infoType],
+      ...this.config.typeConfigs[token.infoType],
     }
 
     const icon = typeConfig.icon
     const title = token.title || typeConfig.defaultTitle
     const content = this.innerRender(token.text ?? '')
 
-    return `<div class="md-container md-container-${token.containerType}">
-      <p class="md-container-title">${icon} ${escapeHtml(title)}</p>
-      <div class="md-container-content">${content}</div>
+    return `<div class="md-info md-info-${token.infoType}">
+      <p class="md-info-title">${icon} ${escapeHtml(title)}</p>
+      <div class="md-info-content">${content}</div>
     </div>`
   }
 }
@@ -140,33 +140,33 @@ export class ContainerExtension implements MarkdownExtension {
  * @param innerRender 内部渲染函数
  * @returns 容器扩展实例
  */
-export function createContainerExtension(
-  config?: ContainerExtensionConfig,
+export function createInfoExtension(
+  config?: InfoExtensionConfig,
   innerRender?: (text: string) => string
-): ContainerExtension {
-  return new ContainerExtension(config, innerRender)
+): InfoExtension {
+  return new InfoExtension(config, innerRender)
 }
 
 /**
  * 默认容器扩展实例
  */
-export const containerExtension = new ContainerExtension()
+export const infoExtension = new InfoExtension()
 
 /**
  * 容器扩展模块定义
  *
  * 用于自动发现和注册系统
  */
-export const extensionModule: ExtensionModule<ContainerExtension> = {
+export const extensionModule: ExtensionModule<InfoExtension> = {
   meta: {
-    name: 'container',
+    name: 'info',
     description: '自定义容器扩展，支持 tip/warning/danger/info/success 语法',
     version: '1.0.0',
     author: 'huxuehao',
     enabled: true,
     priority: 60,
   },
-  extension: containerExtension,
+  extension: infoExtension,
   /**
    * 初始化函数：设置内部渲染器
    *
@@ -175,7 +175,7 @@ export const extensionModule: ExtensionModule<ContainerExtension> = {
   setup: (engine: unknown) => {
     // engine 参数由注册系统传入，用于设置嵌套渲染
     if (engine && typeof engine === 'object' && 'render' in engine) {
-      containerExtension.setInnerRender((text) => (engine as { render: (t: string) => string }).render(text))
+      infoExtension.setInnerRender((text) => (engine as { render: (t: string) => string }).render(text))
     }
   },
 }

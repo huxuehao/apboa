@@ -28,9 +28,9 @@ export {
   renderKatexInline,
 
   // 容器扩展
-  ContainerExtension,
-  createContainerExtension,
-  containerExtension,
+  InfoExtension,
+  createInfoExtension,
+  infoExtension,
 
   // 渲染器扩展
   createRendererExtension,
@@ -76,11 +76,11 @@ export type {
   EngineConfig,
   RenderContext,
   ExtensionMetadata,
-  ContainerToken,
+  InfoToken,
   KatexToken,
   MarkedExtensionAdapter,
   KatexRenderOptions,
-  ContainerType,
-  ContainerTypeConfig,
-  ContainerExtensionConfig,
+  InfoType,
+  InfoTypeConfig,
+  InfoExtensionConfig,
 } from './markdown/index'

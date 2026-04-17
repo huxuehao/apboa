@@ -16,7 +16,7 @@ export type {
   EngineConfig,
   RenderContext,
   ExtensionMetadata,
-  ContainerToken,
+  InfoToken,
   KatexToken,
   MarkedExtensionAdapter,
 } from './types'
