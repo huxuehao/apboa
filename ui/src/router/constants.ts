@@ -59,9 +59,6 @@ export const RouteNames = {
   CHAT_HISTORY: 'ChatHistory',
   COMMUNICATION: 'Communication',
 
-  // 文档
-  MARKDOWN_EXTENSION_DOC: 'MarkdownExtensionDoc',
-
   // 错误页面
   NOT_FOUND: 'NotFound'
 } as const
@@ -115,9 +112,6 @@ export const RoutePaths = {
   CHAT: '/chat',
   CHAT_HISTORY: '/chat/history',
   COMMUNICATION: '/communication',
-
-  // 文档
-  MARKDOWN_EXTENSION_DOC: '/doc/markdown-extension',
 
   // 错误页面
   NOT_FOUND: '/:pathMatch(.*)*',

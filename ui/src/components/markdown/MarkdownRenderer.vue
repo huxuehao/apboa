@@ -1,4 +1,3 @@
-<!-- src/components/chat/MarkdownRenderer.vue -->
 <template>
   <div ref="container" class="markdown-renderer">
     <template v-for="(part, index) in parts" :key="index">
@@ -65,11 +64,11 @@ const parseContent = () => {
     // 没有 mermaid 块，直接使用 HTML
     parts.value = [{ type: 'html', content: html }]
     // DOM 更新后初始化自动预览的 iframe
-    nextTick(() => {
-      if (container.value) {
-        initAutoPreviewIframes(container.value)
-      }
-    })
+    // nextTick(() => {
+    //   if (container.value) {
+    //     initAutoPreviewIframes(container.value)
+    //   }
+    // })
     return
   }
 
@@ -107,11 +106,11 @@ const parseContent = () => {
   parts.value = newParts
 
   // DOM 更新后初始化自动预览的 iframe
-  nextTick(() => {
-    if (container.value) {
-      initAutoPreviewIframes(container.value)
-    }
-  })
+  // nextTick(() => {
+  //   if (container.value) {
+  //     initAutoPreviewIframes(container.value)
+  //   }
+  // })
 }
 
 onMounted(() => {

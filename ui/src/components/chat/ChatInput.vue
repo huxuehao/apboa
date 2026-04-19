@@ -285,48 +285,67 @@ watch(() => props.modelValue, () => {
     </div>
     <div class="chat-input-toolbar">
       <div class="chat-input-toolbar-left">
-        <button
-          :disabled="!enableMemory"
-          type="button"
-          class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"
-          :title="(memoryActive && enableMemory)?'点击关闭记忆持久化':'点击开启记忆持久化'"
-          :class="{ 'is-active': memoryActive && enableMemory }"
-          @click="toggleMemory"
-        >
-          <ClockCircleOutlined />
-        </button>
-        <button
-          :disabled="!enablePlanning"
-          type="button"
-          class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"
-          :title="(planActive && enablePlanning)?'点击关闭智能体计划能力':'点击开启智能体计划能力'"
-          :class="{ 'is-active': planActive && enablePlanning }"
-          @click="togglePlan"
-        >
-          <UnorderedListOutlined />
-        </button>
-        <button
-          :disabled="!showToolProcess"
-          type="button"
-          class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"
-          :title="(toolProcessActive && showToolProcess)?'点击关闭工具调用历史':'点击开启工具调用历史'"
-          :class="{ 'is-active': toolProcessActive && showToolProcess }"
-          @click="toggleToolProcess"
-        >
-          <ThunderboltOutlined />
-        </button>
+        <ATooltip placement="bottom">
+          <template #title>
+            <span>{{ (memoryActive && enableMemory)?'点击关闭记忆持久化':'点击开启记忆持久化' }}</span>
+          </template>
+          <button
+            :disabled="!enableMemory"
+            type="button"
+            class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"
+            :class="{ 'is-active': memoryActive && enableMemory }"
+            @click="toggleMemory"
+          >
+            <ClockCircleOutlined />
+          </button>
+        </ATooltip>
+      
+        <ATooltip placement="bottom">
+          <template #title>
+            <span>{{ (planActive && enablePlanning)?'点击关闭智能体计划能力':'点击开启智能体计划能力' }}</span>
+          </template>
+          <button
+            :disabled="!enablePlanning"
+            type="button"
+            class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"
+            :class="{ 'is-active': planActive && enablePlanning }"
+            @click="togglePlan"
+          >
+            <UnorderedListOutlined />
+          </button>
+        </ATooltip>
+
+        <ATooltip placement="bottom">
+          <template #title>
+            <span>{{ (toolProcessActive && showToolProcess)?'点击关闭工具调用历史':'点击开启工具调用历史' }}</span>
+          </template>
+          <button
+            :disabled="!showToolProcess"
+            type="button"
+            class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"
+            :class="{ 'is-active': toolProcessActive && showToolProcess }"
+            @click="toggleToolProcess"
+          >
+            <ThunderboltOutlined />
+          </button>
+        </ATooltip>
+
       </div>
       <div class="chat-input-toolbar-right">
-        <button
-          :disabled="!allowUploadFileType?.length"
-          type="button"
-          class="chat-toolbar-btn chat-toolbar-btn-icon chat-toolbar-btn-circle"
-          title="点击上传文件"
-          style="margin-right: 15px"
-          @click="handleFileClick"
-        >
-          <PaperClipOutlined />
-        </button>
+        <ATooltip placement="bottom">
+          <template #title>
+            <span>点击上传文件</span>
+          </template>
+          <button
+            :disabled="!allowUploadFileType?.length"
+            type="button"
+            class="chat-toolbar-btn chat-toolbar-btn-icon chat-toolbar-btn-circle"
+            style="margin-right: 15px"
+            @click="handleFileClick"
+          >
+            <PaperClipOutlined />
+          </button>
+        </ATooltip>
         <button
           type="button"
           class="chat-send-btn-inner"

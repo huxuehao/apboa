@@ -266,31 +266,31 @@ defineExpose({
       </ARow>
     </div>
 
-    <ARow :gutter="16">
-      <ACol :span="12">
-        <AFormItem label="启用结构化输出">
-          <ASwitch
-            v-model:checked="formData.structuredOutputEnabled"
-            @change="handleStructuredOutputToggle"
-          />
-          <div class="text-placeholder text-xs mt-xs">
-            开启后,智能体将按照指定的Schema输出结构化数据
-          </div>
-        </AFormItem>
-      </ACol>
-      <ACol :span="12" v-if="formData.structuredOutputEnabled">
-        <AFormItem label="结构化输出模式">
-          <ASelect
-            ref="select"
-            v-model:value="formData.structuredOutputReminder"
-            :options="[
-              {value: 'TOOL_CHOICE',label: 'TOOL_CHOICE（强制调用工具，一次 API 调用）'},
-              {value: 'PROMPT',label: 'PROMPT（提示词引导，可能多次调用）'}
-            ]"
-          ></ASelect>
-        </AFormItem>
-      </ACol>
-    </ARow>
+<!--    <ARow :gutter="16">-->
+<!--      <ACol :span="12">-->
+<!--        <AFormItem label="启用结构化输出">-->
+<!--          <ASwitch-->
+<!--            v-model:checked="formData.structuredOutputEnabled"-->
+<!--            @change="handleStructuredOutputToggle"-->
+<!--          />-->
+<!--          <div class="text-placeholder text-xs mt-xs">-->
+<!--            开启后,智能体将按照指定的Schema输出结构化数据-->
+<!--          </div>-->
+<!--        </AFormItem>-->
+<!--      </ACol>-->
+<!--      <ACol :span="12" v-if="formData.structuredOutputEnabled">-->
+<!--        <AFormItem label="结构化输出模式">-->
+<!--          <ASelect-->
+<!--            ref="select"-->
+<!--            v-model:value="formData.structuredOutputReminder"-->
+<!--            :options="[-->
+<!--              {value: 'TOOL_CHOICE',label: 'TOOL_CHOICE（强制调用工具，一次 API 调用）'},-->
+<!--              {value: 'PROMPT',label: 'PROMPT（提示词引导，可能多次调用）'}-->
+<!--            ]"-->
+<!--          ></ASelect>-->
+<!--        </AFormItem>-->
+<!--      </ACol>-->
+<!--    </ARow>-->
 
     <AFormItem v-if="formData.structuredOutputEnabled" label="输出Schema">
       <SmartCodeEditor

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apboa 使用手册</title>
+    <style>
+      /* 遮罩层样式 */
+      .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* 环形加载动画 */
+      .loader {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #409EFF;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        animation: spin 0.5s linear infinite;
+      }
+
+      /* 动画效果：旋转 */
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="doc-app">
+      <div class="loading-overlay">
+        <div class="loader"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/doc/main.ts"></script>
+  </body>
+</html>
