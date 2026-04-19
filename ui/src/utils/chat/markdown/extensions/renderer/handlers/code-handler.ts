@@ -97,8 +97,8 @@ function renderHtmlCodeBlock(
   return `<div class="md-code-block md-code-block-html" id="${id}" data-raw-html="${rawHtmlBase64}">
     <div class="md-code-header">
       <div class="md-code-tabs">
-        <button class="${previewTabClass}" onclick="window.__toggleHtmlView__(this,'preview')">视图</button>
         <button class="${codeTabClass}" onclick="window.__toggleHtmlView__(this,'code')">代码</button>
+        <button class="${previewTabClass}" onclick="window.__toggleHtmlView__(this,'preview')">视图</button>
       </div>
       ${btnGroup}
     </div>
@@ -154,7 +154,7 @@ export function codeHandler(token: Tokens.Code): string {
 
   if (isHtml) {
     // 完整HTML优先显示预览效果
-    return renderHtmlCodeBlock(text, language, highlighted, true)
+    return renderHtmlCodeBlock(text, language, highlighted, false)
   }
 
   return renderNormalCodeBlock(text, language, highlighted)

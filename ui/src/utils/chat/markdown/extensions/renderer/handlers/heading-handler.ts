@@ -24,8 +24,9 @@ export function headingHandler(token: Tokens.Heading, parser?: { parseInline: (t
   const content = parser ? parser.parseInline(childTokens) : token.text
   const anchor = generateAnchorId(token.text)
 
-  return `<h${depth} id="${anchor}" class="md-heading md-h${depth}">
-    <a href="#${anchor}" class="md-heading-anchor">#</a>
-    ${content}
-  </h${depth}>`
+  return `<h${depth} id="${anchor}" class="md-heading md-h${depth}">${content}</h${depth}>`
+  // return `<h${depth} id="${anchor}" class="md-heading md-h${depth}">
+  //   <a href="#${anchor}" class="md-heading-anchor">#</a>
+  //   ${content}
+  // </h${depth}>`
 }

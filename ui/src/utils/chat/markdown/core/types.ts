@@ -242,9 +242,9 @@ export interface ExtensionMetadata {
 /**
  * 容器 Token 类型（用于自定义容器扩展）
  */
-export interface ContainerToken extends CustomToken {
+export interface InfoToken extends CustomToken {
   type: 'container'
-  containerType: string
+  infoType: string
   title: string
 }
 

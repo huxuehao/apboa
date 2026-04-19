@@ -8,7 +8,7 @@ import { computed, h, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { RoutePaths } from '@/router/constants.ts'
 import { useAccountStore } from '@/stores'
-import { UndoOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons-vue'
+import { UndoOutlined, LogoutOutlined, SettingOutlined, BookOutlined } from '@ant-design/icons-vue'
 import { Modal } from "ant-design-vue";
 import SettingsModal from '@/components/settings/SettingsModal.vue'
 // import { useWebSocket } from '@/composables/useWebSocket';
@@ -75,13 +75,33 @@ const handleMenuClick = async ({ key }: { key: string }) => {
   }
 }
 
+const openMarkdownDoc = () => {
+  window.open('/doc.html#/', '_blank')
+}
+
 </script>
 
 <template>
   <div class="user-section flex items-center gap-sm pr-md">
-    <AButton style="border: none" shape="circle" type="text" @click="setRefresh" title="刷新">
-      <template #icon><UndoOutlined /></template>
-    </AButton>
+    
+    <ATooltip placement="bottom">
+      <template #title>
+        <span>刷新</span>
+      </template>
+      <AButton style="border: none" shape="circle" type="text" @click="setRefresh">
+        <template #icon><UndoOutlined /></template>
+      </AButton>
+    </ATooltip>
+
+    <ATooltip placement="bottom">
+      <template #title>
+        <span>使用手册</span>
+      </template>
+      <AButton style="border: none" shape="circle" type="text" @click="openMarkdownDoc">
+        <template #icon><BookOutlined /></template>
+      </AButton>
+    </ATooltip>
+    
 
     <ADropdown :trigger="['hover']">
       <div class="user-info flex items-center gap-sm">
