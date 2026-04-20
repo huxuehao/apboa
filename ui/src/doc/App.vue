@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { RouterView, RouterLink, useRoute } from 'vue-router';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
-import { BookOutlined, ReadOutlined, HomeOutlined, StopOutlined, FileTextOutlined, CloudServerOutlined, LinkOutlined, ToolOutlined, AppstoreOutlined, ApiOutlined, DatabaseOutlined, RobotOutlined, QuestionCircleOutlined, BuildOutlined } from '@ant-design/icons-vue';
+import { BookOutlined, ReadOutlined, HomeOutlined, SafetyCertificateOutlined, FileTextOutlined, CloudServerOutlined, LoginOutlined, ToolOutlined, AppstoreOutlined, ApiOutlined, DatabaseOutlined, RobotOutlined, QuestionCircleOutlined, BuildOutlined } from '@ant-design/icons-vue';
 
 const route = useRoute();
 
@@ -16,10 +16,10 @@ const route = useRoute();
  */
 const docMenus = [
   { path: '/', label: '概述', icon: HomeOutlined, color: '#409eff' },
-  { path: '/sensitive', label: '敏感词', icon: StopOutlined, color: '#E55B5B' },
+  { path: '/sensitive', label: '敏感词', icon: SafetyCertificateOutlined, color: '#E55B5B' },
   { path: '/prompt', label: '提示词模板', icon: FileTextOutlined, color: '#F0843E' },
   { path: '/model', label: '模型供应商', icon: CloudServerOutlined, color: '#00B81B' },
-  { path: '/hook', label: '钩子', icon: LinkOutlined, color: '#DB2781' },
+  { path: '/hook', label: '钩子', icon: LoginOutlined, color: '#DB2781' },
   { path: '/tool', label: '工具', icon: ToolOutlined, color: '#399DF2' },
   { path: '/skill', label: '技能包', icon: AppstoreOutlined, color: '#AB47BC' },
   { path: '/mcp', label: 'MCP', icon: ApiOutlined, color: '#66BB6A' },

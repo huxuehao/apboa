@@ -459,7 +459,7 @@ defineExpose({
         </div>
       </AFormItem>
 
-      <AFormItem label="代码执行配置">
+      <AFormItem label="代码执行配置" v-if="formData.skill?.length > 0">
         <CodeExecutionConfigSelect v-model="formData.codeExecutionConfigId" />
         <div class="text-placeholder text-xs mt-xs">
           配置代码执行环境，用于智能体执行代码脚本

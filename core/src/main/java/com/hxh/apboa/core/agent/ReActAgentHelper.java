@@ -164,7 +164,9 @@ public class ReActAgentHelper {
 
         ReActAgent reActAgent = builder.build();
 
-        skillBoxFactory.configureCodeExecution(skillBox, definition.getId());
+        if (skillBox != null) {
+            skillBoxFactory.configureCodeExecution(skillBox, definition.getId());
+        }
 
         return reActAgent;
     }
