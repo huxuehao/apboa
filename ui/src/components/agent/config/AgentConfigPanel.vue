@@ -77,8 +77,7 @@ function checkUnsaved(): boolean {
     if (isA2aAgent.value && editA2aRef.value?.isDirty) return true
     if (!isA2aAgent.value && editRef.value?.isDirty) return true
   }
-  if (activeKey.value === 'schedule' && scheduleRef.value?.isDirty) return true
-  return false
+  return !!(activeKey.value === 'schedule' && scheduleRef.value?.isDirty);
 }
 
 /**

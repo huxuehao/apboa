@@ -74,7 +74,7 @@ defineProps<{
           <div class="config-name">记忆压缩</div>
         </div>
         <div class="config-status">
-          <CheckCircleOutlined v-if="data.enableMemoryCompression" class="status-icon enabled" />
+          <CheckCircleOutlined v-if="data.enableMemory && data.enableMemoryCompression" class="status-icon enabled" />
           <CloseCircleOutlined v-else class="status-icon disabled" />
         </div>
       </div>

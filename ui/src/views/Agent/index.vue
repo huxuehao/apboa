@@ -272,6 +272,12 @@ async function handleConfigPanel(id: string) {
 function handleConfigPanelSuccess() {
   resetListAndRebuild()
   store.fetchTags()
+  if (configPanelAgentData.value) {
+    agentApi.detail(configPanelAgentData.value.id as string).then((res) => {
+      configPanelAgentData.value = res.data.data
+    })
+  }
+
 }
 
 /**

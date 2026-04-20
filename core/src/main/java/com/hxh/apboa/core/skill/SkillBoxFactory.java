@@ -132,6 +132,9 @@ public class SkillBoxFactory {
      * @param agentDefinitionId 智能体定义ID
      */
     public void configureCodeExecution(SkillBox skillBox, Long agentDefinitionId) {
+        if (skillBox == null) {
+            return;
+        }
         // 获取代码执行配置
         CodeExecutionConfig config = getCodeExecutionConfig(agentDefinitionId);
         if (config == null) {

@@ -3,9 +3,11 @@ package com.hxh.apboa.agent.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hxh.apboa.agent.mapper.IJobInfoMapper;
 import com.hxh.apboa.agent.service.AgentDefinitionService;
+import com.hxh.apboa.cluster.core.MessagePublisher;
 import com.hxh.apboa.common.config.auth.ChatKeyAccess;
 import com.hxh.apboa.common.config.auth.RoleNeed;
 import com.hxh.apboa.common.config.auth.SkAccess;
+import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.dto.AgentDefinitionDTO;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.AgentStudio;
@@ -38,6 +40,7 @@ public class AgentDefinitionController {
     private final AgentDefinitionService agentDefinitionService;
     private final IJobInfoMapper iJobInfoMapper;
     private final AgentStudioMapper agentStudioMapper;
+    private final MessagePublisher messagePublisher;
 
     /**
      * 分页查询
@@ -96,7 +99,9 @@ public class AgentDefinitionController {
     @PostMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> save(@RequestBody AgentDefinitionVO vo) {
-        return R.data(agentDefinitionService.saveAgentDefinition(vo));
+        agentDefinitionService.saveAgentDefinition(vo);
+        messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(vo.getId()));
+        return R.data(true);
     }
 
     /**

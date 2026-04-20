@@ -300,9 +300,8 @@ $doc-toc-width: 240px;
   font-size: 13px;
   font-weight: 600;
   color: #1F2937;
-  margin-bottom: 16px;
+  margin-bottom: 5px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #E5E7EB;
   text-transform: uppercase;
   letter-spacing: 1px;
 }

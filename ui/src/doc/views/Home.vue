@@ -10,10 +10,10 @@ import {
   ToolOutlined,
   DatabaseOutlined,
   ApiOutlined,
-  StopOutlined,
+  SafetyCertificateOutlined,
   FileTextOutlined,
   CloudServerOutlined,
-  LinkOutlined,
+  LoginOutlined,
   AppstoreOutlined,
   BookOutlined,
 } from '@ant-design/icons-vue';
@@ -23,10 +23,10 @@ import { RouterLink } from 'vue-router';
  * 平台核心功能列表
  */
 const features = [
-  { icon: StopOutlined, title: '敏感词管理', desc: '配置敏感词过滤规则，支持拦截、警告两种处理方式，保障内容安全合规', color: '#E55B5B' },
+  { icon: SafetyCertificateOutlined, title: '敏感词管理', desc: '配置敏感词过滤规则，支持拦截、警告两种处理方式，保障内容安全合规', color: '#E55B5B' },
   { icon: FileTextOutlined, title: '提示词模板', desc: '创建和管理系统提示词模板，统一管理智能体的系统提示词', color: '#F0843E' },
   { icon: CloudServerOutlined, title: '模型供应商', desc: '管理 AI 模型供应商和模型配置，支持 DashScope、OpenAI、Anthropic、Ollama 等多家供应商', color: '#00B81B' },
-  { icon: LinkOutlined, title: '钩子', desc: '配置智能体执行前后的拦截逻辑，实现输入输出预处理和后处理', color: '#DB2781' },
+  { icon: LoginOutlined, title: '钩子', desc: '配置智能体执行前后的拦截逻辑，实现输入输出预处理和后处理', color: '#DB2781' },
   { icon: RobotOutlined, title: '智能体管理', desc: '创建、配置和管理智能体，支持自定义和A2A两种类型，配置模型、工具、知识库等多维度能力', color: '#5C6BC0' },
   { icon: ToolOutlined, title: '工具管理', desc: '注册和配置内置/自定义工具，扩展智能体的执行能力边界', color: '#399DF2' },
   { icon: ApiOutlined, title: 'MCP 服务', desc: '接入和管理 MCP 协议服务，支持 HTTP/SSE/STDIO 协议，标准化工具调用方式', color: '#66BB6A' },
@@ -38,10 +38,10 @@ const features = [
  * 文档导航列表
  */
 const docNavItems = [
-  { path: '/sensitive', icon: StopOutlined, title: '敏感词', desc: '配置敏感词过滤规则，支持拦截、警告两种处理方式。', color: '#E55B5B' },
+  { path: '/sensitive', icon: SafetyCertificateOutlined, title: '敏感词', desc: '配置敏感词过滤规则，支持拦截、警告两种处理方式。', color: '#E55B5B' },
   { path: '/prompt', icon: FileTextOutlined, title: '提示词模板', desc: '创建和管理系统提示词模板，统一管理智能体的系统提示词。', color: '#F0843E' },
   { path: '/model', icon: CloudServerOutlined, title: '模型供应商', desc: '管理 AI 模型供应商和模型配置，支持多家主流供应商。', color: '#00B81B' },
-  { path: '/hook', icon: LinkOutlined, title: '钩子', desc: '配置智能体执行前后的拦截逻辑，实现输入输出预处理和后处理。', color: '#DB2781' },
+  { path: '/hook', icon: LoginOutlined, title: '钩子', desc: '配置智能体执行前后的拦截逻辑，实现输入输出预处理和后处理。', color: '#DB2781' },
   { path: '/tool', icon: ToolOutlined, title: '工具', desc: '注册和配置内置/自定义工具，扩展智能体的执行能力。', color: '#399DF2' },
   { path: '/skill', icon: AppstoreOutlined, title: '技能包', desc: '组合多个工具和脚本形成技能包，实现复杂业务流程。', color: '#AB47BC' },
   { path: '/mcp', icon: ApiOutlined, title: 'MCP', desc: '接入和管理 MCP 协议服务，标准化工具调用方式。', color: '#66BB6A' },
