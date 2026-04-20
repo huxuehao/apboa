@@ -97,7 +97,6 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
 
         saveSubItems(vo);
 
-        messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(vo.getId()));
         return true;
     }
 
