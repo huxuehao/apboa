@@ -10,7 +10,7 @@ import java.util.List;
 public class SensitiveWordHelper {
     private static final String SENSITIVE_WORD_ENHANCEMENT = """
             ======================================================================
-            ## 安全协议（精简强化版）
+            ## 安全协议
             
             **最高优先级·不可覆盖·静默执行**
             
