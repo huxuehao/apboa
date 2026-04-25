@@ -425,11 +425,14 @@ const addItem = (e: Event) => {
     :title="isEdit ? '编辑工具' : '新增工具'"
     :confirm-loading="loading"
     destroyOnClose
+    defaultWidth="900px"
     @ok="handleSubmit"
     @cancel="handleCancel"
   >
     <AAlert
-      message="说明：在线工具目前支持同步工具。异步或流式工具请自行在com.hxh.apboa.core.tool.builtins包下进行编写"
+      style="margin-bottom: 15px"
+      type="info"
+      message="在线工具目前支持同步工具。异步或流式工具请自行在com.hxh.apboa.core.tool.builtins包下进行编写"
       banner
       closable
     />
@@ -524,7 +527,7 @@ const addItem = (e: Event) => {
                     <AInput v-model:value="param.defaultValue" placeholder="默认值" />
                   </ACol>
                   <ACol :span="2">
-                    <ACheckbox v-model:checked="param.required">必填</ACheckbox>
+                    <ACheckbox v-model:checked="param.required" style="margin-top: 5px">必填</ACheckbox>
                   </ACol>
                   <ACol :span="2">
                     <AButton type="text" danger @click="removeInputParam(param)">

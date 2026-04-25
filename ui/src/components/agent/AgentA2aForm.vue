@@ -261,7 +261,9 @@ function handleCancel() {
     @cancel="handleCancel"
   >
     <AAlert
-      message="因 AgentScope 未适配 AgentCard 的 securitySchemes，仅支持无鉴权 A2A-Server。"
+      style="margin-bottom: 15px"
+      type="info"
+      message="因 AgentScope 未适配 AgentCard 的 securitySchemes，仅支持无鉴权 A2A-Server"
       banner
       closable
     />

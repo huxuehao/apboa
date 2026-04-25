@@ -287,7 +287,8 @@ watch(() => props.modelValue, () => {
       <div class="chat-input-toolbar-left">
         <ATooltip placement="bottom">
           <template #title>
-            <span>{{ (memoryActive && enableMemory)?'点击关闭记忆持久化':'点击开启记忆持久化' }}</span>
+            <span v-if="enableMemory">{{ (memoryActive && enableMemory)?'点击关闭':'点击开启记忆持久化' }}</span>
+            <span v-else>不支持记忆持久化</span>
           </template>
           <button
             :disabled="!enableMemory"
@@ -299,10 +300,11 @@ watch(() => props.modelValue, () => {
             <ClockCircleOutlined />
           </button>
         </ATooltip>
-      
+
         <ATooltip placement="bottom">
           <template #title>
-            <span>{{ (planActive && enablePlanning)?'点击关闭智能体计划能力':'点击开启智能体计划能力' }}</span>
+            <span v-if="enablePlanning">{{ (planActive && enablePlanning)?'点击关闭规划能力':'点击开启规划能力' }}</span>
+            <span v-else>不支持规划能力</span>
           </template>
           <button
             :disabled="!enablePlanning"
@@ -317,7 +319,8 @@ watch(() => props.modelValue, () => {
 
         <ATooltip placement="bottom">
           <template #title>
-            <span>{{ (toolProcessActive && showToolProcess)?'点击关闭工具调用历史':'点击开启工具调用历史' }}</span>
+            <span v-if="showToolProcess">{{ (toolProcessActive && showToolProcess)?'点击关闭工具调用历史':'点击开启工具调用历史' }}</span>
+            <span v-else>不支持控制工具调用显示</span>
           </template>
           <button
             :disabled="!showToolProcess"
@@ -334,7 +337,8 @@ watch(() => props.modelValue, () => {
       <div class="chat-input-toolbar-right">
         <ATooltip placement="bottom">
           <template #title>
-            <span>点击上传文件</span>
+            <span v-if="allowUploadFileType && allowUploadFileType?.length > 0">点击上传文件（{{allowUploadFileType?.join('、')}}）</span>
+            <span v-else>不支持上传文件</span>
           </template>
           <button
             :disabled="!allowUploadFileType?.length"
