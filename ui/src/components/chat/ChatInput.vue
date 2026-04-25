@@ -287,7 +287,7 @@ watch(() => props.modelValue, () => {
       <div class="chat-input-toolbar-left">
         <ATooltip placement="bottom">
           <template #title>
-            <span v-if="enableMemory">{{ (memoryActive && enableMemory)?'点击关闭':'点击开启记忆持久化' }}</span>
+            <span v-if="enableMemory">{{ (memoryActive && enableMemory)?'点击关闭记忆':'点击开启记忆' }}</span>
             <span v-else>不支持记忆持久化</span>
           </template>
           <button
@@ -301,25 +301,25 @@ watch(() => props.modelValue, () => {
           </button>
         </ATooltip>
 
-        <ATooltip placement="bottom">
-          <template #title>
-            <span v-if="enablePlanning">{{ (planActive && enablePlanning)?'点击关闭规划能力':'点击开启规划能力' }}</span>
-            <span v-else>不支持规划能力</span>
-          </template>
-          <button
-            :disabled="!enablePlanning"
-            type="button"
-            class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"
-            :class="{ 'is-active': planActive && enablePlanning }"
-            @click="togglePlan"
-          >
-            <UnorderedListOutlined />
-          </button>
-        </ATooltip>
+<!--        <ATooltip placement="bottom">-->
+<!--          <template #title>-->
+<!--            <span v-if="enablePlanning">{{ (planActive && enablePlanning)?'点击关闭规划能力':'点击开启规划能力' }}</span>-->
+<!--            <span v-else>不支持规划能力</span>-->
+<!--          </template>-->
+<!--          <button-->
+<!--            :disabled="!enablePlanning"-->
+<!--            type="button"-->
+<!--            class="chat-toolbar-btn chat-toolbar-btn-icon  chat-toolbar-btn-circle"-->
+<!--            :class="{ 'is-active': planActive && enablePlanning }"-->
+<!--            @click="togglePlan"-->
+<!--          >-->
+<!--            <UnorderedListOutlined />-->
+<!--          </button>-->
+<!--        </ATooltip>-->
 
         <ATooltip placement="bottom">
           <template #title>
-            <span v-if="showToolProcess">{{ (toolProcessActive && showToolProcess)?'点击关闭工具调用历史':'点击开启工具调用历史' }}</span>
+            <span v-if="showToolProcess">{{ (toolProcessActive && showToolProcess)?'点击关闭工具调用历史':'点击显示工具调用历史' }}</span>
             <span v-else>不支持控制工具调用显示</span>
           </template>
           <button

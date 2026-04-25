@@ -195,22 +195,22 @@ defineExpose({
         </ACol>
       </ARow>
 
-      <AFormItem label="需要计划确认">
-        <ASwitch v-model:checked="formData.requirePlanConfirmation" />
+      <AFormItem label="需要确认计划">
+        <ASwitch v-model:checked="formData.requirePlanConfirmation" :disabled="!formData.enableMemory" />
         <div class="text-placeholder text-xs mt-xs">
-          开启后,执行计划前需要用户确认
+          开启后,执行计划前需要用户确认（注意：需要开启记忆后方可生效）
         </div>
       </AFormItem>
     </div>
 
-    <AFormItem label="启用记忆持久化">
+    <AFormItem label="开启记忆">
       <ASwitch v-model:checked="formData.enableMemory" />
       <div class="text-placeholder text-xs mt-xs">
         开启后,智能体将能够记住对话历史并持久化到数据库
       </div>
     </AFormItem>
 
-    <AFormItem v-if="formData.enableMemory" label="启用记忆压缩">
+    <AFormItem v-if="formData.enableMemory" label="开启记忆压缩">
       <ASwitch
         v-model:checked="formData.enableMemoryCompression"
         @change="handleEnableMemoryCompressionToggle"

@@ -299,7 +299,7 @@ async function handleSubmit() {
       enablePlanning: formData.value.advanced.enablePlanning,
       maxIterations: formData.value.advanced.maxIterations,
       maxSubtasks: formData.value.advanced.maxSubtasks,
-      requirePlanConfirmation: formData.value.advanced.requirePlanConfirmation,
+      requirePlanConfirmation: formData.value.advanced.requirePlanConfirmation && formData.value.advanced.enableMemory,
       showToolProcess: formData.value.advanced.showToolProcess,
       enableMemory: formData.value.advanced.enableMemory,
       enableMemoryCompression: formData.value.advanced.enableMemoryCompression,

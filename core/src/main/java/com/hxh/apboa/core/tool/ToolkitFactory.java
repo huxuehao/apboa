@@ -59,8 +59,6 @@ public class ToolkitFactory {
         List<Long> toolIds = agentToolService.getToolIds(agentDefinition.getId());
         Toolkit toolkit = getToolkit(toolIds);
         if (!toolIds.isEmpty()) {
-            // 获取是否开启记忆
-            Boolean isMemoryActive = AgentContext.getIfExists().map(AgentContext::isMemoryActive).orElse(false);
             // 注册工具
             toolService.listByIds(toolIds)
                     .stream()
@@ -75,7 +73,7 @@ public class ToolkitFactory {
                             toolkit.registerTool(new DynamicAgentTool(toolConfig));
                         }
 
-                        if (toolConfig.getNeedConfirm() && isMemoryActive) {
+                        if (toolConfig.getNeedConfirm()) {
                             IConfirmationHook.setNeedConfirmTool(toolConfig.getToolId());
                         } else {
                             IConfirmationHook.removeNeedConfirmTool(toolConfig.getToolId());
