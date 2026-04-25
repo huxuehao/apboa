@@ -541,12 +541,12 @@ watch(() => props.modelValue, () => {
   align-items: center;
   justify-content: center;
   border: none;
-  background: transparent;
+  background-color: #f5f5f5;
   cursor: pointer;
   color: var(--color-text-secondary);
   transition: color 0.2s ease, background-color 0.2s ease;
   border-radius: var(--border-radius-md);
-  margin-right: 5px;
+  margin-right: 10px;
 
   &:hover {
     color: $chat-primary;
