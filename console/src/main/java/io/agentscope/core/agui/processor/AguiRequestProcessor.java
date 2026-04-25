@@ -84,15 +84,26 @@ public class AguiRequestProcessor {
         }
 
         // 加载历史记忆
-        if (agent instanceof ReActAgent reActAgent && memoryActive) {
-            try {
-                AgentDefinition agentDefinition = getAgentDefinition(threadId, jdbcTemplate);
-                if (agentDefinition != null && agentDefinition.getEnableMemory()) {
-                    // 从session中加载历史会话
-                    reActAgent.loadFrom(session, threadId);
+        if (agent instanceof ReActAgent reActAgent) {
+            if (memoryActive) {
+                try {
+                    AgentDefinition agentDefinition = getAgentDefinition(threadId, jdbcTemplate);
+                    if (agentDefinition != null && agentDefinition.getEnableMemory()) {
+                        // 从session中加载历史会话
+                        reActAgent.loadFrom(session, threadId);
+                    }
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
                 }
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
+            } else  {
+                boolean isToolMsg = "tool".equalsIgnoreCase(
+                        input.getMessages().isEmpty()
+                                ? "none"
+                                : input.getMessages().getFirst().getRole());
+                // 成立条件：不是工具消息且记忆不为空
+                if (!isToolMsg && reActAgent.getMemory() != null) {
+                    reActAgent.getMemory().clear();
+                }
             }
         }
 

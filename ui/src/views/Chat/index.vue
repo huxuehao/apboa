@@ -67,9 +67,6 @@ const sidebarCollapsed = computed({
 })
 
 const handleMemoryChange = (v: boolean) => {
-  if (!v) {
-    message.warning("关闭记忆后，所有工具调用将无需人工确认，自动执行")
-  }
   const id = agentDetail.value?.id ?? agentId.value
   chatStore.setMemoryActive(id as string, accountId.value as string, v)
 }
