@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import MediaPreview from '@/components/common/MediaPreview.vue'
 import type { UploadedFileItem } from '@/types'
+import MediaIcon from '@/components/common/MediaIcon.vue'
 import MarkdownRenderer from "@/components/markdown/MarkdownRenderer.vue";
 
 const FILE_SEP = '@==##::::##==@'
@@ -67,11 +68,9 @@ const openPreview = (index: number) => {
             @click="openPreview(index)"
             class="chat-message-file-item"
           >
-            <span class="chat-input-file-tag">
-              {{ (item.extension ?? getExtension(item.name)).toUpperCase() || 'FILE' }}
-            </span>
+            <MediaIcon :type="(item.extension ?? getExtension(item.name)) || 'FILE'" size="19"/>
             <span class="chat-message-file-name" :title="item.name">{{ item.name }}</span>
-            <span class="chat-message-file-size">{{ item.size }}</span>
+<!--            <span class="chat-message-file-size">{{ item.size }}</span>-->
           </div>
         </div>
         <!-- 文本内容 -->
@@ -125,25 +124,16 @@ const openPreview = (index: number) => {
 .chat-message-file-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   max-width: 280px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.6);
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-sm);
   cursor: pointer;
   &:hover {
-    color: var(--color-primary);
+    background: rgba(255, 255, 255, 0.9);
   }
-}
-
-.chat-input-file-tag {
-  flex-shrink: 0;
-  padding: 2px 6px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  border-radius: 4px;
-  color: var(--color-text-regular);
-  background: rgba(0, 0, 0, 0.06);
 }
 
 .chat-message-file-name {

@@ -12,6 +12,7 @@ import {
 } from '@ant-design/icons-vue'
 import * as attachApi from '@/api/attach'
 import MediaPreview from '@/components/common/MediaPreview.vue'
+import MediaIcon from '@/components/common/MediaIcon.vue'
 import type { UploadedFileItem } from '@/types'
 
 const props = withDefaults(
@@ -249,11 +250,9 @@ watch(() => props.modelValue, () => {
           <span v-if="item.uploading" class="chat-input-file-loading">
             <LoadingOutlined spin />
           </span>
-          <span class="chat-input-file-tag">
-            {{ (item.extension ?? getExtension(item.name)).toUpperCase() || 'FILE' }}
-          </span>
+          <MediaIcon :type="(item.extension ?? getExtension(item.name)) || 'FILE'" size="19"/>
           <span class="chat-input-file-name" :title="item.name">{{ item.name }}</span>
-          <span class="chat-input-file-size">{{ item.size }}</span>
+<!--          <span class="chat-input-file-size">{{ item.size }}</span>-->
           <button
             type="button"
             class="chat-input-file-remove"
@@ -420,11 +419,10 @@ watch(() => props.modelValue, () => {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   max-width: 280px;
   padding: 6px 10px;
-  background: rgba($chat-primary, 0.06);
-  // border: 1px solid rgba($chat-primary, 0.15);
+  background: #F5F7FA;
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-sm);
   transition: background-color 0.2s ease, border-color 0.2s ease;
@@ -432,7 +430,6 @@ watch(() => props.modelValue, () => {
 
   &:hover {
     background: rgba($chat-primary, 0.1);
-    border-color: rgba($chat-primary, 0.25);
   }
 }
 
@@ -442,17 +439,6 @@ watch(() => props.modelValue, () => {
   align-items: center;
   color: $chat-primary;
   font-size: 14px;
-}
-
-.chat-input-file-tag {
-  flex-shrink: 0;
-  padding: 2px 6px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  border-radius: 4px;
-  color: var(--color-text-regular);
-  background: rgba(0, 0, 0, 0.06);
 }
 
 .chat-input-file-name {
@@ -541,12 +527,12 @@ watch(() => props.modelValue, () => {
   align-items: center;
   justify-content: center;
   border: none;
-  background: transparent;
+  background-color: #f5f5f5;
   cursor: pointer;
   color: var(--color-text-secondary);
   transition: color 0.2s ease, background-color 0.2s ease;
   border-radius: var(--border-radius-md);
-  margin-right: 5px;
+  margin-right: 10px;
 
   &:hover {
     color: $chat-primary;
