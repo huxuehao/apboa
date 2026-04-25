@@ -96,12 +96,12 @@ public class AguiRequestProcessor {
                     logger.error(e.getMessage(), e);
                 }
             } else  {
-                boolean isToolMsg = "tool".equalsIgnoreCase(
+                boolean isUserMsg = "user".equalsIgnoreCase(
                         input.getMessages().isEmpty()
                                 ? "none"
                                 : input.getMessages().getFirst().getRole());
-                // 成立条件：不是工具消息且记忆不为空
-                if (!isToolMsg && reActAgent.getMemory() != null) {
+                // 成立条件：是用户消息且记忆不为空
+                if (isUserMsg && reActAgent.getMemory() != null) {
                     reActAgent.getMemory().clear();
                 }
             }
