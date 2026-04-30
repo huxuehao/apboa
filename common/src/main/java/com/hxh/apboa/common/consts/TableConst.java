@@ -42,4 +42,6 @@ public class TableConst {
     public static final String SECRET_KEY = "secret_key";
     public static final String CODE_EXECUTION_CONFIG  = "code_execution_config ";
     public static final String AGENT_CODE_EXECUTION  = "agent_code_execution";
+    public static final String RAG_DOCUMENT = "rag_document";
+    public static final String RAG_DOCUMENT_CHUNK = "rag_document_chunk";
 }

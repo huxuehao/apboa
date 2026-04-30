@@ -100,10 +100,14 @@ public class ReActAgentHelper {
         if (knowledgeWrapper != null) {
             builder.knowledge(knowledgeWrapper.getKnowledge());
             builder.ragMode(knowledgeWrapper.getRagMode());
+
+            JsonNode retrievalConfigNode = knowledgeWrapper.getRetrievalConfig();
+            int limit = JsonUtils.getIntValue(retrievalConfigNode, "topK", 5);
+            double scoreThreshold = JsonUtils.getDoubleValue(retrievalConfigNode, "scoreThreshold", 0.5);
             builder.retrieveConfig(
                     RetrieveConfig.builder()
-                            .limit(5)
-                            .scoreThreshold(0.5)
+                            .limit(limit)
+                            .scoreThreshold(scoreThreshold)
                             .build());
         }
 

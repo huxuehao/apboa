@@ -42,7 +42,8 @@ const kbTypeOptions = [
   { label: '全部', value: null },
   { label: '百炼', value: 'BAILIAN' },
   { label: 'Dify', value: 'DIFY' },
-  { label: 'RagFlow', value: 'RAGFLOW' }
+  { label: 'RagFlow', value: 'RAGFLOW' },
+  { label: '本地', value: 'LOCAL' }
 ]
 
 /**
@@ -51,7 +52,8 @@ const kbTypeOptions = [
 const kbTypeMap: Record<string, string> = {
   BAILIAN: '百炼',
   DIFY: 'Dify',
-  RAGFLOW: 'RAGFlow'
+  RAGFLOW: 'RagFlow',
+  LOCAL: '本地'
 }
 
 /**

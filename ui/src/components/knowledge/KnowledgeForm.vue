@@ -8,6 +8,7 @@ import { ref, reactive, computed, watch } from 'vue'
 import { message } from 'ant-design-vue'
 import { DatabaseOutlined } from '@ant-design/icons-vue'
 import {type KnowledgeBaseConfig, type KnowledgeBaseConfigVO, type KbType, RAGMode} from '@/types'
+import RagDocumentManager from '@/components/rag/RagDocumentManager.vue'
 import * as knowledgeApi from '@/api/knowledge'
 
 /**
@@ -98,6 +99,11 @@ const configSectionOptions = computed(() => {
       { label: '检索配置', value: 'retrieval' },
       { label: 'HTTP配置', value: 'http' }
     ]
+  } else if (formData.kbType === 'LOCAL') {
+    return [
+      ...baseOptions,
+      { label: '检索配置', value: 'retrieval' }
+    ]
   }
 
   return baseOptions
@@ -112,6 +118,27 @@ const bailianConnection = reactive({
   workspaceId: '',
   indexId: '',
   saveRetrieverHistory: false
+})
+
+/**
+ * 本地RAG连接配置
+ */
+const localConnection = reactive({
+  ollamaBaseUrl: 'http://localhost:11434',
+  embeddingModel: 'qwen3-embedding:4b',
+  pgvectorUrl: 'jdbc:postgresql://localhost:5432/apboa_vector',
+  pgvectorUsername: 'postgres',
+  pgvectorPassword: ''
+})
+
+/**
+ * 本地RAG检索配置
+ */
+const localRetrieval = reactive({
+  chunkSize: 512,
+  chunkOverlap: 64,
+  topK: 5,
+  scoreThreshold: 0.5
 })
 
 /**
@@ -295,6 +322,13 @@ function loadConfigData() {
         ragflowHttp.customHeaders = JSON.stringify(httpConfig.customHeaders, null, 2)
       }
     }
+  } else if (formData.kbType === 'LOCAL') {
+    if (connectionConfig) {
+      Object.assign(localConnection, connectionConfig)
+    }
+    if (retrievalConfig) {
+      Object.assign(localRetrieval, retrievalConfig)
+    }
   }
 }
 
@@ -331,6 +365,8 @@ function resetForm() {
   Object.assign(metadataFilters, { logicalOperator: 'AND', conditions: [] })
   Object.assign(difyHttp, { connectTimeout: '', readTimeout: '', maxRetries: undefined, customHeaders: '{}' })
   Object.assign(ragflowHttp, { timeout: '', maxRetries: undefined, customHeaders: '{}' })
+  Object.assign(localConnection, { ollamaBaseUrl: 'http://localhost:11434', embeddingModel: 'qwen3-embedding:4b', pgvectorUrl: 'jdbc:postgresql://localhost:5432/apboa_vector', pgvectorUsername: 'postgres', pgvectorPassword: '' })
+  Object.assign(localRetrieval, { chunkSize: 512, chunkOverlap: 64, topK: 5, scoreThreshold: 0.5 })
 }
 
 /**
@@ -420,6 +456,14 @@ function buildSubmitData(): KnowledgeBaseConfig {
     } else {
       data.httpConfig = null
     }
+  } else if (formData.kbType === 'LOCAL') {
+    data.connectionConfig = { ...localConnection }
+    data.retrievalConfig = { ...localRetrieval }
+    data.endpointConfig = null
+    data.rerankingConfig = null
+    data.queryRewriteConfig = null
+    data.metadataFilters = null
+    data.httpConfig = null
   }
 
   return data as unknown as KnowledgeBaseConfig
@@ -498,7 +542,8 @@ function removeMetadataCondition(index: number) {
         <ASelect v-model:value="formData.kbType" placeholder="请选择知识库类型" :disabled="isEdit">
           <ASelectOption value="BAILIAN">百炼</ASelectOption>
           <ASelectOption value="DIFY">Dify</ASelectOption>
-          <ASelectOption value="RAGFLOW">RAGFlow</ASelectOption>
+          <ASelectOption value="RAGFLOW">RagFlow</ASelectOption>
+          <ASelectOption value="LOCAL">本地</ASelectOption>
         </ASelect>
       </AFormItem>
 
@@ -594,6 +639,25 @@ function removeMetadataCondition(index: number) {
               />
             </AFormItem>
           </template>
+
+          <!-- 本地RAG连接配置 -->
+          <template v-if="formData.kbType === 'LOCAL'">
+            <AFormItem label="Ollama服务地址" :rules="[{ required: true, message: '请输入Ollama服务地址' }]">
+              <AInput v-model:value="localConnection.ollamaBaseUrl" placeholder="例如: http://localhost:11434" />
+            </AFormItem>
+            <AFormItem label="嵌入模型" :rules="[{ required: true, message: '请输入嵌入模型名称' }]">
+              <AInput v-model:value="localConnection.embeddingModel" placeholder="例如: qwen3-embedding:4b" />
+            </AFormItem>
+            <AFormItem label="PostgreSQL地址" :rules="[{ required: true, message: '请输入PostgreSQL连接地址' }]">
+              <AInput v-model:value="localConnection.pgvectorUrl" placeholder="例如: jdbc:postgresql://localhost:5432/apboa_vector" />
+            </AFormItem>
+            <AFormItem label="PostgreSQL用户名">
+              <AInput v-model:value="localConnection.pgvectorUsername" placeholder="postgres" />
+            </AFormItem>
+            <AFormItem label="PostgreSQL密码">
+              <AInputPassword v-model:value="localConnection.pgvectorPassword" placeholder="请输入密码" />
+            </AFormItem>
+          </template>
         </div>
 
         <!-- 端点配置 -->
@@ -683,6 +747,22 @@ function removeMetadataCondition(index: number) {
                 placeholder="输入语言代码后按回车添加, 如: en, zh"
                 :token-separators="[',']"
               />
+            </AFormItem>
+          </template>
+
+          <!-- 本地RAG检索配置 -->
+          <template v-if="formData.kbType === 'LOCAL'">
+            <AFormItem label="分块大小(字符数)">
+              <AInputNumber v-model:value="localRetrieval.chunkSize" :min="128" :max="8192" style="width: 100%" />
+            </AFormItem>
+            <AFormItem label="分块重叠(字符数)">
+              <AInputNumber v-model:value="localRetrieval.chunkOverlap" :min="0" :max="1024" style="width: 100%" />
+            </AFormItem>
+            <AFormItem label="Top K">
+              <AInputNumber v-model:value="localRetrieval.topK" :min="1" :max="100" style="width: 100%" />
+            </AFormItem>
+            <AFormItem label="相似度阈值">
+              <AInputNumber v-model:value="localRetrieval.scoreThreshold" :min="0" :max="1" :step="0.1" style="width: 100%" />
             </AFormItem>
           </template>
         </div>
@@ -802,6 +882,11 @@ function removeMetadataCondition(index: number) {
         </div>
       </div>
     </AForm>
+
+    <div v-if="isEdit && formData.kbType === 'LOCAL' && formData.id" class="mt-md">
+      <ADivider>文档管理</ADivider>
+      <RagDocumentManager :knowledge-base-config-id="String(formData.id)" />
+    </div>
 
     <template #footer>
       <AButton @click="handleCancel">取消</AButton>

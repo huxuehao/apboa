@@ -33,7 +33,8 @@ const showTypeSelect = computed(() => props.kbType === null)
 const typeOptions = [
   { value: 'BAILIAN', label: '百炼', desc: '百炼平台的知识库服务' },
   { value: 'DIFY', label: 'Dify', desc: 'Dify平台的知识库管理服务' },
-  { value: 'RAGFLOW', label: 'RAGFlow', desc: 'RagFlow平台的智能检索服务' }
+  { value: 'RAGFLOW', label: 'RAGFlow', desc: 'RagFlow平台的智能检索服务' },
+  { value: 'LOCAL', label: '本地', desc: '本地部署的RAG知识库服务' }
 ]
 
 /**
@@ -43,6 +44,7 @@ const currentTypeText = computed(() => {
   if (props.kbType === 'BAILIAN') return '百炼知识库'
   if (props.kbType === 'DIFY') return 'Dify知识库'
   if (props.kbType === 'RAGFLOW') return 'RAGFlow知识库'
+  if (props.kbType === 'LOCAL') return '本地知识库'
   return ''
 })
 

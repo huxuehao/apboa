@@ -54,7 +54,8 @@ const kbTypeText = computed(() => {
   const typeMap: Record<string, string> = {
     BAILIAN: '百炼',
     DIFY: 'Dify',
-    RAGFLOW: 'RagFlow'
+    RAGFLOW: 'RagFlow',
+    LOCAL: '本地'
   }
   return typeMap[props.data.kbType] || props.data.kbType
 })
