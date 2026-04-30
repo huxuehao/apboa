@@ -1,5 +1,6 @@
 package com.hxh.apboa.core.rag;
 
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.hxh.apboa.common.entity.KnowledgeBaseConfig;
 import com.hxh.apboa.common.entity.RagDocument;
 import com.hxh.apboa.common.entity.RagDocumentChunk;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -63,7 +65,7 @@ public class LocalRagService {
             int chunkSize = getChunkSize(config);
             int chunkOverlap = getChunkOverlap(config);
 
-            List<ChunkResult> chunks = textChunker.fixedSizeChunk(text, chunkSize, chunkOverlap);
+            List<ChunkResult> chunks = doChunk(text, chunkSize, chunkOverlap, config);
             if (chunks.isEmpty()) {
                 document.setStatus(RagDocumentStatus.FAILED);
                 document.setErrorMessage("文档解析后内容为空");
@@ -82,7 +84,7 @@ public class LocalRagService {
                 ChunkResult chunk = chunks.get(i);
 
                 RagDocumentChunk chunkEntity = RagDocumentChunk.builder()
-                        .id(new Date().getTime())
+                        .id(IdWorker.getId())
                         .documentId(document.getId())
                         .chunkIndex(chunk.index())
                         .content(chunk.content())
@@ -166,6 +168,46 @@ public class LocalRagService {
     private int getChunkOverlap(KnowledgeBaseConfig config) {
         JsonNode retrievalConfig = config.getRetrievalConfig();
         return JsonUtils.getIntValue(retrievalConfig, "chunkOverlap", 64);
+    }
+
+    /**
+     * 根据分块策略执行分块
+     */
+    private List<ChunkResult> doChunk(String text, int chunkSize, int chunkOverlap, KnowledgeBaseConfig config) {
+        String chunkStrategy = getChunkStrategy(config);
+        if ("DELIMITER".equals(chunkStrategy)) {
+            List<String> delimiters = getChunkDelimiters(config);
+            return textChunker.delimiterChunk(text, chunkSize, chunkOverlap, delimiters);
+        }
+        return textChunker.fixedSizeChunk(text, chunkSize, chunkOverlap);
+    }
+
+    private String getChunkStrategy(KnowledgeBaseConfig config) {
+        JsonNode retrievalConfig = config.getRetrievalConfig();
+        return JsonUtils.getStringValue(retrievalConfig, "chunkStrategy", "FIXED_SIZE");
+    }
+
+    private List<String> getChunkDelimiters(KnowledgeBaseConfig config) {
+        JsonNode retrievalConfig = config.getRetrievalConfig();
+        String delimitersStr = JsonUtils.getStringValue(retrievalConfig, "chunkDelimiters", null);
+        if (delimitersStr == null || delimitersStr.isEmpty()) {
+            return List.of();
+        }
+        return Arrays.stream(delimitersStr.split(","))
+                .map(String::trim)
+                .map(this::unescapeDelimiter)
+                .filter(d -> !d.isEmpty())
+                .toList();
+    }
+
+    /**
+     * 将转义字符还原为实际字符，例如 \\n -> \n, \\t -> \t
+     */
+    private String unescapeDelimiter(String delimiter) {
+        return delimiter
+                .replace("\\n", "\n")
+                .replace("\\t", "\t")
+                .replace("\\r", "\r");
     }
 
     private int estimateTokenCount(String text) {
