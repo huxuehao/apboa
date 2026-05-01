@@ -23,7 +23,7 @@ import java.util.Objects;
 public class IExcludeThinkingBlockHook implements IAgentHook {
     @Override
     public String getDescription() {
-        return "推理前排除历史消息思考内容Hook";
+        return "排除思考内容钩子，配置后可在推理前排除历史消息思考内容，节约Token";
     }
 
     @Override

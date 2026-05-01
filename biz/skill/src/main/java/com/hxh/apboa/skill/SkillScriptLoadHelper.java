@@ -1,6 +1,7 @@
 package com.hxh.apboa.skill;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.entity.SkillPackage;
 import com.hxh.apboa.common.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ import java.util.stream.Stream;
  **/
 @Slf4j
 public class SkillScriptLoadHelper {
-    public static final String BASE_DIR = ".apboa/skill-scripts/skills";
+    public static final String BASE_DIR = SysConst.WORKSPACE_PATH + "/" + SysConst.SKILLS_DIR_NAME;
     private static final String SCRIPTS_SUB_DIR = "scripts";
 
     /**

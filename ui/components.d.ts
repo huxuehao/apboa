@@ -153,6 +153,11 @@ declare module 'vue' {
     UserSection: typeof import('./src/components/layout/UserSection.vue')['default']
     Welcome: typeof import('./src/components/chat/Welcome.vue')['default']
     WordsInput: typeof import('./src/components/sensitive/WordsInput.vue')['default']
+    WorkspaceFileItem: typeof import('./src/components/workspace/WorkspaceFileItem.vue')['default']
+    WorkspaceFileTree: typeof import('./src/components/workspace/WorkspaceFileTree.vue')['default']
+    WorkspaceFolderItem: typeof import('./src/components/workspace/WorkspaceFolderItem.vue')['default']
+    WorkspacePanel: typeof import('./src/components/workspace/WorkspacePanel.vue')['default']
+    WorkspaceToolbar: typeof import('./src/components/workspace/WorkspaceToolbar.vue')['default']
   }
 }
 
@@ -299,4 +304,9 @@ declare global {
   const UserSection: typeof import('./src/components/layout/UserSection.vue')['default']
   const Welcome: typeof import('./src/components/chat/Welcome.vue')['default']
   const WordsInput: typeof import('./src/components/sensitive/WordsInput.vue')['default']
+  const WorkspaceFileItem: typeof import('./src/components/workspace/WorkspaceFileItem.vue')['default']
+  const WorkspaceFileTree: typeof import('./src/components/workspace/WorkspaceFileTree.vue')['default']
+  const WorkspaceFolderItem: typeof import('./src/components/workspace/WorkspaceFolderItem.vue')['default']
+  const WorkspacePanel: typeof import('./src/components/workspace/WorkspacePanel.vue')['default']
+  const WorkspaceToolbar: typeof import('./src/components/workspace/WorkspaceToolbar.vue')['default']
 }

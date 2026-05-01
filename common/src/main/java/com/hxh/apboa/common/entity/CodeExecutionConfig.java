@@ -26,7 +26,7 @@ public class CodeExecutionConfig  extends BaseEntity {
     private String workDir;
 
     /**
-     * 脚本上传目录，空则使用work_dir/skills
+     * 脚本上传目录，空则使用.apboa/workspace/skills
      */
     private String uploadDir;
 

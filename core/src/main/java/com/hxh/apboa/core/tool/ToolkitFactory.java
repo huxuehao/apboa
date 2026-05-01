@@ -11,6 +11,7 @@ import com.hxh.apboa.core.agui.AgentContext;
 import com.hxh.apboa.core.hook.builtins.IConfirmationHook;
 import com.hxh.apboa.core.mcp.McpClientFactory;
 import com.hxh.apboa.core.tool.dynamices.DynamicAgentTool;
+import com.hxh.apboa.core.workspace.tools.WorkspaceTool;
 import com.hxh.apboa.tool.service.AgentToolService;
 import com.hxh.apboa.tool.service.ToolService;
 import io.agentscope.core.tool.Toolkit;
@@ -58,6 +59,10 @@ public class ToolkitFactory {
     public Toolkit getToolkit(AgentDefinition agentDefinition) {
         List<Long> toolIds = agentToolService.getToolIds(agentDefinition.getId());
         Toolkit toolkit = getToolkit(toolIds);
+
+        // 配置工作空间专属tool
+        toolkit.registerTool(new WorkspaceTool());
+
         if (!toolIds.isEmpty()) {
             // 注册工具
             toolService.listByIds(toolIds)

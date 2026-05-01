@@ -1,6 +1,8 @@
 package io.agentscope.spring.boot.agui.webflux;
 
+import com.hxh.apboa.common.util.AgentMetadataStore;
 import com.hxh.apboa.core.agui.AgentContext;
+import io.agentscope.core.agent.AgentBase;
 import io.agentscope.core.agui.AguiException;
 import io.agentscope.core.agui.adapter.AguiAdapterConfig;
 import io.agentscope.core.agui.encoder.AguiEventEncoder;
@@ -33,6 +35,7 @@ public class AguiWebFluxHandler {
     private final AguiRequestProcessor processor;
     private final AguiEventEncoder encoder;
     private final String agentIdHeader;
+    private final ThreadSessionManager sessionManager;
 
     private AguiWebFluxHandler(Builder builder) {
         Session session = builder.session;
@@ -55,6 +58,7 @@ public class AguiWebFluxHandler {
         this.encoder = new AguiEventEncoder();
         this.agentIdHeader =
                 builder.agentIdHeader != null ? builder.agentIdHeader : DEFAULT_AGENT_ID_HEADER;
+        this.sessionManager = builder.sessionManager;
     }
 
     /**
@@ -96,6 +100,7 @@ public class AguiWebFluxHandler {
         // 初始化上下文
         AgentContext.init(input, threadId);
 
+
         try {
             // Get header agent ID
             String headerAgentId = request.headers().firstHeader(agentIdHeader);
@@ -103,6 +108,13 @@ public class AguiWebFluxHandler {
             // Process request - returns both agent and event stream
             AguiRequestProcessor.ProcessResult result =
                     processor.process(input, headerAgentId, pathAgentId);
+
+            String baseAgentId;
+            if (result.agent() instanceof AgentBase agentBase) {
+                baseAgentId = agentBase.getAgentId();
+            } else {
+                baseAgentId = null;
+            }
 
             // Create SSE stream using ServerSentEvent for proper streaming behavior
             Flux<ServerSentEvent<String>> sseStream =
@@ -119,7 +131,12 @@ public class AguiWebFluxHandler {
                                                 "SSE stream cancelled for run {}, interrupting"
                                                         + " agent",
                                                 runId);
+
                                         AgentContext.clean();
+                                        if (baseAgentId != null && sessionManager.getSession(threadId).isEmpty()) {
+                                            AgentMetadataStore.remove(baseAgentId);
+                                        }
+
                                         result.agent().interrupt();
                                     });
 

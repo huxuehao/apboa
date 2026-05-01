@@ -357,3 +357,23 @@ export interface AgentStatisticsVO {
   messageTrend: TrendItem[]
   avgRoundsTrend: TrendItem[]
 }
+
+/**
+ * 工作空间文件树节点 VO
+ */
+export interface WorkspaceFileNode {
+  /** 文件或文件夹名称 */
+  name: string
+  /** 文件在工作空间中的相对路径 */
+  path: string
+  /** 是否为目录 */
+  directory: boolean
+  /** 文件全名（仅文件有效，含后缀） */
+  fullName?: string
+  /** 文件后缀（仅文件有效，不含点号） */
+  extension?: string
+  /** 文件大小可读格式（仅文件有效，如 "1.5 MB"） */
+  readableSize?: string
+  /** 子节点（仅目录有效） */
+  children?: WorkspaceFileNode[]
+}

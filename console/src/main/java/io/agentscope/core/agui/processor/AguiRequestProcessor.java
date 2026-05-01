@@ -4,11 +4,10 @@ package io.agentscope.core.agui.processor;
 import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.ChatSession;
-import com.hxh.apboa.common.util.JsonUtils;
-import com.hxh.apboa.common.vo.AccountVO;
-import com.hxh.apboa.core.agui.AgentContext;
+import com.hxh.apboa.common.util.AgentMetadataStore;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.agent.Agent;
+import io.agentscope.core.agent.AgentBase;
 import io.agentscope.core.agui.adapter.AguiAdapterConfig;
 import io.agentscope.core.agui.adapter.AguiAgentAdapter;
 import io.agentscope.core.agui.event.AguiEvent;
@@ -68,6 +67,11 @@ public class AguiRequestProcessor {
 
         // Resolve agent
         Agent agent = agentResolver.resolveAgent(agentId, threadId);
+
+        // 添加threadId
+        if (agent instanceof AgentBase agentBase) {
+            AgentMetadataStore.put(agentBase.getAgentId(), "threadId", threadId);
+        }
 
         // 获取是否开启记忆
         boolean memoryActive = input.getForwardedProp("memoryActive") != null

@@ -42,4 +42,11 @@ public class SysConst {
     public static final String CURRENT_NODE_ID = CryptoUtils.uuid();
 
     public static final String CHAT_KEY_TO_AGENT_CODE_PREFIX = "apboa:chatkey:";
+
+    // 工作空间相关
+    public static final String ROOT_DIR_NAME = ".apboa";
+    public static final String WORKSPACE_DIR_NAME = "workspace";
+    public static final String SKILLS_DIR_NAME = "skills";
+    public static final String UNITS_DIR_NAME = "units";
+    public static final String WORKSPACE_PATH = String.format("%s/%s", ROOT_DIR_NAME, WORKSPACE_DIR_NAME);
 }

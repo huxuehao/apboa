@@ -16,7 +16,7 @@ import java.util.List;
  * @author huxuehao
  **/
 @RestController
-@RequestMapping("/code-execution")
+@RequestMapping("/agent/code-execution")
 @RequiredArgsConstructor
 public class CodeExecutionConfigController {
     private final CodeExecutionConfigService codeExecutionConfigService;
