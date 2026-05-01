@@ -1,6 +1,8 @@
 package com.hxh.apboa.agent.controller;
 
 import com.hxh.apboa.agent.service.WorkspaceService;
+import com.hxh.apboa.common.config.auth.ChatKeyAccess;
+import com.hxh.apboa.common.config.auth.SkAccess;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.vo.WorkspaceFileNode;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,8 @@ public class WorkspaceController {
     /**
      * 上传单个文件到工作空间
      */
+    @SkAccess
+    @ChatKeyAccess
     @PostMapping("/upload")
     public R<String> upload(@RequestParam("sessionId") String sessionId,
                             @RequestParam("file") MultipartFile file) {
@@ -40,6 +44,8 @@ public class WorkspaceController {
     /**
      * 上传多个文件到工作空间
      */
+    @SkAccess
+    @ChatKeyAccess
     @PostMapping("/upload/batch")
     public R<List<String>> uploadBatch(@RequestParam("sessionId") String sessionId,
                                        @RequestParam("files") MultipartFile[] files) {
@@ -50,6 +56,8 @@ public class WorkspaceController {
     /**
      * 上传压缩包并自动解压到工作空间
      */
+    @SkAccess
+    @ChatKeyAccess
     @PostMapping("/upload/archive")
     public R<List<String>> uploadArchive(@RequestParam("sessionId") String sessionId,
                                           @RequestParam("file") MultipartFile file) {
@@ -60,6 +68,8 @@ public class WorkspaceController {
     /**
      * 获取工作空间文件树
      */
+    @SkAccess
+    @ChatKeyAccess
     @GetMapping("/files")
     public R<List<WorkspaceFileNode>> listFiles(@RequestParam("sessionId") String sessionId) {
         List<WorkspaceFileNode> nodes = workspaceService.listFiles(sessionId);
@@ -69,6 +79,8 @@ public class WorkspaceController {
     /**
      * 下载工作空间中的单个文件
      */
+    @SkAccess
+    @ChatKeyAccess
     @GetMapping("/download")
     public void download(@RequestParam("sessionId") String sessionId,
                          @RequestParam("fileName") String fileName,
@@ -86,6 +98,8 @@ public class WorkspaceController {
     /**
      * 下载工作空间中的多个文件（打包成ZIP）
      */
+    @SkAccess
+    @ChatKeyAccess
     @PostMapping("/download/batch")
     public void downloadBatch(@RequestParam("sessionId") String sessionId,
                               @RequestBody List<String> filePaths,
@@ -103,6 +117,8 @@ public class WorkspaceController {
     /**
      * 下载整个工作空间（打包成ZIP）
      */
+    @SkAccess
+    @ChatKeyAccess
     @GetMapping("/download/all")
     public void downloadAll(@RequestParam("sessionId") String sessionId,
                             HttpServletResponse response) {
@@ -119,6 +135,8 @@ public class WorkspaceController {
     /**
      * 删除工作空间中的单个文件
      */
+    @SkAccess
+    @ChatKeyAccess
     @DeleteMapping("/file")
     public R<Void> deleteFile(@RequestParam("sessionId") String sessionId,
                               @RequestParam("filePath") String filePath) {
@@ -129,6 +147,8 @@ public class WorkspaceController {
     /**
      * 清空工作空间下的所有文件
      */
+    @SkAccess
+    @ChatKeyAccess
     @DeleteMapping("/clear")
     public R<Void> clearWorkspace(@RequestParam("sessionId") String sessionId) {
         workspaceService.clearWorkspace(sessionId);

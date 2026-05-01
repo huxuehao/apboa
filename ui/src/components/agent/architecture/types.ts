@@ -149,6 +149,7 @@ export interface AdvancedConfigNodeData {
   enableMemory: boolean
   enableMemoryCompression: boolean
   structuredOutputEnabled: boolean
+  codeExecutionConfigId: boolean
   maxIterations: number
   maxSubtasks: number
 }

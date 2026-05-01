@@ -322,6 +322,7 @@ const nodes = computed<Node[]>(() => {
       enableMemory: data.agent?.enableMemory || false,
       enableMemoryCompression: data.agent?.enableMemoryCompression || false,
       structuredOutputEnabled: data.agent?.structuredOutputEnabled || false,
+      codeExecutionConfigId: data.agent?.codeExecutionConfigId || false,
       maxIterations: data.agent?.maxIterations || 10,
       maxSubtasks: data.agent?.maxSubtasks || 5
     },

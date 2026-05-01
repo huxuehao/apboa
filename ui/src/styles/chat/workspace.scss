@@ -11,6 +11,8 @@ $ws-bg-main: #F9FAFB;
 $ws-primary: #0F74FF;
 $ws-transition: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 $ws-item-height: 36px;
+$mobile-breakpoint: 768px;
+$small-mobile-breakpoint: 375px;
 
 // 面板容器 - 作为 flex 子项，width 动画推移 ChatMain
 .workspace-panel {
@@ -22,12 +24,37 @@ $ws-item-height: 36px;
   background-color: $ws-bg-main;
   border-left: 1px solid $ws-border-color;
   overflow: hidden;
-  transition: width $ws-transition, min-width $ws-transition;
+  transition: width $ws-transition, min-width $ws-transition, transform $ws-transition;
   flex-shrink: 0;
 
   &.open {
     width: $ws-width;
     min-width: $ws-width;
+  }
+
+  /* 移动端适配：面板变为右侧抽屉式 */
+  @media (max-width: $mobile-breakpoint) {
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    //z-index: var(--z-index-fixed, 10);
+    width: 100%;
+    min-width: 100%;
+    border-left: none;
+
+    &:not(.open) {
+      transform: translateX(100%);
+      width: 100%;
+      min-width: 100%;
+    }
+
+    &.open {
+      width: 100%;
+      min-width: 100%;
+      transform: translateX(0);
+    }
   }
 }
 
@@ -234,7 +261,7 @@ $ws-item-height: 36px;
     background-color: rgba(0, 0, 0, 0.035);
 
     .workspace-folder-icon {
-      color: darken(#F5A623, 8%);
+      color: #E09A1F;
     }
   }
 

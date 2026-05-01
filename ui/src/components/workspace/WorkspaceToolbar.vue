@@ -5,7 +5,6 @@ import {
   DeleteOutlined,
   DownloadOutlined,
   ClearOutlined,
-  CheckSquareOutlined,
   ReloadOutlined
 } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'

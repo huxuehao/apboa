@@ -26,6 +26,7 @@ defineProps<{
 
 const emit = defineEmits<{
   (e: 'select', path: string): void
+  (e: 'preview', node: WorkspaceFileNode): void
   (e: 'download-file', node: WorkspaceFileNode): void
   (e: 'delete-file', node: WorkspaceFileNode): void
   (e: 'drop-upload', files: File[]): void
@@ -123,6 +124,7 @@ const handleDrop = (e: DragEvent) => {
           :multi-select="multiSelect"
           :operating="operatingPaths.has(node.path)"
           @select="emit('select', $event)"
+          @preview="emit('preview', $event)"
           @download="emit('download-file', $event)"
           @delete="emit('delete-file', $event)"
         />

@@ -79,15 +79,28 @@ defineProps<{
         </div>
       </div>
 
+<!--      <div class="config-item">-->
+<!--        <div class="config-icon">-->
+<!--          <ProfileOutlined />-->
+<!--        </div>-->
+<!--        <div class="config-info">-->
+<!--          <div class="config-name">结构化输出</div>-->
+<!--        </div>-->
+<!--        <div class="config-status">-->
+<!--          <CheckCircleOutlined v-if="data.structuredOutputEnabled" class="status-icon enabled" />-->
+<!--          <CloseCircleOutlined v-else class="status-icon disabled" />-->
+<!--        </div>-->
+<!--      </div>-->
+
       <div class="config-item">
         <div class="config-icon">
           <ProfileOutlined />
         </div>
         <div class="config-info">
-          <div class="config-name">结构化输出</div>
+          <div class="config-name">执行环境配置</div>
         </div>
         <div class="config-status">
-          <CheckCircleOutlined v-if="data.structuredOutputEnabled" class="status-icon enabled" />
+          <CheckCircleOutlined v-if="data.codeExecutionConfigId" class="status-icon enabled" />
           <CloseCircleOutlined v-else class="status-icon disabled" />
         </div>
       </div>

@@ -53,7 +53,7 @@ public class SkillBoxFactory {
         // 注册技能包
         List<Long> skillPackageIds = agentSkillPackageService.getSkillPackageIds(agentDefinition.getId());
         if (skillPackageIds.isEmpty()) {
-            return null;
+            return skillBox;
         }
 
         // 配置工作空间专属skill

@@ -30,6 +30,7 @@ const props = defineProps<{
   allowUploadFileType?: string[]
   agentHasResult?: boolean
   workspacePanelOpen?: boolean
+  hasCodeExecutionConfig?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -135,7 +136,7 @@ defineExpose({
       <!-- 工作空间入口按钮（与左侧菜单按钮对称） -->
       <ATooltip placement="left" title="工作空间">
         <button
-          v-if="!isWelcomeMode"
+          v-if="!isWelcomeMode && hasCodeExecutionConfig"
           type="button"
           class="chat-workspace-btn"
           :class="{ 'is-active': workspacePanelOpen }"

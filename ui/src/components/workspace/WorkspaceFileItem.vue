@@ -33,6 +33,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'select', path: string): void
+  (e: 'preview', node: WorkspaceFileNode): void
   (e: 'download', node: WorkspaceFileNode): void
   (e: 'delete', node: WorkspaceFileNode): void
 }>()
@@ -109,6 +110,7 @@ const handleRowClick = () => {
         size="small"
         class="workspace-file-action-btn workspace-file-action-btn--primary"
         title="预览"
+        @click.stop="emit('preview', node)"
         :disabled="operating"
       >
         <EyeOutlined />

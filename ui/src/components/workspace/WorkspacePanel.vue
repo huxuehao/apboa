@@ -5,7 +5,7 @@ import WorkspaceToolbar from './WorkspaceToolbar.vue'
 import WorkspaceFileTree from './WorkspaceFileTree.vue'
 import * as workspaceApi from '@/api/workspace'
 import type { WorkspaceFileNode } from '@/types'
-import {Modal} from "ant-design-vue";
+import { Modal, message } from "ant-design-vue";
 
 /**
  * 工作空间面板主组件
@@ -143,6 +143,13 @@ const handleSelect = (path: string) => {
   } else {
     selectedPaths.add(path)
   }
+}
+
+/**
+ * 预览文件
+ */
+const handlePreview = (node: WorkspaceFileNode) => {
+  message.info("正在努力开发中...")
 }
 
 /**
@@ -327,6 +334,7 @@ defineExpose({ startFileOperation, stopFileOperation, refresh })
         :multi-select="multiSelect"
         :operating-paths="operatingPaths"
         @select="handleSelect"
+        @preview="handlePreview"
         @download-file="handleDownloadFile"
         @delete-file="handleDeleteFile"
         @drop-upload="handleUpload"

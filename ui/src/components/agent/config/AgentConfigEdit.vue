@@ -79,7 +79,8 @@ const formData = ref({
     structuredOutputEnabled: false,
     structuredOutputReminder: 'TOOL_CHOICE' as "TOOL_CHOICE" | "PROMPT",
     structuredOutputSchema: '',
-    studioConfigId: null as string | null
+    studioConfigId: null as string | null,
+    codeExecutionConfigId: null as string | null
   }
 })
 
@@ -88,7 +89,7 @@ const steps = [
   { title: '模型与提示词', description: '选择模型和提示词模板' },
   { title: '工具与能力', description: '配置钩子、工具、技能和敏感词' },
   { title: '知识库与MCP', description: '配置知识库、MCP服务器和子智能体' },
-  { title: '高级设置', description: '配置计划、记忆、结构化输出和Studio' }
+  { title: '高级设置', description: '配置计划、记忆、执行环境和Studio等' }
 ]
 
 const currentFormRef = computed(() => {
@@ -149,7 +150,8 @@ function initFormData() {
     structuredOutputEnabled: data.structuredOutputEnabled,
     structuredOutputReminder: data.structuredOutputReminder || 'TOOL_CHOICE',
     structuredOutputSchema: data.structuredOutputSchema ? JSON.stringify(data.structuredOutputSchema, null, 2) : '',
-    studioConfigId: data.studioConfigId || null
+    studioConfigId: data.studioConfigId || null,
+    codeExecutionConfigId: data.codeExecutionConfigId || null
   }
 
   nextTick(() => {
@@ -226,7 +228,7 @@ async function handleSubmit() {
         ? JSON.parse(formData.value.advanced.structuredOutputSchema)
         : null,
       studioConfigId: formData.value.advanced.studioConfigId,
-      codeExecutionConfigId: formData.value.tools.codeExecutionConfigId,
+      codeExecutionConfigId: formData.value.advanced.codeExecutionConfigId,
       version: '1.0.0'
     }
 

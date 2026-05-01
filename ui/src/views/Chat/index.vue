@@ -38,6 +38,8 @@ const accountId = computed(() => accountStore.userInfo?.id)
 const enableMemory = computed(() => agentDetail.value?.enableMemory === true)
 const enablePlanning = computed(() => agentDetail.value?.enablePlanning === true)
 const showToolProcess = computed(() => agentDetail.value?.showToolProcess === true)
+// 是否配置了代码执行
+const hasCodeExecutionConfig = computed(() => agentDetail.value?.codeExecutionConfigId)
 
 // 记忆/规划/侧边栏状态：从 Pinia store 读取（持久化由 pinia-plugin-persistedstate 处理）
 const memoryActive = computed(() => {
@@ -379,6 +381,7 @@ onMounted(() => {
       :show-tool-process="showToolProcess"
       :tool-process-active="toolProcessActive"
       :workspace-panel-open="workspacePanelOpen"
+      :has-code-execution-config="!!hasCodeExecutionConfig"
       @update:input-value="inputText = $event"
       @update:uploaded-files="uploadedFiles = $event"
       @memory="handleMemoryChange"
@@ -393,7 +396,7 @@ onMounted(() => {
 
     <!-- 工作空间面板（作为 flex 子项从右侧滑出） -->
     <WorkspacePanel
-      v-if="!isWelcomeMode"
+      v-if="!isWelcomeMode && hasCodeExecutionConfig"
       ref="workspacePanelRef"
       :session-id="currentSessionId"
       :class="{ open: workspacePanelOpen }"
