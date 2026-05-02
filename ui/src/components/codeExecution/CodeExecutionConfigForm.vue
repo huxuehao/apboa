@@ -216,12 +216,6 @@ function handleCancel() {
 <!--              <span class="ml-sm">自动上传Skill文件</span>-->
 <!--            </AFormItem>-->
 <!--          </ACol>-->
-          <ACol :span="24">
-            <AFormItem>
-              <ASwitch v-model:checked="formData.enableShell" />
-              <span class="ml-sm">启用Shell执行</span>
-            </AFormItem>
-          </ACol>
           <ACol :span="12">
             <AFormItem>
               <ASwitch v-model:checked="formData.enableRead" />
@@ -232,6 +226,12 @@ function handleCancel() {
             <AFormItem>
               <ASwitch v-model:checked="formData.enableWrite" />
               <span class="ml-sm">启用文件写入</span>
+            </AFormItem>
+          </ACol>
+          <ACol :span="24">
+            <AFormItem>
+              <ASwitch v-model:checked="formData.enableShell" />
+              <span class="ml-sm">启用Shell执行</span>
             </AFormItem>
           </ACol>
         </ARow>

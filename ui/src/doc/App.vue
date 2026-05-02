@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { RouterView, RouterLink, useRoute } from 'vue-router';
 import zhCN from 'ant-design-vue/es/locale/zh_CN';
-import { BookOutlined, ReadOutlined, HomeOutlined, SafetyCertificateOutlined, FileTextOutlined, CloudServerOutlined, LoginOutlined, ToolOutlined, AppstoreOutlined, ApiOutlined, DatabaseOutlined, RobotOutlined, QuestionCircleOutlined, BuildOutlined } from '@ant-design/icons-vue';
+import { BookOutlined, ReadOutlined, HomeOutlined, SafetyCertificateOutlined, FileTextOutlined, CloudServerOutlined, LoginOutlined, ToolOutlined, AppstoreOutlined, ApiOutlined, DatabaseOutlined, RobotOutlined, QuestionCircleOutlined, BuildOutlined, MessageOutlined } from '@ant-design/icons-vue';
 
 const route = useRoute();
 
@@ -25,6 +25,7 @@ const docMenus = [
   { path: '/mcp', label: 'MCP', icon: ApiOutlined, color: '#66BB6A' },
   { path: '/knowledge', label: '知识库', icon: DatabaseOutlined, color: '#42A5F5' },
   { path: '/agent', label: '智能体', icon: RobotOutlined, color: '#5C6BC0' },
+  { path: '/chat', label: '对话界面', icon: MessageOutlined, color: '#FF8C00' },
   { path: '/markdown-extension', label: 'Markdown 扩展', icon: ReadOutlined, color: '#409eff' },
   { path: '/build', label: '打包构建', icon: BuildOutlined, color: '#78909C' },
   { path: '/qa', label: 'Q&A', icon: QuestionCircleOutlined, color: '#FF9800' },

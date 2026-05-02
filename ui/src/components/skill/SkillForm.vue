@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, defineComponent, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import { AppstoreOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
+import { AppstoreOutlined, InfoCircleOutlined, FolderOutlined, FileOutlined, CloseOutlined } from '@ant-design/icons-vue'
 import SmartCodeEditor from '@/components/editor/SmartCodeEditor.vue'
 import ResourceEditor from './ResourceEditor.vue'
 import type { SkillPackage, SkillPackageVO, ToolVO } from '@/types'
@@ -74,6 +74,9 @@ const allTools = ref<ToolVO[]>([])
 // 左右两侧独立搜索
 const leftSearchText = ref<string>('')
 const rightSearchText = ref<string>('')
+
+/** 结构说明是否可见（仅新增模式展示） */
+const structGuideVisible = ref<boolean>(true)
 
 /**
  * Transfer 穿梭框数据源
@@ -378,6 +381,7 @@ const addItem = (e: Event) => {
 watch(() => props.visible, (val) => {
   if (val) {
     initForm()
+    structGuideVisible.value = true
   } else {
     formRef.value?.resetFields()
   }
@@ -400,6 +404,40 @@ onMounted(() => {
     @ok="handleSubmit"
     @cancel="handleCancel"
   >
+    <!-- 技能包结构说明（仅新增模式展示，可手动关闭） -->
+    <div v-if="!isEdit && structGuideVisible" class="struct-guide">
+      <div class="struct-guide__header">
+        <InfoCircleOutlined class="struct-guide__icon" />
+        <span class="struct-guide__title">技能包结构说明</span>
+        <CloseOutlined class="struct-guide__close" @click="structGuideVisible = false" />
+      </div>
+      <div class="struct-guide__body">
+        <p class="struct-guide__desc">当前模式仅支持如下结构的技能包结构，包含 <span class="file-tree__tag">SKILL.md 及其附属目录（scripts、examples、references）</span>。若技能包需要携带数据文件或其他自定义资源，建议将技能包放置于 <span class="file-tree__tag">.apboa/workspace/skills</span> 目录下，并通过“<span class="file-tree__tag">装载本地技能包</span>”功能完成导入。</p>
+        <div class="file-tree">
+          <div class="file-tree__item file-tree__item--root">
+            <FolderOutlined class="file-tree__icon file-tree__icon--folder" />
+            <span class="file-tree__name">MySkill/</span>
+          </div>
+          <div class="file-tree__item file-tree__item--l1">
+            <FileOutlined class="file-tree__icon file-tree__icon--file" />
+            <span class="file-tree__name">SKILL.md</span>
+          </div>
+          <div class="file-tree__item file-tree__item--l1">
+            <FolderOutlined class="file-tree__icon file-tree__icon--folder" />
+            <span class="file-tree__name">scripts/</span>
+          </div>
+          <div class="file-tree__item file-tree__item--l1">
+            <FolderOutlined class="file-tree__icon file-tree__icon--folder" />
+            <span class="file-tree__name">examples/</span>
+          </div>
+          <div class="file-tree__item file-tree__item--l1">
+            <FolderOutlined class="file-tree__icon file-tree__icon--folder" />
+            <span class="file-tree__name">references/</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <AForm
       ref="formRef"
       :model="form"
@@ -655,5 +693,92 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* 结构说明区域 */
+.struct-guide {
+  margin-bottom: 20px;
+  border: 1px solid var(--color-border-base, #e8e8e8);
+  border-radius: 8px;
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--color-bg-light, #f8f9fa);
+    border-bottom: 1px solid var(--color-border-base, #e8e8e8);
+  }
+
+  &__icon {
+    color: var(--color-primary);
+    font-size: 15px;
+  }
+
+  &__title {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-base, #333);
+  }
+
+  &__close {
+    font-size: 13px;
+    color: var(--color-text-secondary, #999);
+    cursor: pointer;
+    transition: color 0.2s;
+
+    &:hover {
+      color: var(--color-text-base, #333);
+    }
+  }
+
+  &__body {
+    padding: 12px 14px;
+  }
+
+  &__desc {
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: var(--color-text-secondary, #666);
+    line-height: 1.8;
+  }
+}
+
+/* 文件目录树 */
+.file-tree {
+  font-size: 12px;
+  font-family: 'Consolas', 'Monaco', monospace;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+
+    &--root { padding-left: 0; }
+    &--l1 { padding-left: 20px; }
+  }
+
+  &__icon {
+    font-size: 13px;
+    flex-shrink: 0;
+
+    &--folder { color: #f39c12; }
+    &--file { color: #3498db; }
+  }
+
+  &__name {
+    color: var(--color-text-base, #333);
+  }
+
+  &__tag {
+    padding: 1px 6px;
+    background: rgba(24, 144, 255, 0.1);
+    color: var(--color-primary);
+    border-radius: 4px;
+    font-size: 11px;
+  }
 }
 </style>
