@@ -22,6 +22,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'select', path: string): void
+  (e: 'preview', node: WorkspaceFileNode): void
   (e: 'download-file', node: WorkspaceFileNode): void
   (e: 'delete-file', node: WorkspaceFileNode): void
 }>()
@@ -84,6 +85,7 @@ const handleDblClick = () => {
             :multi-select="multiSelect"
             :operating-paths="operatingPaths"
             @select="emit('select', $event)"
+            @preview="emit('preview', $event)"
             @download-file="emit('download-file', $event)"
             @delete-file="emit('delete-file', $event)"
           />
@@ -96,6 +98,7 @@ const handleDblClick = () => {
             :multi-select="multiSelect"
             :operating="operatingPaths.has(child.path)"
             @select="emit('select', $event)"
+            @preview="emit('preview', $event)"
             @download="emit('download-file', $event)"
             @delete="emit('delete-file', $event)"
           />

@@ -3,9 +3,10 @@ import { ref, reactive, computed, watch } from 'vue'
 import { CloseOutlined } from '@ant-design/icons-vue'
 import WorkspaceToolbar from './WorkspaceToolbar.vue'
 import WorkspaceFileTree from './WorkspaceFileTree.vue'
+import WorkspaceFilePreview from './WorkspaceFilePreview.vue'
 import * as workspaceApi from '@/api/workspace'
 import type { WorkspaceFileNode } from '@/types'
-import { Modal, message } from "ant-design-vue";
+import { Modal } from "ant-design-vue";
 
 /**
  * 工作空间面板主组件
@@ -30,6 +31,10 @@ const multiSelect = ref(false)
 const selectedPaths = reactive(new Set<string>())
 /** 正在被操作的文件路径集合 */
 const operatingPaths = reactive(new Set<string>())
+/** 预览弹窗可见性 */
+const previewVisible = ref(false)
+/** 当前预览的文件节点 */
+const previewNode = ref<WorkspaceFileNode | null>(null)
 
 /** 是否存在文件 */
 const hasFiles = computed(() => nodes.value.length > 0)
@@ -149,7 +154,8 @@ const handleSelect = (path: string) => {
  * 预览文件
  */
 const handlePreview = (node: WorkspaceFileNode) => {
-  message.info("正在努力开发中...")
+  previewNode.value = node
+  previewVisible.value = true
 }
 
 /**
@@ -340,6 +346,13 @@ defineExpose({ startFileOperation, stopFileOperation, refresh })
         @drop-upload="handleUpload"
       />
     </div>
+
+    <!-- 文件预览弹窗 -->
+    <WorkspaceFilePreview
+      v-model:visible="previewVisible"
+      :file-node="previewNode"
+      :session-id="sessionId"
+    />
   </div>
 </template>
 

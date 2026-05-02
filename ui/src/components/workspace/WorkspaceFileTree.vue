@@ -112,6 +112,7 @@ const handleDrop = (e: DragEvent) => {
           :multi-select="multiSelect"
           :operating-paths="operatingPaths"
           @select="emit('select', $event)"
+          @preview="emit('preview', $event)"
           @download-file="emit('download-file', $event)"
           @delete-file="emit('delete-file', $event)"
         />
