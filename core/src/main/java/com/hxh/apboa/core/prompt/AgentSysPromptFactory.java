@@ -29,6 +29,12 @@ public class AgentSysPromptFactory {
     public String getAgentSysPrompt(AgentDefinition agentDefinition) {
         String prompt = primaryAgentSysPrompt.getPrompt(agentDefinition);
 
+        String workspaceTagExplanation = """
+                ===================================================
+                用户可以通过 <workspace-file>文件名</workspace-file> 标签引用工作空间中的文件。当你看到此标签时，应将其视为指示：前往当前工作空间查找对应的文件，并读取其内容以辅助回答或执行任务。
+                """;
+        prompt = prompt + "\n\n" + workspaceTagExplanation;
+
         Long id = agentDefinition.getSensitiveWordConfigId();
         if (id == null) {
             return prompt;

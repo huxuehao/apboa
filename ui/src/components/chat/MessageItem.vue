@@ -4,6 +4,7 @@ import MediaPreview from '@/components/common/MediaPreview.vue'
 import type { UploadedFileItem } from '@/types'
 import MediaIcon from '@/components/common/MediaIcon.vue'
 import MarkdownRenderer from "@/components/markdown/MarkdownRenderer.vue";
+import TaggedContentRenderer from './TaggedContentRenderer.vue';
 
 const FILE_SEP = '@==##::::##==@'
 
@@ -75,9 +76,9 @@ const openPreview = (index: number) => {
 <!--            <span class="chat-message-file-size">{{ item.size }}</span>-->
           </div>
         </div>
-        <!-- 文本内容 -->
+        <!-- 文本内容（支持标签渲染） -->
         <span v-if="parsedUserContent.text" class="chat-message-user-content">
-          {{ parsedUserContent.text }}
+          <TaggedContentRenderer :content="parsedUserContent.text" />
         </span>
       </div>
     </template>

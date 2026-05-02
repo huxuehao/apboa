@@ -382,6 +382,7 @@ onMounted(() => {
       :tool-process-active="toolProcessActive"
       :workspace-panel-open="workspacePanelOpen"
       :has-code-execution-config="!!hasCodeExecutionConfig"
+      :session-id="currentSessionId"
       @update:input-value="inputText = $event"
       @update:uploaded-files="uploadedFiles = $event"
       @memory="handleMemoryChange"

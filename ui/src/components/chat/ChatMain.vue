@@ -31,6 +31,7 @@ const props = defineProps<{
   agentHasResult?: boolean
   workspacePanelOpen?: boolean
   hasCodeExecutionConfig?: boolean
+  sessionId?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -163,6 +164,7 @@ defineExpose({
         :allow-upload-file-type="allowUploadFileType"
         :show-tool-process="showToolProcess"
         :tool-process-active="toolProcessActive"
+        :session-id="sessionId"
         @update:input-value="$emit('update:inputValue', $event)"
         @update:uploaded-files="$emit('update:uploadedFiles', $event)"
         @memory="$emit('memory', $event)"
@@ -198,6 +200,7 @@ defineExpose({
             :allow-upload-file-type="allowUploadFileType"
             :show-tool-process="showToolProcess"
             :tool-process-active="toolProcessActive"
+            :session-id="sessionId"
             @update:model-value="$emit('update:inputValue', $event)"
             @update:uploaded-files="$emit('update:uploadedFiles', $event)"
             @memory="$emit('memory', $event)"
