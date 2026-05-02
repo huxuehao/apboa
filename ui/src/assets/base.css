@@ -181,6 +181,29 @@ ol {
   list-style: none;
 }
 
+/* summary 区域：保持原有结构，但美化文字和布局 */
+details > summary {
+  list-style: none;
+}
+
+/* 自定义展开/收起三角符号（保留原生功能但视觉更统一） */
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* 用伪元素模拟优雅的展开箭头，并保留原本文本内容结构 */
+details > summary::before {
+  content: '已执行';
+  color: #7B7E80;
+  font-size: 12px;
+  cursor: pointer;
+}
+.tool-call-title {
+  color: #7B7E80;
+  font-size: 12px;
+  cursor: pointer;
+}
+
 /* 滚动条样式 */
 ::-webkit-scrollbar {
   width: 8px;

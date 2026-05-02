@@ -50,14 +50,14 @@ public class SkillBoxFactory {
     public SkillBox getSkillBox(AgentDefinition agentDefinition) {
         SkillBox skillBox = new SkillBox(new Toolkit());
 
+        // 配置工作空间专属skill
+        skillBox.registerSkill(WorkspaceSkill.getAgentSkill());
+
         // 注册技能包
         List<Long> skillPackageIds = agentSkillPackageService.getSkillPackageIds(agentDefinition.getId());
         if (skillPackageIds.isEmpty()) {
             return skillBox;
         }
-
-        // 配置工作空间专属skill
-        skillBox.registerSkill(WorkspaceSkill.getAgentSkill());
 
         registerSkills(skillBox, skillPackageIds);
 

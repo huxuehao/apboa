@@ -626,7 +626,7 @@ onUnmounted(() => {
   overflow: auto;
   color: #FFFFFF;
   font-weight: 350;
-  font-size: 15px;
+  font-size: 16px;
   font-family: 'AlimamaFangYuan',serif;
   line-height: 1.8;
   letter-spacing: 1px;
