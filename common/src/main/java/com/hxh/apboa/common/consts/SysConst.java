@@ -49,4 +49,5 @@ public class SysConst {
     public static final String SKILLS_DIR_NAME = "skills";
     public static final String UNITS_DIR_NAME = "units";
     public static final String WORKSPACE_PATH = String.format("%s/%s", ROOT_DIR_NAME, WORKSPACE_DIR_NAME);
+    public static final String SKILLS_DIR = WORKSPACE_PATH + "/" + SKILLS_DIR_NAME;
 }

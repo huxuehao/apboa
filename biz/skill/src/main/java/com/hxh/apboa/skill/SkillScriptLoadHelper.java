@@ -3,6 +3,7 @@ package com.hxh.apboa.skill;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.entity.SkillPackage;
+import com.hxh.apboa.common.util.FolderUtils;
 import com.hxh.apboa.common.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * 描述：技能包执行脚本装载工具类
@@ -24,7 +24,7 @@ import java.util.stream.Stream;
  **/
 @Slf4j
 public class SkillScriptLoadHelper {
-    public static final String BASE_DIR = SysConst.WORKSPACE_PATH + "/" + SysConst.SKILLS_DIR_NAME;
+    public static final String BASE_DIR = SysConst.SKILLS_DIR;
     private static final String SCRIPTS_SUB_DIR = "scripts";
 
     /**
@@ -65,8 +65,8 @@ public class SkillScriptLoadHelper {
         }
 
         Path skillDir = getSkillDirectory(skillPackage.getName());
-        if (skillDir != null && Files.exists(skillDir)) {
-            deleteDirectory(skillDir);
+        if (skillDir != null && skillDir.toFile().exists()) {
+            FolderUtils.deleteRecursively(skillDir.toAbsolutePath().toString());
             log.info("删除技能包脚本目录: {}", skillDir.toAbsolutePath());
         }
     }
@@ -82,30 +82,6 @@ public class SkillScriptLoadHelper {
             return null;
         }
         return Paths.get(BASE_DIR, skillName);
-    }
-
-    /**
-     * 删除目录及其所有内容
-     *
-     * @param directory 目标目录
-     */
-    private static void deleteDirectory(Path directory) {
-        if (!Files.exists(directory)) {
-            return;
-        }
-
-        try (Stream<Path> paths = Files.walk(directory)) {
-            paths.sorted((a, b) -> -a.compareTo(b)) // 先删除文件，再删除目录
-                    .forEach(path -> {
-                        try {
-                            Files.delete(path);
-                        } catch (IOException e) {
-                            log.warn("删除文件失败: {}", path.toAbsolutePath(), e);
-                        }
-                    });
-        } catch (IOException e) {
-            log.error("删除目录失败: {}", directory.toAbsolutePath(), e);
-        }
     }
 
     /**
@@ -125,7 +101,7 @@ public class SkillScriptLoadHelper {
     }
 
     /**
-     * 创建目标目录（如果存在则先清理旧文件）
+     * 创建目标目录（确保目录存在即可，不清理已有文件）
      *
      * @param skillName 技能包名称
      * @return 目标目录路径，创建失败返回null
@@ -133,45 +109,14 @@ public class SkillScriptLoadHelper {
     private static Path createTargetDirectory(String skillName) {
         Path targetDir = Paths.get(BASE_DIR, skillName, SCRIPTS_SUB_DIR);
         try {
-            // 如果目录已存在，先清理旧文件以支持更新操作
-            if (Files.exists(targetDir)) {
-                cleanDirectory(targetDir);
-                log.info("清理旧脚本目录: {}", targetDir.toAbsolutePath());
-            }
-            // 创建目录
-            Files.createDirectories(targetDir);
-            log.info("创建脚本目录: {}", targetDir.toAbsolutePath());
+            // 确保脚本目录存在
+            FolderUtils.mkdirsByAbsolutePath(targetDir.toAbsolutePath().toString());
             return targetDir;
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("创建脚本目录失败: {}", targetDir.toAbsolutePath(), e);
             return null;
         }
     }
-
-    /**
-     * 清理目录下的所有文件和子目录
-     *
-     * @param directory 目标目录
-     * @throws IOException IO异常
-     */
-    private static void cleanDirectory(Path directory) throws IOException {
-        if (!Files.exists(directory) || !Files.isDirectory(directory)) {
-            return;
-        }
-
-        try (Stream<Path> paths = Files.walk(directory)) {
-            paths.sorted((a, b) -> -a.compareTo(b)) // 先删除文件，再删除目录
-                    .filter(path -> !path.equals(directory)) // 不删除根目录本身
-                    .forEach(path -> {
-                        try {
-                            Files.delete(path);
-                        } catch (IOException e) {
-                            log.warn("删除文件失败: {}", path.toAbsolutePath(), e);
-                        }
-                    });
-        }
-    }
-
     /**
      * 解析脚本项列表
      *
@@ -215,7 +160,6 @@ public class SkillScriptLoadHelper {
 
             // 写入文件内容
             Files.writeString(filePath, item.content, StandardCharsets.UTF_8);
-            log.info("写入脚本文件: {}", filePath.toAbsolutePath());
 
             // 设置文件权限
             setFilePermissions(filePath);
