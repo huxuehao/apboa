@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 描述：工作空间钩子，验证路径以及脚本内容，确保所有路径都被限定在会话专属的工作单元或全局技能目录内
+ * 描述：工作空间路径验证钩子，验证路径以及脚本内容，确保所有路径都被限定在会话专属的工作单元或全局技能目录内
  * <p>
  * 作为 Hook 生命周期入口，编排以下验证器完成安全校验：
  * <ul>
@@ -27,10 +27,7 @@ import java.util.Map;
  * @author huxuehao
  **/
 @Slf4j
-public class WorkspaceHook implements Hook {
-
-    /** 向后兼容：引用常量类中的敏感工具集合 */
-    public static final java.util.Set<String> PATH_SENSITIVE_TOOLS = WorkspaceToolConstants.PATH_SENSITIVE_TOOLS;
+public class WorkspaceValidateHook implements Hook {
 
     // ==================== 组合的验证器 ====================
 
@@ -52,7 +49,7 @@ public class WorkspaceHook implements Hook {
             FolderUtils.mkdirsByRelativePath(String.format("%s/%s", SysConst.WORKSPACE_PATH, threadId));
 
             ToolUseBlock toolUse = preActing.getToolUse();
-            if (toolUse != null && PATH_SENSITIVE_TOOLS.contains(toolUse.getName())) {
+            if (toolUse != null && WorkspaceToolConstants.PATH_SENSITIVE_TOOLS.contains(toolUse.getName())) {
                 try {
                     validateToolUse(toolUse);
                 } catch (Exception e) {

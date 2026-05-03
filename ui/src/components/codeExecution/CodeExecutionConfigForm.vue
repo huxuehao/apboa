@@ -37,7 +37,7 @@ const formRef = ref()
 const formData = ref({
   configName: '',
   workDir: '.apboa/workspace',
-  uploadDir: '.apboa/workspace/skills',
+  uploadDir: '.apboa/skills',
   autoUpload: false,
   enableShell: true,
   enableRead: false,
@@ -76,7 +76,7 @@ function resetForm() {
   formData.value = {
     configName: '',
     workDir: '.apboa/workspace',
-    uploadDir: '.apboa/workspace/skills',
+    uploadDir: '.apboa/skills',
     autoUpload: false,
     enableShell: true,
     enableRead: false,
@@ -96,7 +96,7 @@ watch(() => props.visible, (val) => {
       formData.value = {
         configName: props.data.configName,
         workDir: props.data.workDir || '',
-        uploadDir: props.data.uploadDir || '.apboa/workspace/skills',
+        uploadDir: props.data.uploadDir || '.apboa/skills',
         autoUpload: props.data.autoUpload || false,
         enableShell: props.data.enableShell || false,
         enableRead: props.data.enableRead || false,
@@ -142,7 +142,7 @@ async function handleSubmit() {
     const entity: CodeExecutionConfig = {
       configName: formData.value.configName,
       workDir: formData.value.workDir || undefined,
-      uploadDir: formData.value.uploadDir || '.apboa/workspace/skills',
+      uploadDir: formData.value.uploadDir || '.apboa/skills',
       autoUpload: formData.value.autoUpload,
       enableShell: formData.value.enableShell,
       enableRead: formData.value.enableRead,

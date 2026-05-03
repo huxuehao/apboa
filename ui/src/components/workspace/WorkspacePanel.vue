@@ -7,6 +7,8 @@ import WorkspaceFilePreview from './WorkspaceFilePreview.vue'
 import * as workspaceApi from '@/api/workspace'
 import type { WorkspaceFileNode } from '@/types'
 import { Modal } from "ant-design-vue";
+import { WS_MESSAGE_TYPES } from '@/websocket/const/websocket';
+import { useWebSocketEvent } from '@/websocket/composables/useWebSocketEvent';
 
 /**
  * 工作空间面板主组件
@@ -297,6 +299,15 @@ const stopFileOperation = (path: string) => {
 const refresh = () => {
   fetchFiles()
 }
+
+// 订阅 WORKSPACE_FILE_CHANGE 消息
+useWebSocketEvent(WS_MESSAGE_TYPES.WORKSPACE_FILE_CHANGE, (message) => {
+  const { fileName, sessionId } = message
+  if (sessionId !== props.sessionId) {
+    return
+  }
+  fetchFiles()
+});
 
 defineExpose({ startFileOperation, stopFileOperation, refresh })
 </script>

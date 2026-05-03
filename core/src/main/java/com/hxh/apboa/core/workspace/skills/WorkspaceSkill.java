@@ -23,18 +23,18 @@ public class WorkspaceSkill {
 
     private static String buildSkillContent() {
         return """
-            # 工作区路径与执行规范
+            # 工作空间路径与执行规范
 
             ## 一、核心原则：一切路径使用相对路径
 
-            你当前的工作目录就是你的**专属会话工作单元**。所有操作都必须基于此目录进行。
+            你当前的工作目录就是你的**专属会话工作空间**。所有操作都必须基于此目录进行。
             - 文件工具（view、write、list_files 等）的路径参数只能写**相对路径**。
             - Shell 命令中的所有路径也必须是**相对路径**。
             - **绝对路径**（以 `/` 或盘符开头）以及** `../` 逃逸**（除技能脚本的特殊前缀外）全部被系统拦截。
 
             ## 二、文件操作规范
 
-            所有文件操作都限定在你的工作单元内，你只需使用简单的相对路径：
+            所有文件操作都限定在你的工作空间内，你只需使用简单的相对路径：
 
             ```text
             view(path="report.md")
@@ -66,12 +66,12 @@ public class WorkspaceSkill {
             ```shell
             python skills/doGetCurrentTime/scripts/getCurrentTime.py   # 缺少 ../
             python /absolute/path/to/skills/...                        # 绝对路径
-            python ../../evil/script.py                                # 跳出工作区
+            python ../../evil/script.py                                # 跳出工作空间
             ```
 
             ## 四、脚本参数也必须是相对路径
 
-            当技能脚本需要文件参数时，你必须使用工作单元内的相对路径，例如：
+            当技能脚本需要文件参数时，你必须使用工作空间内的相对路径，例如：
             ```shell
             python ../../skills/csvAnalyzer/scripts/analyze.py data/input.csv --out result.json
             ```
@@ -79,8 +79,7 @@ public class WorkspaceSkill {
 
             ## 五、内联代码执行
 
-            如果你使用 `python -c "..."` 或 `node -e "..."` 等内联方式执行代码，
-            代码内部的文件路径也必须遵守相对路径规则，系统会检查代码内容。
+            如果你使用 `python -c "..."` 或 `node -e "..."` 等内联方式执行代码，**代码内部的文件路径**也必须遵守相对路径规则，系统会检查代码内容。
 
             ## 六、快速自查
 

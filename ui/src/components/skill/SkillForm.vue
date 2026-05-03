@@ -412,7 +412,7 @@ onMounted(() => {
         <CloseOutlined class="struct-guide__close" @click="structGuideVisible = false" />
       </div>
       <div class="struct-guide__body">
-        <p class="struct-guide__desc">当前模式仅支持如下结构的技能包结构，包含 <span class="file-tree__tag">SKILL.md 及其附属目录（scripts、examples、references）</span>。若技能包需要携带数据文件或其他自定义资源，建议将技能包放置于 <span class="file-tree__tag">.apboa/workspace/skills</span> 目录下，并通过“<span class="file-tree__tag">装载本地技能包</span>”功能完成导入。</p>
+        <p class="struct-guide__desc">当前模式仅支持如下结构的技能包结构，包含 <span class="file-tree__tag">SKILL.md 及其附属目录（scripts、examples、references）</span>。若技能包需要携带数据文件或其他自定义资源，建议将技能包放置于 <span class="file-tree__tag">.apboa/skills</span> 目录下，并通过“<span class="file-tree__tag">装载本地技能包</span>”功能完成导入。</p>
         <div class="file-tree">
           <div class="file-tree__item file-tree__item--root">
             <FolderOutlined class="file-tree__icon file-tree__icon--folder" />

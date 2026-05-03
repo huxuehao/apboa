@@ -20,7 +20,7 @@
 | **工作目录** | Shell 命令的执行目录 |
 | **skill-scripts 装载目录** | Skill 脚本的装载目录 |
 
-3. 推荐工作目录设置为 `.apboa/workspace/skills`
+3. 推荐工作目录设置为 `.apboa/skills`
 4. 在 Skill 中引导智能体执行代码时，路径需要与上述目录匹配。例如 Skill 名称为 `doGetCurrentTime`，引导内容可写为：
 
 ```bash

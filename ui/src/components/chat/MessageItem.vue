@@ -71,9 +71,7 @@ const openPreview = (index: number) => {
             class="chat-message-file-item"
           >
             <MediaIcon :type="(item.extension ?? getExtension(item.name)) || 'FILE'" size="19"/>
-<!--            <MediaIcon type="FILE" size="19"/>-->
             <span class="chat-message-file-name" :title="item.name">{{ item.name }}</span>
-<!--            <span class="chat-message-file-size">{{ item.size }}</span>-->
           </div>
         </div>
         <!-- 文本内容（支持标签渲染） -->

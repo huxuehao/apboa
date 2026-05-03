@@ -35,6 +35,7 @@ import {
   removeToken,
   removeRefreshToken
 } from "@/utils/auth";
+import setting from "@/config/setting.ts";
 
 
 /** 事件处理器集合 */
@@ -182,6 +183,13 @@ export class AgentClient {
                   value: newRefreshToken,
                   ttl: newRefreshTokenTTL
                 });
+
+                // 重新设置 headers，使用新 token
+                this.headers = {
+                  ...this.headers,
+                  [setting.tokenHeader]: `Bearer ${newToken}`
+                };
+
                 // 重试原始请求
                 await executeRequest()
                 return

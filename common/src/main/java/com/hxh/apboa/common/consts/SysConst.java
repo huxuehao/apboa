@@ -49,7 +49,6 @@ public class SysConst {
     public static final String WORKSPACE_PATH = ROOT_DIR_NAME + "/" + WORKSPACE_DIR_NAME;
     public static final String SKILLS_DIR_NAME = "skills";
     public static final String SKILLS_DIR = ROOT_DIR_NAME + "/" + SKILLS_DIR_NAME;
-    public static final String UNITS_DIR_NAME = "units";
 
     // 工作空间钩子错误键
     public static final String WORKSPACE_HOOK_ERROR_KEY = "workspace_hook_error";
