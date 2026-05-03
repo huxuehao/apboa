@@ -2,6 +2,7 @@
 import MessageItem from './MessageItem.vue'
 import ToolCallItem from './ToolCallItem.vue'
 import type { DisplayMessage } from '@/types'
+import type {FlatFileItem} from "@/composables/chat/useWorkspaceFiles.ts";
 
 defineProps<{
   messages: DisplayMessage[]
@@ -11,6 +12,7 @@ defineProps<{
 
 const emit = defineEmits<{
   (e: 'toolContent', value: any): void
+  (e: 'inputTagPreview', value: FlatFileItem): void
 }>()
 </script>
 
@@ -18,6 +20,7 @@ const emit = defineEmits<{
   <div class="chat-main-messages">
     <MessageItem
       v-for="msg in messages"
+      @inputTagPreview="$emit('inputTagPreview', $event)"
       :key="msg.id"
       :role="msg.role"
       :content="msg.content"

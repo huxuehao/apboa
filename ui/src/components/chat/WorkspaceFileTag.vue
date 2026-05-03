@@ -17,6 +17,8 @@ const props = defineProps<{
   path: string
 }>()
 
+defineEmits(['inputTagPreview'])
+
 /**
  * 从路径中提取文件名和父文件夹路径
  */
@@ -55,8 +57,14 @@ const fileIcon = computed(() => {
 </script>
 
 <template>
-  <span class="workspace-file-tag">
-    <span class="workspace-file-tag-name" :title="fileInfo.folder ? fileInfo.folder + '/' + fileInfo.name : fileInfo.name">{{ fileInfo.name }}</span>
+  <span class="workspace-file-tag" @click="$emit('inputTagPreview', {
+    path: props.path,
+    name: fileInfo.name,
+    fullName: fileInfo.name,
+    folderPath: fileInfo.folder,
+    extension
+  })">
+    <span class="workspace-file-tag-name" :title="path">{{ fileInfo.name }}</span>
   </span>
 </template>
 
@@ -75,6 +83,7 @@ const fileIcon = computed(() => {
   vertical-align: middle;
   white-space: nowrap;
   user-select: none;
+  cursor: pointer;
 }
 
 .workspace-file-tag-icon {

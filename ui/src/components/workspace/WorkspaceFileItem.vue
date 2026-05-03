@@ -92,6 +92,7 @@ const handleRowClick = () => {
     <!-- 文件名 -->
     <span
       class="workspace-item-name"
+      @click.stop="emit('preview', node)"
       :class="{ 'workspace-item-name--operating': operating }"
       :title="node.fullName || node.name"
     >
