@@ -15,7 +15,8 @@ import MediaIcon from '@/components/common/MediaIcon.vue'
 import ResourceMentionDropdown from './ResourceMentionDropdown.vue'
 import { type FlatFileItem, useWorkspaceFiles } from '@/composables/chat/useWorkspaceFiles'
 import { extractTextFromEditor, renderTaggedTextToHtml } from '@/utils/chat/tagSystem'
-import type { UploadedFileItem } from '@/types'
+import type {UploadedFileItem, WorkspaceFileNode} from '@/types'
+import WorkspaceFilePreview from "@/components/workspace/WorkspaceFilePreview.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -52,6 +53,7 @@ const emit = defineEmits<{
   (e: 'memory', value: boolean): void
   (e: 'plan', value: boolean): void
   (e: 'toolProcess', value: boolean): void
+  (e: 'inputTagPreview', value: FlatFileItem): void
 }>()
 
 const editorRef = ref<HTMLDivElement | null>()
@@ -395,6 +397,10 @@ const insertWorkspaceFileTag = (item: FlatFileItem) => {
 
   const name = path.split('/').pop() || path
   tagEl.innerHTML = `<span class="editor-tag-inner"><span class="editor-tag-name">${escapeHtml(name)}</span></span>`
+
+  // 添加点击事件监听（预览）
+  const innerSpan = tagEl.querySelector('.editor-tag-inner')
+  innerSpan?.addEventListener('click', () => emit('inputTagPreview', item))
 
   const parent = textNode.parentNode!
   parent.insertBefore(tagEl, textNode.nextSibling)
@@ -1153,6 +1159,7 @@ watch(
   vertical-align: middle;
   white-space: nowrap;
   margin: 0 2px;
+  cursor: pointer;
 }
 
 :deep(.editor-tag-name) {

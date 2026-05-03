@@ -14,6 +14,7 @@ import {
 } from '@ant-design/icons-vue'
 import * as workspaceApi from '@/api/workspace'
 import type { WorkspaceFileNode } from '@/types'
+import type {FlatFileItem} from "@/composables/chat/useWorkspaceFiles.ts";
 
 /**
  * 媒体类型
@@ -27,7 +28,7 @@ const props = defineProps<{
   /** 预览是否可见 */
   visible: boolean
   /** 当前预览的文件节点 */
-  fileNode: WorkspaceFileNode | null
+  fileNode: WorkspaceFileNode | FlatFileItem | null
   /** 当前会话 ID */
   sessionId: string | null
 }>()
@@ -114,7 +115,7 @@ async function loadFile() {
 
   loading.value = true
   try {
-    const fname = props.fileNode.fullName ?? props.fileNode.name
+    const fname = props.fileNode.path ?? props.fileNode.fullName ?? props.fileNode.name
     const res = await workspaceApi.download(props.sessionId, fname)
     const blob = res.data as Blob
 
@@ -174,7 +175,7 @@ function handleClose() {
 async function handleDownload() {
   if (!props.fileNode || !props.sessionId) return
   try {
-    const fname = props.fileNode.fullName ?? props.fileNode.name
+    const fname = props.fileNode.path ?? props.fileNode.fullName ?? props.fileNode.name
     const res = await workspaceApi.download(props.sessionId, fname)
     const blob = res.data as Blob
     const url = URL.createObjectURL(blob)

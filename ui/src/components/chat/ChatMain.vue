@@ -10,6 +10,8 @@ import MessageList from './MessageList.vue'
 import ChatInput from './ChatInput.vue'
 import Welcome from './Welcome.vue'
 import type { DisplayMessage, UploadedFileItem } from '@/types'
+import type {FlatFileItem} from "@/composables/chat/useWorkspaceFiles.ts";
+import WorkspaceFilePreview from "@/components/workspace/WorkspaceFilePreview.vue";
 
 const props = defineProps<{
   title: string
@@ -53,6 +55,9 @@ const messagesScrollRef = ref<HTMLElement | null>()
 const shouldAutoScroll = ref(true)
 const SCROLL_BOTTOM_THRESHOLD = 80
 
+const workspaceFilePreviewVisible = ref(false)
+const workspaceFilePreviewNode = ref<FlatFileItem | null>(null)
+
 // 滚动到底部
 const scrollToBottom = (smooth = false) => {
   const el = messagesScrollRef.value
@@ -84,6 +89,12 @@ const checkAndUpdateAutoScroll = () => {
 const handleScroll = (event: UIEvent | any) => {
   checkAndUpdateAutoScroll()
   emit('scroll', event)
+}
+
+// 预览输入tag
+const inputTagPreviewHandle = (file: FlatFileItem) => {
+  workspaceFilePreviewVisible.value = true
+  workspaceFilePreviewNode.value = file
 }
 
 // 监听消息变化，自动滚动
@@ -184,6 +195,7 @@ defineExpose({
           :agent-has-result="agentHasResult"
           :messages="messages"
           :tool-calls="toolCalls"
+          @inputTagPreview="inputTagPreviewHandle"
           @toolContent="(content: any) => $emit('toolContent', content)"
         />
       </div>
@@ -201,6 +213,7 @@ defineExpose({
             :show-tool-process="showToolProcess"
             :tool-process-active="toolProcessActive"
             :session-id="sessionId"
+            @inputTagPreview="inputTagPreviewHandle"
             @update:model-value="$emit('update:inputValue', $event)"
             @update:uploaded-files="$emit('update:uploadedFiles', $event)"
             @memory="$emit('memory', $event)"
@@ -213,6 +226,12 @@ defineExpose({
         </div>
       </div>
     </template>
+    <!-- 输入Tag文件预览弹窗 -->
+    <WorkspaceFilePreview
+      v-model:visible="workspaceFilePreviewVisible"
+      :file-node="workspaceFilePreviewNode"
+      :session-id="sessionId as string"
+    />
   </main>
 </template>
 

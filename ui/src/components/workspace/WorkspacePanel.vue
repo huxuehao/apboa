@@ -229,7 +229,7 @@ const handleDownload = async () => {
     const firstPath = paths[0]!
     const node = findNodeByPath(nodes.value, firstPath)
     if (node) {
-      const filename = node.fullName ?? node.name
+      const filename = node.path ?? node.fullName ?? node.name
       const res = await workspaceApi.download(sid, filename)
       triggerBlobDownload(res.data as Blob, filename)
     }
@@ -244,7 +244,7 @@ const handleDownload = async () => {
  */
 const handleDownloadFile = async (node: WorkspaceFileNode) => {
   if (!props.sessionId) return
-  const filename = node.fullName ?? node.name
+  const filename = node.path ?? node.fullName ?? node.name
   const res = await workspaceApi.download(props.sessionId, filename)
   triggerBlobDownload(res.data as Blob, filename)
 }

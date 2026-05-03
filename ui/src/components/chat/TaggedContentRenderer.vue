@@ -3,6 +3,8 @@ import { computed } from 'vue'
 import { parseTaggedContent, TagRegistry } from '@/utils/chat/tagSystem'
 import WorkspaceFileTag from './WorkspaceFileTag.vue'
 
+defineEmits(['inputTagPreview'])
+
 /**
  * 注册内置标签渲染器
  */
@@ -36,6 +38,7 @@ const segments = computed(() => parseTaggedContent(props.content || ''))
       <component
         v-else-if="seg.type === 'tag' && seg.tagName && TagRegistry.get(seg.tagName)"
         :is="TagRegistry.get(seg.tagName)"
+        @inputTagPreview="$emit('inputTagPreview', $event)"
         :path="seg.tagContent"
       />
       <!-- 未知标签或空内容 -->

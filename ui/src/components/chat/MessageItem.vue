@@ -38,6 +38,8 @@ const props = defineProps<{
   isStreaming?: boolean
 }>()
 
+defineEmits(['inputTagPreview'])
+
 const isUser = computed(() => props.role === 'user')
 const isAssistant = computed(() => props.role === 'assistant')
 const isTool = computed(() => props.role === 'tool')
@@ -76,7 +78,9 @@ const openPreview = (index: number) => {
         </div>
         <!-- 文本内容（支持标签渲染） -->
         <span v-if="parsedUserContent.text" class="chat-message-user-content">
-          <TaggedContentRenderer :content="parsedUserContent.text" />
+          <TaggedContentRenderer
+            @inputTagPreview="$emit('inputTagPreview', $event)"
+            :content="parsedUserContent.text" />
         </span>
       </div>
     </template>
