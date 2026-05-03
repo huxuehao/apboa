@@ -262,7 +262,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
      */
     private Path getWorkspaceDir(String sessionId) {
         validateSessionId(sessionId);
-        Path dir = Paths.get(SysConst.WORKSPACE_PATH, SysConst.UNITS_DIR_NAME, sessionId).toAbsolutePath().normalize();
+        Path dir = Paths.get(SysConst.WORKSPACE_PATH, sessionId).toAbsolutePath().normalize();
         FileUtil.mkdir(dir.toFile());
         return dir;
     }

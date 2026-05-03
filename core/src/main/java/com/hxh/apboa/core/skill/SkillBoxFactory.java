@@ -9,6 +9,7 @@ import com.hxh.apboa.common.entity.SkillPackage;
 import com.hxh.apboa.common.key.SkillExampleKey;
 import com.hxh.apboa.common.key.SkillReferencesKey;
 import com.hxh.apboa.common.key.SkillScriptKey;
+import com.hxh.apboa.core.agui.AgentContext;
 import com.hxh.apboa.core.tool.ToolkitFactory;
 import com.hxh.apboa.core.workspace.skills.WorkspaceSkill;
 import com.hxh.apboa.skill.service.AgentSkillPackageService;
@@ -153,7 +154,7 @@ public class SkillBoxFactory {
         SkillBox.CodeExecutionBuilder codeExecutionBuilder = skillBox.codeExecution();
 
         // 设置工作目录
-        codeExecutionBuilder.workDir(SysConst.WORKSPACE_PATH);
+        codeExecutionBuilder.workDir(SysConst.WORKSPACE_PATH + "/" + AgentContext.get().getThreadId());
 
         // 配置Shell命令工具
         if (Boolean.TRUE.equals(config.getEnableShell())) {

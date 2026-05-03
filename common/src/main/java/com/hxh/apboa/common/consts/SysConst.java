@@ -45,9 +45,12 @@ public class SysConst {
 
     // 工作空间相关
     public static final String ROOT_DIR_NAME = ".apboa";
-    public static final String WORKSPACE_DIR_NAME = "workspace";
+    public static final String WORKSPACE_DIR_NAME = "workspaces";
+    public static final String WORKSPACE_PATH = ROOT_DIR_NAME + "/" + WORKSPACE_DIR_NAME;
     public static final String SKILLS_DIR_NAME = "skills";
+    public static final String SKILLS_DIR = ROOT_DIR_NAME + "/" + SKILLS_DIR_NAME;
     public static final String UNITS_DIR_NAME = "units";
-    public static final String WORKSPACE_PATH = String.format("%s/%s", ROOT_DIR_NAME, WORKSPACE_DIR_NAME);
-    public static final String SKILLS_DIR = WORKSPACE_PATH + "/" + SKILLS_DIR_NAME;
+
+    // 工作空间钩子错误键
+    public static final String WORKSPACE_HOOK_ERROR_KEY = "workspace_hook_error";
 }

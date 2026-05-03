@@ -74,7 +74,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         session.setCurrentMessageId(root.getId());
         updateById(session);
 
-        FolderUtils.mkdirsByRelativePath(String.format("%s/%s/%s", SysConst.WORKSPACE_PATH, SysConst.UNITS_DIR_NAME, session.getId()));
+        FolderUtils.mkdirsByRelativePath(SysConst.WORKSPACE_PATH + "/" + session.getId());
         return toSessionVO(session);
     }
 
@@ -259,7 +259,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         }
 
         // 删除工作空间目录（文件 + sessionId文件夹本身）
-        String workspacePath = String.format("%s/%s/%s", SysConst.WORKSPACE_PATH, SysConst.UNITS_DIR_NAME, session.getId());
+        String workspacePath = SysConst.WORKSPACE_PATH + "/" + session.getId();
         FolderUtils.deleteRecursively(workspacePath);
     }
 

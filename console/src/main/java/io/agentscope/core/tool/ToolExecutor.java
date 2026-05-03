@@ -15,6 +15,7 @@
  */
 package io.agentscope.core.tool;
 
+import com.hxh.apboa.common.consts.SysConst;
 import io.agentscope.core.agent.Agent;
 import io.agentscope.core.message.ToolResultBlock;
 import io.agentscope.core.message.ToolUseBlock;
@@ -126,6 +127,12 @@ class ToolExecutor {
     private Mono<ToolResultBlock> executeCore(ToolCallParam param) {
         ToolUseBlock toolCall = param.getToolUseBlock();
         AgentTool tool = toolRegistry.getTool(toolCall.getName());
+
+        // 检查 workspace hook 错误
+        Object error = param.getToolUseBlock().getMetadata().get(SysConst.WORKSPACE_HOOK_ERROR_KEY);
+        if (error != null) {
+            return Mono.just(ToolResultBlock.text(error.toString()));
+        }
 
         if (tool == null) {
             return Mono.just(ToolResultBlock.error("Tool not found: " + toolCall.getName()));

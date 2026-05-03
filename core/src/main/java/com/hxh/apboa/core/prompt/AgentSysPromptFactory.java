@@ -2,6 +2,7 @@ package com.hxh.apboa.core.prompt;
 
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.SensitiveWordConfig;
+import com.hxh.apboa.core.workspace.hook.WorkspaceToolConstants;
 import com.hxh.apboa.sensitive.service.SensitiveWordConfigService;
 import org.springframework.stereotype.Component;
 
@@ -31,8 +32,11 @@ public class AgentSysPromptFactory {
 
         String workspaceTagExplanation = """
                 ===================================================
-                用户可以通过 <workspace-file>文件名</workspace-file> 标签引用工作空间中的文件。当你看到此标签时，应将其视为指示：前往当前工作空间查找对应的文件，并读取其内容以辅助回答或执行任务。
+                用户可以通过 <workspace-file>文件名</workspace-file> 标签引用当前目录下的文件。当你看到此标签时，应将其视为指示：前往当前目录下查找对应的文件，并读取其内容以辅助回答或执行任务。
+
+                workspace_path_and_execution_rules 是你的核心技能，其中规定了使用 %s 的注意事项，在使用上述工具时要严格遵守 workspace_path_and_execution_rules 的规则。
                 """;
+        workspaceTagExplanation = String.format(workspaceTagExplanation, String.join("、", WorkspaceToolConstants.PATH_SENSITIVE_TOOLS));
         prompt = prompt + "\n\n" + workspaceTagExplanation;
 
         Long id = agentDefinition.getSensitiveWordConfigId();
