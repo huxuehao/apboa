@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { FolderOutlined, FolderOpenOutlined } from '@ant-design/icons-vue'
+import { FolderFilled, FolderOpenFilled } from '@ant-design/icons-vue'
 import WorkspaceFileItem from './WorkspaceFileItem.vue'
 import type { WorkspaceFileNode } from '@/types'
 
@@ -50,12 +50,12 @@ const handleDblClick = () => {
     <div
       class="workspace-item-row"
       :style="{ paddingLeft }"
-      @dblclick="handleDblClick"
+      @click="handleDblClick"
     >
       <!-- 文件夹图标 -->
       <span class="workspace-item-icon workspace-folder-icon">
-        <FolderOpenOutlined v-if="expanded" />
-        <FolderOutlined v-else />
+        <FolderOpenFilled v-if="expanded" />
+        <FolderFilled v-else />
       </span>
 
       <!-- 文件夹名称 -->
@@ -69,7 +69,7 @@ const handleDblClick = () => {
       <!-- 子节点数量 -->
 
       <!-- 双击提示（hover 时淡入，不喧宾夺主） -->
-      <span class="workspace-item-hint">双击{{ expanded ? '折叠' : '展开' }}</span>
+      <span class="workspace-item-hint">点击{{ expanded ? '折叠' : '展开' }}</span>
     </div>
 
     <!-- 子节点列表 -->

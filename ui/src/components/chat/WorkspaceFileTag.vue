@@ -1,16 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import {
-  FileOutlined,
-  FileImageOutlined,
-  FileTextOutlined,
-  FilePdfOutlined,
-  FileZipOutlined,
-  FileMarkdownOutlined,
-  FileExcelOutlined,
-  FileWordOutlined,
-  FilePptOutlined
-} from '@ant-design/icons-vue'
+import FileIcon from "@/components/workspace/FileIcon.vue";
 
 const props = defineProps<{
   /** 文件在工作空间中的相对路径 */
@@ -38,22 +28,6 @@ const extension = computed(() => {
   const lastDot = name.lastIndexOf('.')
   return lastDot > -1 ? name.slice(lastDot + 1).toLowerCase() : ''
 })
-
-/**
- * 根据文件后缀返回对应图标组件
- */
-const fileIcon = computed(() => {
-  const e = extension.value
-  if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'ico'].includes(e)) return FileImageOutlined
-  if (['pdf'].includes(e)) return FilePdfOutlined
-  if (['zip', 'tar', 'gz', 'rar', '7z', 'bz2', 'xz', 'tgz'].includes(e)) return FileZipOutlined
-  if (['md', 'markdown'].includes(e)) return FileMarkdownOutlined
-  if (['xls', 'xlsx', 'csv'].includes(e)) return FileExcelOutlined
-  if (['doc', 'docx'].includes(e)) return FileWordOutlined
-  if (['ppt', 'pptx'].includes(e)) return FilePptOutlined
-  if (['txt', 'log', 'json', 'xml', 'yaml', 'yml', 'toml', 'ini', 'conf', 'sh', 'bash', 'py', 'js', 'ts', 'java', 'go', 'rs', 'c', 'cpp', 'h'].includes(e)) return FileTextOutlined
-  return FileOutlined
-})
 </script>
 
 <template>
@@ -64,6 +38,7 @@ const fileIcon = computed(() => {
     folderPath: fileInfo.folder,
     extension
   })">
+    <FileIcon :file-name="fileInfo.name" width="14" />
     <span class="workspace-file-tag-name" :title="path">{{ fileInfo.name }}</span>
   </span>
 </template>
@@ -99,5 +74,6 @@ const fileIcon = computed(() => {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 500;
+  //font-size: 14px;
 }
 </style>

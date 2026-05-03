@@ -1,18 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 import {
-  FileOutlined,
-  FileImageOutlined,
-  FileTextOutlined,
-  FilePdfOutlined,
-  FileZipOutlined,
-  FileMarkdownOutlined,
-  FileExcelOutlined,
-  FileWordOutlined,
-  FilePptOutlined,
   FolderOutlined
 } from '@ant-design/icons-vue'
 import type { FlatFileItem } from '@/composables/chat/useWorkspaceFiles'
+import FileIcon from "@/components/workspace/FileIcon.vue";
 
 const props = defineProps<{
   /** 是否显示 */
@@ -44,22 +36,6 @@ const filteredItems = computed(() => {
       item.fullName.toLowerCase().includes(kw)
   )
 })
-
-/**
- * 根据文件后缀返回对应图标组件
- */
-const getFileIcon = (ext?: string) => {
-  const e = (ext || '').toLowerCase()
-  if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'ico'].includes(e)) return FileImageOutlined
-  if (['pdf'].includes(e)) return FilePdfOutlined
-  if (['zip', 'tar', 'gz', 'rar', '7z', 'bz2', 'xz', 'tgz'].includes(e)) return FileZipOutlined
-  if (['md', 'markdown'].includes(e)) return FileMarkdownOutlined
-  if (['xls', 'xlsx', 'csv'].includes(e)) return FileExcelOutlined
-  if (['doc', 'docx'].includes(e)) return FileWordOutlined
-  if (['ppt', 'pptx'].includes(e)) return FilePptOutlined
-  if (['txt', 'log', 'json', 'xml', 'yaml', 'yml', 'toml', 'ini', 'conf', 'sh', 'bash', 'py', 'js', 'ts', 'java', 'go', 'rs', 'c', 'cpp', 'h'].includes(e)) return FileTextOutlined
-  return FileOutlined
-}
 
 /**
  * 选中当前高亮的文件
@@ -164,10 +140,9 @@ defineExpose({
         @click="handleItemClick(item)"
         @mouseenter="activeIndex = index"
       >
-          <span class="mention-dropdown-item-icon">
-            <component :is="getFileIcon(item.extension)" />
-          </span>
-
+        <span class="mention-dropdown-item-icon">
+          <FileIcon :file-name="item.fullName" width="18" />
+        </span>
         <div class="mention-dropdown-item-content">
             <span class="mention-dropdown-item-name" :title="item.fullName">
               {{ item.fullName }}
