@@ -2,14 +2,16 @@ package com.hxh.apboa.core.skill;
 
 import com.hxh.apboa.agent.service.AgentCodeExecutionService;
 import com.hxh.apboa.agent.service.CodeExecutionConfigService;
+import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.CodeExecutionConfig;
 import com.hxh.apboa.common.entity.SkillPackage;
 import com.hxh.apboa.common.key.SkillExampleKey;
 import com.hxh.apboa.common.key.SkillReferencesKey;
 import com.hxh.apboa.common.key.SkillScriptKey;
+import com.hxh.apboa.core.agui.AgentContext;
 import com.hxh.apboa.core.tool.ToolkitFactory;
-import com.hxh.apboa.skill.SkillScriptLoadHelper;
+import com.hxh.apboa.core.workspace.skills.WorkspaceSkill;
 import com.hxh.apboa.skill.service.AgentSkillPackageService;
 import com.hxh.apboa.skill.service.SkillPackageService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -49,11 +51,15 @@ public class SkillBoxFactory {
     public SkillBox getSkillBox(AgentDefinition agentDefinition) {
         SkillBox skillBox = new SkillBox(new Toolkit());
 
+        // 配置工作空间专属skill
+        skillBox.registerSkill(WorkspaceSkill.getAgentSkill());
+
         // 注册技能包
         List<Long> skillPackageIds = agentSkillPackageService.getSkillPackageIds(agentDefinition.getId());
         if (skillPackageIds.isEmpty()) {
-            return null;
+            return skillBox;
         }
+
         registerSkills(skillBox, skillPackageIds);
 
         return skillBox;
@@ -142,22 +148,13 @@ public class SkillBoxFactory {
         }
 
         // 设置自动上传
-        skillBox.setAutoUploadSkill(Boolean.TRUE.equals(config.getAutoUpload()));
+        skillBox.setAutoUploadSkill(false);
 
         // 配置代码执行环境
         SkillBox.CodeExecutionBuilder codeExecutionBuilder = skillBox.codeExecution();
 
         // 设置工作目录
-        if (config.getWorkDir() != null && !config.getWorkDir().isEmpty()) {
-            codeExecutionBuilder.workDir(config.getWorkDir());
-        }
-
-        // 设置上传目录
-        if (config.getUploadDir() != null && !config.getUploadDir().isEmpty()) {
-            codeExecutionBuilder.uploadDir(config.getUploadDir());
-        } else {
-            codeExecutionBuilder.uploadDir(SkillScriptLoadHelper.BASE_DIR);
-        }
+        codeExecutionBuilder.workDir(SysConst.WORKSPACE_PATH + "/" + AgentContext.get().getThreadId());
 
         // 配置Shell命令工具
         if (Boolean.TRUE.equals(config.getEnableShell())) {

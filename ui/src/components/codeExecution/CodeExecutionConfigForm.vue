@@ -36,8 +36,8 @@ const formRef = ref()
  */
 const formData = ref({
   configName: '',
-  workDir: '.apboa/skill-scripts/skills',
-  uploadDir: '.apboa/skill-scripts/skills',
+  workDir: '.apboa/workspace',
+  uploadDir: '.apboa/skills',
   autoUpload: false,
   enableShell: true,
   enableRead: false,
@@ -75,8 +75,8 @@ const rules = {
 function resetForm() {
   formData.value = {
     configName: '',
-    workDir: '.apboa/skill-scripts/skills',
-    uploadDir: '.apboa/skill-scripts/skills',
+    workDir: '.apboa/workspace',
+    uploadDir: '.apboa/skills',
     autoUpload: false,
     enableShell: true,
     enableRead: false,
@@ -96,7 +96,7 @@ watch(() => props.visible, (val) => {
       formData.value = {
         configName: props.data.configName,
         workDir: props.data.workDir || '',
-        uploadDir: props.data.uploadDir || '.apboa/skill-scripts/skills',
+        uploadDir: props.data.uploadDir || '.apboa/skills',
         autoUpload: props.data.autoUpload || false,
         enableShell: props.data.enableShell || false,
         enableRead: props.data.enableRead || false,
@@ -142,7 +142,7 @@ async function handleSubmit() {
     const entity: CodeExecutionConfig = {
       configName: formData.value.configName,
       workDir: formData.value.workDir || undefined,
-      uploadDir: formData.value.uploadDir || '.apboa/skill-scripts/skills',
+      uploadDir: formData.value.uploadDir || '.apboa/skills',
       autoUpload: formData.value.autoUpload,
       enableShell: formData.value.enableShell,
       enableRead: formData.value.enableRead,
@@ -197,16 +197,16 @@ function handleCancel() {
         <AInput v-model:value="formData.configName" placeholder="请输入配置名称" />
       </AFormItem>
 
-      <AFormItem label="工作目录">
-        <AInput v-model:value="formData.workDir" placeholder="留空则使用临时目录" />
-        <div class="text-placeholder text-xs mt-xs">
-          指定代码执行的工作目录，shell命令将在此目录下执行，留空则使用系统临时目录
-        </div>
-      </AFormItem>
+<!--      <AFormItem label="工作目录（只读）">-->
+<!--        <AInput v-model:value="formData.workDir" placeholder="留空则使用临时目录" readonly />-->
+<!--        <div class="text-placeholder text-xs mt-xs">-->
+<!--          指定代码执行的工作目录，shell命令将在此目录下执行，留空则使用系统临时目录-->
+<!--        </div>-->
+<!--      </AFormItem>-->
 
-      <AFormItem label="skill-scripts装载目录（只读）">
-        <AInput v-model:value="formData.uploadDir" readonly/>
-      </AFormItem>
+<!--      <AFormItem label="skill-scripts装载目录（只读）">-->
+<!--        <AInput v-model:value="formData.uploadDir" readonly />-->
+<!--      </AFormItem>-->
 
       <AFormItem label="工具开关配置">
         <ARow :gutter="16">
@@ -216,12 +216,6 @@ function handleCancel() {
 <!--              <span class="ml-sm">自动上传Skill文件</span>-->
 <!--            </AFormItem>-->
 <!--          </ACol>-->
-          <ACol :span="24">
-            <AFormItem>
-              <ASwitch v-model:checked="formData.enableShell" />
-              <span class="ml-sm">启用Shell执行</span>
-            </AFormItem>
-          </ACol>
           <ACol :span="12">
             <AFormItem>
               <ASwitch v-model:checked="formData.enableRead" />
@@ -232,6 +226,12 @@ function handleCancel() {
             <AFormItem>
               <ASwitch v-model:checked="formData.enableWrite" />
               <span class="ml-sm">启用文件写入</span>
+            </AFormItem>
+          </ACol>
+          <ACol :span="24">
+            <AFormItem>
+              <ASwitch v-model:checked="formData.enableShell" />
+              <span class="ml-sm">启用Shell执行</span>
             </AFormItem>
           </ACol>
         </ARow>

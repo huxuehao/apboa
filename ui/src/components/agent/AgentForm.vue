@@ -65,7 +65,6 @@ const formData = ref({
     tool: [] as string[],
     specificToolName: '',
     skill: [] as string[],
-    codeExecutionConfigId: null as string | null,
     sensitiveWordConfigId: '',
     sensitiveFilterEnabled: false
   },
@@ -86,7 +85,8 @@ const formData = ref({
     structuredOutputEnabled: false,
     structuredOutputReminder: 'TOOL_CHOICE' as "TOOL_CHOICE" | "PROMPT",
     structuredOutputSchema: '',
-    studioConfigId: null as string | null
+    studioConfigId: null as string | null,
+    codeExecutionConfigId: null as string | null
   }
 })
 
@@ -98,7 +98,7 @@ const steps = [
   { title: '模型与提示词', description: '选择模型和提示词模板' },
   { title: '工具与能力', description: '配置钩子、工具、技能和敏感词' },
   { title: '知识库与MCP', description: '配置知识库、MCP服务器和子智能体' },
-  { title: '高级设置', description: '配置计划、记忆、结构化输出和Studio' }
+  { title: '高级设置', description: '配置计划、记忆、执行环境和Studio等' }
 ]
 
 /**
@@ -154,7 +154,6 @@ watch(
           specificToolName: props.data.specificToolName || '',
           skill: props.data.skill || [],
           sensitiveWordConfigId: props.data.sensitiveWordConfigId || '',
-          codeExecutionConfigId: props.data.codeExecutionConfigId,
           sensitiveFilterEnabled: props.data.sensitiveFilterEnabled
         }
         formData.value.knowledge = {
@@ -174,7 +173,8 @@ watch(
           structuredOutputEnabled: props.data.structuredOutputEnabled,
           structuredOutputReminder: props.data.structuredOutputReminder || 'TOOL_CHOICE',
           structuredOutputSchema: props.data.structuredOutputSchema ? JSON.stringify(props.data.structuredOutputSchema, null, 2) : '',
-          studioConfigId: props.data.studioConfigId || null
+          studioConfigId: props.data.studioConfigId || null,
+          codeExecutionConfigId: props.data.codeExecutionConfigId || null
         }
       } else {
         resetForm()
@@ -209,7 +209,6 @@ function resetForm() {
       specificToolName: '',
       skill: [],
       sensitiveWordConfigId: '',
-      codeExecutionConfigId: '',
       sensitiveFilterEnabled: false
     },
     knowledge: {
@@ -229,7 +228,8 @@ function resetForm() {
       structuredOutputEnabled: false,
       structuredOutputReminder: 'TOOL_CHOICE',
       structuredOutputSchema: '',
-      studioConfigId: null
+      studioConfigId: null,
+      codeExecutionConfigId: null
     }
   }
 }
@@ -310,7 +310,7 @@ async function handleSubmit() {
         ? JSON.parse(formData.value.advanced.structuredOutputSchema)
         : null,
       studioConfigId: formData.value.advanced.studioConfigId,
-      codeExecutionConfigId: formData.value.tools.codeExecutionConfigId,
+      codeExecutionConfigId: formData.value.advanced.codeExecutionConfigId,
       version: '1.0.0'
     }
 

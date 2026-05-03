@@ -5,6 +5,8 @@ import com.hxh.apboa.common.entity.HookConfig;
 import com.hxh.apboa.common.enums.CodeLanguage;
 import com.hxh.apboa.common.enums.HookType;
 import com.hxh.apboa.core.hook.dynamices.HookInstanceLoadFactory;
+import com.hxh.apboa.core.workspace.hook.WorkspaceValidateHook;
+import com.hxh.apboa.core.workspace.hook.WorkspaceWebsocketHook;
 import com.hxh.apboa.hook.service.AgentHookService;
 import com.hxh.apboa.hook.service.HookConfigService;
 import io.agentscope.core.hook.Hook;
@@ -24,15 +26,20 @@ import java.util.List;
 public class HooksFactory {
     private final AgentHookService agentHookService;
     private final HookConfigService hookConfigService;
+    private final WorkspaceWebsocketHook workspaceWebsocketHook;
 
     public List<Hook> getHooks(AgentDefinition agentDefinition) {
-        List<Long> hookIds = agentHookService.getHookIds(agentDefinition.getId());
+        List<Hook> hooks = new ArrayList<>();
 
+        // 配置工作空间专属Hook
+        hooks.add(new WorkspaceValidateHook());
+        hooks.add(workspaceWebsocketHook);
+
+        List<Long> hookIds = agentHookService.getHookIds(agentDefinition.getId());
         if (hookIds.isEmpty()) {
-            return List.of();
+            return hooks;
         }
 
-        List<Hook> hooks = new ArrayList<>();
         hookConfigService.listByIds(hookIds)
                 .stream()
                 .filter(HookConfig::getEnabled)

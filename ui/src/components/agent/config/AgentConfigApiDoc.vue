@@ -5,7 +5,7 @@
  */
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { CopyOutlined, CheckOutlined, DownOutlined, RightOutlined, KeyOutlined, LinkOutlined, ThunderboltOutlined, SyncOutlined, GlobalOutlined } from '@ant-design/icons-vue'
+import { CopyOutlined, CheckOutlined, DownOutlined, RightOutlined, KeyOutlined, LinkOutlined, ThunderboltOutlined, SyncOutlined, GlobalOutlined, FolderOpenOutlined } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
 import { getChatKey } from '@/api/agentChatKey'
 
@@ -307,6 +307,126 @@ const endpoints = [
     responseExample: null
   }
 ]
+
+/**
+ * 工作空间接口定义
+ */
+const workspaceEndpoints = [
+  {
+    id: 'ws-upload',
+    method: 'POST',
+    path: '/api/agent/workspace/upload',
+    desc: '上传单个文件',
+    note: '上传单个文件到工作空间，使用 multipart/form-data 格式提交。',
+    params: [
+      { name: 'sessionId', type: 'string (表单字段)', required: true, desc: '会话ID' },
+      { name: 'file', type: 'File (表单字段)', required: true, desc: '上传的文件' }
+    ],
+    bodyExample: null,
+    responseExample: null
+  },
+  {
+    id: 'ws-upload-batch',
+    method: 'POST',
+    path: '/api/agent/workspace/upload/batch',
+    desc: '批量上传文件',
+    note: '上传多个文件到工作空间，使用 multipart/form-data 格式提交。',
+    params: [
+      { name: 'sessionId', type: 'string (表单字段)', required: true, desc: '会话ID' },
+      { name: 'files', type: 'File[] (表单字段)', required: true, desc: '上传的文件列表' }
+    ],
+    bodyExample: null,
+    responseExample: null
+  },
+  {
+    id: 'ws-upload-archive',
+    method: 'POST',
+    path: '/api/agent/workspace/upload/archive',
+    desc: '上传压缩包并解压',
+    note: '上传压缩包文件到工作空间，系统会自动解压到工作空间目录中。',
+    params: [
+      { name: 'sessionId', type: 'string (表单字段)', required: true, desc: '会话ID' },
+      { name: 'file', type: 'File (表单字段)', required: true, desc: '上传的压缩包文件' }
+    ],
+    bodyExample: null,
+    responseExample: null
+  },
+  {
+    id: 'ws-list-files',
+    method: 'GET',
+    path: '/api/agent/workspace/files',
+    desc: '获取文件树',
+    note: '获取工作空间的文件树结构，返回树形的文件节点列表。',
+    params: [
+      { name: 'sessionId', type: 'string (查询参数)', required: true, desc: '会话ID' }
+    ],
+    bodyExample: null,
+    responseExample: null
+  },
+  {
+    id: 'ws-download',
+    method: 'GET',
+    path: '/api/agent/workspace/download',
+    desc: '下载单个文件',
+    note: '下载工作空间中的指定文件，返回文件流。',
+    params: [
+      { name: 'sessionId', type: 'string (查询参数)', required: true, desc: '会话ID' },
+      { name: 'fileName', type: 'string (查询参数)', required: true, desc: '文件名' }
+    ],
+    bodyExample: null,
+    responseExample: null
+  },
+  {
+    id: 'ws-download-batch',
+    method: 'POST',
+    path: '/api/agent/workspace/download/batch',
+    desc: '批量下载文件',
+    note: '将指定的多个文件打包成 ZIP 后下载，请求体为文件路径数组。',
+    params: [
+      { name: 'sessionId', type: 'string (查询参数)', required: true, desc: '会话ID' },
+      { name: 'body', type: 'string[] (请求体)', required: true, desc: '要下载的文件路径列表' }
+    ],
+    bodyExample: '[\n  "src/main.java",\n  "config/application.yml"\n]',
+    responseExample: null
+  },
+  {
+    id: 'ws-download-all',
+    method: 'GET',
+    path: '/api/agent/workspace/download/all',
+    desc: '下载整个工作空间',
+    note: '将工作空间中的所有文件打包成 ZIP 后下载。',
+    params: [
+      { name: 'sessionId', type: 'string (查询参数)', required: true, desc: '会话ID' }
+    ],
+    bodyExample: null,
+    responseExample: null
+  },
+  {
+    id: 'ws-delete-file',
+    method: 'DELETE',
+    path: '/api/agent/workspace/file',
+    desc: '删除单个文件',
+    note: '删除工作空间中指定的文件，操作不可逆。',
+    params: [
+      { name: 'sessionId', type: 'string (查询参数)', required: true, desc: '会话ID' },
+      { name: 'filePath', type: 'string (查询参数)', required: true, desc: '文件路径' }
+    ],
+    bodyExample: null,
+    responseExample: null
+  },
+  {
+    id: 'ws-clear',
+    method: 'DELETE',
+    path: '/api/agent/workspace/clear',
+    desc: '清空工作空间',
+    note: '清空工作空间下的所有文件，操作不可逆。',
+    params: [
+      { name: 'sessionId', type: 'string (查询参数)', required: true, desc: '会话ID' }
+    ],
+    bodyExample: null,
+    responseExample: null
+  }
+]
 </script>
 
 <template>
@@ -503,7 +623,7 @@ const endpoints = [
       </div>
     </div>
 
-    <!-- 接口列表 -->
+    <!-- 会话管理接口 -->
     <div class="api-doc-section">
       <div class="api-doc-title">
         <ThunderboltOutlined style="margin-right: 8px;" />会话管理接口
@@ -511,6 +631,84 @@ const endpoints = [
 
       <div
         v-for="ep in endpoints"
+        :key="ep.id"
+        class="api-endpoint-card"
+      >
+        <div class="endpoint-header" @click="toggleEndpoint(ep.id)">
+          <component
+            :is="expandedEndpoints.has(ep.id) ? DownOutlined : RightOutlined"
+            style="font-size: 10px; color: #bfbfbf;"
+          />
+          <span class="method-badge" :class="ep.method.toLowerCase()">{{ ep.method }}</span>
+          <span class="endpoint-path">{{ ep.path }}</span>
+          <span class="endpoint-desc">{{ ep.desc }}</span>
+        </div>
+
+        <div v-if="expandedEndpoints.has(ep.id)" class="endpoint-body">
+          <div v-if="ep.note" style="font-size: 13px; color: var(--color-text-secondary); margin-top: 12px; margin-bottom: 8px;">
+            {{ ep.note }}
+          </div>
+
+          <!-- 参数表 -->
+          <div v-if="ep.params.length > 0">
+            <div class="endpoint-detail-title">Parameters</div>
+            <table class="param-table">
+              <thead>
+                <tr>
+                  <th>参数名</th>
+                  <th>类型</th>
+                  <th>必填</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="p in ep.params" :key="p.name">
+                  <td class="param-name">{{ p.name }}</td>
+                  <td class="param-type">{{ p.type }}</td>
+                  <td><span v-if="p.required" class="param-required">Required</span><span v-else style="color: #bfbfbf;">Optional</span></td>
+                  <td>{{ p.desc }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 请求体示例 -->
+          <template v-if="ep.bodyExample">
+            <div class="endpoint-detail-title">Request Body</div>
+            <div class="code-block">{{ ep.bodyExample }}<span
+              class="code-copy-btn"
+              style="position: absolute; top: 8px; right: 8px; cursor: pointer;"
+              @click="copyToClipboard(ep.bodyExample!, `body-${ep.id}`)"
+            >
+              <CheckOutlined v-if="copiedKey === `body-${ep.id}`" style="color: #a6e3a1;" />
+              <CopyOutlined v-else style="color: #a6adc8;" />
+            </span></div>
+          </template>
+
+          <!-- 响应示例 -->
+          <template v-if="ep.responseExample">
+            <div class="endpoint-detail-title">Response</div>
+            <div class="code-block">{{ ep.responseExample }}<span
+              class="code-copy-btn"
+              style="position: absolute; top: 8px; right: 8px; cursor: pointer;"
+              @click="copyToClipboard(ep.responseExample!, `resp-${ep.id}`)"
+            >
+              <CheckOutlined v-if="copiedKey === `resp-${ep.id}`" style="color: #a6e3a1;" />
+              <CopyOutlined v-else style="color: #a6adc8;" />
+            </span></div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- 工作空间接口 -->
+    <div class="api-doc-section">
+      <div class="api-doc-title">
+        <FolderOpenOutlined style="margin-right: 8px;" />工作空间接口
+      </div>
+
+      <div
+        v-for="ep in workspaceEndpoints"
         :key="ep.id"
         class="api-endpoint-card"
       >

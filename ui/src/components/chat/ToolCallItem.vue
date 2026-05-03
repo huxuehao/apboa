@@ -92,7 +92,7 @@ const handleShowArgs = () => {
     <div class="chat-tool-call" :class="{ 'chat-tool-call--loading': loading }">
       <span class="chat-tool-call-dot"></span>
       <span class="chat-tool-call-label">
-      <template v-if="loading">正在调用工具 {{ name }}</template>
+      <template v-if="loading">正在执行 {{ name }}</template>
       <template v-if="needConfirm && !doing" >
         <div class="chat-tool-call-actions">
           <AButton v-if="args && args !== '{}'"

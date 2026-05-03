@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import { useRoute } from 'vue-router'
 import { Modal, message } from 'ant-design-vue'
 import { useAccountStore, useChatStore } from '@/stores'
@@ -11,6 +11,7 @@ import { useChatStream } from '@/composables/chat/useChatStream'
 import ChatSidebar from '@/components/chat/ChatSidebar.vue'
 import ChatMain from '@/components/chat/ChatMain.vue'
 import RenameModal from '@/components/chat/RenameModal.vue'
+import WorkspacePanel from '@/components/workspace/WorkspacePanel.vue'
 import type { DisplayMessage, ChatMessageVO, UploadedFileItem } from '@/types'
 import * as chatSessionApi from '@/api/chatSession'
 
@@ -37,6 +38,8 @@ const accountId = computed(() => accountStore.userInfo?.id)
 const enableMemory = computed(() => agentDetail.value?.enableMemory === true)
 const enablePlanning = computed(() => agentDetail.value?.enablePlanning === true)
 const showToolProcess = computed(() => agentDetail.value?.showToolProcess === true)
+// 是否配置了代码执行
+const hasCodeExecutionConfig = computed(() => agentDetail.value?.codeExecutionConfigId)
 
 // 记忆/规划/侧边栏状态：从 Pinia store 读取（持久化由 pinia-plugin-persistedstate 处理）
 const memoryActive = computed(() => {
@@ -305,6 +308,24 @@ const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
 }
 
+/** 工作空间面板开关状态 */
+const workspacePanelOpen = ref(false)
+
+/** 工作空间面板引用（供外部调用 startFileOperation 等） */
+const workspacePanelRef = ref<InstanceType<typeof WorkspacePanel> | null>(null)
+
+/**
+ * 切换工作空间面板显示/隐藏
+ */
+const toggleWorkspace = () => {
+  workspacePanelOpen.value = !workspacePanelOpen.value
+}
+
+watch(() => isWelcomeMode.value, () => {
+  if (isWelcomeMode.value) {
+    workspacePanelOpen.value = false
+  }
+})
 
 
 // 初始化加载会话列表
@@ -359,6 +380,9 @@ onMounted(() => {
       :agent-has-result="agentHasResult"
       :show-tool-process="showToolProcess"
       :tool-process-active="toolProcessActive"
+      :workspace-panel-open="workspacePanelOpen"
+      :has-code-execution-config="!!hasCodeExecutionConfig"
+      :session-id="currentSessionId"
       @update:input-value="inputText = $event"
       @update:uploaded-files="uploadedFiles = $event"
       @memory="handleMemoryChange"
@@ -368,6 +392,16 @@ onMounted(() => {
       @send="handleSend"
       @abort="abortRun"
       @toggle-sidebar="toggleSidebar"
+      @toggle-workspace="toggleWorkspace"
+    />
+
+    <!-- 工作空间面板（作为 flex 子项从右侧滑出） -->
+    <WorkspacePanel
+      v-if="!isWelcomeMode && hasCodeExecutionConfig"
+      ref="workspacePanelRef"
+      :session-id="currentSessionId"
+      :class="{ open: workspacePanelOpen }"
+      @close="workspacePanelOpen = false"
     />
   </div>
 </template>

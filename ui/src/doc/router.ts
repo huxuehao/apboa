@@ -117,6 +117,14 @@ const router: Router = createRouter({
         title: '智能体',
       },
     },
+    {
+      path: '/chat',
+      name: 'Chat',
+      component: () => import('./views/ChatDoc.vue'),
+      meta: {
+        title: '对话界面',
+      },
+    },
   ],
   scrollBehavior() {
     return { top: 0 };

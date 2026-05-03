@@ -1,4 +1,4 @@
-package com.hxh.apboa;
+package com.hxh.apboa.core;
 
 import com.hxh.apboa.common.consts.TableConst;
 import io.agentscope.core.agui.registry.AguiAgentRegistry;

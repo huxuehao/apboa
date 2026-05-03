@@ -13,12 +13,15 @@ import com.hxh.apboa.core.mcp.McpClientFactory;
 import com.hxh.apboa.core.tool.dynamices.DynamicAgentTool;
 import com.hxh.apboa.tool.service.AgentToolService;
 import com.hxh.apboa.tool.service.ToolService;
+import io.agentscope.core.model.ExecutionConfig;
 import io.agentscope.core.tool.Toolkit;
+import io.agentscope.core.tool.ToolkitConfig;
 import io.agentscope.core.tool.subagent.SubAgentConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -58,6 +61,7 @@ public class ToolkitFactory {
     public Toolkit getToolkit(AgentDefinition agentDefinition) {
         List<Long> toolIds = agentToolService.getToolIds(agentDefinition.getId());
         Toolkit toolkit = getToolkit(toolIds);
+
         if (!toolIds.isEmpty()) {
             // 注册工具
             toolService.listByIds(toolIds)
@@ -95,7 +99,15 @@ public class ToolkitFactory {
     }
 
     public Toolkit getToolkit(List<Long> toolIds) {
-        Toolkit toolkit = new Toolkit();
+        Toolkit toolkit = new Toolkit(
+                ToolkitConfig.builder()
+                        // 禁止并行执行多个工具
+                        .parallel(false)
+                        // 禁止删除工具
+                        .allowToolDeletion(false)
+                        // 设置工具执行超时时间为60秒
+                        .executionConfig(ExecutionConfig.builder().timeout(Duration.ofSeconds(60)).build())
+                        .build());
         if (!toolIds.isEmpty()) {
             // 获取是否开启记忆
             Boolean isMemoryActive = AgentContext.getIfExists().map(AgentContext::isMemoryActive).orElse(false);

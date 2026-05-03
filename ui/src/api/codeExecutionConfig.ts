@@ -7,7 +7,7 @@ import type { CodeExecutionConfig } from '@/types'
  * GET /code-execution/list
  */
 export function list() {
-  return request.get<ApiResponse<CodeExecutionConfig[]>>('/api/code-execution/list')
+  return request.get<ApiResponse<CodeExecutionConfig[]>>('/api/agent/code-execution/list')
 }
 
 /**
@@ -15,7 +15,7 @@ export function list() {
  * GET /code-execution/{id}
  */
 export function detail(id: string) {
-  return request.get<ApiResponse<CodeExecutionConfig>>(`/api/code-execution/${id}`)
+  return request.get<ApiResponse<CodeExecutionConfig>>(`/api/agent/code-execution/${id}`)
 }
 
 /**
@@ -23,7 +23,7 @@ export function detail(id: string) {
  * POST /code-execution
  */
 export function save(entity: CodeExecutionConfig) {
-  return request.post<ApiResponse<boolean>>('/api/code-execution', entity)
+  return request.post<ApiResponse<boolean>>('/api/agent/code-execution', entity)
 }
 
 /**
@@ -31,7 +31,7 @@ export function save(entity: CodeExecutionConfig) {
  * PUT /code-execution
  */
 export function update(entity: CodeExecutionConfig) {
-  return request.put<ApiResponse<boolean>>('/api/code-execution', entity)
+  return request.put<ApiResponse<boolean>>('/api/agent/code-execution', entity)
 }
 
 /**
@@ -39,7 +39,7 @@ export function update(entity: CodeExecutionConfig) {
  * DELETE /code-execution
  */
 export function remove(ids: string[]) {
-  return request.delete<ApiResponse<boolean>>('/api/code-execution', { data: ids })
+  return request.delete<ApiResponse<boolean>>('/api/agent/code-execution', { data: ids })
 }
 
 /**
@@ -47,5 +47,5 @@ export function remove(ids: string[]) {
  * POST /code-execution/used-with-agent
  */
 export function usedWithAgent(ids: string[]) {
-  return request.post<ApiResponse<unknown[]>>('/api/code-execution/used-with-agent', ids)
+  return request.post<ApiResponse<unknown[]>>('/api/agent/code-execution/used-with-agent', ids)
 }

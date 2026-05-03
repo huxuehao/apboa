@@ -1,0 +1,424 @@
+/**
+ * 工作空间面板样式
+ *
+ * @author huxuehao
+ */
+
+$ws-width: 500px;
+$ws-border-color: #ededed;
+$ws-bg: #F9FAFB;
+$ws-bg-main: #F9FAFB;
+$ws-primary: #0F74FF;
+$ws-transition: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+$ws-item-height: 36px;
+$mobile-breakpoint: 768px;
+$small-mobile-breakpoint: 375px;
+
+// 面板容器 - 作为 flex 子项，width 动画推移 ChatMain
+.workspace-panel {
+  width: 0;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: $ws-bg-main;
+  border-left: 1px solid $ws-border-color;
+  overflow: hidden;
+  transition: width $ws-transition, min-width $ws-transition, transform $ws-transition;
+  flex-shrink: 0;
+
+  &.open {
+    width: $ws-width;
+    min-width: $ws-width;
+  }
+
+  /* 移动端适配：面板变为右侧抽屉式 */
+  @media (max-width: $mobile-breakpoint) {
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    //z-index: var(--z-index-fixed, 10);
+    width: 100%;
+    min-width: 100%;
+    border-left: none;
+
+    &:not(.open) {
+      transform: translateX(100%);
+      width: 100%;
+      min-width: 100%;
+    }
+
+    &.open {
+      width: 100%;
+      min-width: 100%;
+      transform: translateX(0);
+    }
+  }
+}
+
+// 面板标题栏
+.workspace-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-sm);
+  height: 56px;
+  min-height: 56px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.workspace-panel-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.workspace-panel-close-btn,
+.workspace-panel-close-btn.ant-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  border-radius: var(--border-radius-md);
+  flex-shrink: 0;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  padding: 0;
+  box-shadow: none;
+
+  &:hover {
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-base);
+  }
+}
+
+// 工具栏
+.workspace-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-bottom: 1px solid $ws-border-color;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.workspace-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.workspace-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+// 纯图标工具栏按钮（刷新等）
+.workspace-toolbar-icon-btn,
+.workspace-toolbar-icon-btn.ant-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: var(--border-radius-md);
+  //font-size: 13px;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.3s ease;
+  padding: 0;
+  box-shadow: none;
+
+  &:hover:not(:disabled):not(.ant-btn-disabled) {
+    color: var(--color-text-primary);
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &.is-spinning {
+    animation: ws-btn-spin 0.6s linear;
+  }
+
+  &:disabled,
+  &.ant-btn-disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    color: var(--color-text-secondary);
+    background: transparent;
+  }
+}
+
+@keyframes ws-btn-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// 主体内容区
+.workspace-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// 文件树滚动容器（兼作拖拽区域）
+.workspace-file-tree {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--spacing-xs) 0;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+
+  // 拖拽悬停高亮
+  &.drop-active {
+    background-color: rgba($ws-primary, 0.03);
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border: 1.5px dashed rgba($ws-primary, 0.4);
+      border-radius: var(--border-radius-md);
+      pointer-events: none;
+    }
+  }
+}
+
+// 空状态
+.workspace-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--spacing-xl) var(--spacing-md);
+  text-align: center;
+  gap: var(--spacing-sm);
+  user-select: none;
+}
+
+.workspace-empty-icon {
+  font-size: 36px;
+  color: var(--color-text-placeholder);
+  opacity: 0.5;
+}
+
+.workspace-empty-title {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-regular);
+  font-weight: 500;
+}
+
+.workspace-empty-desc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-placeholder);
+  line-height: 1.6;
+}
+
+// 拖拽上传引导区（空状态时的整体拖拽区）
+.workspace-drop-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1.5px dashed var(--color-border-light);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-placeholder);
+  background-color: #FFFFFF;
+}
+
+// 文件/文件夹行通用
+.workspace-item-row {
+  display: flex;
+  align-items: center;
+  height: $ws-item-height;
+  padding-right: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease;
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  gap: var(--spacing-xs);
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.035);
+
+    .workspace-folder-icon {
+      color: #E09A1F;
+    }
+  }
+
+  &.is-selected {
+    background-color: rgba($ws-primary, 0.06);
+  }
+
+  // 操作中：禁止交互，文件名有波光动画（见 .workspace-item-name--operating）
+  &.is-operating {
+    pointer-events: none;
+  }
+}
+
+.workspace-item-icon {
+  flex-shrink: 0;
+  font-size: 17px;
+  width: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// 文件夹图标色
+.workspace-folder-icon {
+  color: #F5A623;
+}
+
+// 文件图标色
+.workspace-file-icon {
+  color: #78abfb;
+}
+
+.workspace-item-name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 文件操作中——文件名波光扫过动画
+.workspace-item-name--operating {
+  background: linear-gradient(
+    90deg,
+    #b0b8c4 0%,
+    #c8cdd5 30%,
+    #e2e6ec 50%,
+    #c8cdd5 70%,
+    #b0b8c4 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ws-text-shimmer 1.6s linear infinite;
+}
+
+@keyframes ws-text-shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.workspace-item-meta {
+  flex-shrink: 0;
+  color: var(--color-text-placeholder);
+  white-space: nowrap;
+  margin-right: 4px;
+}
+
+// 折叠/展开提示（不喧宾夺主，始终可见）
+.workspace-item-hint {
+  flex-shrink: 0;
+  color: var(--color-text-placeholder);
+  opacity: 0.55;
+  white-space: nowrap;
+  user-select: none;
+  padding-right: 4px;
+}
+
+// 子节点数量标识
+.workspace-folder-count {
+  flex-shrink: 0;
+  color: var(--color-text-placeholder);
+  white-space: nowrap;
+}
+
+// 行内操作按钮组（始终显示）
+.workspace-file-actions {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.workspace-file-action-btn,
+.workspace-file-action-btn.ant-btn {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  border-radius: var(--border-radius-sm);
+  font-size: 15px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+  padding: 0;
+  box-shadow: none;
+
+  &--primary:hover:not(:disabled):not(.ant-btn-disabled) {
+    color: $ws-primary;
+    background-color: rgba($ws-primary, 0.1);
+  }
+
+  &--danger:hover:not(:disabled):not(.ant-btn-disabled) {
+    color: #e53e3e;
+    background-color: rgba(#e53e3e, 0.08);
+  }
+
+  &:disabled,
+  &.ant-btn-disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    color: var(--color-text-secondary);
+    background: transparent;
+  }
+}
+
+// 操作中 loading 动画
+.workspace-operating-spin {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid rgba($ws-primary, 0.25);
+  border-top-color: $ws-primary;
+  border-radius: 50%;
+  animation: ws-spin 0.7s linear infinite;
+}
+
+@keyframes ws-spin {
+  to { transform: rotate(360deg); }
+}
+
+// 多选 checkbox 占位
+.workspace-item-checkbox {
+  flex-shrink: 0;
+  width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// 文件夹子节点容器
+.workspace-folder-children {
+  overflow: hidden;
+}

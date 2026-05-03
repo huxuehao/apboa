@@ -4,6 +4,7 @@ import com.hxh.apboa.agent.mapper.AgentScopeSessionMapper;
 import com.hxh.apboa.agent.mapper.ChatSessionMapper;
 import com.hxh.apboa.agent.service.ChatMessageService;
 import com.hxh.apboa.agent.service.ChatSessionService;
+import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.dto.ChatMessageAppendDTO;
 import com.hxh.apboa.common.dto.ChatSessionCreateDTO;
 import com.hxh.apboa.common.dto.ChatSessionQueryDTO;
@@ -11,6 +12,7 @@ import com.hxh.apboa.common.entity.ChatMessage;
 import com.hxh.apboa.common.entity.ChatSession;
 import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.util.BeanUtils;
+import com.hxh.apboa.common.util.FolderUtils;
 import com.hxh.apboa.common.util.UserUtils;
 import com.hxh.apboa.common.vo.ChatMessageVO;
 import com.hxh.apboa.common.vo.ChatSessionVO;
@@ -72,6 +74,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         session.setCurrentMessageId(root.getId());
         updateById(session);
 
+        FolderUtils.mkdirsByRelativePath(SysConst.WORKSPACE_PATH + "/" + session.getId());
         return toSessionVO(session);
     }
 
@@ -254,6 +257,10 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         if (sessionManager != null) {
             sessionManager.removeSession(String.valueOf(session.getId()));
         }
+
+        // 删除工作空间目录（文件 + sessionId文件夹本身）
+        String workspacePath = SysConst.WORKSPACE_PATH + "/" + session.getId();
+        FolderUtils.deleteRecursively(workspacePath);
     }
 
     private ChatSessionVO toSessionVO(ChatSession session) {

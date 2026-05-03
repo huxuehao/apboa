@@ -1,9 +1,9 @@
 package com.hxh.apboa.skill.imports;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.entity.SkillPackage;
-import com.hxh.apboa.common.util.JsonUtils;
-import com.hxh.apboa.skill.SkillScriptLoadHelper;
+import com.hxh.apboa.common.util.FolderUtils;
 import com.hxh.apboa.skill.imports.config.GitImportConfig;
 import com.hxh.apboa.skill.imports.config.LocalImportConfig;
 import com.hxh.apboa.skill.imports.config.UploadImportConfig;
@@ -16,15 +16,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import cn.hutool.core.io.FileUtil;
-
-import java.nio.file.*;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 /**
- * 描述：技能包导入服务
+ * 描述：技能包导入服务，编排本地/压缩包/Git三种导入方式
  *
  * @author huxuehao
  **/
@@ -36,65 +35,57 @@ public class SkillImportService {
 
     /**
      * 从 Git 导入
+     * 使用临时目录克隆仓库，导入完成后清理临时目录
+     *
      * @param config 配置
      */
     public boolean importFromGit(GitImportConfig config) {
-        GitSkillRepository repo = null;
+        Path tempDir = createTempDir();
         try {
-            repo = new GitSkillRepository(config.getRepoUrl());
-            doImport(repo, List.of(), config.isCover(), config.getCategory());
-        } finally {
-            if (repo != null) {
-                try {
-                    repo.close();
-                } catch (Exception e) {
-                    // Windows 下文件占用是正常现象，只打印警告，不抛出异常
-                    log.warn("关闭 Git 仓库临时目录时出现文件占用（Windows 环境可忽略）：{}", e.getMessage());
-                }
+            GitSkillRepository repo = new GitSkillRepository(config.getRepoUrl(), tempDir);
+            try {
+                Path skillsDir = resolveSkillsDir(tempDir);
+                doImport(skillsDir, repo, config.isCover(), config.getCategory());
+            } finally {
+                closeQuietly(repo);
             }
+        } finally {
+            FolderUtils.deleteRecursively(tempDir.toAbsolutePath().toString());
+            log.info("清理 Git 临时目录: {}", tempDir.toAbsolutePath());
         }
         return true;
-
-//        Path localPath = Path.of(".apboa/temp/skills-from-git");
-//        try {
-//            if (!Files.exists(localPath)) {
-//                Files.createDirectories(localPath);
-//            }
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//        try (AgentSkillRepository repo = new GitSkillRepository(config.getRepoUrl(), localPath)) {
-//           doImport(repo, List.of(), config.isCover(), config.getCategory());
-//        }
-//        return true;
     }
 
     /**
      * 从本地导入
+     * 当本地路径与 SKILLS_DIR 相同时，跳过文件复制，仅更新 DB
+     *
      * @param config 配置
      */
     public boolean importFromLocal(LocalImportConfig config) {
-        try (AgentSkillRepository repo = new FileSystemSkillRepository(Path.of(config.getPath()))) {
-            doImport(repo, List.of(), config.isCover(), config.getCategory());
+        Path skillsDir = Path.of(config.getPath());
+        try (AgentSkillRepository repo = new FileSystemSkillRepository(skillsDir)) {
+            doImport(skillsDir, repo, config.isCover(), config.getCategory());
         }
         return true;
     }
 
     /**
-     * 从上传压缩包导入，需要删除临时文件
-     * 调用该方法前，需要将上传的压缩包解压到临时文件中，完成入库后需要删除临时文件
+     * 从上传压缩包导入
+     * 调用该方法前，需要将上传的压缩包解压到临时目录，完成后会自动删除临时目录
+     *
      * @param config 配置
      */
     public boolean importFromUpload(UploadImportConfig config) {
-        // templatePath 指向解压后的 skills 目录，其上一层即为 UUID 临时目录
         Path skillsPath = Path.of(config.getTemplatePath());
         try (AgentSkillRepository repo = new FileSystemSkillRepository(skillsPath)) {
-            doImport(repo, List.of(), config.isCover(), config.getCategory());
+            doImport(skillsPath, repo, config.isCover(), config.getCategory());
         } finally {
             // 基于 templatePath 向上一层定位 UUID 临时目录并删除
             Path tempUuidDir = skillsPath.getParent();
             if (tempUuidDir != null) {
-                FileUtil.del(tempUuidDir.toFile());
+                FolderUtils.deleteRecursively(tempUuidDir.toAbsolutePath().toString());
+                log.info("清理上传临时目录: {}", tempUuidDir.toAbsolutePath());
             }
         }
         return true;
@@ -102,84 +93,84 @@ public class SkillImportService {
 
     /**
      * 执行导入
-     * @param repo AgentSkillRepository
-     * @param skillNames 确认导入的skill名称
-     * @param isCover 是否覆盖
+     *
+     * @param skillsDir 技能包根目录（包含各技能包子目录）
+     * @param repo      AgentSkillRepository
+     * @param isCover   是否覆盖
+     * @param category  分类
      */
-    private void doImport(AgentSkillRepository repo, List<String> skillNames, boolean isCover, String category) {
+    private void doImport(Path skillsDir, AgentSkillRepository repo, boolean isCover, String category) {
         List<String> allSkillNames = repo.getAllSkillNames();
-        if (skillNames != null && !skillNames.isEmpty()) {
-            allSkillNames = allSkillNames.stream().filter(skillNames::contains).toList();
-        }
 
-        for (String allSkillName : allSkillNames) {
-            SkillPackage skillPackage = buildSkillPackageFromAgentSkill(repo.getSkill(allSkillName), category);
+        for (String skillName : allSkillNames) {
+            Path sourceSkillDir = skillsDir.resolve(skillName);
+
+            // 安装技能包目录到 SKILLS_DIR（含覆盖策略）
+            boolean installed = SkillInstaller.install(sourceSkillDir, skillName, isCover);
+            if (!installed) {
+                log.info("技能包 {} 已存在且跳过覆盖", skillName);
+                continue;
+            }
+
+            // DB 持久化
+            AgentSkill agentSkill = repo.getSkill(skillName);
+            SkillPackage skillPackage = SkillPackageBuilder.build(agentSkill, category);
+
             SkillPackage oldSkillPackage = skillPackageService.getOne(
                     new LambdaQueryWrapper<SkillPackage>()
-                            .eq(SkillPackage::getName, allSkillName),
+                            .eq(SkillPackage::getName, skillName),
                     false);
 
             if (oldSkillPackage == null) {
                 skillPackageService.save(skillPackage);
-            } else if (isCover) {
+            } else {
                 skillPackage.setId(oldSkillPackage.getId());
                 skillPackageService.updateById(skillPackage);
             }
-
-            // 尝试装载脚本到本地
-            SkillScriptLoadHelper.loadScripts(skillPackage);
         }
     }
 
     /**
-     * 基于 AgentSkill  构建 SkillPackage
-     * @param agentSkill AgentSkill
-     * @return SkillPackage
+     * 创建临时目录（.apboa/temp/{uuid}/）
+     *
+     * @return 临时目录路径
      */
-    private SkillPackage buildSkillPackageFromAgentSkill(AgentSkill agentSkill, String category) {
-        SkillPackage skillPackage = new SkillPackage();
-        skillPackage.setCategory(category);
-        skillPackage.setName(agentSkill.getName());
-        skillPackage.setDescription(agentSkill.getDescription());
-        skillPackage.setSkillContent(agentSkill.getSkillContent());
+    private Path createTempDir() {
+        Path tempBase = Paths.get(SysConst.ROOT_DIR_NAME, "temp");
+        FolderUtils.mkdirsByAbsolutePath(tempBase.toAbsolutePath().toString());
+        Path tempDir = tempBase.resolve(UUID.randomUUID().toString());
+        FolderUtils.mkdirsByAbsolutePath(tempDir.toAbsolutePath().toString());
+        return tempDir;
+    }
 
-        ArrayList<SkillPackageItem> examples = new ArrayList<>();
-        ArrayList<SkillPackageItem> references = new ArrayList<>();
-        ArrayList<SkillPackageItem> scripts = new ArrayList<>();
+    /**
+     * 解析技能包根目录
+     * 优先使用 skills/ 子目录，否则使用根目录
+     *
+     * @param baseDir 基础目录
+     * @return 技能包根目录
+     */
+    private Path resolveSkillsDir(Path baseDir) {
+        Path skillsSubDir = baseDir.resolve(SysConst.SKILLS_DIR_NAME);
+        if (Files.isDirectory(skillsSubDir)) {
+            return skillsSubDir;
+        }
+        return baseDir;
+    }
 
-        Map<String, String> resources = agentSkill.getResources();
-        resources.forEach((path, content) -> {
-            if (path.startsWith("examples/")) {
-                examples.add(
-                        SkillPackageItem
-                                .builder()
-                                .prefix("examples")
-                                .name(path.substring("examples/".length()))
-                                .content(content)
-                                .build());
-            } else if (path.startsWith("references/")) {
-                references.add(
-                        SkillPackageItem
-                                .builder()
-                                .prefix("references")
-                                .name(path.substring("references/".length()))
-                                .content(content)
-                                .build());
-            } else if (path.startsWith("scripts/")) {
-                scripts.add(
-                        SkillPackageItem
-                                .builder()
-                                .prefix("scripts")
-                                .name(path.substring("scripts/".length()))
-                                .content(content)
-                                .build());
+    /**
+     * 安静关闭 GitSkillRepository
+     *
+     * @param repo GitSkillRepository 实例
+     */
+    private void closeQuietly(GitSkillRepository repo) {
+        if (repo != null) {
+            try {
+                repo.close();
+            } catch (Exception e) {
+                // Windows 下文件占用是正常现象，只打印警告
+                log.warn("关闭 Git 仓库临时目录时出现文件占用（Windows 环境可忽略）：{}", e.getMessage());
             }
-        });
-
-        skillPackage.setExamples(JsonUtils.valueToTree(examples));
-        skillPackage.setReferences(JsonUtils.valueToTree(references));
-        skillPackage.setScripts(JsonUtils.valueToTree(scripts));
-
-        return skillPackage;
+        }
     }
 }

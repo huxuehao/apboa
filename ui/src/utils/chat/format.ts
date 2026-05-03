@@ -30,11 +30,11 @@ export function buildToolCallsContent(
     if (t.args) block += '\n\n参数：\n````json\n' + formatToolDisplay(t.args) + '\n````\n'
     if (t.result != null) block += '\n\n结果：\n````\n' + formatToolDisplay(t.result) + '\n````\n'
     blocks.push(
-      `<details> <summary> <span style="color: #1890FF; font-weight: bold; cursor: pointer; "> ${t.name}（耗时：${t.elapsed || 0}ms） </span> </summary>\n\n ${block} </details>`
+      `<details> <summary> <span class="tool-call-title"> ${t.name}（耗时：${t.elapsed || 0}ms） </span> </summary>\n\n ${block} </details>`
     )
   }
 
-  return '**工具调用记录**\n\n' + blocks.join('\n\n---\n\n')
+  return blocks.join('\n\n---\n\n')
 }
 
 /**

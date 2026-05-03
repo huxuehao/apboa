@@ -14,6 +14,7 @@ defineProps<{
   toolProcessActive?: boolean
   showToolProcess?: boolean
   allowUploadFileType?: string[]
+  sessionId?: string | null
 }>()
 
 defineEmits<{
@@ -42,7 +43,7 @@ defineEmits<{
         :allow-upload-file-type="allowUploadFileType"
         :show-tool-process="showToolProcess"
         :tool-process-active="toolProcessActive"
-        placeholder="输入消息..."
+        :session-id="sessionId"
         @update:model-value="$emit('update:inputValue', $event)"
         @update:uploaded-files="$emit('update:uploadedFiles', $event)"
         @memory="$emit('memory', $event)"

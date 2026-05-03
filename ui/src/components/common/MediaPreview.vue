@@ -70,6 +70,8 @@ const dragStartTranslateY = ref(0)
 
 // 图片元素引用
 const imageRef = ref<HTMLImageElement | null>(null)
+// 图片容器引用
+const imageWrapperRef = ref<HTMLDivElement | null>(null)
 
 // 当前媒体项
 const currentItem = computed(() => props.items[currentIdx.value])
@@ -232,6 +234,51 @@ function handleZoomOut() {
 }
 
 /**
+ * 鼠标滚轮缩放图片
+ */
+function handleWheel(e: WheelEvent) {
+  if (!isImage.value) return
+
+  e.preventDefault()
+
+  // 获取鼠标位置相对于图片包装器的位置
+  const rect = imageWrapperRef.value?.getBoundingClientRect()
+  if (!rect) return
+
+  // 计算鼠标相对于图片中心的比例（用于保持缩放中心点）
+  const mouseX = e.clientX - rect.left
+  const mouseY = e.clientY - rect.top
+  const centerX = rect.width / 2
+  const centerY = rect.height / 2
+
+  // 计算缩放前鼠标位置相对于图片的位置
+  const oldScale = scale.value
+  const oldTranslateX = translateX.value
+  const oldTranslateY = translateY.value
+
+  // 计算鼠标位置在图片坐标系中的位置（考虑当前的transform）
+  const mouseOnImageX = (mouseX - centerX - oldTranslateX) / oldScale
+  const mouseOnImageY = (mouseY - centerY - oldTranslateY) / oldScale
+
+  // 更新缩放值（向下滚动缩小，向上滚动放大）
+  let delta = -e.deltaY / 500
+  let newScale = scale.value + delta
+
+  // 限制缩放范围
+  newScale = Math.min(Math.max(newScale, 0.5), 3)
+
+  if (newScale === scale.value) return
+
+  // 计算新的translate，使鼠标位置保持不变
+  const newTranslateX = mouseX - centerX - mouseOnImageX * newScale
+  const newTranslateY = mouseY - centerY - mouseOnImageY * newScale
+
+  scale.value = newScale
+  translateX.value = newTranslateX
+  translateY.value = newTranslateY
+}
+
+/**
  * 向左旋转
  */
 function handleRotateLeft() {
@@ -371,11 +418,13 @@ onUnmounted(() => {
           <Spin size="large" />
         </div>
 
-        <!-- 图片预览（支持拖拽） -->
+        <!-- 图片预览（支持拖拽和滚轮缩放） -->
         <div
           v-else-if="isImage && mediaUrl"
+          ref="imageWrapperRef"
           class="media-preview-image-wrapper"
           @click.self="handleClose"
+          @wheel="handleWheel"
         >
           <img
             ref="imageRef"
@@ -576,7 +625,6 @@ onUnmounted(() => {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  padding: 20px;
   min-height: 0;
 }
 
@@ -586,7 +634,7 @@ onUnmounted(() => {
   justify-content: center;
 }
 
-// 图片预览（支持拖拽）
+// 图片预览（支持拖拽和滚轮缩放）
 .media-preview-image-wrapper {
   display: flex;
   align-items: center;
@@ -594,6 +642,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   cursor: zoom-out;
+  overflow: hidden;
 }
 
 .media-preview-image {
@@ -647,7 +696,6 @@ onUnmounted(() => {
 .media-preview-video {
   max-width: 100%;
   max-height: 100%;
-  border-radius: 8px;
 }
 
 // 不支持预览

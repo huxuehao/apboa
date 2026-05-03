@@ -12,7 +12,10 @@ export interface MessagePayloadMap {
     accountId: string;
     role: "ADMIN" | "EDIT" | "READ_ONLY";
   };
-
+  [WS_MESSAGE_TYPES.WORKSPACE_FILE_CHANGE]: {
+    fileName: string;
+    sessionId: string;
+  };
   // 默认
   [key: string]: any;
 }

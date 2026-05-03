@@ -7,6 +7,8 @@
 import { ref, computed } from 'vue'
 import SmartCodeEditor from '@/components/editor/SmartCodeEditor.vue'
 import StudioConfigSelect from '@/components/studio/StudioConfigSelect.vue'
+import CodeExecutionConfigSelect from "@/components/codeExecution/CodeExecutionConfigSelect.vue";
+import {InfoCircleOutlined} from "@ant-design/icons-vue";
 
 /**
  * Props定义
@@ -25,6 +27,7 @@ const props = defineProps<{
     structuredOutputReminder: 'PROMPT' | 'TOOL_CHOICE'
     structuredOutputSchema: string
     studioConfigId: string | null
+    codeExecutionConfigId: string | null
   }
 }>()
 
@@ -292,14 +295,26 @@ defineExpose({
 <!--      </ACol>-->
 <!--    </ARow>-->
 
-    <AFormItem v-if="formData.structuredOutputEnabled" label="输出Schema">
-      <SmartCodeEditor
-        v-model="formData.structuredOutputSchema"
-        language="json"
-        height="250px"
-      />
+<!--    <AFormItem v-if="formData.structuredOutputEnabled" label="输出Schema">-->
+<!--      <SmartCodeEditor-->
+<!--        v-model="formData.structuredOutputSchema"-->
+<!--        language="json"-->
+<!--        height="250px"-->
+<!--      />-->
+<!--      <div class="text-placeholder text-xs mt-xs">-->
+<!--        定义输出的JSON Schema格式-->
+<!--      </div>-->
+<!--    </AFormItem>-->
+
+    <AFormItem>
+      <template #label>
+        <ATooltip title="该配置可开启 [工作空间]，同时可赋予智能体执行 Shell 脚本、读取&写入文件的能力">
+          <span>执行环境配置</span><InfoCircleOutlined class="text-secondary cursor-pointer" />
+        </ATooltip>
+      </template>
+      <CodeExecutionConfigSelect v-model="formData.codeExecutionConfigId" />
       <div class="text-placeholder text-xs mt-xs">
-        定义输出的JSON Schema格式
+        配置后，可开启 [工作空间]，同时智能体可执行 Shell 脚本、读取&写入文件等操作。如果您希望 Skill 中的脚本可以被正常执行，那么请确保已正确配置此项。
       </div>
     </AFormItem>
 

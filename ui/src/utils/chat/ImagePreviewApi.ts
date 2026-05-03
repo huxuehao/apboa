@@ -44,6 +44,8 @@ export const ImagePreviewApi = {
       if (!container.parentNode) return
       appInstance.unmount()
       document.body.removeChild(container)
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
     }
 
     const openRef = ref(true)
@@ -58,6 +60,10 @@ export const ImagePreviewApi = {
     const dragStartY = ref(0)
     const dragStartTranslateX = ref(0)
     const dragStartTranslateY = ref(0)
+
+    // 图片容器引用
+    let imageWrapperRef: HTMLElement | null = null
+    let imageRef: HTMLImageElement | null = null
 
     function handleZoomIn() {
       scale.value = Math.min(scale.value + 0.25, 3)
@@ -79,6 +85,50 @@ export const ImagePreviewApi = {
       // 旋转后重置位置，避免偏移
       translateX.value = 0
       translateY.value = 0
+    }
+
+    /**
+     * 鼠标滚轮缩放图片
+     */
+    function handleWheel(e: WheelEvent) {
+      e.preventDefault()
+
+      if (!imageWrapperRef || !imageRef) return
+
+      // 获取鼠标位置相对于图片包装器的位置
+      const rect = imageWrapperRef.getBoundingClientRect()
+
+      // 计算鼠标相对于图片包装器的位置
+      const mouseX = e.clientX - rect.left
+      const mouseY = e.clientY - rect.top
+      const centerX = rect.width / 2
+      const centerY = rect.height / 2
+
+      // 计算缩放前鼠标位置相对于图片的位置
+      const oldScale = scale.value
+      const oldTranslateX = translateX.value
+      const oldTranslateY = translateY.value
+
+      // 计算鼠标位置在图片坐标系中的位置（考虑当前的transform）
+      const mouseOnImageX = (mouseX - centerX - oldTranslateX) / oldScale
+      const mouseOnImageY = (mouseY - centerY - oldTranslateY) / oldScale
+
+      // 更新缩放值（向下滚动缩小，向上滚动放大）
+      let delta = -e.deltaY / 500
+      let newScale = scale.value + delta
+
+      // 限制缩放范围
+      newScale = Math.min(Math.max(newScale, 0.5), 3)
+
+      if (newScale === scale.value) return
+
+      // 计算新的translate，使鼠标位置保持不变
+      const newTranslateX = mouseX - centerX - mouseOnImageX * newScale
+      const newTranslateY = mouseY - centerY - mouseOnImageY * newScale
+
+      scale.value = newScale
+      translateX.value = newTranslateX
+      translateY.value = newTranslateY
     }
 
     // 拖拽开始
@@ -188,22 +238,38 @@ export const ImagePreviewApi = {
                       ),
                     ]),
                   ]),
-                  // 图片内容
-                  h('div', { class: 'image-preview-content' }, [
-                    h('img', {
-                      src: options.url,
-                      alt: options.title || '图片',
-                      class: 'image-preview-img',
-                      style: {
-                        transform: `translate(${translateX.value}px, ${translateY.value}px) scale(${scale.value}) rotate(${rotate.value}deg)`,
-                        transition: isDragging.value ? 'none' : 'transform 0.3s ease',
-                        cursor: isDragging.value ? 'grabbing' : 'grab',
+                  // 图片内容区域（添加包装器用于滚轮事件）
+                  h(
+                    'div',
+                    {
+                      class: 'image-preview-content',
+                      ref: (el: any) => {
+                        if (el) {
+                          imageWrapperRef = el as HTMLElement
+                        }
                       },
-                      onMousedown: onMouseDown,
-                      onMousemove: onMouseMove,
-                      onMouseup: onMouseUp,
-                    }),
-                  ]),
+                      onWheel: handleWheel,
+                    },
+                    [
+                      h('img', {
+                        ref: (el: any) => {
+                          if (el) {
+                            imageRef = el as HTMLImageElement
+                          }
+                        },
+                        src: options.url,
+                        alt: options.title || '图片',
+                        class: 'image-preview-img',
+                        style: {
+                          transform: `translate(${translateX.value}px, ${translateY.value}px) scale(${scale.value}) rotate(${rotate.value}deg)`,
+                          transition: isDragging.value ? 'none' : 'transform 0.3s ease',
+                          cursor: isDragging.value ? 'grabbing' : 'grab',
+                        },
+                        onMousedown: onMouseDown,
+                        onDragstart: (e: Event) => e.preventDefault(),
+                      }),
+                    ]
+                  ),
                 ]),
             }
           )
@@ -216,14 +282,6 @@ export const ImagePreviewApi = {
     // 全局监听鼠标事件
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('mouseup', onMouseUp)
-
-    // 清理函数
-    const originalUnmount = unmountApp
-    window.unmountApp = () => {
-      window.removeEventListener('mousemove', onMouseMove)
-      window.removeEventListener('mouseup', onMouseUp)
-      originalUnmount()
-    }
   },
 }
 
@@ -314,6 +372,7 @@ style.textContent = `
     justify-content: center;
     overflow: hidden;
     position: relative;
+    cursor: zoom-out;
   }
 
   .image-preview-img {
@@ -322,15 +381,13 @@ style.textContent = `
     object-fit: contain;
     user-select: none;
     -webkit-user-drag: none;
-    transition: transform 0.3s ease;
+    will-change: transform;
+  }
+
+  /* 防止页面滚动 */
+  .image-preview-modal {
+    overscroll-behavior: none;
   }
 `
 
 document.head.appendChild(style)
-
-// 修复 TypeScript 类型声明
-declare global {
-  interface Window {
-    unmountApp: () => void
-  }
-}

@@ -21,5 +21,9 @@ public enum WsMessageType {
     /**
      * 账号角色变化
      */
-    ACCOUNT_ROLE_CHANGE
+    ACCOUNT_ROLE_CHANGE,
+    /**
+     * 工作区文件变化
+     */
+    WORKSPACE_FILE_CHANGE
 }

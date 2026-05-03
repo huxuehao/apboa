@@ -28,6 +28,7 @@ import io.agentscope.core.rag.model.RetrieveConfig;
 import io.agentscope.core.skill.SkillBox;
 import io.agentscope.core.studio.StudioManager;
 import io.agentscope.core.studio.StudioMessageHook;
+import io.agentscope.core.tool.ToolExecutionContext;
 import io.agentscope.core.tool.Toolkit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -162,6 +163,13 @@ public class ReActAgentHelper {
         // 保存Agent定义到上下文
         AgentContext.get().setAgentDefinition(definition);
 
+        // 注册工具执行上下文
+        ToolExecutionContext context = ToolExecutionContext.builder()
+                .register(AgentContext.get())
+                .build();
+        builder.toolExecutionContext(context);
+
+        // 构建reActAgent
         ReActAgent reActAgent = builder.build();
 
         if (skillBox != null) {

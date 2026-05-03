@@ -372,6 +372,7 @@ $small-mobile-breakpoint: 375px;
   text-align: center;
   flex-shrink: 0;
   min-width: 0;
+  position: relative;
 
   /* 移动端适配：调整头部间距 */
   @media (max-width: $mobile-breakpoint) {
@@ -419,7 +420,7 @@ $small-mobile-breakpoint: 375px;
   gap: var(--spacing-lg);
   max-width: 800px;
   margin: 0 auto;
-  width: 100%;
+  width: calc(100% - 16px);
   box-sizing: content-box;
 
   /* 移动端适配：调整消息区域间距 */
@@ -447,7 +448,7 @@ $small-mobile-breakpoint: 375px;
 
 .chat-message-bubble {
   max-width: 100%;
-  padding: var(--spacing-base) var(--spacing-md);
+  padding: 0 var(--spacing-md);
   border-radius: var(--border-radius-xl);
   font-size: var(--font-size-base);
   line-height: 1.6;
@@ -458,7 +459,7 @@ $small-mobile-breakpoint: 375px;
   /* 移动端适配：调整消息气泡 */
   @media (max-width: $mobile-breakpoint) {
     // max-width: 85%;
-    padding: var(--spacing-sm) var(--spacing-base);
+    padding: 0 var(--spacing-base);
     font-size: var(--font-size-sm);
     line-height: 1.5;
   }
@@ -466,13 +467,14 @@ $small-mobile-breakpoint: 375px;
   /* 小型手机适配 */
   @media (max-width: $small-mobile-breakpoint) {
     max-width: 90%;
-    padding: var(--spacing-sm);
+    padding: 0 var(--spacing-sm);
   }
 }
 
 .chat-message-bubble_user {
   max-width: 85%;
-  color: red;
+  padding-top: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
 }
 
 .chat-message-user .chat-message-bubble {
@@ -820,7 +822,6 @@ $small-mobile-breakpoint: 375px;
     left: 0;
     right: 0;
     bottom: 0;
-    //background: rgba(0, 0, 0, 0.3);
     z-index: -1;
   }
 }
@@ -1059,5 +1060,39 @@ $small-mobile-breakpoint: 375px;
 
   .chat-input-textarea {
     max-height: 100px;
+  }
+}
+
+/* 工作空间入口按钮（始终可见，对称于左侧菜单按钮） */
+.chat-workspace-btn {
+  position: absolute;
+  right: var(--spacing-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  z-index: 10;
+
+  &:hover {
+    color: $chat-primary;
+    background-color: rgba($chat-primary, 0.08);
+  }
+
+  &.is-active {
+    color: $chat-primary;
+    background-color: rgba($chat-primary, 0.1);
+  }
+
+  &:active {
+    background-color: rgba($chat-primary, 0.12);
   }
 }

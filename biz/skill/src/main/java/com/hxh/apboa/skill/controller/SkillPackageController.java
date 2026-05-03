@@ -2,6 +2,7 @@ package com.hxh.apboa.skill.controller;
 
 import cn.hutool.core.io.FileUtil;
 import com.hxh.apboa.common.config.auth.RoleNeed;
+import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.dto.SkillPackageDTO;
 import com.hxh.apboa.common.entity.SkillPackage;
 import com.hxh.apboa.common.enums.Role;
@@ -12,6 +13,7 @@ import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.vo.SkillPackageVO;
 import com.hxh.apboa.skill.SkillScriptLoadHelper;
 import com.hxh.apboa.skill.imports.SkillImportService;
+import com.hxh.apboa.skill.imports.SkillInstaller;
 import com.hxh.apboa.skill.imports.config.GitImportConfig;
 import com.hxh.apboa.skill.imports.config.LocalImportConfig;
 import com.hxh.apboa.skill.imports.config.UploadImportConfig;
@@ -112,8 +114,8 @@ public class SkillPackageController {
     public R<Boolean> delete(@RequestBody List<Long> ids) {
         List<SkillPackage> skillPackages = skillPackageService.listByIds(ids);
         for (SkillPackage skillPackage : skillPackages) {
-            // 尝试删除本地装载的脚本
-            SkillScriptLoadHelper.removeScripts(skillPackage);
+            // 卸载技能包目录
+            SkillInstaller.uninstall(skillPackage.getName());
         }
         return R.data(skillPackageService.deleteByIds(ids));
     }
@@ -166,7 +168,7 @@ public class SkillPackageController {
             @RequestParam("cover") boolean cover) throws IOException {
 
         // 确保 .apboa/temp 目录存在
-        Path tempBase = Paths.get(".apboa", "temp");
+        Path tempBase = Paths.get(SysConst.ROOT_DIR_NAME, "temp");
         Files.createDirectories(tempBase);
 
         // 生成唯一 UUID 作为本次解压目录名
@@ -202,7 +204,7 @@ public class SkillPackageController {
         UploadImportConfig config = UploadImportConfig.builder()
                 .category(category)
                 .cover(cover)
-                .templatePath(extractDir.resolve("skills").toString())
+                .templatePath(extractDir.resolve(SysConst.SKILLS_DIR_NAME).toString())
                 .build();
 
         return R.data(skillImportService.importFromUpload(config));

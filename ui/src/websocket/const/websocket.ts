@@ -17,6 +17,7 @@ export const WS_MESSAGE_TYPES = {
 
   CLIENT: 'CLIENT',
   ACCOUNT_ROLE_CHANGE: 'ACCOUNT_ROLE_CHANGE',
+  WORKSPACE_FILE_CHANGE: 'WORKSPACE_FILE_CHANGE',
 } as const;
 
 export type WSMessageType = typeof WS_MESSAGE_TYPES[keyof typeof WS_MESSAGE_TYPES];

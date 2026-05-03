@@ -29,7 +29,7 @@ const props = defineProps<{
     skill: string[]
     sensitiveWordConfigId: string
     sensitiveFilterEnabled: boolean
-    codeExecutionConfigId: string | null
+    // codeExecutionConfigId: string | null
   }
 }>()
 
@@ -459,12 +459,12 @@ defineExpose({
         </div>
       </AFormItem>
 
-      <AFormItem label="代码执行配置" v-if="formData.skill?.length > 0">
-        <CodeExecutionConfigSelect v-model="formData.codeExecutionConfigId" />
-        <div class="text-placeholder text-xs mt-xs">
-          配置代码执行环境，用于智能体执行代码脚本
-        </div>
-      </AFormItem>
+<!--      <AFormItem label="代码执行配置" v-if="formData.skill?.length > 0">-->
+<!--        <CodeExecutionConfigSelect v-model="formData.codeExecutionConfigId" />-->
+<!--        <div class="text-placeholder text-xs mt-xs">-->
+<!--          配置代码执行环境，用于智能体执行代码脚本-->
+<!--        </div>-->
+<!--      </AFormItem>-->
 
       <AFormItem label="敏感词配置">
         <ACollapse v-if="sensitiveCategories?.length > 0">

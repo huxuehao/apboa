@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { ref, nextTick, watch, onMounted } from 'vue'
-import { MenuOutlined } from '@ant-design/icons-vue'
+import {ref, nextTick, watch, onMounted, h} from 'vue'
+import {
+  MenuOutlined,
+  FolderOutlined,
+  FolderOpenOutlined,
+  ReloadOutlined
+} from '@ant-design/icons-vue'
 import MessageList from './MessageList.vue'
 import ChatInput from './ChatInput.vue'
 import Welcome from './Welcome.vue'
@@ -24,6 +29,9 @@ const props = defineProps<{
   showToolProcess?: boolean
   allowUploadFileType?: string[]
   agentHasResult?: boolean
+  workspacePanelOpen?: boolean
+  hasCodeExecutionConfig?: boolean
+  sessionId?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -37,6 +45,7 @@ const emit = defineEmits<{
   (e: 'plan', value: boolean): void
   (e: 'toolProcess', value: boolean): void
   (e: 'toggleSidebar'): void
+  (e: 'toggleWorkspace'): void
 }>()
 
 // 滚动容器 ref
@@ -125,6 +134,20 @@ defineExpose({
         <MenuOutlined />
       </button>
       <h1 class="chat-main-title" :title="title">{{ title }}</h1>
+      <!-- 工作空间入口按钮（与左侧菜单按钮对称） -->
+      <ATooltip placement="left" title="工作空间">
+        <button
+          v-if="!isWelcomeMode && hasCodeExecutionConfig"
+          type="button"
+          class="chat-workspace-btn"
+          :class="{ 'is-active': workspacePanelOpen }"
+          @click="$emit('toggleWorkspace')"
+        >
+          <FolderOpenOutlined v-if="workspacePanelOpen" />
+          <FolderOutlined v-else />
+        </button>
+      </ATooltip>
+
     </header>
 
     <div v-if="isWelcomeMode" class="chat-welcome-container">
@@ -141,6 +164,7 @@ defineExpose({
         :allow-upload-file-type="allowUploadFileType"
         :show-tool-process="showToolProcess"
         :tool-process-active="toolProcessActive"
+        :session-id="sessionId"
         @update:input-value="$emit('update:inputValue', $event)"
         @update:uploaded-files="$emit('update:uploadedFiles', $event)"
         @memory="$emit('memory', $event)"
@@ -176,6 +200,7 @@ defineExpose({
             :allow-upload-file-type="allowUploadFileType"
             :show-tool-process="showToolProcess"
             :tool-process-active="toolProcessActive"
+            :session-id="sessionId"
             @update:model-value="$emit('update:inputValue', $event)"
             @update:uploaded-files="$emit('update:uploadedFiles', $event)"
             @memory="$emit('memory', $event)"

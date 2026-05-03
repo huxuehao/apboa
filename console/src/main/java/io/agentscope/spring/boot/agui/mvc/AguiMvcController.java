@@ -1,8 +1,7 @@
 package io.agentscope.spring.boot.agui.mvc;
 
-import com.hxh.apboa.common.util.JsonUtils;
-import com.hxh.apboa.common.vo.AccountVO;
 import com.hxh.apboa.core.agui.AgentContext;
+import io.agentscope.core.agent.AgentBase;
 import io.agentscope.core.agui.AguiException;
 import io.agentscope.core.agui.adapter.AguiAdapterConfig;
 import io.agentscope.core.agui.encoder.AguiEventEncoder;
@@ -14,10 +13,10 @@ import io.agentscope.core.session.Session;
 import io.agentscope.spring.boot.agui.common.DefaultAgentResolver;
 import io.agentscope.spring.boot.agui.common.ThreadSessionManager;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -36,6 +35,7 @@ public class AguiMvcController {
     private final String agentIdHeader;
     private final long sseTimeout;
     private final ExecutorService executorService;
+    private final ThreadSessionManager sessionManager;
 
     private AguiMvcController(Builder builder) {
         Session session = builder.session;
@@ -60,6 +60,7 @@ public class AguiMvcController {
                 builder.agentIdHeader != null ? builder.agentIdHeader : DEFAULT_AGENT_ID_HEADER;
         this.sseTimeout = builder.sseTimeout > 0 ? builder.sseTimeout : 600000L;
         this.executorService = Executors.newCachedThreadPool();
+        this.sessionManager = builder.sessionManager;
     }
 
     /**
@@ -98,17 +99,26 @@ public class AguiMvcController {
                     AgentContext.init(input, threadId);
 
                     Disposable subscription = null;
+
+                    String baseAgentId = null;
                     try {
                         // Process request - returns both agent and event stream
                         AguiRequestProcessor.ProcessResult result =
                                 processor.process(input, headerAgentId, pathAgentId);
+
+                        if (result.agent() instanceof AgentBase agentBase) {
+                            baseAgentId = agentBase.getAgentId();
+                        }
+                        String finalAgentId = baseAgentId;
 
                         // Set up callbacks for client disconnect handling
                         // using the same agent instance from the result
                         emitter.onCompletion(
                                 () -> {
                                     logger.debug("SSE connection completed for run {}", runId);
+
                                     AgentContext.clean();
+
                                     result.agent().interrupt();
                                     emitter.complete();
                                 });
@@ -118,7 +128,9 @@ public class AguiMvcController {
                                             "SSE connection timed out for run {}, interrupting"
                                                     + " agent",
                                             runId);
+
                                     AgentContext.clean();
+
                                     result.agent().interrupt();
                                 });
                         emitter.onError(
@@ -128,7 +140,9 @@ public class AguiMvcController {
                                                     + " agent",
                                             runId,
                                             ex.getMessage());
+
                                     AgentContext.clean();
+
                                     result.agent().interrupt();
                                 });
 
@@ -141,7 +155,9 @@ public class AguiMvcController {
                                                     logger.error(
                                                             "Error during AG-UI run: {}",
                                                             error.getMessage());
+
                                                     AgentContext.clean();
+
                                                     sendErrorAndComplete(
                                                             emitter,
                                                             threadId,
@@ -162,11 +178,15 @@ public class AguiMvcController {
 
                     } catch (AguiException.AgentNotFoundException e) {
                         logger.error("Agent not found: {}", e.getMessage());
+
                         AgentContext.clean();
+
                         sendErrorAndComplete(emitter, threadId, runId, e.getMessage());
                     } catch (Exception e) {
                         logger.error("Error processing AG-UI request: {}", e.getMessage());
+
                         AgentContext.clean();
+
                         sendErrorAndComplete(emitter, threadId, runId, e.getMessage());
                     }
                 });

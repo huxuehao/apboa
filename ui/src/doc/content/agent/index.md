@@ -118,9 +118,7 @@
 | **启用记忆** | 是否启用对话记忆功能 | 是 |
 | **启用记忆压缩** | 是否启用记忆压缩（长对话时自动压缩历史） | 否 |
 | **记忆压缩配置** | 记忆压缩的参数配置 | - |
-| **启用结构化输出** | 是否要求智能体输出结构化数据 | 否 |
-| **结构化输出模式** | PROMPT / TOOL_CHOICE | TOOL_CHOICE |
-| **结构化输出模板** | JSON Schema 格式的输出结构定义 | - |
+| **执行环境配置** | 该配置可开启 [工作空间]，同时可赋予智能体执行 Shell 脚本、读取&写入文件的能力 | - |
 | **Studio 配置** | 关联 Studio 画布配置 | - |
 
 ![高级设置占位](src/doc/images/agent-form-advanced.png)
@@ -255,25 +253,6 @@ A2A 智能体的认证头和 Nacos 属性使用 KvMap 结构：
 示例：
 - 直接值：`key=Authorization`, `value=Bearer xxx`, `evn=false`
 - 环境变量：`key=Authorization`, `value=API_AUTH_TOKEN`, `evn=true`（运行时从环境变量 `API_AUTH_TOKEN` 读取）
-
-### 结构化输出模板
-
-结构化输出模板使用 JSON Schema 格式定义，例如：
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "summary": { "type": "string" },
-    "categories": {
-      "type": "array",
-      "items": { "type": "string" }
-    },
-    "confidence": { "type": "number" }
-  },
-  "required": ["summary", "categories"]
-}
-```
 
 ### 版本号
 
