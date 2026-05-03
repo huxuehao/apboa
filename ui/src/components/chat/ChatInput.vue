@@ -15,8 +15,7 @@ import MediaIcon from '@/components/common/MediaIcon.vue'
 import ResourceMentionDropdown from './ResourceMentionDropdown.vue'
 import { type FlatFileItem, useWorkspaceFiles } from '@/composables/chat/useWorkspaceFiles'
 import { extractTextFromEditor, renderTaggedTextToHtml } from '@/utils/chat/tagSystem'
-import type {UploadedFileItem, WorkspaceFileNode} from '@/types'
-import WorkspaceFilePreview from "@/components/workspace/WorkspaceFilePreview.vue";
+import type {UploadedFileItem} from '@/types'
 
 const props = withDefaults(
   defineProps<{

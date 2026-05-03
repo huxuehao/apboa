@@ -1,19 +1,11 @@
 <script setup lang="ts">
 import {
   EyeOutlined,
-  FileOutlined,
-  FileImageOutlined,
-  FileTextOutlined,
-  FilePdfOutlined,
-  FileZipOutlined,
-  FileMarkdownOutlined,
-  FileExcelOutlined,
-  FileWordOutlined,
-  FilePptOutlined,
   DownloadOutlined,
   DeleteOutlined
 } from '@ant-design/icons-vue'
 import type { WorkspaceFileNode } from '@/types'
+import FileIcon from "@/components/workspace/FileIcon.vue";
 
 /**
  * 工作空间文件节点组件
@@ -37,22 +29,6 @@ const emit = defineEmits<{
   (e: 'download', node: WorkspaceFileNode): void
   (e: 'delete', node: WorkspaceFileNode): void
 }>()
-
-/**
- * 根据文件后缀返回对应图标组件
- */
-const getFileIcon = (ext?: string) => {
-  const e = (ext || '').toLowerCase()
-  if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'ico'].includes(e)) return FileImageOutlined
-  if (['pdf'].includes(e)) return FilePdfOutlined
-  if (['zip', 'tar', 'gz', 'rar', '7z', 'bz2', 'xz', 'tgz'].includes(e)) return FileZipOutlined
-  if (['md', 'markdown'].includes(e)) return FileMarkdownOutlined
-  if (['xls', 'xlsx', 'csv'].includes(e)) return FileExcelOutlined
-  if (['doc', 'docx'].includes(e)) return FileWordOutlined
-  if (['ppt', 'pptx'].includes(e)) return FilePptOutlined
-  if (['txt', 'log', 'json', 'xml', 'yaml', 'yml', 'toml', 'ini', 'conf', 'sh', 'bash', 'py', 'js', 'ts', 'java', 'go', 'rs', 'c', 'cpp', 'h'].includes(e)) return FileTextOutlined
-  return FileOutlined
-}
 
 const paddingLeft = `${(props.depth ?? 0) * 16 + 8}px`
 
@@ -86,7 +62,7 @@ const handleRowClick = () => {
 
     <!-- 文件图标 -->
     <span class="workspace-item-icon workspace-file-icon">
-      <component :is="getFileIcon(node.extension)" />
+      <FileIcon :file-name="node.fullName" width="17" />
     </span>
 
     <!-- 文件名 -->
