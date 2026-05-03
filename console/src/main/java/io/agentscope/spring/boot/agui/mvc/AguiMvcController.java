@@ -1,6 +1,5 @@
 package io.agentscope.spring.boot.agui.mvc;
 
-import com.hxh.apboa.common.util.AgentMetadataStore;
 import com.hxh.apboa.core.agui.AgentContext;
 import io.agentscope.core.agent.AgentBase;
 import io.agentscope.core.agui.AguiException;
@@ -119,9 +118,6 @@ public class AguiMvcController {
                                     logger.debug("SSE connection completed for run {}", runId);
 
                                     AgentContext.clean();
-                                    if (finalAgentId != null && sessionManager.getSession(threadId).isEmpty()) {
-                                        AgentMetadataStore.remove(finalAgentId);
-                                    }
 
                                     result.agent().interrupt();
                                     emitter.complete();
@@ -134,9 +130,6 @@ public class AguiMvcController {
                                             runId);
 
                                     AgentContext.clean();
-                                    if (finalAgentId != null && sessionManager.getSession(threadId).isEmpty()) {
-                                        AgentMetadataStore.remove(finalAgentId);
-                                    }
 
                                     result.agent().interrupt();
                                 });
@@ -149,9 +142,6 @@ public class AguiMvcController {
                                             ex.getMessage());
 
                                     AgentContext.clean();
-                                    if (finalAgentId != null && sessionManager.getSession(threadId).isEmpty()) {
-                                        AgentMetadataStore.remove(finalAgentId);
-                                    }
 
                                     result.agent().interrupt();
                                 });
@@ -167,9 +157,6 @@ public class AguiMvcController {
                                                             error.getMessage());
 
                                                     AgentContext.clean();
-                                                    if (finalAgentId != null && sessionManager.getSession(threadId).isEmpty()) {
-                                                        AgentMetadataStore.remove(finalAgentId);
-                                                    }
 
                                                     sendErrorAndComplete(
                                                             emitter,
@@ -186,9 +173,6 @@ public class AguiMvcController {
                                                                 e.getMessage());
                                                     } finally {
                                                         AgentContext.clean();
-                                                        if (finalAgentId != null && sessionManager.getSession(threadId).isEmpty()) {
-                                                            AgentMetadataStore.remove(finalAgentId);
-                                                        }
                                                     }
                                                 });
 
@@ -196,18 +180,12 @@ public class AguiMvcController {
                         logger.error("Agent not found: {}", e.getMessage());
 
                         AgentContext.clean();
-                        if (baseAgentId != null && sessionManager.getSession(threadId).isEmpty() ) {
-                            AgentMetadataStore.remove(baseAgentId);
-                        }
 
                         sendErrorAndComplete(emitter, threadId, runId, e.getMessage());
                     } catch (Exception e) {
                         logger.error("Error processing AG-UI request: {}", e.getMessage());
 
                         AgentContext.clean();
-                        if (baseAgentId != null &&  sessionManager.getSession(threadId).isEmpty()) {
-                            AgentMetadataStore.remove(baseAgentId);
-                        }
 
                         sendErrorAndComplete(emitter, threadId, runId, e.getMessage());
                     }

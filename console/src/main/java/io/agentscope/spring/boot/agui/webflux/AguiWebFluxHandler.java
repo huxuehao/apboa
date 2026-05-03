@@ -1,6 +1,5 @@
 package io.agentscope.spring.boot.agui.webflux;
 
-import com.hxh.apboa.common.util.AgentMetadataStore;
 import com.hxh.apboa.core.agui.AgentContext;
 import io.agentscope.core.agent.AgentBase;
 import io.agentscope.core.agui.AguiException;
@@ -133,9 +132,6 @@ public class AguiWebFluxHandler {
                                                 runId);
 
                                         AgentContext.clean();
-                                        if (baseAgentId != null && sessionManager.getSession(threadId).isEmpty()) {
-                                            AgentMetadataStore.remove(baseAgentId);
-                                        }
 
                                         result.agent().interrupt();
                                     });

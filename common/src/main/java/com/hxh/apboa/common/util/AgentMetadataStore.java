@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author huxuehao
  **/
 public final class AgentMetadataStore {
-    private static final Map<String, Map<String, Object>> STORE = new ConcurrentHashMap<>();
+    public static final Map<String, Map<String, Object>> STORE = new ConcurrentHashMap<>();
 
     private AgentMetadataStore() {}
 
