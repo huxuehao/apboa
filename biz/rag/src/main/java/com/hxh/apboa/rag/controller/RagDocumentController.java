@@ -8,6 +8,7 @@ import com.hxh.apboa.common.enums.RagDocumentStatus;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.core.rag.LocalRagService;
+import com.hxh.apboa.core.rag.DocumentParser;
 import com.hxh.apboa.core.rag.RagRepository;
 import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
 import com.hxh.apboa.resource.service.AttachService;
@@ -33,6 +34,7 @@ import java.util.Map;
 public class RagDocumentController {
 
     private final LocalRagService localRagService;
+    private final DocumentParser documentParser;
     private final RagRepository ragRepository;
     private final KnowledgeBaseConfigService knowledgeBaseConfigService;
     private final AttachService attachService;
@@ -53,9 +55,12 @@ public class RagDocumentController {
         }
 
         try {
-            Attach attach = attachService.upload(file, file.getOriginalFilename());
-
             String fileName = file.getOriginalFilename();
+            if (!documentParser.isSupported(fileName)) {
+                return R.fail("不支持的文件类型，支持的格式: txt、md、pdf、doc、docx、xlsx、xls、csv、pptx、ppt");
+            }
+
+            Attach attach = attachService.upload(file, fileName);
             String fileType = extractFileType(fileName);
 
             RagDocument document = RagDocument.builder()

@@ -135,7 +135,6 @@ const localConnection = reactive({
  * 本地RAG检索配置
  */
 const localRetrieval = reactive({
-  chunkStrategy: 'FIXED_SIZE',
   chunkSize: 512,
   chunkOverlap: 64,
   chunkDelimiters: '',
@@ -368,7 +367,7 @@ function resetForm() {
   Object.assign(difyHttp, { connectTimeout: '', readTimeout: '', maxRetries: undefined, customHeaders: '{}' })
   Object.assign(ragflowHttp, { timeout: '', maxRetries: undefined, customHeaders: '{}' })
   Object.assign(localConnection, { ollamaBaseUrl: 'http://localhost:11434', embeddingModel: 'qwen3-embedding:4b', pgvectorUrl: 'jdbc:postgresql://localhost:5432/apboa_vector', pgvectorUsername: 'postgres', pgvectorPassword: '' })
-  Object.assign(localRetrieval, { chunkStrategy: 'FIXED_SIZE', chunkSize: 512, chunkOverlap: 64, chunkDelimiters: '', topK: 5, scoreThreshold: 0.5 })
+  Object.assign(localRetrieval, { chunkSize: 512, chunkOverlap: 64, chunkDelimiters: '', topK: 5, scoreThreshold: 0.5 })
 }
 
 /**
@@ -754,19 +753,13 @@ function removeMetadataCondition(index: number) {
 
           <!-- 本地RAG检索配置 -->
           <template v-if="formData.kbType === 'LOCAL'">
-            <AFormItem label="分块策略">
-              <ASelect v-model:value="localRetrieval.chunkStrategy" placeholder="请选择分块策略">
-                <ASelectOption value="FIXED_SIZE">按字符数分块</ASelectOption>
-                <ASelectOption value="DELIMITER">按自定义标识分块</ASelectOption>
-              </ASelect>
-            </AFormItem>
-            <AFormItem v-if="localRetrieval.chunkStrategy === 'DELIMITER'" label="分块分隔符">
+            <AFormItem label="分块分隔符">
               <AInput v-model:value="localRetrieval.chunkDelimiters" placeholder="多个分隔符用逗号分隔，如：\n\n,^|,\n" />
               <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
-                支持转义字符：\n（换行）、\t（制表符）、\r（回车），多个分隔符用英文逗号分隔
+                支持转义字符：\n（换行）、\t（制表符）、\r（回车），多个分隔符用英文逗号分隔。不填则按字符数分块
               </div>
             </AFormItem>
-            <AFormItem :label="localRetrieval.chunkStrategy === 'DELIMITER' ? '最大块长度(字符数)' : '分块大小(字符数)'">
+            <AFormItem label="最大块长度(字符数)">
               <AInputNumber v-model:value="localRetrieval.chunkSize" :min="128" :max="8192" style="width: 100%" />
             </AFormItem>
             <AFormItem label="分块重叠(字符数)">

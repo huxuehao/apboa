@@ -171,20 +171,11 @@ public class LocalRagService {
     }
 
     /**
-     * 根据分块策略执行分块
+     * 根据配置执行分块，有分隔符时按分隔符分块，否则按固定大小分块
      */
     private List<ChunkResult> doChunk(String text, int chunkSize, int chunkOverlap, KnowledgeBaseConfig config) {
-        String chunkStrategy = getChunkStrategy(config);
-        if ("DELIMITER".equals(chunkStrategy)) {
-            List<String> delimiters = getChunkDelimiters(config);
-            return textChunker.delimiterChunk(text, chunkSize, chunkOverlap, delimiters);
-        }
-        return textChunker.fixedSizeChunk(text, chunkSize, chunkOverlap);
-    }
-
-    private String getChunkStrategy(KnowledgeBaseConfig config) {
-        JsonNode retrievalConfig = config.getRetrievalConfig();
-        return JsonUtils.getStringValue(retrievalConfig, "chunkStrategy", "FIXED_SIZE");
+        List<String> delimiters = getChunkDelimiters(config);
+        return textChunker.delimiterChunk(text, chunkSize, chunkOverlap, delimiters);
     }
 
     private List<String> getChunkDelimiters(KnowledgeBaseConfig config) {

@@ -138,7 +138,7 @@ function formatFileSize(bytes: number) {
       <AUpload
         :before-upload="handleUpload"
         :show-upload-list="false"
-        accept=".pdf,.txt,.docx,.doc,.xlsx,.xls,.md,.csv,.pptx"
+        accept=".pdf,.txt,.docx,.doc,.xlsx,.xls,.md,.csv,.pptx,.ppt"
       >
         <AButton type="primary" :loading="uploading" :disabled="!knowledgeBaseConfigId">
           <UploadOutlined /> 上传文档
