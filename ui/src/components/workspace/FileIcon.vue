@@ -79,21 +79,21 @@ const props = defineProps({
 })
 
 const iconConfigs = [
-  { ext: 'xls', color: '#217A31' },
-  { ext: 'xlsx', color: '#217A31' },
-  { ext: 'md', color: '#1E6F8C' },
-  { ext: 'doc', color: '#2B579A' },
-  { ext: 'docx', color: '#2B579A' },
-  { ext: 'ppt', color: '#D24726' },
-  { ext: 'pptx', color: '#D24726' },
-  { ext: 'txt', color: '#5A5A5A' },
-  { ext: 'js', color: '#E65100' },
-  { ext: 'py', color: '#3A6FA1' },
-  { ext: 'sh', color: '#FF455B' },
+  { ext: 'xls', color: '#289B4F' },
+  { ext: 'xlsx', color: '#289B4F' },
+  { ext: 'md', color: '#2A8BB5' },
+  { ext: 'doc', color: '#3A7FD9' },
+  { ext: 'docx', color: '#3A7FD9' },
+  { ext: 'ppt', color: '#E5552A' },
+  { ext: 'pptx', color: '#E5552A' },
+  { ext: 'txt', color: '#6B6B6B' },
+  { ext: 'js', color: '#E68A2E' },
+  { ext: 'py', color: '#3A91C2' },
+  { ext: 'sh', color: '#E54C59' },
 ]
 
 /** 匹配不到后缀时的默认颜色 */
-const DEFAULT_COLOR = '#7B8794'
+const DEFAULT_COLOR = '#9CA3AF'
 
 /**
  * 从文件名提取后缀（小写），无有效后缀返回空字符串
@@ -113,12 +113,7 @@ const rawExt = computed(() => {
   const lastDotIndex = name.lastIndexOf('.')
 
   // 没有点，或者点在开头（隐藏文件如 .gitignore），或者点在末尾
-  if (lastDotIndex <= 0 || lastDotIndex === name.length - 1) {
-    // 点在开头：.gitignore → 返回 "gitignore" 作为扩展名（常见做法）
-    if (lastDotIndex === 0 && name.length > 1) {
-      return name.slice(1).toLowerCase()
-    }
-    // 无点或点在末尾："Makefile" 或 "test." → 无后缀
+  if (lastDotIndex <= 0 || name.slice(lastDotIndex + 1).length > 4) {
     return '?'
   }
 
@@ -142,30 +137,30 @@ const iconColor = computed(() => {
 const displayExt = computed(() => {
   if (!rawExt.value) return ''
   // 匹配到时使用配置中的 ext，匹配不到时使用原始后缀名
-  const extStr = matchedConfig?.ext || rawExt.value
+  const extStr = matchedConfig.value?.ext || rawExt.value
   return extStr.toUpperCase()
 })
 
 /** 根据扩展名长度动态调整字体大小 */
 const fontSize = computed(() => {
   const len = displayExt.value.length
-  if (len <= 2) return '35'
-  if (len <= 3) return '30'
-  if (len <= 4) return '27'
-  if (len <= 5) return '22'
+  if (len === 1) return '40'
+  if (len === 2) return '35'
+  if (len === 3) return '30'
+  if (len === 4) return '25'
   return '17'
 })
 
 /** 解析宽度数值（去除单位） */
 const numericWidth = computed(() => {
-  const parsed = parseFloat(props.width)
+  const parsed = parseFloat(props.width + '')
   return Number.isNaN(parsed) ? 50 : parsed
 })
 
 /** 计算 SVG 高度：未传则按 viewBox 比例自动计算 */
 const svgHeight = computed(() => {
   if (props.height !== undefined) {
-    const parsed = parseFloat(props.height)
+    const parsed = parseFloat(props.height + '')
     if (!Number.isNaN(parsed)) return props.height
   }
   // 自动按比例：viewBox 比例 110:135

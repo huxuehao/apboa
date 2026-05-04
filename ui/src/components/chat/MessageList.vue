@@ -24,6 +24,7 @@ const emit = defineEmits<{
       :key="msg.id"
       :role="msg.role"
       :content="msg.content"
+      :created-at="msg.createdAt"
       :agent-has-result="agentHasResult"
       :is-streaming="msg.isStreaming"
     />

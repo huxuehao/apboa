@@ -6,6 +6,7 @@ import com.hxh.apboa.common.dto.ChatSessionQueryDTO;
 import com.hxh.apboa.common.entity.ChatSession;
 import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.vo.ChatMessageVO;
+import com.hxh.apboa.common.vo.ChatMessagePageVO;
 import com.hxh.apboa.common.vo.ChatSessionVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -62,6 +63,16 @@ public interface ChatSessionService extends IService<ChatSession> {
     List<ChatMessageVO> getCurrentMessages(Long sessionId);
 
     /**
+     * 分页加载当前对话消息：首次加载最新 size 条，后续按 beforeDepth 向前加载
+     *
+     * @param sessionId    会话 ID
+     * @param beforeDepth  游标：加载此 depth 之前的消息，null 表示首次加载（取最新）
+     * @param size         每页大小
+     * @return 分页消息结果
+     */
+    ChatMessagePageVO getCurrentMessagesPaged(Long sessionId, Integer beforeDepth, int size);
+
+    /**
      * 分页或列表查询会话（未删除，可按 userId、agentId 筛选）
      *
      * @param query 查询条件
@@ -114,3 +125,4 @@ public interface ChatSessionService extends IService<ChatSession> {
      */
     void deleteSession(Long id);
 }
+

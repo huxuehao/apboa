@@ -104,9 +104,12 @@ const {
   currentSessionId,
   currentSessionTitle,
   messagesList,
+  hasMoreHistory,
+  historyLoading,
   selectSession,
   resetSession,
   loadCurrentMessages,
+  loadMoreHistory,
 } = useCurrentSession(agentId)
 
 // 已上传附件（仅已完成上传的计入 fileIds）
@@ -155,6 +158,7 @@ const displayMessages = computed<DisplayMessage[]>(() => {
       id: String(m.id),
       role: m.role as any,
       content: (m.content || '') as string,
+      createdAt: m.createdAt,
       isStreaming: false,
     })
   }
@@ -392,6 +396,8 @@ onMounted(() => {
       :workspace-panel-open="workspacePanelOpen"
       :has-code-execution-config="!!hasCodeExecutionConfig"
       :session-id="currentSessionId"
+      :has-more-history="hasMoreHistory"
+      :history-loading="historyLoading"
       @update:input-value="inputText = $event"
       @update:uploaded-files="uploadedFiles = $event"
       @memory="handleMemoryChange"
@@ -402,6 +408,7 @@ onMounted(() => {
       @abort="abortRun"
       @toggle-sidebar="toggleSidebar"
       @toggle-workspace="toggleWorkspace"
+      @load-more-history="loadMoreHistory"
     />
 
     <!-- 工作空间面板（作为 flex 子项从右侧滑出） -->

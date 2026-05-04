@@ -3,5 +3,6 @@ export interface DisplayMessage {
   id: string
   role: 'user' | 'assistant' | 'system' | 'tool'
   content: string
+  createdAt?: string
   isStreaming?: boolean
 }

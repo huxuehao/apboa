@@ -31,9 +31,48 @@ const getExtension = (fileName: string): string => {
   return lastDot > -1 ? fileName.slice(lastDot + 1).toLowerCase() : ''
 }
 
+/**
+ * 格式化时间显示
+ * 输入格式：YYYY-MM-DD HH:mm:ss
+ * - 今天：显示 HH:mm
+ * - 本年非今天：显示 MM-DD HH:mm
+ * - 非本年：显示 YYYY-MM-DD HH:mm
+ */
+const formatTime = (dateStr?: string): string => {
+  if (!dateStr) return ''
+
+  // 直接截取，避免不必要的 split 操作
+  const datePart = dateStr.slice(0, 10)
+  const timePart = dateStr.slice(11, 16) // HH:mm
+
+  if (datePart.length < 10) return ''
+
+  // 一次性解析日期部分
+  const year = datePart.slice(0, 4)
+  const month = datePart.slice(5, 7)
+  const day = datePart.slice(8, 10)
+
+  const now = new Date()
+  const currentYear = String(now.getFullYear())
+
+  // 今日判断：比较时间戳（最高效）
+  const todayStr = `${currentYear}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+
+  if (datePart === todayStr) {
+    return timePart
+  }
+
+  if (year === currentYear) {
+    return `${month}/${day} ${timePart}`
+  }
+
+  return `${year}/${month}/${day} ${timePart}`
+}
+
 const props = defineProps<{
   role: 'user' | 'assistant' | 'system' | 'tool' | 'error'
   content: string
+  createdAt?: string
   agentHasResult?: boolean
   isStreaming?: boolean
 }>()
@@ -46,6 +85,7 @@ const isTool = computed(() => props.role === 'tool')
 const isError = computed(() => props.role === 'error')
 
 const parsedUserContent = computed(() => parseUserContent(props.content))
+const formattedTime = computed(() => formatTime(props.createdAt))
 
 // 预览相关状态
 const previewVisible = ref(false)
@@ -63,7 +103,8 @@ const openPreview = (index: number) => {
 <template>
   <div class="chat-message" :class="[isUser ? 'chat-message-user' : 'chat-message-assistant']">
     <template v-if="isUser">
-      <div class="chat-message-bubble chat-message-bubble_user">
+      <div class="chat-message-bubble chat-message-bubble_user" style="position: relative">
+        <div class="message-time">{{ formattedTime }}</div>
         <!-- 文件列表 -->
         <div v-if="parsedUserContent.files.length > 0" class="chat-message-files">
           <div
@@ -104,7 +145,7 @@ const openPreview = (index: number) => {
     <template v-else-if="isError">
       <div class="chat-message-bubble">
         <div class="chat-md-content">
-          <span style="color: tomato">{{content}}</span>
+          <span class="error-text">{{ content }}</span>
         </div>
       </div>
     </template>
@@ -119,6 +160,20 @@ const openPreview = (index: number) => {
 
 <style scoped lang="scss">
 @use '@/styles/chat/index.scss' as *;
+
+.message-time {
+  position: absolute;
+  top: -18px;
+  right: 3px;
+  width: 150px;
+  text-align: end;
+  font-size: var(--font-size-xs);
+  color: #d2d2d2;
+}
+
+.error-text {
+  color: tomato;
+}
 
 .chat-message-files {
   display: flex;
@@ -148,11 +203,5 @@ const openPreview = (index: number) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.chat-message-file-size {
-  flex-shrink: 0;
-  color: var(--color-text-placeholder);
-  font-size: var(--font-size-xs);
 }
 </style>
