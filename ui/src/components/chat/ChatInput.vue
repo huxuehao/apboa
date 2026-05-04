@@ -31,6 +31,7 @@ const props = withDefaults(
     showToolProcess?: boolean
     allowUploadFileType?: string[]
     sessionId?: string | null
+    workspacePanelOpen?: boolean
   }>(),
   {
     uploadedFiles: () => [],
@@ -40,7 +41,8 @@ const props = withDefaults(
     enablePlanning: false,
     toolProcessActive: false,
     showToolProcess: false,
-    sessionId: null
+    sessionId: null,
+    workspacePanelOpen: false
   }
 )
 
@@ -299,6 +301,10 @@ const sanitizeEmptyEditor = () => {
 
 /** 检测 @mention 触发 */
 const checkMentionTrigger = () => {
+  if (!props.workspacePanelOpen) {
+    return;
+  }
+
   const sel = window.getSelection()
   if (!sel || sel.rangeCount === 0) {
     mentionVisible.value = false
@@ -841,6 +847,7 @@ watch(
         <!-- @ 添加上下文按钮 -->
         <ATooltip placement="bottom" title="添加上下文">
           <button
+            :disabled="!workspacePanelOpen"
             type="button"
             class="chat-toolbar-btn chat-toolbar-btn-icon chat-toolbar-btn-circle"
             @mousedown.prevent

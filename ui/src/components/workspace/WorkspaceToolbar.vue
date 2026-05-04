@@ -75,7 +75,7 @@ const handleClear = () => {
     title: '确认清空',
     content: '将删除工作空间内所有文件，此操作不可恢复，是否继续？',
     okText: '确认清空',
-    okType: 'danger',
+    okButtonProps: { danger: true },
     cancelText: '取消',
     onOk: () => emit('clear'),
   })
