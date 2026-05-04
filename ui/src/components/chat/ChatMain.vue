@@ -91,6 +91,14 @@ const handleScroll = (event: UIEvent | any) => {
   emit('scroll', event)
 }
 
+// 处理发送事件
+const handleSend = () => {
+  emit('send')
+  // 发送后强制自动滚动到底部，带丝滑动画
+  shouldAutoScroll.value = true
+  scrollToBottom(true)
+}
+
 // 预览输入tag
 const inputTagPreviewHandle = (file: FlatFileItem) => {
   workspaceFilePreviewVisible.value = true
@@ -181,7 +189,7 @@ defineExpose({
         @memory="$emit('memory', $event)"
         @plan="$emit('plan', $event)"
         @toolProcess="$emit('toolProcess', $event)"
-        @send="$emit('send')"
+        @send="handleSend"
       />
     </div>
 
@@ -219,7 +227,7 @@ defineExpose({
             @memory="$emit('memory', $event)"
             @plan="$emit('plan', $event)"
             @toolProcess="$emit('toolProcess', $event)"
-            @send="$emit('send')"
+            @send="handleSend"
             @abort="$emit('abort')"
           />
           <div class="text-placeholder text-xs mt-sm" style="text-align: center; margin: 5px 0;">内容由AI生成，仅供参考</div>

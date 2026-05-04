@@ -11,8 +11,8 @@ public class WorkspaceSkill {
                 .name(SKILL_NAME)
                 .description(
                         "当你需要执行以下任何操作时，必须调用此技能获取正确的路径格式：\n"
-                        + "1. 使用文件工具（view、write、edit、list_files、delete 等）\n"
-                        + "2. 执行 Shell 命令（cat、ls、python、bash、node 等）\n"
+                        + "1. 使用文件工具（view_text_file、list_directory、insert_text_file、write_text_file 等）\n"
+                        + "2. 使用 execute_shell_command 工具执行 Shell 命令（cat、ls、python、bash、node 等）\n"
                         + "3. 调用任何SKILL脚本（如 doGetCurrentTime、csvAnalyzer 等）\n"
                         + "4. 命令或工具参数中包含文件路径\n\n"
                         + "【重要】在执行任何涉及路径的操作前，建议先调用此技能，避免被系统拦截。"
@@ -28,7 +28,7 @@ public class WorkspaceSkill {
             ## 一、核心原则：一切路径使用相对路径
 
             你当前的工作目录就是你的**专属会话工作空间**。所有操作都必须基于此目录进行。
-            - 文件工具（view、write、list_files 等）的路径参数只能写**相对路径**。
+            - 文件工具（view_text_file、list_directory、insert_text_file、write_text_file、execute_shell_command 等）的路径参数只能写**相对路径**。
             - Shell 命令中的所有路径也必须是**相对路径**。
             - **绝对路径**（以 `/` 或盘符开头）以及** `../` 逃逸**（除技能脚本的特殊前缀外）全部被系统拦截。
 
@@ -37,15 +37,22 @@ public class WorkspaceSkill {
             所有文件操作都限定在你的工作空间内，你只需使用简单的相对路径：
 
             ```text
-            view(path="report.md")
-            write(path="./data.csv", content="...")
-            list_files(path=".")
+            view_text_file(file_path="report.md")
+            list_directory(dir_path=".")
+            insert_text_file(file_path="./data.md")
+            write_text_file(file_path="data.md")
             ```
 
             禁止：
             ```text
-            view(path="/etc/passwd")          // 绝对路径
-            write(path="../other/secret.txt")  // .. 逃逸
+            view_text_file(file_path="/etc/report.md") // 绝对路径
+            view_text_file(file_path="../report.md") // .. 逃逸
+            list_directory(dir_path="/other/dir") // 绝对路径
+            list_directory(dir_path="../../") // .. 逃逸
+            insert_text_file(file_path="/data.md") // 绝对路径
+            insert_text_file(file_path="../data.md") // .. 逃逸
+            write_text_file(file_path="/other/secret.txt")  // 绝对路径
+            write_text_file(file_path="../other/secret.txt")  // .. 逃逸
             ```
 
             ## 三、技能脚本调用规范

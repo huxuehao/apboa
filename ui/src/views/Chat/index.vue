@@ -189,7 +189,10 @@ const renameSubmitting = ref(false)
 
 // 新会话
 const handleNewSession = async () => {
-  if (isRunning.value) return
+  if (isRunning.value) {
+    message.info('请等待当前对话完成')
+    return
+  }
   resetSession()
   // 可选：自动创建一个空会话？原逻辑是点击新建重置，不自动创建，发送时创建。这里保持原样。
   // 但也可以在这里创建一个空白会话，原组件是 resetSession 后 currentSessionId 为 null，然后发送时创建。
@@ -198,7 +201,10 @@ const handleNewSession = async () => {
 
 // 选择会话
 const handleSelectSession = async (session: any) => {
-  if (isRunning.value) return
+  if (isRunning.value) {
+    message.info('请等待当前对话完成')
+    return
+  }
   await selectSession(session)
 }
 
@@ -223,6 +229,10 @@ const handleSessionMenu = async (key: string, session: any) => {
     return
   }
   if (key === 'delete') {
+    if (isRunning.value) {
+      message.info('请等待当前对话完成')
+      return
+    }
     Modal.confirm({
       title: '确认删除',
       content: '删除后无法恢复，是否继续？',
@@ -343,7 +353,6 @@ onMounted(() => {
       :other-sessions="otherSessions"
       :current-session-id="currentSessionId"
       :user-nickname="userInfo?.nickname"
-      :is-running="isRunning"
       :loading="sessionsLoading"
       :has-more="sessionsHasMore"
       :show-account="showAccount"

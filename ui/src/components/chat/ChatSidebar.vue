@@ -9,7 +9,6 @@ defineProps<{
   otherSessions: any[]
   currentSessionId: string | null
   userNickname?: string
-  isRunning: boolean
   loading: boolean
   hasMore: boolean
   showAccount: boolean
@@ -89,7 +88,7 @@ const handleNewSession = () => {
     </div>
     <div class="chat-sidebar-body">
       <div v-show="!collapsed" class="chat-sidebar-new-wrap">
-        <button type="button" class="chat-sidebar-new-btn" :disabled="isRunning" title="开启新对话" @click="handleNewSession">
+        <button type="button" class="chat-sidebar-new-btn" title="开启新对话" @click="handleNewSession">
           <MessageOutlined /><span>开启新对话</span>
         </button>
       </div>
@@ -97,7 +96,6 @@ const handleNewSession = () => {
         <AButton
           type="text"
           class="chat-sidebar-collapse-btn"
-          :disabled="isRunning"
           title="新对话"
           @click="$emit('newSession')"
         >
