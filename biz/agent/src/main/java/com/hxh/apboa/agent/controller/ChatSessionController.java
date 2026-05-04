@@ -9,6 +9,7 @@ import com.hxh.apboa.common.dto.ChatSessionQueryDTO;
 import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.vo.ChatMessageVO;
+import com.hxh.apboa.common.vo.ChatMessagePageVO;
 import com.hxh.apboa.common.vo.ChatSessionVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
@@ -77,6 +78,21 @@ public class ChatSessionController {
     @GetMapping("/{sessionId}/messages/current")
     public R<List<ChatMessageVO>> getCurrentMessages(@PathVariable("sessionId") Long sessionId) {
         return R.data(chatSessionService.getCurrentMessages(sessionId));
+    }
+
+    /**
+     * 分页加载当前对话消息（滚动加载历史）
+     * 首次加载：不传 beforeDepth，返回最新 50 条
+     * 加载更多：传入上一次返回的 nextBeforeDepth，返回更早的 50 条
+     */
+    @SkAccess
+    @ChatKeyAccess
+    @GetMapping("/{sessionId}/messages/paged")
+    public R<ChatMessagePageVO> getCurrentMessagesPaged(
+            @PathVariable("sessionId") Long sessionId,
+            @RequestParam(value = "beforeDepth", required = false) Integer beforeDepth,
+            @RequestParam(value = "size", defaultValue = "50") int size) {
+        return R.data(chatSessionService.getCurrentMessagesPaged(sessionId, beforeDepth, size));
     }
 
     /**
@@ -153,3 +169,4 @@ public class ChatSessionController {
         return R.success("操作成功");
     }
 }
+

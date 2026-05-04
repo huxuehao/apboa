@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -404,8 +406,20 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         String fileName = path.getFileName().toString();
         String relativePath = workspaceDir.relativize(path).toString().replace('\\', '/');
 
+        long lastModifiedMillis;
+
+        try {
+            BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
+            lastModifiedMillis = attrs.lastModifiedTime().toMillis();
+        } catch (IOException e) {
+            log.warn("读取文件属性失败: {}", path, e);
+            lastModifiedMillis = 0;
+        }
+
         node.setName(fileName);
         node.setPath(relativePath);
+        node.setLastModifiedTime(lastModifiedMillis);
+        node.setLastModified(formatDateTime(lastModifiedMillis));
         node.setDirectory(Files.isDirectory(path));
 
         if (Files.isDirectory(path)) {
@@ -447,6 +461,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             return fileName.substring(dotIndex + 1).toLowerCase();
         }
         return "";
+    }
+
+    /**
+     * 将时间戳格式化为日期时间字符串
+     */
+    private String formatDateTime(long timestamp) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yy/MM/dd HH:mm");
+        return sdf.format(new Date(timestamp));
     }
 
     /**

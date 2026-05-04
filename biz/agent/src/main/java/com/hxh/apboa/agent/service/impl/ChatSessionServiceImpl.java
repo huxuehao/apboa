@@ -15,6 +15,7 @@ import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.util.FolderUtils;
 import com.hxh.apboa.common.util.UserUtils;
 import com.hxh.apboa.common.vo.ChatMessageVO;
+import com.hxh.apboa.common.vo.ChatMessagePageVO;
 import com.hxh.apboa.common.vo.ChatSessionVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -134,6 +135,64 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         List<ChatMessage> list = chatMessageService.listByIdsOrderByDepth(ids);
         return BeanUtils.copyList(list, ChatMessageVO.class);
     }
+    @Override
+    public ChatMessagePageVO getCurrentMessagesPaged(Long sessionId, Integer beforeDepth, int size) {
+        // 1. 解析当前路径上的所有消息 ID
+        ChatSession session = getById(sessionId);
+        ChatMessagePageVO result = new ChatMessagePageVO();
+        if (session == null || session.getCurrentMessageId() == null) {
+            result.setMessages(new ArrayList<>());
+            result.setHasMore(false);
+            return result;
+        }
+        ChatMessage cur = chatMessageService.getById(session.getCurrentMessageId());
+        if (cur == null || cur.getPath() == null || cur.getPath().isEmpty()) {
+            result.setMessages(new ArrayList<>());
+            result.setHasMore(false);
+            return result;
+        }
+        List<Integer> ids = Arrays.stream(cur.getPath().split("/"))
+                .filter(s -> !s.isEmpty())
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
+        if (ids.isEmpty()) {
+            ids.add(session.getCurrentMessageId());
+        }
+
+        // 2. 查询该路径上全部消息并按 depth 升序
+        List<ChatMessage> allMessages = chatMessageService.listByIdsOrderByDepth(ids);
+
+        // 3. 根据游标切片
+        List<ChatMessage> page;
+        if (beforeDepth == null) {
+            // 首次加载：取末尾 size 条
+            int from = Math.max(0, allMessages.size() - size);
+            page = allMessages.subList(from, allMessages.size());
+        } else {
+            // 加载 beforeDepth 之前的消息：取 depth < beforeDepth 的末尾 size 条
+            List<ChatMessage> candidates = allMessages.stream()
+                    .filter(m -> m.getDepth() < beforeDepth)
+                    .collect(Collectors.toList());
+            int from = Math.max(0, candidates.size() - size);
+            page = candidates.subList(from, candidates.size());
+        }
+
+        // 4. 判断是否还有更早的消息
+        boolean hasMore;
+        if (page.isEmpty()) {
+            hasMore = false;
+        } else {
+            int earliestDepth = page.get(0).getDepth();
+            hasMore = allMessages.stream().anyMatch(m -> m.getDepth() < earliestDepth);
+        }
+
+        result.setMessages(BeanUtils.copyList(page, ChatMessageVO.class));
+        result.setHasMore(hasMore);
+        result.setNextBeforeDepth(page.isEmpty() ? null : page.get(0).getDepth());
+        return result;
+    }
+
+
 
     @Override
     public List<ChatSessionVO> listSessions(ChatSessionQueryDTO query) {
@@ -267,3 +326,4 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         return BeanUtils.copy(session, ChatSessionVO.class);
     }
 }
+

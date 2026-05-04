@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+﻿import request from '@/utils/request'
 import type { ApiResponse, PageResult } from '@/types'
 import type {
   ChatSessionCreateDTO,
@@ -50,6 +50,21 @@ export function switchCurrentMessage(sessionId: string, messageId: string) {
  */
 export function getCurrentMessages(sessionId: string) {
   return request.get<ApiResponse<ChatMessageVO[]>>(`${BASE}/${sessionId}/messages/current`)
+}
+
+/**
+ * 分页加载当前对话消息（向上滚动加载历史）
+ * GET /agent/chat/session/{sessionId}/messages/paged?beforeDepth=xx&size=50
+ */
+export function getCurrentMessagesPaged(
+  sessionId: string,
+  params: { beforeDepth?: number | null; size?: number }
+) {
+  return request.get<ApiResponse<{
+    messages: ChatMessageVO[]
+    hasMore: boolean
+    nextBeforeDepth: number | null
+  }>>(`${BASE}/${sessionId}/messages/paged`, { params })
 }
 
 /**

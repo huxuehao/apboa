@@ -81,13 +81,8 @@ const handleDrop = (e: DragEvent) => {
     @dragleave="handleDragLeave"
     @drop="handleDrop"
   >
-    <!-- 加载中 -->
-    <div v-if="loading" class="workspace-empty">
-      <ASpin />
-    </div>
-
     <!-- 空状态 -->
-    <div v-else-if="!nodes.length" class="workspace-empty">
+    <div v-if="!nodes.length && !loading" class="workspace-empty">
       <span class="workspace-empty-icon">
         <FolderOpenOutlined />
       </span>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
-import { CloseOutlined } from '@ant-design/icons-vue'
+import { CloseOutlined, LoadingOutlined } from '@ant-design/icons-vue'
 import WorkspaceToolbar from './WorkspaceToolbar.vue'
 import WorkspaceFileTree from './WorkspaceFileTree.vue'
 import WorkspaceFilePreview from './WorkspaceFilePreview.vue'
@@ -316,7 +316,7 @@ defineExpose({ startFileOperation, stopFileOperation, refresh })
   <div class="workspace-panel">
     <!-- 标题栏 -->
     <div class="workspace-panel-header">
-      <span class="workspace-panel-title">工作空间</span>
+      <span class="workspace-panel-title">工作空间 <LoadingOutlined v-if="loading" /></span>
       <AButton
         type="text"
         size="small"

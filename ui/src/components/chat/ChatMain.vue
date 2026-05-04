@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import {ref, nextTick, watch, onMounted, h} from 'vue'
+import {ref, nextTick, watch, onMounted} from 'vue'
 import {
   MenuOutlined,
   FolderOutlined,
   FolderOpenOutlined,
-  ReloadOutlined
+  LoadingOutlined
 } from '@ant-design/icons-vue'
 import MessageList from './MessageList.vue'
 import ChatInput from './ChatInput.vue'
@@ -34,6 +34,10 @@ const props = defineProps<{
   workspacePanelOpen?: boolean
   hasCodeExecutionConfig?: boolean
   sessionId?: string | null
+  /** 是否还有更早的历史消息 */
+  hasMoreHistory?: boolean
+  /** 历史消息加载中 */
+  historyLoading?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -48,12 +52,19 @@ const emit = defineEmits<{
   (e: 'toolProcess', value: boolean): void
   (e: 'toggleSidebar'): void
   (e: 'toggleWorkspace'): void
+  /** 触发加载更多历史消息 */
+  (e: 'loadMoreHistory'): void
 }>()
 
 // 滚动容器 ref
 const messagesScrollRef = ref<HTMLElement | null>()
 const shouldAutoScroll = ref(true)
 const SCROLL_BOTTOM_THRESHOLD = 80
+// 触顶加载阈值
+const SCROLL_TOP_THRESHOLD = 50
+// 加载前记录滚动位置
+const savedScrollHeight = ref(0)
+const savedScrollTop = ref(0)
 
 const workspaceFilePreviewVisible = ref(false)
 const workspaceFilePreviewNode = ref<FlatFileItem | null>(null)
@@ -88,7 +99,41 @@ const checkAndUpdateAutoScroll = () => {
 // 处理滚动事件
 const handleScroll = (event: UIEvent | any) => {
   checkAndUpdateAutoScroll()
+
+  // 触顶检测：向上滚动接近顶部时加载更多历史消息
+  const el = messagesScrollRef.value
+  if (
+    el && el.scrollTop <= SCROLL_TOP_THRESHOLD
+    && props.hasMoreHistory
+    && !props.historyLoading
+  ) {
+    // 记录加载前的滚动位置
+    savedScrollHeight.value = el.scrollHeight
+    savedScrollTop.value = el.scrollTop
+    emit('loadMoreHistory')
+  }
+
   emit('scroll', event)
+}
+
+// 处理发送事件
+/**
+ * 加载历史消息后保持滚动位置不变（视觉上不跳动）
+ */
+const maintainScrollPosition = () => {
+  nextTick(() => {
+    const el = messagesScrollRef.value
+    if (!el) return
+    const heightDiff = el.scrollHeight - savedScrollHeight.value
+    el.scrollTop = savedScrollTop.value + heightDiff
+  })
+}
+
+const handleSend = () => {
+  emit('send')
+  // 发送后强制自动滚动到底部，带丝滑动画
+  shouldAutoScroll.value = true
+  scrollToBottom(true)
 }
 
 // 预览输入tag
@@ -100,7 +145,13 @@ const inputTagPreviewHandle = (file: FlatFileItem) => {
 // 监听消息变化，自动滚动
 watch(
   () => props.messages,
-  () => {
+  (newVal: DisplayMessage[], oldVal: DisplayMessage[]) => {
+    // 历史消息加载：新消息被插入头部
+    if (oldVal && newVal.length > oldVal.length && newVal[0]?.id !== oldVal[0]?.id) {
+      maintainScrollPosition()
+      return
+    }
+    // 正常新消息：自动滚动到底部
     if (shouldAutoScroll.value) {
       scrollToBottom()
     }
@@ -181,7 +232,7 @@ defineExpose({
         @memory="$emit('memory', $event)"
         @plan="$emit('plan', $event)"
         @toolProcess="$emit('toolProcess', $event)"
-        @send="$emit('send')"
+        @send="handleSend"
       />
     </div>
 
@@ -191,6 +242,16 @@ defineExpose({
         class="chat-main-messages-scroll"
         @scroll="handleScroll"
       >
+        <!-- 历史消息加载提示 -->
+        <div v-if="hasMoreHistory || historyLoading" class="chat-history-loading">
+          <template v-if="historyLoading">
+            <LoadingOutlined style="margin-right: 6px; font-size: 14px" />
+            <span>正在加载</span>
+          </template>
+          <template v-else-if="hasMoreHistory">
+            <span>下拉加载更多历史消息</span>
+          </template>
+        </div>
         <MessageList
           :agent-has-result="agentHasResult"
           :messages="messages"
@@ -219,7 +280,7 @@ defineExpose({
             @memory="$emit('memory', $event)"
             @plan="$emit('plan', $event)"
             @toolProcess="$emit('toolProcess', $event)"
-            @send="$emit('send')"
+            @send="handleSend"
             @abort="$emit('abort')"
           />
           <div class="text-placeholder text-xs mt-sm" style="text-align: center; margin: 5px 0;">内容由AI生成，仅供参考</div>
@@ -237,4 +298,14 @@ defineExpose({
 
 <style scoped lang="scss">
 @use '@/styles/chat/index.scss' as *;
+
+/* 历史消息加载提示 */
+.chat-history-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
+  color: #999;
+  font-size: 13px;
+}
 </style>
