@@ -39,6 +39,15 @@ public class WorkspaceFileNode implements SerializableEnable {
      */
     private String readableSize;
     /**
+     * 最后修改时间（格式：yyyy-MM-dd HH:mm:ss）
+     */
+    private String lastModified;
+
+    /**
+     * 最后修改时间戳（毫秒）
+     */
+    private long lastModifiedTime;
+    /**
      * 子节点（仅目录有效）
      */
     private List<WorkspaceFileNode> children;

@@ -374,6 +374,10 @@ export interface WorkspaceFileNode {
   extension?: string
   /** 文件大小可读格式（仅文件有效，如 "1.5 MB"） */
   readableSize?: string
+  /** 最后修改时间（格式：yyyy-MM-dd HH:mm:ss） */
+  lastModified?: string
+  /** 最后修改时间戳（毫秒） */
+  lastModifiedTime?: string
   /** 子节点（仅目录有效） */
   children?: WorkspaceFileNode[]
 }

@@ -27,8 +27,8 @@ const emit = defineEmits<{
   (e: 'delete-file', node: WorkspaceFileNode): void
 }>()
 
-/** 文件夹展开状态，默认展开 */
-const expanded = ref(true)
+/** 文件夹展开状态，默认折叠 */
+const expanded = ref(false)
 
 /** 文件夹行 padding */
 const paddingLeft = `${props.depth * 16 + 8}px`
@@ -61,15 +61,16 @@ const handleDblClick = () => {
       <!-- 文件夹名称 -->
       <span class="workspace-item-name" :title="node.name">
         {{ node.name }}
+        <!-- 子节点数量 -->
         <span v-if="childCount > 0" class="workspace-folder-count">
           ({{ childCount }})
         </span>
       </span>
 
-      <!-- 子节点数量 -->
-
       <!-- 双击提示（hover 时淡入，不喧宾夺主） -->
-      <span class="workspace-item-hint">点击{{ expanded ? '折叠' : '展开' }}</span>
+      <span v-if="node.lastModified" class="workspace-item-meta">
+        {{ node.lastModified }}
+      </span>
     </div>
 
     <!-- 子节点列表 -->

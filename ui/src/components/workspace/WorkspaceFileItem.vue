@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {
-  EyeOutlined,
-  DownloadOutlined,
-  DeleteOutlined
-} from '@ant-design/icons-vue'
+// import {
+//   EyeOutlined,
+//   DownloadOutlined,
+//   DeleteOutlined
+// } from '@ant-design/icons-vue'
 import type { WorkspaceFileNode } from '@/types'
 import FileIcon from "@/components/workspace/FileIcon.vue";
 
@@ -62,7 +62,7 @@ const handleRowClick = () => {
 
     <!-- 文件图标 -->
     <span class="workspace-item-icon workspace-file-icon">
-      <FileIcon :file-name="node.fullName" width="17" />
+      <FileIcon :file-name="node.fullName as string" width="17" />
     </span>
 
     <!-- 文件名 -->
@@ -79,40 +79,43 @@ const handleRowClick = () => {
     <span v-if="node.readableSize" class="workspace-item-meta">
       {{ node.readableSize }}
     </span>
+    <span v-if="node.lastModified" class="workspace-item-meta">
+      {{ node.lastModified }}
+    </span>
 
     <!-- 行内操作按钮（始终显示，operating 时禁用） -->
-    <div class="workspace-file-actions">
-      <AButton
-        type="text"
-        size="small"
-        class="workspace-file-action-btn workspace-file-action-btn--primary"
-        title="预览"
-        @click.stop="emit('preview', node)"
-        :disabled="operating"
-      >
-        <EyeOutlined />
-      </AButton>
-      <AButton
-        type="text"
-        size="small"
-        class="workspace-file-action-btn workspace-file-action-btn--primary"
-        title="下载"
-        :disabled="operating || multiSelect"
-        @click.stop="emit('download', node)"
-      >
-        <DownloadOutlined />
-      </AButton>
-      <AButton
-        type="text"
-        size="small"
-        class="workspace-file-action-btn workspace-file-action-btn--danger"
-        title="删除"
-        :disabled="operating || multiSelect"
-        @click.stop="emit('delete', node)"
-      >
-        <DeleteOutlined />
-      </AButton>
-    </div>
+<!--    <div class="workspace-file-actions">-->
+<!--      <AButton-->
+<!--        type="text"-->
+<!--        size="small"-->
+<!--        class="workspace-file-action-btn workspace-file-action-btn&#45;&#45;primary"-->
+<!--        title="预览"-->
+<!--        @click.stop="emit('preview', node)"-->
+<!--        :disabled="operating"-->
+<!--      >-->
+<!--        <EyeOutlined />-->
+<!--      </AButton>-->
+<!--      <AButton-->
+<!--        type="text"-->
+<!--        size="small"-->
+<!--        class="workspace-file-action-btn workspace-file-action-btn&#45;&#45;primary"-->
+<!--        title="下载"-->
+<!--        :disabled="operating || multiSelect"-->
+<!--        @click.stop="emit('download', node)"-->
+<!--      >-->
+<!--        <DownloadOutlined />-->
+<!--      </AButton>-->
+<!--      <AButton-->
+<!--        type="text"-->
+<!--        size="small"-->
+<!--        class="workspace-file-action-btn workspace-file-action-btn&#45;&#45;danger"-->
+<!--        title="删除"-->
+<!--        :disabled="operating || multiSelect"-->
+<!--        @click.stop="emit('delete', node)"-->
+<!--      >-->
+<!--        <DeleteOutlined />-->
+<!--      </AButton>-->
+<!--    </div>-->
   </div>
 </template>
 
