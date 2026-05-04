@@ -161,6 +161,7 @@
       <div class="modal-footer">
         <AButton
           danger
+          type="primary"
           :disabled="!isEdit"
           :loading="unbindLoading"
           @click="handleUnbind"
@@ -418,7 +419,7 @@ function handleUnbind() {
     title: '确认解绑',
     content: '解绑后将删除该定时任务，是否继续？',
     okText: '确认解绑',
-    okType: 'danger',
+    okButtonProps: { danger: true },
     onOk: async () => {
       unbindLoading.value = true
       try {

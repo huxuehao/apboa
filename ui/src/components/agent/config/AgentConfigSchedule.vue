@@ -180,7 +180,7 @@ function handleUnbind() {
     title: '确认解绑',
     content: '解绑后将删除该定时任务，是否继续？',
     okText: '确认解绑',
-    okType: 'danger',
+    okButtonProps: { danger: true },
     onOk: async () => {
       unbindLoading.value = true
       try {
@@ -324,7 +324,7 @@ defineExpose({ isDirty })
       </AForm>
 
       <div class="config-schedule-actions flex justify-between mt-lg" style="padding-top: 16px;">
-        <AButton danger :disabled="!isEdit" :loading="unbindLoading" @click="handleUnbind">解绑定时任务</AButton>
+        <AButton type="primary" danger :disabled="!isEdit" :loading="unbindLoading" @click="handleUnbind">解绑定时任务</AButton>
         <AButton type="primary" :loading="loading" @click="handleSubmit">保存</AButton>
       </div>
     </ASpin>

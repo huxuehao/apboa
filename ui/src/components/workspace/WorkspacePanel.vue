@@ -168,7 +168,7 @@ const handleDelete = async () => {
     title: '确认删除',
     content: `将删除所选文件，此操作不可恢复，是否继续？`,
     okText: '确认删除',
-    okType: 'danger',
+    okButtonProps: { danger: true },
     cancelText: '取消',
     onOk: async () => {
       if (!props.sessionId || selectedPaths.size === 0) return
@@ -201,7 +201,7 @@ const handleDeleteFile = async (node: WorkspaceFileNode) => {
     title: '确认删除',
     content: `将删除所选[${node.fullName}]，此操作不可恢复，是否继续？`,
     okText: '确认删除',
-    okType: 'danger',
+    okButtonProps: { danger: true },
     cancelText: '取消',
     onOk: async () => {
       if (!props.sessionId) return
