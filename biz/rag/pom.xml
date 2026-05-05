@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.hxh.apboa</groupId>
-        <artifactId>apboa</artifactId>
+        <artifactId>biz</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>console</artifactId>
+    <artifactId>rag</artifactId>
     <packaging>jar</packaging>
 
-    <name>console</name>
+    <name>rag</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>com.hxh.apboa</groupId>
-            <artifactId>account</artifactId>
+            <artifactId>common</artifactId>
         </dependency>
         <dependency>
             <groupId>com.hxh.apboa</groupId>
@@ -27,31 +27,11 @@
         </dependency>
         <dependency>
             <groupId>com.hxh.apboa</groupId>
-            <artifactId>job</artifactId>
+            <artifactId>knowledge</artifactId>
         </dependency>
         <dependency>
             <groupId>com.hxh.apboa</groupId>
-            <artifactId>sk</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.hxh.apboa</groupId>
-            <artifactId>rag</artifactId>
+            <artifactId>resource</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

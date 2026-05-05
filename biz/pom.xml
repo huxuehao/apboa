@@ -25,6 +25,7 @@
         <module>a2a</module>
         <module>studio</module>
         <module>sk</module>
+        <module>rag</module>
     </modules>
 
     <name>biz</name>

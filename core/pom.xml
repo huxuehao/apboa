@@ -29,5 +29,9 @@
             <groupId>com.hxh.apboa</groupId>
             <artifactId>websocket</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>knowledge</artifactId>
+        </dependency>
     </dependencies>
 </project>

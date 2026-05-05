@@ -1,5 +1,6 @@
 package com.hxh.apboa.common.wrapper;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.agentscope.core.rag.Knowledge;
 import io.agentscope.core.rag.RAGMode;
 import lombok.*;
@@ -17,4 +18,5 @@ import lombok.*;
 public class KnowledgeWrapper {
     private RAGMode ragMode;
     private Knowledge knowledge;
+    private JsonNode retrievalConfig;
 }

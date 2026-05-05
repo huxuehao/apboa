@@ -4,17 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 知识库类型
+ * RAG文档处理状态
  *
  * @author huxuehao
  */
 @Getter
 @AllArgsConstructor
-public enum KbType {
-    BAILIAN("百炼"),
-    DIFY("Dify"),
-    RAGFLOW("Ragflow"),
-    LOCAL("本地");
+public enum RagDocumentStatus {
+    PENDING("待处理"),
+    PROCESSING("处理中"),
+    COMPLETED("已完成"),
+    FAILED("失败");
 
     private final String description;
 }
