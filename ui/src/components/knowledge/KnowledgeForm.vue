@@ -126,9 +126,6 @@ const bailianConnection = reactive({
 const localConnection = reactive({
   ollamaBaseUrl: 'http://localhost:11434',
   embeddingModel: 'qwen3-embedding:4b',
-  pgvectorUrl: 'jdbc:postgresql://localhost:5432/apboa_vector',
-  pgvectorUsername: 'postgres',
-  pgvectorPassword: ''
 })
 
 /**
@@ -366,7 +363,7 @@ function resetForm() {
   Object.assign(metadataFilters, { logicalOperator: 'AND', conditions: [] })
   Object.assign(difyHttp, { connectTimeout: '', readTimeout: '', maxRetries: undefined, customHeaders: '{}' })
   Object.assign(ragflowHttp, { timeout: '', maxRetries: undefined, customHeaders: '{}' })
-  Object.assign(localConnection, { ollamaBaseUrl: 'http://localhost:11434', embeddingModel: 'qwen3-embedding:4b', pgvectorUrl: 'jdbc:postgresql://localhost:5432/apboa_vector', pgvectorUsername: 'postgres', pgvectorPassword: '' })
+  Object.assign(localConnection, { ollamaBaseUrl: 'http://localhost:11434', embeddingModel: 'qwen3-embedding:4b'})
   Object.assign(localRetrieval, { chunkSize: 512, chunkOverlap: 64, chunkDelimiters: '', topK: 5, scoreThreshold: 0.5 })
 }
 
@@ -569,8 +566,6 @@ function removeMetadataCondition(index: number) {
         />
       </AFormItem>
 
-      <ADivider style="margin: 16px 0" />
-
       <div v-if="formData.kbType" class="config-section">
         <ASegmented
           v-model:value="activeConfigSection"
@@ -648,15 +643,6 @@ function removeMetadataCondition(index: number) {
             </AFormItem>
             <AFormItem label="嵌入模型" :rules="[{ required: true, message: '请输入嵌入模型名称' }]">
               <AInput v-model:value="localConnection.embeddingModel" placeholder="例如: qwen3-embedding:4b" />
-            </AFormItem>
-            <AFormItem label="PostgreSQL地址" :rules="[{ required: true, message: '请输入PostgreSQL连接地址' }]">
-              <AInput v-model:value="localConnection.pgvectorUrl" placeholder="例如: jdbc:postgresql://localhost:5432/apboa_vector" />
-            </AFormItem>
-            <AFormItem label="PostgreSQL用户名">
-              <AInput v-model:value="localConnection.pgvectorUsername" placeholder="postgres" />
-            </AFormItem>
-            <AFormItem label="PostgreSQL密码">
-              <AInputPassword v-model:value="localConnection.pgvectorPassword" placeholder="请输入密码" />
             </AFormItem>
           </template>
         </div>
