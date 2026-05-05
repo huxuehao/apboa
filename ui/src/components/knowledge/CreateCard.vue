@@ -32,6 +32,10 @@ const showTypeSelect = computed(() => props.kbType === null)
  */
 const typeOptions = [
   {
+    value: 'LOCAL',
+    label: '本地知识库',
+  },
+  {
     value: 'BAILIAN',
     label: '百炼知识库',
   },
@@ -42,10 +46,6 @@ const typeOptions = [
   {
     value: 'RAGFLOW',
     label: 'RAGFlow',
-  },
-  {
-    value: 'LOCAL',
-    label: '本地知识库',
   }
 ]
 

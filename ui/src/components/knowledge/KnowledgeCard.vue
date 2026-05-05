@@ -53,10 +53,10 @@ const formattedTime = computed(() => {
  */
 const kbTypeText = computed(() => {
   const typeMap: Record<string, string> = {
+    LOCAL: '本地',
     BAILIAN: '百炼',
     DIFY: 'Dify',
     RAGFLOW: 'RagFlow',
-    LOCAL: '本地'
   }
   return typeMap[props.data.kbType] || props.data.kbType
 })
