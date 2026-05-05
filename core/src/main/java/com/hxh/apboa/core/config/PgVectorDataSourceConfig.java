@@ -1,4 +1,4 @@
-package com.hxh.apboa.core.rag.config;
+package com.hxh.apboa.core.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import org.slf4j.Logger;
