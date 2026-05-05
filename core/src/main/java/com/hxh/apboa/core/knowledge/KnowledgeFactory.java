@@ -43,6 +43,7 @@ public class KnowledgeFactory {
                 .builder()
                 .ragMode(knowledgeBaseConfig.getRagMode())
                 .knowledge(iKnowledge.build(knowledgeBaseConfig))
+                .retrievalConfig(knowledgeBaseConfig.getRetrievalConfig())
                 .build();
     }
 

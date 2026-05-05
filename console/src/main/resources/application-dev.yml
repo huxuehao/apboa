@@ -22,7 +22,7 @@ spring:
     redis:
       host: 127.0.0.1
       port: 6379
-      password: "Redis@dhcc123.com"
+      password: "123"
       database: 7
       timeout: 2000ms
       lettuce:
@@ -36,7 +36,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/apboa?useSSL=false&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
     username: root
-    password: root123123
+    password: root
     druid:
       initial-size: 5
       min-idle: 5
@@ -51,6 +51,14 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET:ZJr8c2xF0y5b7yM+1H9v9cGZq6nZ5e0k5r3Cw7H8vJQ=}
+
+rag:
+  pgvector:
+    enabled: true
+    url: jdbc:postgresql://127.0.0.1:5432/apboa_vector
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
 
 mybatis-plus:
   mapper-locations: classpath*:com/hxh/apboa/**/mapper/**/*.xml

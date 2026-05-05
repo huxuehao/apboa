@@ -456,3 +456,47 @@ export interface CodeExecutionConfig {
   enableWrite?: boolean // 是否启用WriteFileTool
   command?: string[] | null // 允许执行的命令，如 python3、bash
 }
+
+/**
+ * RAG文档处理状态
+ */
+export enum RagDocumentStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED'
+}
+
+/**
+ * RAG文档
+ */
+export interface RagDocument {
+  id: string
+  knowledgeBaseConfigId: string
+  fileName: string
+  filePath: string
+  fileSize: number
+  fileType: string
+  chunkCount: number
+  status: RagDocumentStatus
+  errorMessage: string | null
+  createdAt: string
+  updatedAt: string
+  createdBy: string | null
+  updatedBy: string | null
+}
+
+/**
+ * RAG文档分块
+ */
+export interface RagDocumentChunk {
+  id: string
+  documentId: string
+  chunkIndex: number
+  content: string
+  tokenCount: number | null
+  startOffset: number | null
+  endOffset: number | null
+  metadata: string | null
+  createdAt: string
+}

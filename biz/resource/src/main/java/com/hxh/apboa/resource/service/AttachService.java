@@ -63,4 +63,12 @@ public interface AttachService extends IService<Attach> {
      * @param outputStream 输出流
      */
     void batchDownload(List<Long> ids, OutputStream outputStream);
+
+    /**
+     * 以InputStream形式下载文件
+     * @param attach 附件实体
+     * @return 文件输入流
+     */
+    java.io.InputStream downloadAsStream(Attach attach);
+
 }

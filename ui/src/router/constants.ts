@@ -90,6 +90,9 @@ export const RoutePaths = {
   // 知识库管理
   KNOWLEDGE: 'knowledge',
 
+  // 知识库文档管理
+  KNOWLEDGE_DOCUMENTS: 'knowledge/:id/documents',
+
   // 工具管理
   TOOL: 'tool',
 

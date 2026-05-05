@@ -4,8 +4,8 @@
  * @author huxuehao
  */
 <script setup lang="ts">
-import { computed } from 'vue'
-import { EllipsisOutlined, DatabaseOutlined } from '@ant-design/icons-vue'
+import { h, computed } from 'vue'
+import { EllipsisOutlined, DatabaseOutlined, ProfileOutlined } from '@ant-design/icons-vue'
 import type { KnowledgeBaseConfigVO } from '@/types'
 import {
   createViewItem,
@@ -30,6 +30,7 @@ const emit = defineEmits<{
   edit: [id: string]
   delete: [id: string]
   enable: [id: string]
+  manageDocuments: [id: string]
 }>()
 
 /**
@@ -52,9 +53,10 @@ const formattedTime = computed(() => {
  */
 const kbTypeText = computed(() => {
   const typeMap: Record<string, string> = {
+    LOCAL: '本地',
     BAILIAN: '百炼',
     DIFY: 'Dify',
-    RAGFLOW: 'RagFlow'
+    RAGFLOW: 'RagFlow',
   }
   return typeMap[props.data.kbType] || props.data.kbType
 })
@@ -62,13 +64,27 @@ const kbTypeText = computed(() => {
 /**
  * 操作菜单项
  */
-const menuItems = computed(() => [
-  createViewItem(),
-  createEditItem(),
-  createEnableItem(props.data.enabled),
-  createDivider(),
-  createDeleteItem(),
-])
+const menuItems = computed(() => {
+  const items = [
+    createViewItem(),
+    createEditItem(),
+    createEnableItem(props.data.enabled),
+  ]
+
+  // 本地知识库显示文档管理入口
+  if (props.data.kbType === 'LOCAL') {
+    items.push(
+      createDivider(),
+      {
+        key: 'manageDocuments',
+        label: '文档',
+        icon: () => h(ProfileOutlined)
+      })
+  }
+
+  items.push(createDivider(), createDeleteItem())
+  return items
+})
 
 /**
  * 处理菜单点击
@@ -86,6 +102,9 @@ function handleMenuClick({ key }: { key: string }) {
       break
     case 'delete':
       emit('delete', props.data.id as string)
+      break
+    case 'manageDocuments':
+      emit('manageDocuments', props.data.id as string)
       break
   }
 }
@@ -114,7 +133,9 @@ function handleMenuClick({ key }: { key: string }) {
       <div class="card-tags flex items-center gap-xs">
         <ATag color="default" class="tag">{{ kbTypeText }}</ATag>
       </div>
-      <div class="card-time text-placeholder text-xs">更新于 {{ formattedTime }}</div>
+      <div class="card-footer-right flex items-center gap-xs">
+        <div class="card-time text-placeholder text-xs">更新于 {{ formattedTime }}</div>
+      </div>
     </div>
   </div>
 </template>

@@ -91,7 +91,8 @@ export enum HealthStatus {
 export enum KbType {
   BAILIAN = 'BAILIAN',
   DIFY = 'DIFY',
-  RAGFLOW = 'RAGFLOW'
+  RAGFLOW = 'RAGFLOW',
+  LOCAL = 'LOCAL'
 }
 
 /**
