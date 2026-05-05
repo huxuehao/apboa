@@ -8,7 +8,6 @@ import { ref, reactive, computed, watch } from 'vue'
 import { message } from 'ant-design-vue'
 import { DatabaseOutlined } from '@ant-design/icons-vue'
 import {type KnowledgeBaseConfig, type KnowledgeBaseConfigVO, type KbType, RAGMode} from '@/types'
-import RagDocumentManager from '@/components/rag/RagDocumentManager.vue'
 import * as knowledgeApi from '@/api/knowledge'
 
 /**
@@ -875,11 +874,6 @@ function removeMetadataCondition(index: number) {
         </div>
       </div>
     </AForm>
-
-    <div v-if="isEdit && formData.kbType === 'LOCAL' && formData.id" class="mt-md">
-      <ADivider>文档管理</ADivider>
-      <RagDocumentManager :knowledge-base-config-id="String(formData.id)" />
-    </div>
 
     <template #footer>
       <AButton @click="handleCancel">取消</AButton>

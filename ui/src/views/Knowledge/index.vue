@@ -15,6 +15,7 @@ import type { KnowledgeBaseConfigVO, KbType } from '@/types'
 import KnowledgeCard from '@/components/knowledge/KnowledgeCard.vue'
 import CreateCard from '@/components/knowledge/CreateCard.vue'
 import KnowledgeForm from '@/components/knowledge/KnowledgeForm.vue'
+import RagDocManagerPage from '@/components/rag/RagDocManagerPage.vue'
 import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
 import InfiniteLoading from "v3-infinite-loading";
 import "v3-infinite-loading/lib/style.css";
@@ -25,6 +26,10 @@ const { list, selectedKbType, keyword, loading, hasMore } = storeToRefs(store)
 const formVisible = ref<boolean>(false)
 const currentData = ref<KnowledgeBaseConfigVO | undefined>(undefined)
 const initialKbType = ref<KbType | undefined>(undefined)
+/** 文档管理模态窗 */
+const docManagerVisible = ref<boolean>(false)
+const docManagerKbId = ref<string>('')
+const docManagerKbName = ref<string>('')
 /** 用于强制重建 InfiniteLoading 组件的 key */
 const infiniteLoadingKey = ref(0)
 /** 是否首次加载 */
@@ -40,20 +45,20 @@ const currentKbType = computed<KbType | null>(() => selectedKbType.value as KbTy
  */
 const kbTypeOptions = [
   { label: '全部', value: null },
+  { label: '本地', value: 'LOCAL' },
   { label: '百炼', value: 'BAILIAN' },
   { label: 'Dify', value: 'DIFY' },
   { label: 'RagFlow', value: 'RAGFLOW' },
-  { label: '本地', value: 'LOCAL' }
 ]
 
 /**
  * 知识库类型映射
  */
 const kbTypeMap: Record<string, string> = {
+  LOCAL: '本地',
   BAILIAN: '百炼',
   DIFY: 'Dify',
-  RAGFLOW: 'RagFlow',
-  LOCAL: '本地'
+  RAGFLOW: 'RagFlow'
 }
 
 /**
@@ -247,6 +252,16 @@ function handleFormSuccess() {
 }
 
 /**
+ * 处理文档管理
+ */
+function handleManageDocuments(id: string) {
+  const item = list.value.find(i => i.id === id)
+  docManagerKbId.value = id
+  docManagerKbName.value = item?.name || ''
+  docManagerVisible.value = true
+}
+
+/**
  * 处理搜索
  */
 function handleSearch() {
@@ -378,6 +393,7 @@ watch([selectedKbType, keyword], () => {
           @edit="handleEdit"
           @enable="handleEnable"
           @delete="handleDelete"
+          @manageDocuments="handleManageDocuments"
         />
       </div>
 
@@ -409,6 +425,19 @@ watch([selectedKbType, keyword], () => {
       :initial-kb-type="initialKbType"
       @success="handleFormSuccess"
     />
+
+    <ApboaModal
+      v-model:open="docManagerVisible"
+      default-width="100%"
+      destroyOnClose
+      :footer="null"
+    >
+      <RagDocManagerPage
+        v-if="docManagerVisible"
+        :doc-manager-kb-name="docManagerKbName"
+        :knowledge-base-config-id="docManagerKbId"
+      />
+    </ApboaModal>
   </div>
 </template>
 

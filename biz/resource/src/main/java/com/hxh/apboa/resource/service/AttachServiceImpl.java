@@ -374,4 +374,11 @@ public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> impleme
     public static double bytesToMB(long bytes) {
         return (double) bytes / (1024 * 1024);
     }
+
+    @Override
+    public java.io.InputStream downloadAsStream(Attach attach) {
+        FileStorageService storageService = storageProtocolService.getStorageService();
+        return storageService.load(genStoragePath(attach));
+    }
+
 }

@@ -18,6 +18,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -148,6 +155,134 @@ public class RagDocumentController {
         }).toList();
 
         return R.data(results);
+    }
+
+
+
+    /**
+     * 下载文档原始文件
+     */
+    @GetMapping("/download/{id}")
+    public void download(@PathVariable("id") Long id, HttpServletResponse response) {
+        RagDocument document = ragRepository.getDocumentById(id);
+        if (document == null) {
+            throw new RuntimeException("文档不存在");
+        }
+        try {
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment;filename=" + URLEncoder.encode(document.getFileName(), StandardCharsets.UTF_8));
+            Attach attach = attachService.getById(Long.valueOf(document.getFilePath()));
+            if (attach == null) {
+                throw new RuntimeException("文件附件不存在");
+            }
+            try (OutputStream outputStream = response.getOutputStream()) {
+                attachService.download(attach, outputStream);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("文件下载失败", e);
+        }
+    }
+
+    /**
+     * 重新上传文档（替换原有文件并重新处理）
+     */
+    @PostMapping("/re-upload/{id}")
+    @RoleNeed({Role.ADMIN, Role.EDIT})
+    public R<Boolean> reUpload(@PathVariable("id") Long id,
+                               @RequestParam("file") MultipartFile file) {
+        RagDocument document = ragRepository.getDocumentById(id);
+        if (document == null) {
+            return R.fail("文档不存在");
+        }
+
+        KnowledgeBaseConfig kbConfig = knowledgeBaseConfigService.getById(document.getKnowledgeBaseConfigId());
+        if (kbConfig == null) {
+            return R.fail("知识库配置不存在");
+        }
+
+        try {
+            String fileName = file.getOriginalFilename();
+            if (!documentParser.isSupported(fileName)) {
+                return R.fail("不支持的文件类型");
+            }
+
+            // 删除旧的向量和分块数据
+            localRagService.deleteDocumentChunksAndVectors(id);
+
+            // 删除旧附件并上传新附件
+            Attach oldAttach = attachService.getById(Long.valueOf(document.getFilePath()));
+            if (oldAttach != null) {
+                attachService.removeById(oldAttach.getId());
+            }
+
+            Attach newAttach = attachService.upload(file, fileName);
+
+            // 更新文档记录
+            document.setFileName(fileName);
+            document.setFilePath(String.valueOf(newAttach.getId()));
+            document.setFileSize(file.getSize());
+            document.setFileType(extractFileType(fileName));
+            document.setChunkCount(0);
+            document.setStatus(RagDocumentStatus.PENDING);
+            document.setErrorMessage(null);
+            document.setUpdatedAt(LocalDateTime.now());
+            ragRepository.updateDocument(document);
+
+            // 重新处理文档
+            try (InputStream inputStream = file.getInputStream()) {
+                localRagService.processDocument(document, inputStream, kbConfig);
+            }
+
+            return R.data(true);
+        } catch (Exception e) {
+            return R.fail("重新上传处理失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 重新分块处理（使用当前知识库配置重新解析和向量化）
+     */
+    @PostMapping("/re-chunk/{id}")
+    @RoleNeed({Role.ADMIN, Role.EDIT})
+    public R<Boolean> reChunk(@PathVariable("id") Long id) {
+        RagDocument document = ragRepository.getDocumentById(id);
+        if (document == null) {
+            return R.fail("文档不存在");
+        }
+
+        KnowledgeBaseConfig kbConfig = knowledgeBaseConfigService.getById(document.getKnowledgeBaseConfigId());
+        if (kbConfig == null) {
+            return R.fail("知识库配置不存在");
+        }
+
+        try {
+            // 删除旧的向量和分块数据
+            localRagService.deleteDocumentChunksAndVectors(id);
+
+            // 通过附件服务获取文件流并重新处理
+            Attach attach = attachService.getById(Long.valueOf(document.getFilePath()));
+            if (attach == null) {
+                return R.fail("文件附件不存在，请重新上传");
+            }
+
+            document.setChunkCount(0);
+            document.setStatus(RagDocumentStatus.PROCESSING);
+            document.setErrorMessage(null);
+            document.setUpdatedAt(LocalDateTime.now());
+            ragRepository.updateDocument(document);
+
+            // 重新处理文档
+            localRagService.reprocessDocument(document, attach, kbConfig);
+
+            return R.data(true);
+        } catch (Exception e) {
+            document.setStatus(RagDocumentStatus.FAILED);
+            document.setErrorMessage(e.getMessage());
+            document.setUpdatedAt(LocalDateTime.now());
+            ragRepository.updateDocument(document);
+            return R.fail("重新分块失败: " + e.getMessage());
+        }
     }
 
     private String extractFileType(String fileName) {

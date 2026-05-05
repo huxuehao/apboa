@@ -45,3 +45,30 @@ export function listChunks(documentId: string) {
 export function search(params: { knowledgeBaseConfigId: string; query: string; limit?: number; scoreThreshold?: number }) {
   return request.post<ApiResponse<Record<string, unknown>[]>>('/api/rag/document/search', params)
 }
+
+/**
+ * 下载文档原始文件
+ */
+export function downloadDocument(documentId: string) {
+  return request.get(`/api/rag/document/download/${documentId}`, {
+    responseType: 'blob'
+  })
+}
+
+/**
+ * 重新上传文档（替换原有文件并重新处理）
+ */
+export function reUploadDocument(documentId: string, file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request.post<ApiResponse<boolean>>(`/api/rag/document/re-upload/${documentId}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
+/**
+ * 重新分块处理文档
+ */
+export function reChunkDocument(documentId: string) {
+  return request.post<ApiResponse<boolean>>(`/api/rag/document/re-chunk/${documentId}`)
+}

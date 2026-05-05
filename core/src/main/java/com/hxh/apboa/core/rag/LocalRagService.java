@@ -10,6 +10,8 @@ import com.hxh.apboa.core.rag.TextChunker.ChunkResult;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.hxh.apboa.common.entity.Attach;
+import com.hxh.apboa.resource.service.AttachService;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -34,17 +36,20 @@ public class LocalRagService {
     private final EmbeddingService embeddingService;
     private final PgVectorStore pgVectorStore;
     private final RagRepository ragRepository;
+    private final AttachService attachService;
 
     public LocalRagService(DocumentParser documentParser,
                            TextChunker textChunker,
                            EmbeddingService embeddingService,
                            PgVectorStore pgVectorStore,
-                           RagRepository ragRepository) {
+                           RagRepository ragRepository,
+                           AttachService attachService) {
         this.documentParser = documentParser;
         this.textChunker = textChunker;
         this.embeddingService = embeddingService;
         this.pgVectorStore = pgVectorStore;
         this.ragRepository = ragRepository;
+        this.attachService = attachService;
     }
 
     /**
@@ -158,6 +163,33 @@ public class LocalRagService {
         pgVectorStore.deleteByDocumentId(documentId);
         ragRepository.deleteChunksByDocumentId(documentId);
         ragRepository.deleteDocument(documentId);
+    }
+
+    /**
+     * 仅删除文档的分块和向量数据（不删除文档记录本身），用于重新分块场景
+     */
+    public void deleteDocumentChunksAndVectors(Long documentId) {
+        pgVectorStore.deleteByDocumentId(documentId);
+        ragRepository.deleteChunksByDocumentId(documentId);
+    }
+
+    /**
+     * 通过附件服务重新获取文件流并重新处理文档（重新分块场景）
+     */
+    public void reprocessDocument(RagDocument document, Attach attach, KnowledgeBaseConfig config) {
+        document.setStatus(RagDocumentStatus.PROCESSING);
+        document.setUpdatedAt(LocalDateTime.now());
+        ragRepository.updateDocument(document);
+
+        try (InputStream inputStream = attachService.downloadAsStream(attach)) {
+            processDocument(document, inputStream, config);
+        } catch (Exception e) {
+            log.error("重新处理文档失败, docId={}", document.getId(), e);
+            document.setStatus(RagDocumentStatus.FAILED);
+            document.setErrorMessage(e.getMessage());
+            document.setUpdatedAt(LocalDateTime.now());
+            ragRepository.updateDocument(document);
+        }
     }
 
     private int getChunkSize(KnowledgeBaseConfig config) {
