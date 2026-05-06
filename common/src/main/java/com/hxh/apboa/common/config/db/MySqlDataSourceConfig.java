@@ -1,4 +1,4 @@
-package com.hxh.apboa.core.config;
+package com.hxh.apboa.common.config.db;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure;
@@ -35,7 +35,12 @@ public class MySqlDataSourceConfig {
             @Value("${spring.datasource.druid.min-idle:5}") int minIdle,
             @Value("${spring.datasource.druid.max-active:20}") int maxActive,
             @Value("${spring.datasource.druid.max-wait:60000}") long maxWait,
-            @Value("${spring.datasource.druid.validation-query:SELECT 1}") String validationQuery) {
+            @Value("${spring.datasource.druid.validation-query:SELECT 1}") String validationQuery,
+            @Value("${spring.datasource.druid.test-on-borrow:false}") boolean testOnBorrow,
+            @Value("${spring.datasource.druid.test-on-return:false}") boolean testOnReturn,
+            @Value("${spring.datasource.druid.test-while-idle:true}") boolean testWhileIdle,
+            @Value("${spring.datasource.druid.time-between-eviction-runs-millis:60000}") long timeBetweenEvictionRunsMillis,
+            @Value("${spring.datasource.druid.min-evictable-idle-time-millis:300000}") long minEvictableIdleTimeMillis) {
 
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl(url);
@@ -47,6 +52,11 @@ public class MySqlDataSourceConfig {
         dataSource.setMaxActive(maxActive);
         dataSource.setMaxWait(maxWait);
         dataSource.setValidationQuery(validationQuery);
+        dataSource.setTestOnBorrow(testOnBorrow);
+        dataSource.setTestOnReturn(testOnReturn);
+        dataSource.setTestWhileIdle(testWhileIdle);
+        dataSource.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
+        dataSource.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
         log.info("MySQL主数据源初始化完成, url={}", url);
         return dataSource;
     }

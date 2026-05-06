@@ -52,6 +52,7 @@ public class PgVectorStore {
             """);
             pgJdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_embedding_kbc ON rag_embedding(knowledge_base_config_id)");
             pgJdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_embedding_doc ON rag_embedding(document_id)");
+            pgJdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_rag_vectors_embedding ON rag_embedding USING hnsw (embedding halfvec_cosine_ops)");
             log.info("PgVector表结构初始化完成");
         } catch (Exception e) {
             log.error("PgVector表结构初始化失败", e);

@@ -1,8 +1,9 @@
-package com.hxh.apboa.core.rag;
+package com.hxh.apboa.core.rag.knowledge;
 
 import com.hxh.apboa.common.entity.KnowledgeBaseConfig;
 import com.hxh.apboa.common.vo.RagDocumentChunkVO;
 import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
+import com.hxh.apboa.core.rag.service.LocalRagService;
 import io.agentscope.core.message.TextBlock;
 import io.agentscope.core.rag.Knowledge;
 import io.agentscope.core.rag.model.Document;
@@ -52,7 +53,7 @@ public class LocalKnowledge implements Knowledge {
                 KnowledgeBaseConfig kbConfig = knowledgeBaseConfigService.getById(knowledgeBaseConfigId);
                 if (kbConfig == null || !kbConfig.getEnabled()) {
                     log.warn("知识库配置不存在或已禁用, id={}", knowledgeBaseConfigId);
-                    return new ArrayList<Document>();
+                    return new ArrayList<>();
                 }
 
                 int limit = config != null ? config.getLimit() : 5;
