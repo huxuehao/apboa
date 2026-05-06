@@ -65,7 +65,8 @@ public class LocalRagService {
         ragRepository.updateDocument(document);
 
         try {
-            String text = documentParser.parse(inputStream, document.getFileName());
+            String rowDelimiter = getFirstChunkDelimiter(config);
+            String text = documentParser.parse(inputStream, document.getFileName(), rowDelimiter);
 
             int chunkSize = getChunkSize(config);
             int chunkOverlap = getChunkOverlap(config);
@@ -208,6 +209,23 @@ public class LocalRagService {
     private List<ChunkResult> doChunk(String text, int chunkSize, int chunkOverlap, KnowledgeBaseConfig config) {
         List<String> delimiters = getChunkDelimiters(config);
         return textChunker.delimiterChunk(text, chunkSize, chunkOverlap, delimiters);
+    }
+
+    /**
+     * 获取第一个分块分隔符，用于 Excel 等文档在解析时作为行分隔符
+     */
+    private String getFirstChunkDelimiter(KnowledgeBaseConfig config) {
+        JsonNode retrievalConfig = config.getRetrievalConfig();
+        String delimitersStr = JsonUtils.getStringValue(retrievalConfig, "chunkDelimiters", null);
+        if (delimitersStr == null || delimitersStr.isEmpty()) {
+            return null;
+        }
+        String first = Arrays.stream(delimitersStr.split(","))
+                .map(String::trim)
+                .filter(d -> !d.isEmpty())
+                .findFirst()
+                .orElse(null);
+        return first != null ? unescapeDelimiter(first) : null;
     }
 
     private List<String> getChunkDelimiters(KnowledgeBaseConfig config) {
