@@ -128,16 +128,12 @@ function handleDeleteChunk(chunk: RagDocumentChunk) {
     title: '确认删除',
     content: `删除分块 #${chunk.chunkIndex} 后无法恢复，是否继续？`,
     okText: '确认删除',
-    okType: 'danger',
+    okButtonProps: { danger: true },
     cancelText: '取消',
     onOk: async () => {
-      try {
-        await ragApi.deleteChunk(String(chunk.id))
-        message.success('删除成功')
-        await loadChunks()
-      } catch (error) {
-        message.error('删除失败')
-      }
+      await ragApi.deleteChunk(String(chunk.id))
+      message.success('删除成功')
+      await loadChunks()
     }
   })
 }
@@ -160,8 +156,7 @@ function handleClose() {
   >
     <ASpin :spinning="loading">
       <div v-if="chunks.length === 0 && !loading" class="doc-empty">
-        <FileTextOutlined class="doc-empty-icon" />
-        <div class="doc-empty-text">暂无分块数据</div>
+        <AEmpty  description="未找到匹配的检索结果"/>
       </div>
 
       <div v-else class="chunk-list">

@@ -6,6 +6,7 @@ import com.hxh.apboa.common.entity.RagDocument;
 import com.hxh.apboa.common.entity.RagDocumentChunk;
 import com.hxh.apboa.common.enums.RagDocumentStatus;
 import com.hxh.apboa.common.util.JsonUtils;
+import com.hxh.apboa.common.vo.RagDocumentChunkVO;
 import com.hxh.apboa.core.rag.TextChunker.ChunkResult;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.hxh.apboa.common.entity.Attach;
 import com.hxh.apboa.resource.service.AttachService;
 import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -143,18 +145,20 @@ public class LocalRagService {
      * @param scoreThreshold 分数阈值
      * @return 相关文档分块列表
      */
-    public List<RagDocumentChunk> retrieve(String query, KnowledgeBaseConfig config,
+    public List<RagDocumentChunkVO> retrieve(String query, KnowledgeBaseConfig config,
                                            int limit, double scoreThreshold) {
         float[] queryEmbedding = embeddingService.embed(query, config);
 
         List<PgVectorStore.RetrievalResult> results = pgVectorStore.search(
                 queryEmbedding, config.getId(), limit, scoreThreshold);
 
-        List<RagDocumentChunk> chunks = new ArrayList<>();
+        List<RagDocumentChunkVO> chunks = new ArrayList<>();
         for (PgVectorStore.RetrievalResult result : results) {
             RagDocumentChunk chunk = ragRepository.getChunkById(result.chunkId());
             if (chunk != null) {
-                chunks.add(chunk);
+                RagDocumentChunkVO chunkVo = new RagDocumentChunkVO();
+                BeanUtils.copyProperties(chunk, chunkVo);
+                chunks.add(chunkVo);
             }
         }
 

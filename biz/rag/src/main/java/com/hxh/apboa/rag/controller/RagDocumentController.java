@@ -7,6 +7,7 @@ import com.hxh.apboa.common.enums.KbType;
 import com.hxh.apboa.common.enums.RagDocumentStatus;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.r.R;
+import com.hxh.apboa.common.vo.RagDocumentChunkVO;
 import com.hxh.apboa.core.rag.LocalRagService;
 import com.hxh.apboa.core.rag.DocumentParser;
 import com.hxh.apboa.core.rag.RagRepository;
@@ -174,7 +175,7 @@ public class RagDocumentController {
             return R.fail("知识库配置不存在");
         }
 
-        List<com.hxh.apboa.common.entity.RagDocumentChunk> chunks =
+        List<RagDocumentChunkVO> chunks =
                 localRagService.retrieve(query, kbConfig, limit, scoreThreshold);
 
         List<Map<String, Object>> results = chunks.stream().map(chunk -> {
@@ -184,6 +185,7 @@ public class RagDocumentController {
             map.put("chunkIndex", chunk.getChunkIndex());
             map.put("content", chunk.getContent());
             map.put("tokenCount", chunk.getTokenCount());
+            map.put("score", chunk.getScore());
             return map;
         }).toList();
 

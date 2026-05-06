@@ -226,7 +226,7 @@ function handleDelete(doc: RagDocument) {
     title: '确认删除',
     content: `删除"${doc.fileName}"将同时删除其所有分块和向量数据，是否继续？`,
     okText: '确认删除',
-    okType: 'danger',
+    okButtonProps: { danger: true },
     cancelText: '取消',
     onOk: async () => {
       await ragApi.deleteDocuments([doc.id])
