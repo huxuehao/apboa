@@ -744,10 +744,19 @@ function removeMetadataCondition(index: number) {
               </div>
             </AFormItem>
 
-            <AFormItem label="向量化纬度">
-              <AInputNumber v-model:value="localConnection.dimension" :min="64" :max="2048" style="width: 100%" />
+            <AFormItem label="向量化维度（仅可选择一次）" :rules="[{ required: true, message: '请选择向量化维度' }]">
+              <ASelect v-model:value="localConnection.dimension" :disabled="isEdit" style="width: 100%">
+                <ASelectOption :value="64">64</ASelectOption>
+                <ASelectOption :value="128">128</ASelectOption>
+                <ASelectOption :value="256">256</ASelectOption>
+                <ASelectOption :value="512">512</ASelectOption>
+                <ASelectOption :value="768">768</ASelectOption>
+                <ASelectOption :value="1024">1024</ASelectOption>
+                <ASelectOption :value="2048">2048</ASelectOption>
+                <ASelectOption :value="2560">2560</ASelectOption>
+              </ASelect>
               <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
-                默认1024，1024 维度是性能与成本的最佳平衡点，适用于绝大多数语义检索任务
+                默认1024，新增后不可修改。1024 维度是性能与成本的最佳平衡点，适用于绝大多数语义检索任务
               </div>
             </AFormItem>
 
