@@ -1,13 +1,3 @@
--- ============================================================
--- 本地RAG系统数据库初始化脚本
--- MySQL部分：RAG文档和分块元数据
--- PostgreSQL部分：向量存储（pgvector）
--- ============================================================
-
--- ============================================================
--- MySQL 表结构
--- ============================================================
-
 -- RAG文档表
 CREATE TABLE IF NOT EXISTS `rag_document` (
 `id`                        BIGINT          NOT NULL,
@@ -47,35 +37,3 @@ INDEX `idx_chunk_index` (`document_id`, `chunk_index`)
 -- 更新 knowledge_base_config 表的 kb_type 枚举，添加 LOCAL
 ALTER TABLE `knowledge_base_config`
     MODIFY COLUMN `kb_type` ENUM('BAILIAN','DIFY','RAGFLOW','LOCAL') NOT NULL COMMENT '知识库类型';
-
-
-
--- ============================================================
--- PostgreSQL 表结构 (在 apboa_vector 数据库中执行)
--- ============================================================
-
--- 1. 创建数据库
--- CREATE DATABASE apboa_vector;
-
--- 2. 启用pgvector扩展
-CREATE EXTENSION IF NOT EXISTS vector;
-
--- 3. 创建向量存储表
-CREATE TABLE IF NOT EXISTS rag_embedding (
-id                        BIGINT PRIMARY KEY,
-chunk_id                  BIGINT NOT NULL,
-document_id               BIGINT NOT NULL,
-knowledge_base_config_id  BIGINT NOT NULL,
-embedding                 halfvec(2560) NOT NULL,
-created_at                TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
--- 4. 创建索引
-CREATE INDEX IF NOT EXISTS idx_embedding_kbc ON rag_embedding(knowledge_base_config_id);
-CREATE INDEX IF NOT EXISTS idx_embedding_doc ON rag_embedding(document_id);
-CREATE INDEX IF NOT EXISTS idx_rag_vectors_embedding ON rag_embedding USING hnsw (embedding halfvec_cosine_ops);
-
--- 5. 创建IVFFlat向量索引（数据量较大时启用，提升检索性能）
--- 注意：需要先插入一定量的数据后才能创建IVFFlat索引
--- CREATE INDEX IF NOT EXISTS idx_embedding_vector ON rag_embedding
---   USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);

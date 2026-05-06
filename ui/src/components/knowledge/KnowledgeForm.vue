@@ -109,6 +109,40 @@ const configSectionOptions = computed(() => {
 })
 
 /**
+ * 默认服务地址提示
+ */
+const defaultBaseUrlHint = computed(() => {
+  if (localConnection.providerType === 'bailian') {
+    return 'https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings'
+  }
+  return 'http://localhost:11434/api/embed'
+})
+
+/**
+ * 默认嵌入模型提示
+ */
+const defaultModelHint = computed(() => {
+  if (localConnection.providerType === 'bailian') {
+    return 'text-embedding-v4'
+  }
+  return 'qwen3-embedding:4b'
+})
+
+/**
+ * 重置服务地址为当前提供商的默认值
+ */
+function resetBaseUrl() {
+  localConnection.baseUrl = defaultBaseUrlHint.value
+}
+
+/**
+ * 重置嵌入模型为当前提供商的默认值
+ */
+function resetEmbeddingModel() {
+  localConnection.embeddingModel = defaultModelHint.value
+}
+
+/**
  * 百炼连接配置
  */
 const bailianConnection = reactive({
@@ -123,8 +157,21 @@ const bailianConnection = reactive({
  * 本地RAG连接配置
  */
 const localConnection = reactive({
-  ollamaBaseUrl: 'http://localhost:11434',
+  providerType: 'ollama' as 'ollama' | 'bailian',
+  baseUrl: 'http://localhost:11434/api/embed',
+  apiKey: '',
   embeddingModel: 'qwen3-embedding:4b',
+  dimension: 1024,
+  bufferSizeMb: 50,
+  batchSize: 10
+})
+
+/**
+ * 切换提供商时自动重置服务地址和模型为默认值
+ */
+watch(() => localConnection.providerType, () => {
+  localConnection.baseUrl = defaultBaseUrlHint.value
+  localConnection.embeddingModel = defaultModelHint.value
 })
 
 /**
@@ -321,7 +368,15 @@ function loadConfigData() {
     }
   } else if (formData.kbType === 'LOCAL') {
     if (connectionConfig) {
-      Object.assign(localConnection, connectionConfig)
+      Object.assign(localConnection, {
+        providerType: connectionConfig.providerType || 'ollama',
+        baseUrl: connectionConfig.baseUrl || (connectionConfig.providerType === 'bailian' ? 'https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings' : 'http://localhost:11434/api/embed'),
+        apiKey: connectionConfig.apiKey || '',
+        embeddingModel: connectionConfig.embeddingModel || (connectionConfig.providerType === 'bailian' ? 'text-embedding-v4' : 'qwen3-embedding:4b'),
+        dimension: connectionConfig.dimension || 1024,
+        bufferSizeMb: connectionConfig.bufferSizeMb || 50,
+        batchSize: connectionConfig.batchSize || 10
+      })
     }
     if (retrievalConfig) {
       Object.assign(localRetrieval, retrievalConfig)
@@ -362,7 +417,15 @@ function resetForm() {
   Object.assign(metadataFilters, { logicalOperator: 'AND', conditions: [] })
   Object.assign(difyHttp, { connectTimeout: '', readTimeout: '', maxRetries: undefined, customHeaders: '{}' })
   Object.assign(ragflowHttp, { timeout: '', maxRetries: undefined, customHeaders: '{}' })
-  Object.assign(localConnection, { ollamaBaseUrl: 'http://localhost:11434', embeddingModel: 'qwen3-embedding:4b'})
+  Object.assign(localConnection, {
+    providerType: 'ollama',
+    baseUrl: 'http://localhost:11434/api/embed',
+    apiKey: '',
+    embeddingModel: 'qwen3-embedding:4b',
+    dimension: 1024,
+    bufferSizeMb: 50,
+    batchSize: 10
+  })
   Object.assign(localRetrieval, { chunkSize: 512, chunkOverlap: 64, chunkDelimiters: '', topK: 5, scoreThreshold: 0.5 })
 }
 
@@ -454,7 +517,15 @@ function buildSubmitData(): KnowledgeBaseConfig {
       data.httpConfig = null
     }
   } else if (formData.kbType === 'LOCAL') {
-    data.connectionConfig = { ...localConnection }
+    data.connectionConfig = {
+      providerType: localConnection.providerType,
+      baseUrl: localConnection.baseUrl,
+      apiKey: localConnection.providerType === 'bailian' ? (localConnection.apiKey || undefined) : undefined,
+      embeddingModel: localConnection.embeddingModel,
+      dimension: localConnection.dimension,
+      bufferSizeMb: localConnection.bufferSizeMb,
+      batchSize: localConnection.batchSize
+    }
     data.retrievalConfig = { ...localRetrieval }
     data.endpointConfig = null
     data.rerankingConfig = null
@@ -637,11 +708,70 @@ function removeMetadataCondition(index: number) {
 
           <!-- 本地RAG连接配置 -->
           <template v-if="formData.kbType === 'LOCAL'">
-            <AFormItem label="Ollama服务地址" :rules="[{ required: true, message: '请输入Ollama服务地址' }]">
-              <AInput v-model:value="localConnection.ollamaBaseUrl" placeholder="例如: http://localhost:11434" />
+            <AFormItem label="模型提供商" :rules="[{ required: true, message: '请选择模型提供商' }]">
+              <ASelect v-model:value="localConnection.providerType" style="width: 100%">
+                <ASelectOption value="ollama">Ollama</ASelectOption>
+                <ASelectOption value="bailian">Bailian</ASelectOption>
+              </ASelect>
+              <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
+                仅支持 Bailian、Ollama
+              </div>
             </AFormItem>
+
+            <template v-if="localConnection.providerType === 'bailian'">
+              <AFormItem label="API Key" :rules="[{ required: true, message: '请输入API Key' }]">
+                <AInputPassword v-model:value="localConnection.apiKey" placeholder="请输入API Key，支持 ${ENV_VAR} 引用环境变量" />
+              </AFormItem>
+            </template>
+
+            <AFormItem label="服务地址" :rules="[{ required: true, message: '请输入服务地址' }]">
+              <div class="flex gap-sm" style="align-items: center">
+                <AInput v-model:value="localConnection.baseUrl" style="flex: 1" />
+                <AButton type="text" @click="resetBaseUrl">重置默认</AButton>
+              </div>
+              <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
+                当前提供商默认地址：{{ defaultBaseUrlHint }}
+              </div>
+            </AFormItem>
+
             <AFormItem label="嵌入模型" :rules="[{ required: true, message: '请输入嵌入模型名称' }]">
-              <AInput v-model:value="localConnection.embeddingModel" placeholder="例如: qwen3-embedding:4b" />
+              <div class="flex gap-sm" style="align-items: center">
+                <AInput v-model:value="localConnection.embeddingModel" style="flex: 1" />
+                <AButton type="text" @click="resetEmbeddingModel">重置默认</AButton>
+              </div>
+              <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
+                当前提供商默认模型：{{ defaultModelHint }}
+              </div>
+            </AFormItem>
+
+            <AFormItem label="向量化维度（仅可选择一次）" :rules="[{ required: true, message: '请选择向量化维度' }]">
+              <ASelect v-model:value="localConnection.dimension" :disabled="isEdit" style="width: 100%">
+                <ASelectOption :value="64">64</ASelectOption>
+                <ASelectOption :value="128">128</ASelectOption>
+                <ASelectOption :value="256">256</ASelectOption>
+                <ASelectOption :value="512">512</ASelectOption>
+                <ASelectOption :value="768">768</ASelectOption>
+                <ASelectOption :value="1024">1024</ASelectOption>
+                <ASelectOption :value="2048">2048</ASelectOption>
+                <ASelectOption :value="2560">2560</ASelectOption>
+              </ASelect>
+              <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
+                默认1024，新增后不可修改。1024 维度是性能与成本的最佳平衡点，适用于绝大多数语义检索任务
+              </div>
+            </AFormItem>
+
+            <AFormItem label="响应缓冲大小（单位MB）">
+              <AInputNumber v-model:value="localConnection.bufferSizeMb" :min="1" :max="512" style="width: 100%" />
+              <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
+                默认50MB，大数据量时可适当增大
+              </div>
+            </AFormItem>
+
+            <AFormItem label="单批次最大文本数">
+              <AInputNumber v-model:value="localConnection.batchSize" :min="1" :max="100" style="width: 100%" />
+              <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
+                默认10，超过将自动拆分为多批次请求
+              </div>
             </AFormItem>
           </template>
         </div>

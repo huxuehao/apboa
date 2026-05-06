@@ -1,4 +1,4 @@
-package com.hxh.apboa.core.rag;
+package com.hxh.apboa.core.rag.service;
 
 import org.springframework.stereotype.Component;
 
@@ -29,7 +29,7 @@ public class TextChunker {
 
         int start = 0;
         int index = 0;
-        while (start < text.length()) {
+        while (true) {
             int end = Math.min(start + chunkSize, text.length());
 
             String chunkText = text.substring(start, end).trim();
@@ -154,22 +154,22 @@ public class TextChunker {
         StringBuilder current = new StringBuilder();
 
         for (String line : lines) {
-            if (line.trim().isEmpty() && current.length() == 0) {
+            if (line.trim().isEmpty() && current.isEmpty()) {
                 continue;
             }
 
-            if (current.length() + line.length() + 1 > chunkSize && current.length() > 0) {
+            if (current.length() + line.length() + 1 > chunkSize && !current.isEmpty()) {
                 result.add(current.toString().trim());
                 current = new StringBuilder();
             }
 
-            if (current.length() > 0) {
+            if (!current.isEmpty()) {
                 current.append("\n");
             }
             current.append(line);
         }
 
-        if (current.length() > 0) {
+        if (!current.isEmpty()) {
             String trimmed = current.toString().trim();
             if (!trimmed.isEmpty()) {
                 if (trimmed.length() > chunkSize) {
@@ -213,18 +213,18 @@ public class TextChunker {
                 continue;
             }
 
-            if (current.length() + trimmed.length() + 2 > chunkSize && current.length() > 0) {
+            if (current.length() + trimmed.length() + 2 > chunkSize && !current.isEmpty()) {
                 result.add(current.toString().trim());
                 current = new StringBuilder();
             }
 
-            if (current.length() > 0) {
+            if (!current.isEmpty()) {
                 current.append("\n\n");
             }
             current.append(trimmed);
         }
 
-        if (current.length() > 0) {
+        if (!current.isEmpty()) {
             result.add(current.toString().trim());
         }
 
@@ -239,18 +239,18 @@ public class TextChunker {
         StringBuilder current = new StringBuilder();
 
         for (String segment : segments) {
-            if (current.length() + segment.length() + 1 > chunkSize && current.length() > 0) {
+            if (current.length() + segment.length() + 1 > chunkSize && !current.isEmpty()) {
                 result.add(current.toString().trim());
                 current = new StringBuilder();
             }
 
-            if (current.length() > 0) {
+            if (!current.isEmpty()) {
                 current.append("\n");
             }
             current.append(segment);
         }
 
-        if (current.length() > 0) {
+        if (!current.isEmpty()) {
             result.add(current.toString().trim());
         }
 
