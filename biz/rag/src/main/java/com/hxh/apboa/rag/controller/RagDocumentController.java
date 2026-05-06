@@ -1,17 +1,20 @@
 package com.hxh.apboa.rag.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hxh.apboa.common.config.auth.RoleNeed;
 import com.hxh.apboa.common.entity.KnowledgeBaseConfig;
 import com.hxh.apboa.common.entity.RagDocument;
+import com.hxh.apboa.common.entity.RagDocumentChunk;
 import com.hxh.apboa.common.enums.KbType;
 import com.hxh.apboa.common.enums.RagDocumentStatus;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.vo.RagDocumentChunkVO;
-import com.hxh.apboa.core.rag.LocalRagService;
 import com.hxh.apboa.core.rag.DocumentParser;
-import com.hxh.apboa.core.rag.RagRepository;
 import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
+import com.hxh.apboa.core.rag.mapper.RagDocumentChunkMapper;
+import com.hxh.apboa.core.rag.mapper.RagDocumentMapper;
+import com.hxh.apboa.core.rag.service.LocalRagService;
 import com.hxh.apboa.resource.service.AttachService;
 import com.hxh.apboa.common.entity.Attach;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
@@ -26,7 +29,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +45,8 @@ public class RagDocumentController {
 
     private final LocalRagService localRagService;
     private final DocumentParser documentParser;
-    private final RagRepository ragRepository;
+    private final RagDocumentMapper ragDocumentMapper;
+    private final RagDocumentChunkMapper ragDocumentChunkMapper;
     private final KnowledgeBaseConfigService knowledgeBaseConfigService;
     private final AttachService attachService;
 
@@ -64,7 +67,7 @@ public class RagDocumentController {
 
         try {
             String fileName = file.getOriginalFilename();
-            if (!documentParser.isSupported(fileName)) {
+            if (documentParser.isNotSupported(fileName)) {
                 return R.fail("不支持的文件类型，支持的格式: txt、md、pdf、doc、docx、xlsx、xls、csv、pptx、ppt");
             }
 
@@ -84,11 +87,10 @@ public class RagDocumentController {
                     .updatedAt(LocalDateTime.now())
                     .build();
 
-            ragRepository.insertDocument(document);
+            ragDocumentMapper.insert(document);
 
-            try (InputStream inputStream = file.getInputStream()) {
-                localRagService.processDocument(document, inputStream, kbConfig);
-            }
+            // 异步处理文档，从已保存的附件中读取文件流
+            localRagService.reprocessDocument(document, attach, kbConfig);
 
             return R.data(document.getId());
         } catch (Exception e) {
@@ -101,7 +103,10 @@ public class RagDocumentController {
      */
     @GetMapping("/list")
     public R<List<RagDocument>> list(@RequestParam("knowledgeBaseConfigId") Long kbConfigId) {
-        List<RagDocument> documents = ragRepository.getDocumentsByKbConfigId(kbConfigId);
+        LambdaQueryWrapper<RagDocument> wrapper = new LambdaQueryWrapper<RagDocument>()
+                .eq(RagDocument::getKnowledgeBaseConfigId, kbConfigId)
+                .orderByDesc(RagDocument::getCreatedAt);
+        List<RagDocument> documents = ragDocumentMapper.selectList(wrapper);
         return R.data(documents);
     }
 
@@ -123,7 +128,10 @@ public class RagDocumentController {
     @GetMapping("/chunks")
     public R<List<com.hxh.apboa.common.entity.RagDocumentChunk>> chunks(
             @RequestParam("documentId") Long documentId) {
-        return R.data(ragRepository.getChunksByDocumentId(documentId));
+        LambdaQueryWrapper<RagDocumentChunk> chunkWrapper = new LambdaQueryWrapper<RagDocumentChunk>()
+                .eq(RagDocumentChunk::getDocumentId, documentId)
+                .orderByAsc(RagDocumentChunk::getChunkIndex);
+        return R.data(ragDocumentChunkMapper.selectList(chunkWrapper));
     }
 
     /**
@@ -199,7 +207,7 @@ public class RagDocumentController {
      */
     @GetMapping("/download/{id}")
     public void download(@PathVariable("id") Long id, HttpServletResponse response) {
-        RagDocument document = ragRepository.getDocumentById(id);
+        RagDocument document = ragDocumentMapper.selectById(id);
         if (document == null) {
             throw new RuntimeException("文档不存在");
         }
@@ -226,7 +234,7 @@ public class RagDocumentController {
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> reUpload(@PathVariable("id") Long id,
                                @RequestParam("file") MultipartFile file) {
-        RagDocument document = ragRepository.getDocumentById(id);
+        RagDocument document = ragDocumentMapper.selectById(id);
         if (document == null) {
             return R.fail("文档不存在");
         }
@@ -238,7 +246,7 @@ public class RagDocumentController {
 
         try {
             String fileName = file.getOriginalFilename();
-            if (!documentParser.isSupported(fileName)) {
+            if (documentParser.isNotSupported(fileName)) {
                 return R.fail("不支持的文件类型");
             }
 
@@ -262,12 +270,10 @@ public class RagDocumentController {
             document.setStatus(RagDocumentStatus.PENDING);
             document.setErrorMessage(null);
             document.setUpdatedAt(LocalDateTime.now());
-            ragRepository.updateDocument(document);
+            ragDocumentMapper.updateById(document);
 
-            // 重新处理文档
-            try (InputStream inputStream = file.getInputStream()) {
-                localRagService.processDocument(document, inputStream, kbConfig);
-            }
+            // 异步重新处理文档，从已保存的附件中读取文件流
+            localRagService.reprocessDocument(document, newAttach, kbConfig);
 
             return R.data(true);
         } catch (Exception e) {
@@ -281,7 +287,7 @@ public class RagDocumentController {
     @PostMapping("/re-chunk/{id}")
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> reChunk(@PathVariable("id") Long id) {
-        RagDocument document = ragRepository.getDocumentById(id);
+        RagDocument document = ragDocumentMapper.selectById(id);
         if (document == null) {
             return R.fail("文档不存在");
         }
@@ -305,9 +311,9 @@ public class RagDocumentController {
             document.setStatus(RagDocumentStatus.PROCESSING);
             document.setErrorMessage(null);
             document.setUpdatedAt(LocalDateTime.now());
-            ragRepository.updateDocument(document);
+            ragDocumentMapper.updateById(document);
 
-            // 重新处理文档
+            // 异步重新处理文档
             localRagService.reprocessDocument(document, attach, kbConfig);
 
             return R.data(true);
@@ -315,7 +321,7 @@ public class RagDocumentController {
             document.setStatus(RagDocumentStatus.FAILED);
             document.setErrorMessage(e.getMessage());
             document.setUpdatedAt(LocalDateTime.now());
-            ragRepository.updateDocument(document);
+            ragDocumentMapper.updateById(document);
             return R.fail("重新分块失败: " + e.getMessage());
         }
     }

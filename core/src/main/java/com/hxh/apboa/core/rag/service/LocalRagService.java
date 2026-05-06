@@ -1,27 +1,33 @@
-package com.hxh.apboa.core.rag;
+package com.hxh.apboa.core.rag.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.hxh.apboa.common.entity.Attach;
 import com.hxh.apboa.common.entity.KnowledgeBaseConfig;
 import com.hxh.apboa.common.entity.RagDocument;
 import com.hxh.apboa.common.entity.RagDocumentChunk;
 import com.hxh.apboa.common.enums.RagDocumentStatus;
 import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.common.vo.RagDocumentChunkVO;
-import com.hxh.apboa.core.rag.TextChunker.ChunkResult;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.hxh.apboa.core.rag.DocumentParser;
+import com.hxh.apboa.core.rag.EmbeddingService;
+import com.hxh.apboa.core.rag.PgVectorStore;
+import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
+import com.hxh.apboa.core.rag.mapper.RagDocumentChunkMapper;
+import com.hxh.apboa.core.rag.mapper.RagDocumentMapper;
+import com.hxh.apboa.core.rag.service.TextChunker.ChunkResult;
+import com.hxh.apboa.resource.service.AttachService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.hxh.apboa.common.entity.Attach;
-import com.hxh.apboa.resource.service.AttachService;
-import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -38,7 +44,8 @@ public class LocalRagService {
     private final TextChunker textChunker;
     private final EmbeddingService embeddingService;
     private final PgVectorStore pgVectorStore;
-    private final RagRepository ragRepository;
+    private final RagDocumentMapper ragDocumentMapper;
+    private final RagDocumentChunkMapper ragDocumentChunkMapper;
     private final AttachService attachService;
     private final KnowledgeBaseConfigService knowledgeBaseConfigService;
 
@@ -46,14 +53,16 @@ public class LocalRagService {
                            TextChunker textChunker,
                            EmbeddingService embeddingService,
                            PgVectorStore pgVectorStore,
-                           RagRepository ragRepository,
+                           RagDocumentMapper ragDocumentMapper,
+                           RagDocumentChunkMapper ragDocumentChunkMapper,
                            AttachService attachService,
                            KnowledgeBaseConfigService knowledgeBaseConfigService) {
         this.documentParser = documentParser;
         this.textChunker = textChunker;
         this.embeddingService = embeddingService;
         this.pgVectorStore = pgVectorStore;
-        this.ragRepository = ragRepository;
+        this.ragDocumentMapper = ragDocumentMapper;
+        this.ragDocumentChunkMapper = ragDocumentChunkMapper;
         this.attachService = attachService;
         this.knowledgeBaseConfigService = knowledgeBaseConfigService;
     }
@@ -61,14 +70,14 @@ public class LocalRagService {
     /**
      * 处理文档：解析 -> 分块 -> 向量化 -> 存储
      *
-     * @param document  文档记录
+     * @param document   文档记录
      * @param inputStream 文件输入流
      * @param config     知识库配置
      */
     public void processDocument(RagDocument document, InputStream inputStream, KnowledgeBaseConfig config) {
         document.setStatus(RagDocumentStatus.PROCESSING);
         document.setUpdatedAt(LocalDateTime.now());
-        ragRepository.updateDocument(document);
+        ragDocumentMapper.updateById(document);
 
         try {
             String rowDelimiter = getFirstChunkDelimiter(config);
@@ -82,7 +91,7 @@ public class LocalRagService {
                 document.setStatus(RagDocumentStatus.FAILED);
                 document.setErrorMessage("文档解析后内容为空");
                 document.setUpdatedAt(LocalDateTime.now());
-                ragRepository.updateDocument(document);
+                ragDocumentMapper.updateById(document);
                 return;
             }
 
@@ -118,13 +127,15 @@ public class LocalRagService {
                 }
             }
 
-            ragRepository.batchInsertChunks(chunkEntities);
+            for (RagDocumentChunk chunkEntity : chunkEntities) {
+                ragDocumentChunkMapper.insert(chunkEntity);
+            }
             pgVectorStore.storeEmbeddings(embeddingRecords);
 
             document.setChunkCount(chunks.size());
             document.setStatus(RagDocumentStatus.COMPLETED);
             document.setUpdatedAt(LocalDateTime.now());
-            ragRepository.updateDocument(document);
+            ragDocumentMapper.updateById(document);
 
             log.info("文档处理完成, docId={}, chunks={}", document.getId(), chunks.size());
         } catch (Exception e) {
@@ -132,7 +143,7 @@ public class LocalRagService {
             document.setStatus(RagDocumentStatus.FAILED);
             document.setErrorMessage(e.getMessage());
             document.setUpdatedAt(LocalDateTime.now());
-            ragRepository.updateDocument(document);
+            ragDocumentMapper.updateById(document);
         }
     }
 
@@ -154,10 +165,11 @@ public class LocalRagService {
 
         List<RagDocumentChunkVO> chunks = new ArrayList<>();
         for (PgVectorStore.RetrievalResult result : results) {
-            RagDocumentChunk chunk = ragRepository.getChunkById(result.chunkId());
+            RagDocumentChunk chunk = ragDocumentChunkMapper.selectById(result.chunkId());
             if (chunk != null) {
                 RagDocumentChunkVO chunkVo = new RagDocumentChunkVO();
                 BeanUtils.copyProperties(chunk, chunkVo);
+                chunkVo.setScore(result.score());
                 chunks.add(chunkVo);
             }
         }
@@ -170,8 +182,9 @@ public class LocalRagService {
      */
     public void deleteDocument(Long documentId) {
         pgVectorStore.deleteByDocumentId(documentId);
-        ragRepository.deleteChunksByDocumentId(documentId);
-        ragRepository.deleteDocument(documentId);
+        ragDocumentChunkMapper.delete(new LambdaQueryWrapper<RagDocumentChunk>()
+                .eq(RagDocumentChunk::getDocumentId, documentId));
+        ragDocumentMapper.deleteById(documentId);
     }
 
     /**
@@ -179,16 +192,19 @@ public class LocalRagService {
      */
     public void deleteDocumentChunksAndVectors(Long documentId) {
         pgVectorStore.deleteByDocumentId(documentId);
-        ragRepository.deleteChunksByDocumentId(documentId);
+        ragDocumentChunkMapper.delete(new LambdaQueryWrapper<RagDocumentChunk>()
+                .eq(RagDocumentChunk::getDocumentId, documentId));
     }
 
     /**
      * 通过附件服务重新获取文件流并重新处理文档（重新分块场景）
+     * 异步执行，不阻塞调用线程
      */
+    @Async("ragDocExecutor")
     public void reprocessDocument(RagDocument document, Attach attach, KnowledgeBaseConfig config) {
         document.setStatus(RagDocumentStatus.PROCESSING);
         document.setUpdatedAt(LocalDateTime.now());
-        ragRepository.updateDocument(document);
+        ragDocumentMapper.updateById(document);
 
         try (InputStream inputStream = attachService.downloadAsStream(attach)) {
             processDocument(document, inputStream, config);
@@ -197,7 +213,7 @@ public class LocalRagService {
             document.setStatus(RagDocumentStatus.FAILED);
             document.setErrorMessage(e.getMessage());
             document.setUpdatedAt(LocalDateTime.now());
-            ragRepository.updateDocument(document);
+            ragDocumentMapper.updateById(document);
         }
     }
 
@@ -205,12 +221,12 @@ public class LocalRagService {
      * 更新分块内容并重新向量化
      */
     public void updateChunk(Long chunkId, String newContent) {
-        RagDocumentChunk chunk = ragRepository.getChunkById(chunkId);
+        RagDocumentChunk chunk = ragDocumentChunkMapper.selectById(chunkId);
         if (chunk == null) {
             throw new RuntimeException("分块不存在");
         }
 
-        RagDocument document = ragRepository.getDocumentById(chunk.getDocumentId());
+        RagDocument document = ragDocumentMapper.selectById(chunk.getDocumentId());
         if (document == null) {
             throw new RuntimeException("文档不存在");
         }
@@ -224,7 +240,7 @@ public class LocalRagService {
             int newTokenCount = estimateTokenCount(newContent);
             chunk.setContent(newContent);
             chunk.setTokenCount(newTokenCount);
-            ragRepository.updateChunk(chunk);
+            ragDocumentChunkMapper.updateById(chunk);
 
             float[] newEmbedding = embeddingService.embed(newContent, config);
             pgVectorStore.deleteByChunkId(chunkId);
@@ -242,13 +258,13 @@ public class LocalRagService {
      * 删除指定分块及其向量数据
      */
     public void deleteChunk(Long chunkId) {
-        RagDocumentChunk chunk = ragRepository.getChunkById(chunkId);
+        RagDocumentChunk chunk = ragDocumentChunkMapper.selectById(chunkId);
         if (chunk == null) {
             throw new RuntimeException("分块不存在");
         }
 
         try {
-            ragRepository.deleteChunkById(chunkId);
+            ragDocumentChunkMapper.deleteById(chunkId);
             pgVectorStore.deleteByChunkId(chunkId);
             log.info("分块删除成功, chunkId={}", chunkId);
         } catch (Exception e) {

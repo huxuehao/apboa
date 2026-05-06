@@ -3,9 +3,9 @@ package com.hxh.apboa.core.knowledge.impl;
 import com.hxh.apboa.common.entity.KnowledgeBaseConfig;
 import com.hxh.apboa.common.enums.KbType;
 import com.hxh.apboa.core.knowledge.IKnowledge;
-import com.hxh.apboa.core.rag.LocalKnowledge;
-import com.hxh.apboa.core.rag.LocalRagService;
+import com.hxh.apboa.core.rag.knowledge.LocalKnowledge;
 import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
+import com.hxh.apboa.core.rag.service.LocalRagService;
 import io.agentscope.core.rag.Knowledge;
 import org.springframework.stereotype.Component;
 
