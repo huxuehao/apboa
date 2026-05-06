@@ -1,0 +1,8 @@
+该文件夹下的脚本为一次性数据库初始化脚本，如果您是第一次拉取代码，建议您使用该文件夹下的脚本初始化数据库；
+后序数据库变更您需要跟随 yyyy-MM-dd-HH:mm:ss-s.sql 脚本的变更更新您的数据库。
+
+操作步骤：
+1. 在 mysql 库中新建数据库 apboa
+2. 导入 db_init.sql 文件
+
+特别注意：apboa使用 postgresql 作为向量数据库，如果您无本地知识库需求。请确保将 yaml 中的 rag.pgvector.enabled 置为 false
