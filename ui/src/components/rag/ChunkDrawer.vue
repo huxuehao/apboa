@@ -5,12 +5,14 @@
  */
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { message } from 'ant-design-vue'
+import { message, Modal } from 'ant-design-vue'
 import {
   CopyOutlined,
   FileTextOutlined,
   NumberOutlined,
-  ColumnWidthOutlined
+  ColumnWidthOutlined,
+  EditOutlined,
+  DeleteOutlined
 } from '@ant-design/icons-vue'
 import * as ragApi from '@/api/rag'
 import type { RagDocumentChunk } from '@/types'
@@ -28,6 +30,11 @@ const emit = defineEmits<{
 const chunks = ref<RagDocumentChunk[]>([])
 const loading = ref(false)
 const expandedChunks = ref<Set<string>>(new Set())
+
+const editModalOpen = ref(false)
+const editChunkContent = ref('')
+const editChunkId = ref<string>('')
+const editSaving = ref(false)
 
 /**
  * 监听抽屉打开，加载分块数据
@@ -84,6 +91,58 @@ function copyChunkContent(content: string) {
 }
 
 /**
+ * 打开编辑分块对话框
+ */
+function openEditChunk(chunk: RagDocumentChunk) {
+  editChunkId.value = String(chunk.id)
+  editChunkContent.value = chunk.content || ''
+  editModalOpen.value = true
+}
+
+/**
+ * 保存分块修改
+ */
+async function saveEditChunk() {
+  if (!editChunkContent.value.trim()) {
+    message.warning('分块内容不能为空')
+    return
+  }
+  editSaving.value = true
+  try {
+    await ragApi.updateChunk(editChunkId.value, editChunkContent.value)
+    message.success('更新成功')
+    editModalOpen.value = false
+    await loadChunks()
+  } catch (error) {
+    message.error('更新失败')
+  } finally {
+    editSaving.value = false
+  }
+}
+
+/**
+ * 删除分块
+ */
+function handleDeleteChunk(chunk: RagDocumentChunk) {
+  Modal.confirm({
+    title: '确认删除',
+    content: `删除分块 #${chunk.chunkIndex} 后无法恢复，是否继续？`,
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk: async () => {
+      try {
+        await ragApi.deleteChunk(String(chunk.id))
+        message.success('删除成功')
+        await loadChunks()
+      } catch (error) {
+        message.error('删除失败')
+      }
+    }
+  })
+}
+
+/**
  * 关闭抽屉
  */
 function handleClose() {
@@ -127,6 +186,12 @@ function handleClose() {
               <AButton type="text" size="small" @click="copyChunkContent(chunk.content)">
                 <CopyOutlined />
               </AButton>
+              <AButton type="text" size="small" @click="openEditChunk(chunk)">
+                <EditOutlined />
+              </AButton>
+              <AButton type="text" size="small" danger @click="handleDeleteChunk(chunk)">
+                <DeleteOutlined />
+              </AButton>
             </div>
           </div>
 
@@ -145,6 +210,20 @@ function handleClose() {
         </div>
       </div>
     </ASpin>
+
+    <AModal
+      v-model:open="editModalOpen"
+      title="编辑分块"
+      width="600px"
+      :confirm-loading="editSaving"
+      @ok="saveEditChunk"
+    >
+      <ATextarea
+        v-model:value="editChunkContent"
+        placeholder="请输入分块内容"
+        :rows="12"
+      />
+    </AModal>
   </ADrawer>
 </template>
 

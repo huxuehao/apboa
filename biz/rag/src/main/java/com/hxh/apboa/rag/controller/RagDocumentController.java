@@ -126,6 +126,39 @@ public class RagDocumentController {
     }
 
     /**
+     * 更新分块内容
+     */
+    @PutMapping("/chunk/{id}")
+    @RoleNeed({Role.ADMIN, Role.EDIT})
+    public R<Boolean> updateChunk(@PathVariable("id") Long chunkId,
+                                   @RequestBody Map<String, String> params) {
+        String content = params.get("content");
+        if (content == null || content.isBlank()) {
+            return R.fail("分块内容不能为空");
+        }
+        try {
+            localRagService.updateChunk(chunkId, content);
+            return R.data(true);
+        } catch (Exception e) {
+            return R.fail("更新分块失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 删除分块
+     */
+    @DeleteMapping("/chunk/{id}")
+    @RoleNeed({Role.ADMIN, Role.EDIT})
+    public R<Boolean> deleteChunk(@PathVariable("id") Long chunkId) {
+        try {
+            localRagService.deleteChunk(chunkId);
+            return R.data(true);
+        } catch (Exception e) {
+            return R.fail("删除分块失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * RAG检索测试
      */
     @PostMapping("/search")

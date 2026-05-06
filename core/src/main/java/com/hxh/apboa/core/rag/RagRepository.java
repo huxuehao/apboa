@@ -104,6 +104,18 @@ public class RagRepository {
         jdbcTemplate.update("DELETE FROM rag_document_chunk WHERE document_id = ?", documentId);
     }
 
+    public void updateChunk(RagDocumentChunk chunk) {
+        jdbcTemplate.update(
+                "UPDATE rag_document_chunk SET content=?, token_count=?, start_offset=?, end_offset=? WHERE id=?",
+                chunk.getContent(), chunk.getTokenCount(), chunk.getStartOffset(),
+                chunk.getEndOffset(), chunk.getId()
+        );
+    }
+
+    public void deleteChunkById(Long chunkId) {
+        jdbcTemplate.update("DELETE FROM rag_document_chunk WHERE id = ?", chunkId);
+    }
+
     private RagDocument mapToDocument(Map<String, Object> row) {
         return RagDocument.builder()
                 .id(((Number) row.get("id")).longValue())

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hxh.apboa.common.entity.Attach;
 import com.hxh.apboa.resource.service.AttachService;
+import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -37,19 +38,22 @@ public class LocalRagService {
     private final PgVectorStore pgVectorStore;
     private final RagRepository ragRepository;
     private final AttachService attachService;
+    private final KnowledgeBaseConfigService knowledgeBaseConfigService;
 
     public LocalRagService(DocumentParser documentParser,
                            TextChunker textChunker,
                            EmbeddingService embeddingService,
                            PgVectorStore pgVectorStore,
                            RagRepository ragRepository,
-                           AttachService attachService) {
+                           AttachService attachService,
+                           KnowledgeBaseConfigService knowledgeBaseConfigService) {
         this.documentParser = documentParser;
         this.textChunker = textChunker;
         this.embeddingService = embeddingService;
         this.pgVectorStore = pgVectorStore;
         this.ragRepository = ragRepository;
         this.attachService = attachService;
+        this.knowledgeBaseConfigService = knowledgeBaseConfigService;
     }
 
     /**
@@ -190,6 +194,62 @@ public class LocalRagService {
             document.setErrorMessage(e.getMessage());
             document.setUpdatedAt(LocalDateTime.now());
             ragRepository.updateDocument(document);
+        }
+    }
+
+    /**
+     * 更新分块内容并重新向量化
+     */
+    public void updateChunk(Long chunkId, String newContent) {
+        RagDocumentChunk chunk = ragRepository.getChunkById(chunkId);
+        if (chunk == null) {
+            throw new RuntimeException("分块不存在");
+        }
+
+        RagDocument document = ragRepository.getDocumentById(chunk.getDocumentId());
+        if (document == null) {
+            throw new RuntimeException("文档不存在");
+        }
+
+        KnowledgeBaseConfig config = knowledgeBaseConfigService.getById(document.getKnowledgeBaseConfigId());
+        if (config == null) {
+            throw new RuntimeException("知识库配置不存在");
+        }
+
+        try {
+            int newTokenCount = estimateTokenCount(newContent);
+            chunk.setContent(newContent);
+            chunk.setTokenCount(newTokenCount);
+            ragRepository.updateChunk(chunk);
+
+            float[] newEmbedding = embeddingService.embed(newContent, config);
+            pgVectorStore.deleteByChunkId(chunkId);
+            pgVectorStore.storeEmbedding(chunkId, chunkId, chunk.getDocumentId(),
+                    document.getKnowledgeBaseConfigId(), newEmbedding);
+
+            log.info("分块更新成功, chunkId={}", chunkId);
+        } catch (Exception e) {
+            log.error("分块更新失败, chunkId={}", chunkId, e);
+            throw new RuntimeException("分块更新失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 删除指定分块及其向量数据
+     */
+    public void deleteChunk(Long chunkId) {
+        RagDocumentChunk chunk = ragRepository.getChunkById(chunkId);
+        if (chunk == null) {
+            throw new RuntimeException("分块不存在");
+        }
+
+        try {
+            ragRepository.deleteChunkById(chunkId);
+            pgVectorStore.deleteByChunkId(chunkId);
+            log.info("分块删除成功, chunkId={}", chunkId);
+        } catch (Exception e) {
+            log.error("分块删除失败, chunkId={}", chunkId, e);
+            throw new RuntimeException("分块删除失败: " + e.getMessage(), e);
         }
     }
 
