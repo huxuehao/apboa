@@ -267,7 +267,7 @@ function clearResults() {
                 </div>
               </div>
               <span class="text-placeholder text-xs">
-                文档ID: {{ (result.documentId as string)?.substring(0, 12) }}...
+                文档ID: {{ result.documentId }}
               </span>
             </div>
 

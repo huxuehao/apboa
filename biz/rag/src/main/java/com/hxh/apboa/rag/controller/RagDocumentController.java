@@ -7,6 +7,7 @@ import com.hxh.apboa.common.enums.KbType;
 import com.hxh.apboa.common.enums.RagDocumentStatus;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.r.R;
+import com.hxh.apboa.common.vo.RagDocumentChunkVO;
 import com.hxh.apboa.core.rag.LocalRagService;
 import com.hxh.apboa.core.rag.DocumentParser;
 import com.hxh.apboa.core.rag.RagRepository;
@@ -126,6 +127,39 @@ public class RagDocumentController {
     }
 
     /**
+     * 更新分块内容
+     */
+    @PutMapping("/chunk/{id}")
+    @RoleNeed({Role.ADMIN, Role.EDIT})
+    public R<Boolean> updateChunk(@PathVariable("id") Long chunkId,
+                                   @RequestBody Map<String, String> params) {
+        String content = params.get("content");
+        if (content == null || content.isBlank()) {
+            return R.fail("分块内容不能为空");
+        }
+        try {
+            localRagService.updateChunk(chunkId, content);
+            return R.data(true);
+        } catch (Exception e) {
+            return R.fail("更新分块失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 删除分块
+     */
+    @DeleteMapping("/chunk/{id}")
+    @RoleNeed({Role.ADMIN, Role.EDIT})
+    public R<Boolean> deleteChunk(@PathVariable("id") Long chunkId) {
+        try {
+            localRagService.deleteChunk(chunkId);
+            return R.data(true);
+        } catch (Exception e) {
+            return R.fail("删除分块失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * RAG检索测试
      */
     @PostMapping("/search")
@@ -141,7 +175,7 @@ public class RagDocumentController {
             return R.fail("知识库配置不存在");
         }
 
-        List<com.hxh.apboa.common.entity.RagDocumentChunk> chunks =
+        List<RagDocumentChunkVO> chunks =
                 localRagService.retrieve(query, kbConfig, limit, scoreThreshold);
 
         List<Map<String, Object>> results = chunks.stream().map(chunk -> {
@@ -151,6 +185,7 @@ public class RagDocumentController {
             map.put("chunkIndex", chunk.getChunkIndex());
             map.put("content", chunk.getContent());
             map.put("tokenCount", chunk.getTokenCount());
+            map.put("score", chunk.getScore());
             return map;
         }).toList();
 

@@ -144,6 +144,14 @@ public class PgVectorStore {
         pgJdbcTemplate.update("DELETE FROM rag_embedding WHERE knowledge_base_config_id = ?", knowledgeBaseConfigId);
     }
 
+    /**
+     * 删除指定分块的向量
+     */
+    public void deleteByChunkId(Long chunkId) {
+        if (!isAvailable()) return;
+        pgJdbcTemplate.update("DELETE FROM rag_embedding WHERE chunk_id = ?", chunkId);
+    }
+
     private String arrayToVectorString(float[] embedding) {
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < embedding.length; i++) {

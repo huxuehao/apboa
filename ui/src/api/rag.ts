@@ -72,3 +72,17 @@ export function reUploadDocument(documentId: string, file: File) {
 export function reChunkDocument(documentId: string) {
   return request.post<ApiResponse<boolean>>(`/api/rag/document/re-chunk/${documentId}`)
 }
+
+/**
+ * 更新分块内容
+ */
+export function updateChunk(chunkId: string, content: string) {
+  return request.put<ApiResponse<boolean>>(`/api/rag/document/chunk/${chunkId}`, { content })
+}
+
+/**
+ * 删除分块
+ */
+export function deleteChunk(chunkId: string) {
+  return request.delete<ApiResponse<boolean>>(`/api/rag/document/chunk/${chunkId}`)
+}

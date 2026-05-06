@@ -84,7 +84,7 @@ public class TextChunker {
     }
 
     /**
-     * 自定义标识分块：按指定分隔符拆分文本，超长段落按行分割，小段落合并
+     * 自定义标识分块：按指定分隔符拆分文本，超长段落按行分割
      *
      * @param text       原始文本
      * @param chunkSize  最大分块大小（字符数），超过此大小的段落会按行分割
@@ -117,11 +117,9 @@ public class TextChunker {
             }
         }
 
-        List<String> merged = mergeSmallSegments(processedSegments, chunkSize);
-
         int index = 0;
         int offset = 0;
-        for (String chunkText : merged) {
+        for (String chunkText : processedSegments) {
             String trimmed = chunkText.trim();
             if (!trimmed.isEmpty()) {
                 int end = offset + trimmed.length();

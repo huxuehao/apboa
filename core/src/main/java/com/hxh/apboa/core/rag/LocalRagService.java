@@ -6,12 +6,15 @@ import com.hxh.apboa.common.entity.RagDocument;
 import com.hxh.apboa.common.entity.RagDocumentChunk;
 import com.hxh.apboa.common.enums.RagDocumentStatus;
 import com.hxh.apboa.common.util.JsonUtils;
+import com.hxh.apboa.common.vo.RagDocumentChunkVO;
 import com.hxh.apboa.core.rag.TextChunker.ChunkResult;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hxh.apboa.common.entity.Attach;
 import com.hxh.apboa.resource.service.AttachService;
+import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -37,19 +40,22 @@ public class LocalRagService {
     private final PgVectorStore pgVectorStore;
     private final RagRepository ragRepository;
     private final AttachService attachService;
+    private final KnowledgeBaseConfigService knowledgeBaseConfigService;
 
     public LocalRagService(DocumentParser documentParser,
                            TextChunker textChunker,
                            EmbeddingService embeddingService,
                            PgVectorStore pgVectorStore,
                            RagRepository ragRepository,
-                           AttachService attachService) {
+                           AttachService attachService,
+                           KnowledgeBaseConfigService knowledgeBaseConfigService) {
         this.documentParser = documentParser;
         this.textChunker = textChunker;
         this.embeddingService = embeddingService;
         this.pgVectorStore = pgVectorStore;
         this.ragRepository = ragRepository;
         this.attachService = attachService;
+        this.knowledgeBaseConfigService = knowledgeBaseConfigService;
     }
 
     /**
@@ -65,7 +71,8 @@ public class LocalRagService {
         ragRepository.updateDocument(document);
 
         try {
-            String text = documentParser.parse(inputStream, document.getFileName());
+            String rowDelimiter = getFirstChunkDelimiter(config);
+            String text = documentParser.parse(inputStream, document.getFileName(), rowDelimiter);
 
             int chunkSize = getChunkSize(config);
             int chunkOverlap = getChunkOverlap(config);
@@ -138,18 +145,20 @@ public class LocalRagService {
      * @param scoreThreshold 分数阈值
      * @return 相关文档分块列表
      */
-    public List<RagDocumentChunk> retrieve(String query, KnowledgeBaseConfig config,
+    public List<RagDocumentChunkVO> retrieve(String query, KnowledgeBaseConfig config,
                                            int limit, double scoreThreshold) {
         float[] queryEmbedding = embeddingService.embed(query, config);
 
         List<PgVectorStore.RetrievalResult> results = pgVectorStore.search(
                 queryEmbedding, config.getId(), limit, scoreThreshold);
 
-        List<RagDocumentChunk> chunks = new ArrayList<>();
+        List<RagDocumentChunkVO> chunks = new ArrayList<>();
         for (PgVectorStore.RetrievalResult result : results) {
             RagDocumentChunk chunk = ragRepository.getChunkById(result.chunkId());
             if (chunk != null) {
-                chunks.add(chunk);
+                RagDocumentChunkVO chunkVo = new RagDocumentChunkVO();
+                BeanUtils.copyProperties(chunk, chunkVo);
+                chunks.add(chunkVo);
             }
         }
 
@@ -192,6 +201,62 @@ public class LocalRagService {
         }
     }
 
+    /**
+     * 更新分块内容并重新向量化
+     */
+    public void updateChunk(Long chunkId, String newContent) {
+        RagDocumentChunk chunk = ragRepository.getChunkById(chunkId);
+        if (chunk == null) {
+            throw new RuntimeException("分块不存在");
+        }
+
+        RagDocument document = ragRepository.getDocumentById(chunk.getDocumentId());
+        if (document == null) {
+            throw new RuntimeException("文档不存在");
+        }
+
+        KnowledgeBaseConfig config = knowledgeBaseConfigService.getById(document.getKnowledgeBaseConfigId());
+        if (config == null) {
+            throw new RuntimeException("知识库配置不存在");
+        }
+
+        try {
+            int newTokenCount = estimateTokenCount(newContent);
+            chunk.setContent(newContent);
+            chunk.setTokenCount(newTokenCount);
+            ragRepository.updateChunk(chunk);
+
+            float[] newEmbedding = embeddingService.embed(newContent, config);
+            pgVectorStore.deleteByChunkId(chunkId);
+            pgVectorStore.storeEmbedding(chunkId, chunkId, chunk.getDocumentId(),
+                    document.getKnowledgeBaseConfigId(), newEmbedding);
+
+            log.info("分块更新成功, chunkId={}", chunkId);
+        } catch (Exception e) {
+            log.error("分块更新失败, chunkId={}", chunkId, e);
+            throw new RuntimeException("分块更新失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 删除指定分块及其向量数据
+     */
+    public void deleteChunk(Long chunkId) {
+        RagDocumentChunk chunk = ragRepository.getChunkById(chunkId);
+        if (chunk == null) {
+            throw new RuntimeException("分块不存在");
+        }
+
+        try {
+            ragRepository.deleteChunkById(chunkId);
+            pgVectorStore.deleteByChunkId(chunkId);
+            log.info("分块删除成功, chunkId={}", chunkId);
+        } catch (Exception e) {
+            log.error("分块删除失败, chunkId={}", chunkId, e);
+            throw new RuntimeException("分块删除失败: " + e.getMessage(), e);
+        }
+    }
+
     private int getChunkSize(KnowledgeBaseConfig config) {
         JsonNode retrievalConfig = config.getRetrievalConfig();
         return JsonUtils.getIntValue(retrievalConfig, "chunkSize", 512);
@@ -208,6 +273,23 @@ public class LocalRagService {
     private List<ChunkResult> doChunk(String text, int chunkSize, int chunkOverlap, KnowledgeBaseConfig config) {
         List<String> delimiters = getChunkDelimiters(config);
         return textChunker.delimiterChunk(text, chunkSize, chunkOverlap, delimiters);
+    }
+
+    /**
+     * 获取第一个分块分隔符，用于 Excel 等文档在解析时作为行分隔符
+     */
+    private String getFirstChunkDelimiter(KnowledgeBaseConfig config) {
+        JsonNode retrievalConfig = config.getRetrievalConfig();
+        String delimitersStr = JsonUtils.getStringValue(retrievalConfig, "chunkDelimiters", null);
+        if (delimitersStr == null || delimitersStr.isEmpty()) {
+            return null;
+        }
+        String first = Arrays.stream(delimitersStr.split(","))
+                .map(String::trim)
+                .filter(d -> !d.isEmpty())
+                .findFirst()
+                .orElse(null);
+        return first != null ? unescapeDelimiter(first) : null;
     }
 
     private List<String> getChunkDelimiters(KnowledgeBaseConfig config) {

@@ -61,6 +61,18 @@ public class DocumentParser {
      * @return 解析后的文本内容
      */
     public String parse(InputStream inputStream, String fileName) {
+        return parse(inputStream, fileName, null);
+    }
+
+    /**
+     * 解析文档输入流，提取纯文本内容
+     *
+     * @param inputStream   文档输入流
+     * @param fileName      文件名（用于日志和类型推断）
+     * @param rowDelimiter  行分隔符，用于 Excel 等表格文档，在每行后追加此分隔符以便后续分块
+     * @return 解析后的文本内容
+     */
+    public String parse(InputStream inputStream, String fileName, String rowDelimiter) {
         String ext = extractExtension(fileName);
         if (ext == null || !SUPPORTED_TYPES.contains(ext)) {
             throw new RuntimeException("不支持的文件类型: " + fileName);
@@ -68,7 +80,7 @@ public class DocumentParser {
 
         try {
             if (EXCEL_TYPES.contains(ext)) {
-                return parseExcel(inputStream, fileName);
+                return parseExcel(inputStream, fileName, rowDelimiter);
             } else if (PPT_TYPES.contains(ext)) {
                 return parsePpt(inputStream, fileName);
             } else {
@@ -106,11 +118,16 @@ public class DocumentParser {
 
     /**
      * Excel结构化解析：按Sheet逐行提取，保留表格结构
+     *
+     * @param inputStream   文档输入流
+     * @param fileName      文件名
+     * @param rowDelimiter  行分隔符，在每行后追加此分隔符以便后续分块
      */
-    private String parseExcel(InputStream inputStream, String fileName) {
+    private String parseExcel(InputStream inputStream, String fileName, String rowDelimiter) {
         try {
             Workbook workbook = WorkbookFactory.create(inputStream);
             StringBuilder sb = new StringBuilder();
+            String effectiveDelimiter = (rowDelimiter != null && !rowDelimiter.isEmpty()) ? rowDelimiter : "\n";
 
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet = workbook.getSheetAt(i);
@@ -127,7 +144,7 @@ public class DocumentParser {
                     }
                     String rowText = String.join(" | ", cells);
                     if (!rowText.replace("|", "").trim().isEmpty()) {
-                        sb.append(rowText).append("\n");
+                        sb.append(rowText).append(effectiveDelimiter);
                     }
                 }
                 sb.append("\n");

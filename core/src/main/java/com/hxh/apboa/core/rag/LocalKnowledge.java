@@ -1,8 +1,7 @@
 package com.hxh.apboa.core.rag;
 
 import com.hxh.apboa.common.entity.KnowledgeBaseConfig;
-import com.hxh.apboa.common.entity.RagDocumentChunk;
-import com.hxh.apboa.common.util.JsonUtils;
+import com.hxh.apboa.common.vo.RagDocumentChunkVO;
 import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
 import io.agentscope.core.message.TextBlock;
 import io.agentscope.core.rag.Knowledge;
@@ -59,11 +58,11 @@ public class LocalKnowledge implements Knowledge {
                 int limit = config != null ? config.getLimit() : 5;
                 double scoreThreshold = config != null ? config.getScoreThreshold() : 0.5;
 
-                List<RagDocumentChunk> chunks = localRagService.retrieve(
+                List<RagDocumentChunkVO> chunks = localRagService.retrieve(
                         query, kbConfig, limit, scoreThreshold);
 
                 List<Document> documents = new ArrayList<>();
-                for (RagDocumentChunk chunk : chunks) {
+                for (RagDocumentChunkVO chunk : chunks) {
                     Map<String, Object> payload = new HashMap<>();
                     payload.put("documentId", chunk.getDocumentId());
                     payload.put("chunkIndex", chunk.getChunkIndex());
