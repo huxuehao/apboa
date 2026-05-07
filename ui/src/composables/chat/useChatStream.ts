@@ -52,12 +52,12 @@ export function useChatStream(
         streamingContent.value = currentText
       },
       onTextMessageEnd: async (_e, finalText) => {
-        streamingContent.value = ''
-        streamingMessageId.value = null
         if (currentSessionId.value && finalText) {
           const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'assistant', content: finalText })
           onMessageSaved?.(res.data.data)
         }
+        streamingContent.value = ''
+        streamingMessageId.value = null
       },
       onToolCallStart: (e) => {
         agentHasResult.value = true
@@ -96,9 +96,7 @@ export function useChatStream(
           toolCallsInProgress.value = []
         }
       },
-      onRunFinished: (e) => {
-        streamingContent.value = ''
-        streamingMessageId.value = null
+      onRunFinished: (_e) => {
         agentHasResult.value = true
         if (toolCallsInProgress.value.length > 0) {
           toolCallsInProgress.value.forEach(item => item.needConfirm = true)

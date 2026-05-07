@@ -143,6 +143,15 @@ const {
 // 输入框内容
 const inputText = ref('')
 
+// 记录最近一次流式消息的 ID，用于 DOM key 桥接，避免流式→保存切换时的闪烁
+const lastStreamingKey = ref<string | null>(null)
+
+watch(streamingMessageId, (newId) => {
+  if (newId) {
+    lastStreamingKey.value = newId
+  }
+})
+
 /** 构建文件前缀字符串 */
 function buildFilesPrefix(files: UploadedFileItem[]): string {
   if (!files.length) return ''
@@ -154,24 +163,43 @@ const displayMessages = computed<DisplayMessage[]>(() => {
   const list: DisplayMessage[] = []
   for (const m of messagesList.value) {
     if (m.role === 'system' || !m.content) continue
+
+    let displayId = String(m.id)
+    // key 桥接：流式刚结束时，将最后一条 assistant 消息的展示 key 替换为流式 ID
+    // 确保 Vue diff 时 key 不变，复用 DOM 而非销毁重建
+    if (!streamingMessageId.value && lastStreamingKey.value && m.role === 'assistant') {
+      const idx = messagesList.value.indexOf(m)
+      const hasLaterAssistant = messagesList.value.slice(idx + 1).some(x => x.role === 'assistant')
+      if (!hasLaterAssistant) {
+        displayId = lastStreamingKey.value
+      }
+    }
+
     list.push({
-      id: String(m.id),
-      role: m.role as any,
+      id: displayId,
+      role: m.role as DisplayMessage['role'],
       content: (m.content || '') as string,
       createdAt: m.createdAt,
       isStreaming: false,
     })
   }
+
   if (streamingMessageId.value) {
-    list.push({
-      id: streamingMessageId.value,
-      role: 'assistant',
-      content: streamingContent.value,
-      isStreaming: true,
-    })
+    // 去重：若 messagesList 末尾的 assistant 消息内容与当前流式内容一致
+    // 说明流式刚保存完成（onTextMessageEnd 已推入 messagesList 但 streaming 尚未清除）
+    // 此时跳过流式条目，避免同一内容渲染两份
+    const lastMsg = list[list.length - 1]
+    if (!(lastMsg?.role === 'assistant' && streamingContent.value && lastMsg.content === streamingContent.value)) {
+      list.push({
+        id: streamingMessageId.value,
+        role: 'assistant',
+        content: streamingContent.value,
+        isStreaming: true,
+      })
+    }
   } else {
     // 响应加载动画
-    if (list[list.length -1]?.role === 'user') {
+    if (list[list.length - 1]?.role === 'user') {
       list.push({
         id: '',
         role: 'assistant',
