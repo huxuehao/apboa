@@ -190,6 +190,7 @@ public class RagDocumentController {
             Map<String, Object> map = new java.util.HashMap<>();
             map.put("id", chunk.getId());
             map.put("documentId", chunk.getDocumentId());
+            map.put("fileName", chunk.getFileName());
             map.put("chunkIndex", chunk.getChunkIndex());
             map.put("content", chunk.getContent());
             map.put("tokenCount", chunk.getTokenCount());

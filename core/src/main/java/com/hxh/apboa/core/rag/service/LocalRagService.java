@@ -107,6 +107,7 @@ public class LocalRagService {
                 RagDocumentChunk chunkEntity = RagDocumentChunk.builder()
                         .id(IdWorker.getId())
                         .documentId(document.getId())
+                        .fileName(document.getFileName())
                         .chunkIndex(chunk.index())
                         .content(chunk.content())
                         .tokenCount(estimateTokenCount(chunk.content()))

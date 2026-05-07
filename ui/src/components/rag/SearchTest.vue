@@ -267,7 +267,7 @@ function clearResults() {
                 </div>
               </div>
               <span class="text-placeholder text-xs">
-                文档ID: {{ result.documentId }}
+                文档: {{ result.fileName || result.documentId }}
               </span>
             </div>
 
