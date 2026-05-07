@@ -20,6 +20,7 @@ import io.agentscope.core.agent.Agent;
 import io.agentscope.core.message.ToolResultBlock;
 import io.agentscope.core.message.ToolUseBlock;
 import io.agentscope.core.model.ExecutionConfig;
+import io.agentscope.core.shutdown.GracefulShutdownManager;
 import io.agentscope.core.tracing.TracerRegistry;
 import io.agentscope.core.util.ExceptionUtils;
 import java.time.Duration;
@@ -55,7 +56,6 @@ import reactor.util.retry.Retry;
  * </ul>
  */
 class ToolExecutor {
-
     private static final Logger logger = LoggerFactory.getLogger(ToolExecutor.class);
 
     private final Toolkit toolkit;
@@ -63,7 +63,8 @@ class ToolExecutor {
     private final ToolGroupManager groupManager;
     private final ToolkitConfig config;
     private final ExecutorService executorService;
-    private BiConsumer<ToolUseBlock, ToolResultBlock> chunkCallback;
+    private BiConsumer<ToolUseBlock, ToolResultBlock> userChunkCallback;
+    private BiConsumer<ToolUseBlock, ToolResultBlock> internalChunkCallback;
 
     /**
      * Create a tool executor with Reactor Schedulers (recommended).
@@ -93,10 +94,65 @@ class ToolExecutor {
     }
 
     /**
-     * Set chunk callback for streaming tool responses.
+     * Set the user-defined chunk callback for streaming tool responses.
      */
     void setChunkCallback(BiConsumer<ToolUseBlock, ToolResultBlock> callback) {
-        this.chunkCallback = callback;
+        this.userChunkCallback = callback;
+    }
+
+    /**
+     * Set the framework-internal chunk callback used by ReActAgent hooks.
+     */
+    void setInternalChunkCallback(BiConsumer<ToolUseBlock, ToolResultBlock> callback) {
+        this.internalChunkCallback = callback;
+    }
+
+    /**
+     * Get the user-defined chunk callback.
+     * Used by Toolkit.copy() to preserve user callbacks during deep copy.
+     */
+    BiConsumer<ToolUseBlock, ToolResultBlock> getChunkCallback() {
+        return this.userChunkCallback;
+    }
+
+    /**
+     * Combine the user-defined and internal chunk callbacks.
+     */
+    private BiConsumer<ToolUseBlock, ToolResultBlock> getEffectiveChunkCallback() {
+        if (internalChunkCallback == null) {
+            return userChunkCallback != null
+                    ? (toolUse, chunk) ->
+                    invokeChunkCallback("user", userChunkCallback, toolUse, chunk)
+                    : null;
+        }
+        if (userChunkCallback == null) {
+            return (toolUse, chunk) ->
+                    invokeChunkCallback("internal", internalChunkCallback, toolUse, chunk);
+        }
+        return (toolUse, chunk) -> {
+            invokeChunkCallback("internal", internalChunkCallback, toolUse, chunk);
+            invokeChunkCallback("user", userChunkCallback, toolUse, chunk);
+        };
+    }
+
+    /**
+     * Invoke a chunk callback without allowing it to block other callbacks.
+     */
+    private void invokeChunkCallback(
+            String callbackType,
+            BiConsumer<ToolUseBlock, ToolResultBlock> callback,
+            ToolUseBlock toolUse,
+            ToolResultBlock chunk) {
+        try {
+            callback.accept(toolUse, chunk);
+        } catch (Exception e) {
+            logger.warn(
+                    "Chunk callback '{}' failed for tool '{}': {}",
+                    callbackType,
+                    toolUse.getName(),
+                    e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName(),
+                    e);
+        }
     }
 
     // ==================== Single Tool Execution ====================
@@ -167,17 +223,18 @@ class ToolExecutor {
                 ToolExecutionContext.merge(param.getContext(), toolkitContext);
 
         // Create emitter for streaming
-        ToolEmitter toolEmitter = new DefaultToolEmitter(toolCall, chunkCallback);
+        ToolEmitter toolEmitter = new DefaultToolEmitter(toolCall, getEffectiveChunkCallback());
 
-        // Merge preset parameters with input
+        // Merge input with preset parameters. Preset values win so framework-controlled
+        // parameters remain immutable from the caller/LLM perspective.
         Map<String, Object> mergedInput = new HashMap<>();
+        if (!param.getInput().isEmpty()) {
+            mergedInput.putAll(param.getInput());
+        } else if (!toolCall.getInput().isEmpty()) {
+            mergedInput.putAll(toolCall.getInput());
+        }
         if (registered != null) {
             mergedInput.putAll(registered.getPresetParameters());
-        }
-        if (param.getInput() != null && !param.getInput().isEmpty()) {
-            mergedInput.putAll(param.getInput());
-        } else if (toolCall.getInput() != null) {
-            mergedInput.putAll(toolCall.getInput());
         }
 
         // Build final execution param
@@ -275,6 +332,7 @@ class ToolExecutor {
         execution = applyScheduling(execution);
         execution = applyTimeout(execution, executionConfig, toolCall);
         execution = applyRetry(execution, executionConfig, toolCall);
+        execution = applyShutdownGuard(execution);
 
         // Add tool metadata and error handling
         return execution
@@ -347,5 +405,22 @@ class ToolExecutor {
                 toolCall.getName());
 
         return execution.retryWhen(retrySpec);
+    }
+
+    /**
+     * Race tool execution against the global shutdown timeout signal.
+     * When the signal fires, the tool Mono is cancelled and an error is emitted,
+     * which flows through {@code onErrorResume} into a normal {@code ToolResultBlock.error}.
+     */
+    private Mono<ToolResultBlock> applyShutdownGuard(Mono<ToolResultBlock> execution) {
+        Mono<ToolResultBlock> shutdownGuard =
+                GracefulShutdownManager.getInstance()
+                        .getShutdownTimeoutSignal()
+                        .then(
+                                Mono.error(
+                                        new RuntimeException(
+                                                "Tool execution timeout due to system graceful"
+                                                        + " shutdown.")));
+        return Mono.firstWithSignal(execution, shutdownGuard);
     }
 }
