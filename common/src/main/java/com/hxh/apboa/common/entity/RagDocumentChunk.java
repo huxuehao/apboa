@@ -27,6 +27,8 @@ public class RagDocumentChunk implements SerializableEnable {
 
     private Long documentId;
 
+    private String fileName;
+
     private Integer chunkIndex;
 
     private String content;

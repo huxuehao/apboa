@@ -492,6 +492,7 @@ export interface RagDocument {
 export interface RagDocumentChunk {
   id: string
   documentId: string
+  fileName: string
   chunkIndex: number
   content: string
   tokenCount: number | null
