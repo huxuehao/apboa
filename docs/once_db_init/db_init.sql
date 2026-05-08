@@ -227,10 +227,10 @@ INDEX `idx_tool_id`(`tool_id` ASC) USING BTREE
 -- ----------------------------
 DROP TABLE IF EXISTS `agentscope_sessions`;
 CREATE TABLE `agentscope_sessions`  (
-`session_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-`state_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+`session_id` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
+`state_key` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
 `item_index` int NOT NULL DEFAULT 0,
-`state_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+`state_data` longtext CHARACTER SET utf8mb4 NOT NULL,
 `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
 `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 PRIMARY KEY (`session_id`, `state_key`, `item_index`) USING BTREE
@@ -313,10 +313,10 @@ DROP TABLE IF EXISTS `chat_message`;
 CREATE TABLE `chat_message`  (
 `id` int NOT NULL AUTO_INCREMENT COMMENT '消息ID',
 `session_id` bigint NOT NULL COMMENT '会话ID',
-`role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '消息角色',
-`content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '消息内容',
+`role` varchar(20) CHARACTER SET utf8mb4 NOT NULL COMMENT '消息角色',
+`content` text CHARACTER SET utf8mb4 NOT NULL COMMENT '消息内容',
 `parent_id` int NULL DEFAULT NULL COMMENT '父消息ID',
-`path` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '消息路径，格式如：/1/2/3/',
+`path` varchar(2048) CHARACTER SET utf8mb4 NULL DEFAULT NULL COMMENT '消息路径，格式如：/1/2/3/',
 `depth` int NULL DEFAULT NULL COMMENT '消息深度，从0开始，根消息深度为0',
 `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
 PRIMARY KEY (`id`) USING BTREE,
@@ -334,7 +334,7 @@ CREATE TABLE `chat_session`  (
 `user_id` bigint NOT NULL COMMENT '用户ID',
 `agent_id` bigint NOT NULL COMMENT '智能体ID',
 `current_message_id` int NULL DEFAULT NULL COMMENT '当前消息ID',
-`title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '会话标题',
+`title` varchar(255) CHARACTER SET utf8mb4 NULL DEFAULT NULL COMMENT '会话标题',
 `is_pinned` tinyint(1) NULL DEFAULT 0 COMMENT '是否置顶',
 `pin_time` datetime NULL DEFAULT NULL COMMENT '置顶时间',
 `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
@@ -557,13 +557,13 @@ DROP TABLE IF EXISTS `rag_document`;
 CREATE TABLE `rag_document`  (
 `id` bigint NOT NULL,
 `knowledge_base_config_id` bigint NOT NULL COMMENT '关联的知识库配置ID',
-`file_name` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文件名',
-`file_path` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文件存储路径',
+`file_name` varchar(500) CHARACTER SET utf8mb4 NOT NULL COMMENT '文件名',
+`file_path` varchar(1000) CHARACTER SET utf8mb4 NOT NULL COMMENT '文件存储路径',
 `file_size` bigint NOT NULL DEFAULT 0 COMMENT '文件大小(字节)',
-`file_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文件类型(pdf/txt/docx/xlsx/md等)',
+`file_type` varchar(50) CHARACTER SET utf8mb4 NOT NULL COMMENT '文件类型(pdf/txt/docx/xlsx/md等)',
 `chunk_count` int NOT NULL DEFAULT 0 COMMENT '分块数量',
-`status` enum('PENDING','PROCESSING','COMPLETED','FAILED') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PENDING' COMMENT '处理状态',
-`error_message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '错误信息',
+`status` enum('PENDING','PROCESSING','COMPLETED','FAILED') CHARACTER SET utf8mb4 NOT NULL DEFAULT 'PENDING' COMMENT '处理状态',
+`error_message` text CHARACTER SET utf8mb4 NULL COMMENT '错误信息',
 `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 `created_by` bigint NULL DEFAULT NULL,
@@ -577,20 +577,21 @@ INDEX `idx_status`(`status` ASC) USING BTREE
 -- Table structure for rag_document_chunk
 -- ----------------------------
 DROP TABLE IF EXISTS `rag_document_chunk`;
-CREATE TABLE `rag_document_chunk`  (
+CREATE TABLE `rag_document_chunk` (
 `id` bigint NOT NULL,
 `document_id` bigint NOT NULL COMMENT '关联的文档ID',
+`file_name` varchar(500) NOT NULL DEFAULT '' COMMENT '文件名',
 `chunk_index` int NOT NULL COMMENT '分块序号',
-`content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '分块文本内容',
-`token_count` int NULL DEFAULT NULL COMMENT 'Token数量(估算)',
-`start_offset` int NULL DEFAULT NULL COMMENT '在原文中的起始偏移',
-`end_offset` int NULL DEFAULT NULL COMMENT '在原文中的结束偏移',
-`metadata` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '元数据(JSON)',
+`content` text NOT NULL COMMENT '分块文本内容',
+`token_count` int DEFAULT NULL COMMENT 'Token数量(估算)',
+`start_offset` int DEFAULT NULL COMMENT '在原文中的起始偏移',
+`end_offset` int DEFAULT NULL COMMENT '在原文中的结束偏移',
+`metadata` text COMMENT '元数据(JSON)',
 `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-PRIMARY KEY (`id`) USING BTREE,
-INDEX `idx_document_id`(`document_id` ASC) USING BTREE,
-INDEX `idx_chunk_index`(`document_id` ASC, `chunk_index` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'RAG文档分块表';
+PRIMARY KEY (`id`),
+KEY `idx_document_id` (`document_id`),
+KEY `idx_chunk_index` (`document_id`,`chunk_index`)
+) COMMENT='RAG文档分块表';
 
 -- ----------------------------
 -- Table structure for secret_key
