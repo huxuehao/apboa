@@ -37,6 +37,10 @@
             <groupId>com.hxh.apboa</groupId>
             <artifactId>rag</artifactId>
         </dependency>
+		<dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>ui</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

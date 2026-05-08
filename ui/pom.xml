@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.hxh.apboa</groupId>
+        <artifactId>apboa</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>ui</artifactId>
+    <packaging>jar</packaging>
+    <name>ui</name>
+
+    <build>
+        <plugins>
+            <!-- 前端构建插件：自动安装 Node 和 pnpm，并执行构建 -->
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.15.0</version>
+                <configuration>
+                    <workingDirectory>${project.basedir}</workingDirectory>
+                    <installDirectory>${project.build.directory}</installDirectory>
+                    <nodeVersion>v20.19.0</nodeVersion>
+                    <pnpmVersion>9.4.0</pnpmVersion>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install-node-and-pnpm</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>install-node-and-pnpm</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>pnpm-install</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>pnpm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>install</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>pnpm-build-main</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>pnpm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run build-only:main</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>pnpm-build-doc</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>pnpm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run build-only:doc</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 复制主应用构建产物到 classpath 静态资源目录 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-main-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/dist-main</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <!-- 复制文档系统构建产物 -->
+                    <execution>
+                        <id>copy-doc-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/resources/doc</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/dist-doc</directory>
+                                    <excludes>
+                                        <exclude>doc.html</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <!-- 将 doc.html 复制到 doc 目录下后续重命名为 index.html -->
+                    <execution>
+                        <id>copy-doc-html</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/resources/doc</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/dist-doc</directory>
+                                    <includes>
+                                        <include>doc.html</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 将 doc.html 重命名为 index.html，使 /doc/ 路径可访问 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>rename-doc-html</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <move file="${project.build.outputDirectory}/META-INF/resources/doc/doc.html"
+                                      tofile="${project.build.outputDirectory}/META-INF/resources/doc/index.html"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
