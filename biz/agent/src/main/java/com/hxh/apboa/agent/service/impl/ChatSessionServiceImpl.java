@@ -2,12 +2,14 @@ package com.hxh.apboa.agent.service.impl;
 
 import com.hxh.apboa.agent.mapper.AgentScopeSessionMapper;
 import com.hxh.apboa.agent.mapper.ChatSessionMapper;
+import com.hxh.apboa.agent.service.AgentDefinitionService;
 import com.hxh.apboa.agent.service.ChatMessageService;
 import com.hxh.apboa.agent.service.ChatSessionService;
 import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.dto.ChatMessageAppendDTO;
 import com.hxh.apboa.common.dto.ChatSessionCreateDTO;
 import com.hxh.apboa.common.dto.ChatSessionQueryDTO;
+import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.ChatMessage;
 import com.hxh.apboa.common.entity.ChatSession;
 import com.hxh.apboa.common.mp.support.PageParams;
@@ -43,6 +45,7 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     private final ChatMessageService chatMessageService;
     private final ThreadSessionManager sessionManager;
     private final AgentScopeSessionMapper agentScopeSessionMapper;
+    private final AgentDefinitionService agentDefinitionService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -51,8 +54,19 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         if (userId == null || userId == 0L) {
             throw new RuntimeException("用户未登录");
         }
-        if (dto.getAgentId() == null) {
+        if (dto.getAgentId() == null ) {
             throw new RuntimeException("agentId 不能为空");
+        }
+
+        // 校验智能体的合法性
+        AgentDefinition agentDefinition = agentDefinitionService.getOne(
+                new LambdaQueryWrapper<AgentDefinition>()
+                        .eq(AgentDefinition::getId, dto.getAgentId())
+                        .eq(AgentDefinition::getEnabled, true),
+                false);
+
+        if (agentDefinition == null) {
+            throw new RuntimeException("智能体不存在或已禁用");
         }
 
         ChatSession session = new ChatSession();

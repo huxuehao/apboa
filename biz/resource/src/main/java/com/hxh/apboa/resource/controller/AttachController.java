@@ -3,11 +3,9 @@ package com.hxh.apboa.resource.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.hxh.apboa.common.config.auth.ChatKeyAccess;
-import com.hxh.apboa.common.config.auth.RoleNeed;
 import com.hxh.apboa.common.config.auth.SkAccess;
 import com.hxh.apboa.common.entity.Attach;
 import com.hxh.apboa.common.entity.AttachLog;
-import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.mp.support.MP;
 import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
@@ -53,7 +51,7 @@ public class AttachController {
         return R.data(attachLogService.page(MP.getPage(pageParams), qw));
     }
 
-    @RoleNeed({Role.ADMIN, Role.EDIT})
+    @ChatKeyAccess
     @PostMapping(value = "/delete", name = "删除")
     public R<Boolean> delete(@RequestBody List<Long> ids) {
         return R.data(attachService.batchDeleteV2(ids));
