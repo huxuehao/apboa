@@ -14,7 +14,7 @@ import com.hxh.apboa.core.rag.DocumentParser;
 import com.hxh.apboa.core.rag.EmbeddingRecord;
 import com.hxh.apboa.core.rag.EmbeddingService;
 import com.hxh.apboa.core.rag.RetrievalResult;
-import com.hxh.apboa.core.rag.VectorStore;
+import com.hxh.apboa.core.rag.store.VectorStore;
 import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
 import com.hxh.apboa.core.rag.mapper.RagDocumentChunkMapper;
 import com.hxh.apboa.core.rag.mapper.RagDocumentMapper;

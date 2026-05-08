@@ -53,7 +53,7 @@ jwt:
   secret: ${JWT_SECRET:ZJr8c2xF0y5b7yM+1H9v9cGZq6nZ5e0k5r3Cw7H8vJQ=}
 
 rag:
-  store:   # pgvector | milvus，向量存储类型，默认 pgvector
+  store:   # pgvector | milvus，向量存储类型
   pgvector:
     url: jdbc:postgresql://127.0.0.1:5432/apboa_vector
     username: postgres

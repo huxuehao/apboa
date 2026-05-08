@@ -1,5 +1,8 @@
-package com.hxh.apboa.core.rag;
+package com.hxh.apboa.core.rag.store.impl;
 
+import com.hxh.apboa.core.rag.EmbeddingRecord;
+import com.hxh.apboa.core.rag.RetrievalResult;
+import com.hxh.apboa.core.rag.store.VectorStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * PgVector向量存储服务，负责与PostgreSQL/pgvector的交互
+ * PgVector向量存储服务
  *
  * @author huxuehao
  */
