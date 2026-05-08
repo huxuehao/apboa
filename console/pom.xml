@@ -37,10 +37,11 @@
             <groupId>com.hxh.apboa</groupId>
             <artifactId>rag</artifactId>
         </dependency>
-		<dependency>
+        <!--如果您想前后端不分离，可以取消注释以下依赖-->
+		<!--<dependency>
             <groupId>com.hxh.apboa</groupId>
             <artifactId>ui</artifactId>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
     <build>
