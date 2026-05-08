@@ -5,12 +5,14 @@ import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.FuncUtils;
 import com.hxh.apboa.common.util.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.hxh.apboa.core.agui.AgentContext;
 import io.agentscope.core.message.TextBlock;
 import io.agentscope.core.message.ToolResultBlock;
 import io.agentscope.core.tool.AgentTool;
 import io.agentscope.core.tool.ToolCallParam;
 import reactor.core.publisher.Mono;
 
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -90,8 +92,16 @@ public class DynamicAgentTool implements AgentTool {
                 IDynamicAgentTool dynamicAgentTool = ToolInstanceLoadFactory
                         .getInstanceLoader(toolConfig.getLanguage()).loadInstance(toolConfig.getCode());
 
-                // 执行动态工具
-                Object result = dynamicAgentTool.execute(args.toArray());
+                Object result;
+
+                // 判断是否需要传递 agentContext
+                if (needsAgentContext(dynamicAgentTool)) {
+                    // 获取 AgentContext
+                    AgentContext agentContext = param.getContext().get(AgentContext.class);
+                    result = dynamicAgentTool.execute(agentContext, args.toArray());
+                } else {
+                    result = dynamicAgentTool.execute(args.toArray());
+                }
 
                 return ToolResultBlock.of(
                         param.getToolUseBlock().getId(),
@@ -106,6 +116,18 @@ public class DynamicAgentTool implements AgentTool {
                 );
             }
         });
+    }
+
+    // 判断是否需要 agentContext（通过反射检查是否重写了方法）
+    private boolean needsAgentContext(IDynamicAgentTool tool) {
+        try {
+            // 检查是否重写了带 AgentContext 的方法
+            Method method = tool.getClass().getMethod("execute", AgentContext.class, Object[].class);
+            // 如果方法声明的类不是 IDynamicAgentTool 接口，说明被重写了
+            return method.getDeclaringClass() != IDynamicAgentTool.class;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
     }
 
     /**
@@ -127,6 +149,7 @@ public class DynamicAgentTool implements AgentTool {
                 }
             });
         }
+
         return args;
     }
 }

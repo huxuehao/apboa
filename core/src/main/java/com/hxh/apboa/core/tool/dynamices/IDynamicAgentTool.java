@@ -1,7 +1,9 @@
 package com.hxh.apboa.core.tool.dynamices;
 
+import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.hxh.apboa.core.agui.AgentContext;
 
 /**
  * 描述：动态代理工具接口
@@ -12,7 +14,16 @@ public interface IDynamicAgentTool {
     /**
      * 执行
      */
-    Object execute(Object ...args);
+    default Object execute(Object ...args) {
+        return "抱歉，该工具尚未实现，暂不可用";
+    }
+
+    /**
+     * 执行
+     */
+    default Object execute(AgentContext agentContext, Object... args) {
+        return "抱歉，该工具尚未实现，暂不可用";
+    }
 
     /**
      *  将对象转换为json字符串
