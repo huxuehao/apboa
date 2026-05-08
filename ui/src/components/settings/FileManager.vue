@@ -24,7 +24,7 @@ async function load() {
   try {
     const res = await attachApi.page({
       ...queryParams,
-      current: page.current,
+      page: page.current,
       size: page.size
     })
     const result = res.data.data

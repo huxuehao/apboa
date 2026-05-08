@@ -1,5 +1,6 @@
 package com.hxh.apboa.core.agui;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.common.vo.AccountVO;
@@ -8,8 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * 描述：智能体上下文
@@ -29,30 +29,49 @@ public class AgentContext {
     private List<String> fileIds;
     private AccountVO userInfo;
     private AgentDefinition agentDefinition;
+    private Map<String, Object> params;
 
     public static void init(RunAgentInput input, String threadId) {
         // 创建上下文
         AgentContext agentContext = AgentContext.get();
+
         agentContext.setThreadId(threadId);
+
         agentContext.setRunId(input.getRunId());
+
         boolean memoryActive = input.getForwardedProp("memoryActive") != null
                 ? (Boolean) input.getForwardedProp("memoryActive")
                 : false;
         agentContext.setMemoryActive(memoryActive);
+
         agentContext.setPlanActive(
                 input.getForwardedProp("planActive") != null
                         ? (Boolean) input.getForwardedProp("planActive")
                         : false);
-        @SuppressWarnings("unchecked")
-        List<String> fileIds = input.getForwardedProp("fileIds") != null
-                ? (List<String>) input.getForwardedProp("fileIds")
-                : List.of();
-        agentContext.setFileIds(fileIds);
+
+        agentContext.setFileIds(toList(input.getForwardedProp("fileIds")));
 
         AccountVO userInfo = input.getForwardedProp("userInfo") != null
                 ? JsonUtils.objectToBean(input.getForwardedProp("userInfo"), AccountVO.class)
                 : null;
         agentContext.setUserInfo(userInfo);
+
+        agentContext.setParams(toMap(input.getForwardedProp("params")));
+    }
+
+    private static Map<String, Object> toMap(Object params) {
+        if (params == null) {
+            return new HashMap<>();
+        }
+
+        return JsonUtils.parse(JsonUtils.toJsonStr(params), new TypeReference<Map<String, Object>>() {});
+    }
+
+    private static List<String> toList(Object params) {
+        if (params == null) {
+            return new ArrayList<>();
+        }
+        return JsonUtils.parse(JsonUtils.toJsonStr(params), new TypeReference<List<String>>() {});
     }
 
     public static AgentContext get() {

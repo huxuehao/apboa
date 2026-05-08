@@ -34,7 +34,7 @@ const externalChatUrl = computed(() => {
  */
 async function loadChatKey(refresh: boolean = false) {
   if (!props.agentId) return
-  
+
   chatKeyLoading.value = true
   try {
     const res = await getChatKey(props.agentId, refresh)
@@ -543,31 +543,55 @@ const workspaceEndpoints = [
               <td class="param-name">messages</td>
               <td class="param-type">array</td>
               <td><span class="param-required">Required</span></td>
-              <td>消息列表，包含 id、role（user/assistant）、content 字段</td>
+              <td>消息列表，包含 id、role（user）、content 字段</td>
             </tr>
             <tr>
-              <td class="param-name">state</td>
-              <td class="param-type">object</td>
-              <td><span style="color: #bfbfbf;">Optional</span></td>
-              <td>对话状态对象，可用于传递上下文状态</td>
+              <td class="param-name" style="padding-left: 48px;">id</td>
+              <td class="param-type">string</td>
+              <td><span class="param-required">Required</span></td>
+              <td>消息ID</td>
             </tr>
             <tr>
-              <td class="param-name">tools</td>
-              <td class="param-type">array</td>
-              <td><span style="color: #bfbfbf;">Optional</span></td>
-              <td>可用工具列表</td>
+              <td class="param-name" style="padding-left: 48px;">role</td>
+              <td class="param-type">string</td>
+              <td><span class="param-required">Required</span></td>
+              <td>消息角色，可选值为 user</td>
             </tr>
             <tr>
-              <td class="param-name">context</td>
-              <td class="param-type">array</td>
-              <td><span style="color: #bfbfbf;">Optional</span></td>
-              <td>上下文信息列表</td>
+              <td class="param-name" style="padding-left: 48px;">content</td>
+              <td class="param-type">string</td>
+              <td><span class="param-required">Required</span></td>
+              <td>消息内容</td>
             </tr>
             <tr>
               <td class="param-name">forwardedProps</td>
               <td class="param-type">object</td>
-              <td><span class="param-required">Required</span></td>
-              <td>转发属性，包含 agentId、agentCode、fileIds、memoryActive、planActive 等扩展参数</td>
+              <td><span style="color: #bfbfbf;">Optional</span></td>
+              <td>转发属性对象 memoryActive、planActive、fileIds、params 字段</td>
+            </tr>
+            <tr>
+              <td class="param-name" style="padding-left: 48px;">memoryActive</td>
+              <td class="param-type">boolean</td>
+              <td><span style="color: #bfbfbf;">Optional</span></td>
+              <td>是否启用记忆功能</td>
+            </tr>
+            <tr>
+              <td class="param-name" style="padding-left: 48px;">planActive</td>
+              <td class="param-type">boolean</td>
+              <td><span style="color: #bfbfbf;">Optional</span></td>
+              <td>是否启用计划功能</td>
+            </tr>
+            <tr>
+              <td class="param-name" style="padding-left: 48px;">fileIds</td>
+              <td class="param-type">string[]</td>
+              <td><span style="color: #bfbfbf;">Optional</span></td>
+              <td>文件ID列表，上传多模态文件后返回的ID</td>
+            </tr>
+            <tr>
+              <td class="param-name" style="padding-left: 48px;">params</td>
+              <td class="param-type">object</td>
+              <td><span style="color: #bfbfbf;">Optional</span></td>
+              <td>扩展参数键值对，在工具中可直接获取该对象</td>
             </tr>
           </tbody>
         </table>
