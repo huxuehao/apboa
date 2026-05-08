@@ -31,7 +31,13 @@ export default defineConfig(({ mode }) => {
   const rootDir = fileURLToPath(new URL('.', import.meta.url))
   const target = env.VITE_APP_TARGET || 'all'
 
+  // 根据构建目标设置输出目录和基础路径
+  const outDir = target === 'doc' ? 'dist-doc' : (target === 'main' ? 'dist-main' : 'dist')
+  const contextPath = env.VITE_APP_CONTEXT_PATH || ''
+  const base = target === 'doc' ? `${contextPath}/doc/` : (contextPath ? `${contextPath}/` : '/')
+
   return {
+    base,
     // 压缩dist配置
     plugins: [
       vue(),
@@ -39,8 +45,8 @@ export default defineConfig(({ mode }) => {
       vueSetupExtend(),
       // vueDevTools(),
       zipPack({
-        inDir: 'dist',
-        outFileName: 'dist.zip',
+        inDir: outDir,
+        outFileName: `${outDir}.zip`,
       } as ZipPickOptions),
       Components({
         resolvers: [
@@ -96,6 +102,7 @@ export default defineConfig(({ mode }) => {
       }
     },
     build: {
+      outDir,
       rollupOptions: {
         input: resolveInputs(target, rootDir),
       },
