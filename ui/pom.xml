@@ -79,7 +79,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.outputDirectory}/META-INF/resources</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/resources/web</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/dist-main</directory>
@@ -95,7 +95,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.outputDirectory}/META-INF/resources/doc</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/resources/web/doc</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/dist-doc</directory>
@@ -114,7 +114,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.outputDirectory}/META-INF/resources/doc</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/resources/web/doc</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/dist-doc</directory>
@@ -142,8 +142,8 @@
                         </goals>
                         <configuration>
                             <target>
-                                <move file="${project.build.outputDirectory}/META-INF/resources/doc/doc.html"
-                                      tofile="${project.build.outputDirectory}/META-INF/resources/doc/index.html"/>
+                                <move file="${project.build.outputDirectory}/META-INF/resources/web/doc/doc.html"
+                                      tofile="${project.build.outputDirectory}/META-INF/resources/web/doc/index.html"/>
                             </target>
                         </configuration>
                     </execution>
