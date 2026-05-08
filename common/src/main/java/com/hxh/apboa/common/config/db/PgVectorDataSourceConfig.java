@@ -19,7 +19,7 @@ import java.sql.Statement;
  * @author huxuehao
  */
 @Configuration
-@ConditionalOnProperty(name = "rag.pgvector.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = "rag.store", havingValue = "pgvector")
 public class PgVectorDataSourceConfig {
 
     private static final Logger log = LoggerFactory.getLogger(PgVectorDataSourceConfig.class);

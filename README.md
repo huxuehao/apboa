@@ -328,7 +328,7 @@ mysql -u root -p apboa < docs/2026-04-04-01.sql
 
 > **注意：** `schema.sql` 为基础表结构，必须首先执行。其余 SQL 文件为增量更新脚本，请严格按照文件名中的日期顺序依次执行，不可跳过。
 
-> **注意：** apboa 使用 postgresql 作为向量数据库。如果您无本地知识库需求，请确保将 yml 中的 rag.pgvector.enabled 置为 false。
+> **注意：** apboa 支持 PostgreSQL/pgvector 和 Milvus 两种向量数据库，通过 `rag.store` 配置切换（`pgvector` 或 `milvus`）。如果您无本地知识库需求，将 `rag.store` 设为空或注释即可，系统会自动降级为空实现，不影响正常使用。
 
 ### 3. 启动后端
 

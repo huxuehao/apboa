@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,8 @@ import java.util.Map;
  * @author huxuehao
  */
 @Component
-public class PgVectorStore {
+@ConditionalOnProperty(name = "rag.store", havingValue = "pgvector")
+public class PgVectorStore implements VectorStore {
 
     private static final Logger log = LoggerFactory.getLogger(PgVectorStore.class);
 
@@ -78,16 +80,12 @@ public class PgVectorStore {
         }
     }
 
-    /**
-     * 是否可用
-     */
+    @Override
     public boolean isAvailable() {
         return pgJdbcTemplate != null;
     }
 
-    /**
-     * 存储向量，根据embedding数组长度自动确定目标表
-     */
+    @Override
     public void storeEmbedding(Long id, Long chunkId, Long documentId,
                                Long knowledgeBaseConfigId, float[] embedding) {
         if (!isAvailable()) {
@@ -103,23 +101,19 @@ public class PgVectorStore {
         pgJdbcTemplate.update(sql, id, chunkId, documentId, knowledgeBaseConfigId, vectorStr);
     }
 
-    /**
-     * 批量存储向量
-     */
+    @Override
     public void storeEmbeddings(List<EmbeddingRecord> records) {
         if (!isAvailable()) {
             throw new RuntimeException("PgVector数据源未配置");
         }
 
         for (EmbeddingRecord record : records) {
-            storeEmbedding(record.id, record.chunkId, record.documentId,
-                    record.knowledgeBaseConfigId, record.embedding);
+            storeEmbedding(record.id(), record.chunkId(), record.documentId(),
+                    record.knowledgeBaseConfigId(), record.embedding());
         }
     }
 
-    /**
-     * 向量相似度检索，根据查询向量长度自动确定目标表
-     */
+    @Override
     public List<RetrievalResult> search(float[] queryEmbedding, Long knowledgeBaseConfigId,
                                         int limit, double scoreThreshold) {
         if (!isAvailable()) {
@@ -152,9 +146,7 @@ public class PgVectorStore {
         return results;
     }
 
-    /**
-     * 删除指定文档的所有向量（遍历所有维度表）
-     */
+    @Override
     public void deleteByDocumentId(Long documentId) {
         if (!isAvailable()) return;
         for (int dim : SUPPORTED_DIMENSIONS) {
@@ -162,9 +154,7 @@ public class PgVectorStore {
         }
     }
 
-    /**
-     * 删除指定知识库的所有向量（遍历所有维度表）
-     */
+    @Override
     public void deleteByKnowledgeBaseConfigId(Long knowledgeBaseConfigId) {
         if (!isAvailable()) return;
         for (int dim : SUPPORTED_DIMENSIONS) {
@@ -172,9 +162,7 @@ public class PgVectorStore {
         }
     }
 
-    /**
-     * 删除指定分块的向量（遍历所有维度表）
-     */
+    @Override
     public void deleteByChunkId(Long chunkId) {
         if (!isAvailable()) return;
         for (int dim : SUPPORTED_DIMENSIONS) {
@@ -190,18 +178,5 @@ public class PgVectorStore {
         }
         sb.append("]");
         return sb.toString();
-    }
-
-    /**
-     * 嵌入向量记录
-     */
-    public record EmbeddingRecord(Long id, Long chunkId, Long documentId,
-                                  Long knowledgeBaseConfigId, float[] embedding) {
-    }
-
-    /**
-     * 检索结果
-     */
-    public record RetrievalResult(Long chunkId, Long documentId, double score) {
     }
 }
