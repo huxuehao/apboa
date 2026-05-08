@@ -94,8 +94,8 @@
 2. 勾选需要的技能包（Checkbox 多选）
 3. 技能包关联的工具会自动注册到智能体的工具集中
 
-![技能包配置占位](src/doc/images/skill-agent-config.png)
-![技能包配置2占位](src/doc/images/skill-agent-config2.png)
+![技能包配置占位](images/skill-agent-config.png)
+![技能包配置2占位](images/skill-agent-config2.png)
 
 ## 最佳实践
 

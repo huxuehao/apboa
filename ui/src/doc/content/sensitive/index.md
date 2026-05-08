@@ -95,7 +95,7 @@
 2. 开启 **启用敏感词过滤** 开关
 3. 开启后，智能体将对输入和输出内容进行敏感词过滤
 
-![敏感词配置界面占位](src/doc/images/sensitive-agent-config.png)
+![敏感词配置界面占位](images/sensitive-agent-config.png)
 
 ## 最佳实践
 

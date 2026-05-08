@@ -41,8 +41,20 @@ public class InterceptorConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        /* 静态资源处理器，将/web/**请求指引到classpath:/web/下 */
-        registry.addResourceHandler("/web/**").addResourceLocations("classpath:/web/");
+        /* 静态资源处理器，将/apboa/**请求指引到classpath:/META-INF/resources/apboa/下 */
+        registry.addResourceHandler("/web/**").addResourceLocations("classpath:/META-INF/resources/web/");
+        registry.addResourceHandler("/images/**").addResourceLocations("classpath:/META-INF/resources/web/images/");
+    }
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        // 添加视图控制器，引导静态请求
+        registry.addViewController("/web/doc/").setViewName("forward:/web/doc/index.html");
+        registry.addViewController("/web/doc").setViewName("forward:/web/doc/index.html");
+        registry.addViewController("/web/").setViewName("forward:/web/index.html");
+        registry.addViewController("/web").setViewName("forward:/web/index.html");
+        registry.addViewController("/").setViewName("forward:/web/index.html");
+        registry.addViewController("/doc.html").setViewName("forward:/web/doc/index.html");
     }
 
     @Override

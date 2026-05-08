@@ -89,7 +89,7 @@
 2. 勾选需要的工具（Checkbox 多选）
 3. 配置 **工具选择策略**
 
-![工具配置占位](src/doc/images/tool-agent-config.png)
+![工具配置占位](images/tool-agent-config.png)
 
 
 ## 工具描述编写技巧

@@ -59,7 +59,7 @@
 | **描述** | 智能体功能说明 | 否 |
 | **标签** | 分类标签，用于分组管理 | 否 |
 
-![基本信息占位](src/doc/images/agent-form-basic.png)
+![基本信息占位](images/agent-form-basic.png)
 
 #### 步骤二：模型与提示词
 
@@ -71,7 +71,7 @@
 | **跟随模板** | 是否跟随模板内容变化（开启后模板更新时智能体的系统提示词同步更新） | 否 |
 | **系统提示词** | 自定义系统提示词内容（未选模板时手动编写，选了模板则自动填充） | 否 |
 
-![模型与提示词占位](src/doc/images/agent-form-model.png)
+![模型与提示词占位](images/agent-form-model.png)
 
 :::tip
 选择提示词模板并开启「跟随模板」后，系统提示词将自动同步模板内容，无需手动维护。若需自定义，可关闭跟随模板后手动编写。
@@ -90,7 +90,7 @@
 | **敏感词配置** | 关联敏感词配置 | 否 |
 | **启用敏感词过滤** | 是否启用敏感词检测与过滤 | 否 |
 
-![工具与能力占位](src/doc/images/agent-form-tools.png)
+![工具与能力占位](images/agent-form-tools.png)
 
 #### 步骤四：知识库与 MCP
 
@@ -100,7 +100,7 @@
 | **MCP 服务器** | 关联 MCP 服务器，扩展智能体的工具调用能力 | 否 |
 | **子智能体** | 关联子智能体，实现多 Agent 协作 | 否 |
 
-![知识库与MCP占位](src/doc/images/agent-form-knowledge.png)
+![知识库与MCP占位](images/agent-form-knowledge.png)
 
 :::warning
 子智能体不能形成循环引用，即智能体 A 不能是智能体 B 的子智能体的同时，智能体 B 又是智能体 A 的子智能体。
@@ -121,7 +121,7 @@
 | **执行环境配置** | 该配置可开启 [工作空间]，同时可赋予智能体执行 Shell 脚本、读取&写入文件的能力 | - |
 | **Studio 配置** | 关联 Studio 画布配置 | - |
 
-![高级设置占位](src/doc/images/agent-form-advanced.png)
+![高级设置占位](images/agent-form-advanced.png)
 
 :::tip
 - 启用计划模式适合复杂任务场景，智能体会先分析任务并制定执行计划
@@ -148,7 +148,7 @@
 | **Agent Card 路径** | Agent Card 文件的相对路径（如 `/.well-known/agent.json`） | 是 |
 | **认证头** | HTTP 请求的认证头信息（Key-Value 对，支持环境变量引用） | 否 |
 
-![A2A WellKnown配置占位](src/doc/images/agent-a2a-wellknown.png)
+![A2A WellKnown配置占位](images/agent-a2a-wellknown.png)
 
 **Nacos 模式：**
 
@@ -157,7 +157,7 @@
 | **Agent 名称** | 注册到 Nacos 的 Agent 名称 | 是 |
 | **Nacos 属性** | Nacos 连接属性（Key-Value 对，支持环境变量引用） | 是 |
 
-![A2A Nacos配置占位](src/doc/images/agent-a2a-nacos.png)
+![A2A Nacos配置占位](images/agent-a2a-nacos.png)
 
 :::tip
 认证头和 Nacos 属性中的值支持环境变量引用：开启「环境变量」开关后，值字段填写环境变量的 Key，运行时将自动从系统环境变量中获取实际值。这种方式避免了在配置中明文存储密钥等敏感信息。
@@ -197,7 +197,7 @@
 - 子智能体节点
 - 高级配置节点
 
-![架构图占位](src/doc/images/agent-architecture.png)
+![架构图占位](images/agent-architecture.png)
 
 ### 启用/禁用智能体
 

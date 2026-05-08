@@ -102,7 +102,7 @@
 2. 选择该供应商下的模型
 3. 可选配置模型参数覆盖（温度、Top-P 等）
 
-![模型配置占位](src/doc/images/model-agent-config.png)
+![模型配置占位](images/model-agent-config.png)
 
 
 ## 常见问题
