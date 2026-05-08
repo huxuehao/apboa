@@ -108,11 +108,16 @@ const typeOptions = [
 
 const codeTemplate = `import java.util.*;
 import com.hxh.apboa.core.tool.dynamices.IDynamicAgentTool;
+import com.hxh.apboa.core.agui.AgentContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
+/*
+ * 自定义工具类
+ *
+ * AgentContext context 中可以获取到上下文对象
+ *
  * 内置方法:
  * 1. 将对象转成字符串
  * String toJsonString(Object obj)
@@ -130,7 +135,7 @@ import org.springframework.stereotype.Component;
 public class CustomTool implements IDynamicAgentTool {
 
     @Override
-    public Object execute(Object... args) {
+    public Object execute(AgentContext context, Object... args) {
         // 返回结果Map
         Map<String, Object> resMap = new HashMap<>();
 
@@ -546,6 +551,14 @@ const addItem = (e: Event) => {
         </AFormItem>
 
         <AFormItem label="代码" name="code">
+          <AAlert
+            v-if="isEdit"
+            style="margin-bottom: 15px"
+            type="warning"
+            message="点击新增卡片，参考模板代码中 execute 参数的写法，尽快修改当前方法参数。目前对旧写法将继续兼容，但已弃用"
+            banner
+            closable
+          />
           <SmartCodeEditor
             v-if="visible"
             v-model="formData.code"
