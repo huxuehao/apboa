@@ -110,7 +110,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
                     new LambdaQueryWrapper<JobInfo>()
                             .eq(JobInfo::getType, "AGENT")
                             .eq(JobInfo::getBizId, vo.getId()));
-            if (!agent.isEmpty() && agent.getFirst().isEnabled()) {
+            if (!agent.isEmpty() && agent.get(0).isEnabled()) {
                 throw new RuntimeException("请先禁用定时任务");
             }
             if (vo.getEnabled()) {

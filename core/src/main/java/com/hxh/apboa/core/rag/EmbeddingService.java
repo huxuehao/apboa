@@ -110,7 +110,7 @@ public class EmbeddingService {
         if (results.isEmpty()) {
             throw new RuntimeException("文本向量化返回空结果");
         }
-        return results.getFirst();
+        return results.get(0);
     }
 
     /**

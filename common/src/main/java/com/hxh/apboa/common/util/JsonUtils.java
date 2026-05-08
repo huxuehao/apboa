@@ -27,19 +27,14 @@ public class JsonUtils {
     }
 
     public static String toJsonStr(Object obj) {
-        switch (obj) {
-            case null -> {
+        if (obj == null) {
+            return null;
+        } else if (obj instanceof String) {
+            return (String) obj;
+        } else if (obj instanceof JsonNode) {
+            JsonNode node = (JsonNode) obj;
+            if (node.isNull()) {
                 return null;
-            }
-            case String s -> {
-                return s;
-            }
-            case JsonNode node -> {
-                if (node.isNull()) {
-                    return null;
-                }
-            }
-            default -> {
             }
         }
         try {

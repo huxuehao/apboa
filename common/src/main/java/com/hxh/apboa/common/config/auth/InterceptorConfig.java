@@ -28,7 +28,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
         MappingJackson2HttpMessageConverter jackson2HttpMessageConverter =
                 new MappingJackson2HttpMessageConverter();
         jackson2HttpMessageConverter.setObjectMapper(objectMapper);
-        converters.addFirst(jackson2HttpMessageConverter);
+        converters.add(0, jackson2HttpMessageConverter);
     }
 
     @Override
