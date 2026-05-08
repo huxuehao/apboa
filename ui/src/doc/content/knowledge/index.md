@@ -126,7 +126,7 @@ graph TB
 - **范围**：1-100
 - **提示**：超出批次上限的文本会自动拆分为多批次请求。Bailian 和 Ollama 均有批次大小限制，默认 10 为安全值
 
-![本地知识库连接配置](src/doc/images/knowledge-local-connection.png)
+![本地知识库连接配置](images/knowledge-local-connection.png)
 
 ### 检索配置参数说明
 
@@ -156,7 +156,7 @@ graph TB
 - **默认值**：0.5
 - **范围**：0 - 1（步长 0.1）
 
-![本地知识库检索配置](src/doc/images/knowledge-local-retrieval.png)
+![本地知识库检索配置](images/knowledge-local-retrieval.png)
 
 
 ## 操作指南
@@ -182,7 +182,7 @@ graph TB
 
 创建本地知识库后，进入"我的知识库"页面，点击知识库卡片 [文档] 进入详情即可上传和管理文档。
 
-![知识库文档管理](src/doc/images/knowledge-local-docs.png)
+![知识库文档管理](images/knowledge-local-docs.png)
 
 关于文档上传、解析、分块等操作的详细说明，请参考 [知识库文档管理](/knowledge#文档管理) 章节。
 
@@ -217,7 +217,7 @@ graph TB
 2. 勾选需要关联的知识库（Checkbox 多选）
 3. 每个智能体可关联多个不同类型的知识库
 
-![知识库配置占位](src/doc/images/knowledge-agent-config.png)
+![知识库配置占位](images/knowledge-agent-config.png)
 
 
 ## 配置说明

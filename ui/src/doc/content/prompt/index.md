@@ -77,7 +77,7 @@
 3. 配置 **随模板变化** 开关
 4. 若关闭随模板变化，可在下方编辑器中自定义提示词内容
 
-![提示词模板配置占位](src/doc/images/prompt-agent-config.png)
+![提示词模板配置占位](images/prompt-agent-config.png)
 
 
 ## 提示词编写技巧

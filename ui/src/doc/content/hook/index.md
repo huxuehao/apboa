@@ -163,7 +163,7 @@ public class PromptEnhancingHook implements Hook {
 2. 勾选需要关联的钩子（Checkbox 多选）
 3. 已选钩子显示在下方列表中，支持 **拖拽排序** 调整执行顺序
 
-![钩子配置占位](src/doc/images/hook-agent-config.png)
+![钩子配置占位](images/hook-agent-config.png)
 
 ## 最佳实践
 
