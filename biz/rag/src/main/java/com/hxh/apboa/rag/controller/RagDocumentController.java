@@ -207,6 +207,7 @@ public class RagDocumentController {
      * 下载文档原始文件
      */
     @GetMapping("/download/{id}")
+    @RoleNeed({Role.ADMIN, Role.EDIT})
     public void download(@PathVariable("id") Long id, HttpServletResponse response) {
         RagDocument document = ragDocumentMapper.selectById(id);
         if (document == null) {
