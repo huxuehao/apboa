@@ -1,4 +1,7 @@
-package com.hxh.apboa.core.rag;
+package com.hxh.apboa.core.rag.store;
+
+import com.hxh.apboa.core.rag.EmbeddingRecord;
+import com.hxh.apboa.core.rag.RetrievalResult;
 
 import java.util.List;
 
@@ -17,7 +20,7 @@ public interface VectorStore {
     void storeEmbeddings(List<EmbeddingRecord> records);
 
     List<RetrievalResult> search(float[] queryEmbedding, Long knowledgeBaseConfigId,
-                                  int limit, double scoreThreshold);
+                                 int limit, double scoreThreshold);
 
     void deleteByDocumentId(Long documentId);
 

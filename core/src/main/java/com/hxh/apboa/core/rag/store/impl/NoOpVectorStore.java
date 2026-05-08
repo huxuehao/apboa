@@ -1,5 +1,8 @@
-package com.hxh.apboa.core.rag;
+package com.hxh.apboa.core.rag.store.impl;
 
+import com.hxh.apboa.core.rag.EmbeddingRecord;
+import com.hxh.apboa.core.rag.RetrievalResult;
+import com.hxh.apboa.core.rag.store.VectorStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +35,7 @@ public class NoOpVectorStore implements VectorStore {
 
     @Override
     public List<RetrievalResult> search(float[] queryEmbedding, Long knowledgeBaseConfigId,
-                                       int limit, double scoreThreshold) {
+                                        int limit, double scoreThreshold) {
         log.warn("向量存储未配置，返回空检索结果");
         return List.of();
     }

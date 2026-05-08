@@ -1,5 +1,8 @@
-package com.hxh.apboa.core.rag;
+package com.hxh.apboa.core.rag.store.impl;
 
+import com.hxh.apboa.core.rag.EmbeddingRecord;
+import com.hxh.apboa.core.rag.RetrievalResult;
+import com.hxh.apboa.core.rag.store.VectorStore;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.common.clientenum.ConsistencyLevelEnum;
 import io.milvus.grpc.DataType;
@@ -208,7 +211,7 @@ public class MilvusVectorStore implements VectorStore {
 
     @Override
     public List<RetrievalResult> search(float[] queryEmbedding, Long knowledgeBaseConfigId,
-                                         int limit, double scoreThreshold) {
+                                        int limit, double scoreThreshold) {
         if (!isAvailable()) {
             throw new RuntimeException("Milvus客户端未配置");
         }
