@@ -6,6 +6,7 @@ import com.hxh.apboa.common.config.auth.SkAccess;
 import com.hxh.apboa.common.entity.ToolConfig;
 import com.hxh.apboa.common.enums.ToolType;
 import com.hxh.apboa.common.r.R;
+import com.hxh.apboa.core.agui.AgentContext;
 import com.hxh.apboa.core.tool.IAgentTool;
 import com.hxh.apboa.core.tool.ToolsRegister;
 import com.hxh.apboa.core.tool.dynamices.IDynamicAgentTool;
@@ -14,9 +15,8 @@ import com.hxh.apboa.tool.service.ToolService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * 描述：
@@ -57,10 +57,30 @@ public class EndPoint {
                 });
             }
 
-            // 执行动态工具
-            Object result = dynamicAgentTool.execute(args_.toArray());
+            Object result;
+
+            // 判断是否需要传递 agentContext
+            if (needsAgentContext(dynamicAgentTool)) {
+                AgentContext agentContext = new AgentContext();
+                agentContext.setParams(Map.of());
+                result = dynamicAgentTool.execute(agentContext, args_.toArray());
+            } else {
+                result = dynamicAgentTool.execute(args_.toArray());
+            }
 
             return R.data(result);
+        }
+    }
+
+    // 判断是否需要 agentContext（通过反射检查是否重写了方法）
+    private boolean needsAgentContext(IDynamicAgentTool tool) {
+        try {
+            // 检查是否重写了带 AgentContext 的方法
+            Method method = tool.getClass().getMethod("execute", AgentContext.class, Object[].class);
+            // 如果方法声明的类不是 IDynamicAgentTool 接口，说明被重写了
+            return method.getDeclaringClass() != IDynamicAgentTool.class;
+        } catch (NoSuchMethodException e) {
+            return false;
         }
     }
 }
