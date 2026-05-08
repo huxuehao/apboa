@@ -124,6 +124,16 @@ const aguiBodyExpanded = ref(false)
 const aguiExampleExpanded = ref(false)
 
 /**
+ * Request Body 中 messages 子属性折叠状态
+ */
+const messagesExpanded = ref(false)
+
+/**
+ * Request Body 中 forwardedProps 子属性折叠状态
+ */
+const forwardedPropsExpanded = ref(false)
+
+/**
  * 智能体对话接口请求体示例
  */
 const aguiBodyExample = `{
@@ -302,6 +312,18 @@ const endpoints = [
     note: '物理删除会话及其所有消息，操作不可逆。',
     params: [
       { name: 'id', type: 'Long (路径参数)', required: true, desc: '会话ID' }
+    ],
+    bodyExample: null,
+    responseExample: null
+  },
+  {
+    id: 'upload-file',
+    method: 'POST',
+    path: '/api/attach/upload',
+    desc: '上传多模态文件',
+    note: '文件类型仅支持图片、音频、视频，大小受系统参数限制（默认 5MB）',
+    params: [
+      { name: 'file', type: 'File (表单字段)', required: true, desc: '上传的文件' }
     ],
     bodyExample: null,
     responseExample: null
@@ -520,7 +542,7 @@ const workspaceEndpoints = [
         <table class="param-table">
           <thead>
             <tr>
-              <th>参数名</th>
+              <th style="padding-left: 32px;">参数名</th>
               <th>类型</th>
               <th>必填</th>
               <th>说明</th>
@@ -528,23 +550,30 @@ const workspaceEndpoints = [
           </thead>
           <tbody>
             <tr>
-              <td class="param-name">threadId</td>
+              <td class="param-name" style="padding-left: 32px;">threadId</td>
               <td class="param-type">string</td>
               <td><span class="param-required">Required</span></td>
               <td>会话线程ID，用于标识一次完整的对话</td>
             </tr>
             <tr>
-              <td class="param-name">runId</td>
+              <td class="param-name" style="padding-left: 32px;">runId</td>
               <td class="param-type">string</td>
               <td><span class="param-required">Required</span></td>
               <td>本次运行ID，系统自动生成的唯一标识</td>
             </tr>
-            <tr>
-              <td class="param-name">messages</td>
+            <tr class="param-collapse-row" @click="messagesExpanded = !messagesExpanded">
+              <td class="param-name">
+                <component
+                  :is="messagesExpanded ? DownOutlined : RightOutlined"
+                  class="param-collapse-arrow"
+                />
+                messages
+              </td>
               <td class="param-type">array</td>
               <td><span class="param-required">Required</span></td>
               <td>消息列表，包含 id、role（user）、content 字段</td>
             </tr>
+            <template v-if="messagesExpanded">
             <tr>
               <td class="param-name" style="padding-left: 48px;">id</td>
               <td class="param-type">string</td>
@@ -563,12 +592,20 @@ const workspaceEndpoints = [
               <td><span class="param-required">Required</span></td>
               <td>消息内容</td>
             </tr>
-            <tr>
-              <td class="param-name">forwardedProps</td>
+            </template>
+            <tr class="param-collapse-row" @click="forwardedPropsExpanded = !forwardedPropsExpanded">
+              <td class="param-name">
+                <component
+                  :is="forwardedPropsExpanded ? DownOutlined : RightOutlined"
+                  class="param-collapse-arrow"
+                />
+                forwardedProps
+              </td>
               <td class="param-type">object</td>
               <td><span style="color: #bfbfbf;">Optional</span></td>
               <td>转发属性对象 memoryActive、planActive、fileIds、params 字段</td>
             </tr>
+            <template v-if="forwardedPropsExpanded">
             <tr>
               <td class="param-name" style="padding-left: 48px;">memoryActive</td>
               <td class="param-type">boolean</td>
@@ -593,6 +630,7 @@ const workspaceEndpoints = [
               <td><span style="color: #bfbfbf;">Optional</span></td>
               <td>扩展参数键值对，在工具中可直接获取该对象</td>
             </tr>
+            </template>
           </tbody>
         </table>
 
@@ -829,5 +867,19 @@ const workspaceEndpoints = [
 .agui-collapse-title {
   font-size: 13px;
   font-weight: 600;
+}
+
+.param-collapse-row {
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+}
+
+.param-collapse-arrow {
+  font-size: 10px;
+  margin-right: 4px;
+  color: #bfbfbf;
 }
 </style>
