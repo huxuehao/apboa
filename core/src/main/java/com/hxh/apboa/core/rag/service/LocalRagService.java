@@ -11,8 +11,10 @@ import com.hxh.apboa.common.enums.RagDocumentStatus;
 import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.common.vo.RagDocumentChunkVO;
 import com.hxh.apboa.core.rag.DocumentParser;
+import com.hxh.apboa.core.rag.EmbeddingRecord;
 import com.hxh.apboa.core.rag.EmbeddingService;
-import com.hxh.apboa.core.rag.PgVectorStore;
+import com.hxh.apboa.core.rag.RetrievalResult;
+import com.hxh.apboa.core.rag.VectorStore;
 import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
 import com.hxh.apboa.core.rag.mapper.RagDocumentChunkMapper;
 import com.hxh.apboa.core.rag.mapper.RagDocumentMapper;
@@ -43,7 +45,7 @@ public class LocalRagService {
     private final DocumentParser documentParser;
     private final TextChunker textChunker;
     private final EmbeddingService embeddingService;
-    private final PgVectorStore pgVectorStore;
+    private final VectorStore vectorStore;
     private final RagDocumentMapper ragDocumentMapper;
     private final RagDocumentChunkMapper ragDocumentChunkMapper;
     private final AttachService attachService;
@@ -52,7 +54,7 @@ public class LocalRagService {
     public LocalRagService(DocumentParser documentParser,
                            TextChunker textChunker,
                            EmbeddingService embeddingService,
-                           PgVectorStore pgVectorStore,
+                           VectorStore vectorStore,
                            RagDocumentMapper ragDocumentMapper,
                            RagDocumentChunkMapper ragDocumentChunkMapper,
                            AttachService attachService,
@@ -60,7 +62,7 @@ public class LocalRagService {
         this.documentParser = documentParser;
         this.textChunker = textChunker;
         this.embeddingService = embeddingService;
-        this.pgVectorStore = pgVectorStore;
+        this.vectorStore = vectorStore;
         this.ragDocumentMapper = ragDocumentMapper;
         this.ragDocumentChunkMapper = ragDocumentChunkMapper;
         this.attachService = attachService;
@@ -99,7 +101,7 @@ public class LocalRagService {
             List<float[]> embeddings = embeddingService.embed(chunkTexts, config);
 
             List<RagDocumentChunk> chunkEntities = new ArrayList<>();
-            List<PgVectorStore.EmbeddingRecord> embeddingRecords = new ArrayList<>();
+            List<EmbeddingRecord> embeddingRecords = new ArrayList<>();
 
             for (int i = 0; i < chunks.size(); i++) {
                 ChunkResult chunk = chunks.get(i);
@@ -118,7 +120,7 @@ public class LocalRagService {
                 chunkEntities.add(chunkEntity);
 
                 if (i < embeddings.size()) {
-                    embeddingRecords.add(new PgVectorStore.EmbeddingRecord(
+                    embeddingRecords.add(new EmbeddingRecord(
                             chunkEntity.getId(),
                             chunkEntity.getId(),
                             document.getId(),
@@ -131,7 +133,7 @@ public class LocalRagService {
             for (RagDocumentChunk chunkEntity : chunkEntities) {
                 ragDocumentChunkMapper.insert(chunkEntity);
             }
-            pgVectorStore.storeEmbeddings(embeddingRecords);
+            vectorStore.storeEmbeddings(embeddingRecords);
 
             document.setChunkCount(chunks.size());
             document.setStatus(RagDocumentStatus.COMPLETED);
@@ -161,11 +163,11 @@ public class LocalRagService {
                                            int limit, double scoreThreshold) {
         float[] queryEmbedding = embeddingService.embed(query, config);
 
-        List<PgVectorStore.RetrievalResult> results = pgVectorStore.search(
+        List<RetrievalResult> results = vectorStore.search(
                 queryEmbedding, config.getId(), limit, scoreThreshold);
 
         List<RagDocumentChunkVO> chunks = new ArrayList<>();
-        for (PgVectorStore.RetrievalResult result : results) {
+        for (RetrievalResult result : results) {
             RagDocumentChunk chunk = ragDocumentChunkMapper.selectById(result.chunkId());
             if (chunk != null) {
                 RagDocumentChunkVO chunkVo = new RagDocumentChunkVO();
@@ -182,7 +184,7 @@ public class LocalRagService {
      * 删除文档及其关联的向量数据
      */
     public void deleteDocument(Long documentId) {
-        pgVectorStore.deleteByDocumentId(documentId);
+        vectorStore.deleteByDocumentId(documentId);
         ragDocumentChunkMapper.delete(new LambdaQueryWrapper<RagDocumentChunk>()
                 .eq(RagDocumentChunk::getDocumentId, documentId));
         ragDocumentMapper.deleteById(documentId);
@@ -192,7 +194,7 @@ public class LocalRagService {
      * 仅删除文档的分块和向量数据（不删除文档记录本身），用于重新分块场景
      */
     public void deleteDocumentChunksAndVectors(Long documentId) {
-        pgVectorStore.deleteByDocumentId(documentId);
+        vectorStore.deleteByDocumentId(documentId);
         ragDocumentChunkMapper.delete(new LambdaQueryWrapper<RagDocumentChunk>()
                 .eq(RagDocumentChunk::getDocumentId, documentId));
     }
@@ -244,8 +246,8 @@ public class LocalRagService {
             ragDocumentChunkMapper.updateById(chunk);
 
             float[] newEmbedding = embeddingService.embed(newContent, config);
-            pgVectorStore.deleteByChunkId(chunkId);
-            pgVectorStore.storeEmbedding(chunkId, chunkId, chunk.getDocumentId(),
+            vectorStore.deleteByChunkId(chunkId);
+            vectorStore.storeEmbedding(chunkId, chunkId, chunk.getDocumentId(),
                     document.getKnowledgeBaseConfigId(), newEmbedding);
 
             log.info("分块更新成功, chunkId={}", chunkId);
@@ -266,7 +268,7 @@ public class LocalRagService {
 
         try {
             ragDocumentChunkMapper.deleteById(chunkId);
-            pgVectorStore.deleteByChunkId(chunkId);
+            vectorStore.deleteByChunkId(chunkId);
             log.info("分块删除成功, chunkId={}", chunkId);
         } catch (Exception e) {
             log.error("分块删除失败, chunkId={}", chunkId, e);
