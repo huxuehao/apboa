@@ -53,12 +53,12 @@ jwt:
   secret: ${JWT_SECRET:ZJr8c2xF0y5b7yM+1H9v9cGZq6nZ5e0k5r3Cw7H8vJQ=}
 
 rag:
-  pgvector:
+  qdrant:
     enabled: true
-    url: jdbc:postgresql://127.0.0.1:5432/apboa_vector
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
+    host: localhost
+    port: 6334
+    api-key:
+    collection-prefix: apboa_rag
 
 mybatis-plus:
   mapper-locations: classpath*:com/hxh/apboa/**/mapper/**/*.xml

@@ -87,11 +87,11 @@
             <artifactId>tika-parsers-standard-package</artifactId>
             <version>2.9.2</version>
         </dependency>
-        <!-- PostgreSQL 驱动 -->
+        <!-- Qdrant Java 客户端 -->
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
+            <groupId>io.qdrant</groupId>
+            <artifactId>client</artifactId>
+            <version>1.17.0</version>
         </dependency>
 
         <!-- JGit -->
