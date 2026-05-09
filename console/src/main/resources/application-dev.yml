@@ -53,7 +53,7 @@ jwt:
   secret: ${JWT_SECRET:ZJr8c2xF0y5b7yM+1H9v9cGZq6nZ5e0k5r3Cw7H8vJQ=}
 
 rag:
-  store:   # pgvector | milvus，向量存储类型
+  store:  # pgvector | milvus | qdrant，向量存储类型
   pgvector:
     url: jdbc:postgresql://127.0.0.1:5432/apboa_vector
     username: postgres
@@ -66,6 +66,11 @@ rag:
     password:          # Milvus 密码，自建部署留空
     token:             # Milvus SaaS 认证 token，与用户名/密码二选一
     database: default  # 默认库名
+  qdrant:
+    host: localhost
+    port: 6334
+    api-key:
+    collection-prefix: apboa_rag
 
 mybatis-plus:
   mapper-locations: classpath*:com/hxh/apboa/**/mapper/**/*.xml
