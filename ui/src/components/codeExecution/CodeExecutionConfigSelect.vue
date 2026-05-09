@@ -128,7 +128,7 @@ async function handleDelete(config: CodeExecutionConfigVO, e: Event) {
   if (usedAgents.length > 0) {
     Modal.confirm({
       title: '二次确认',
-      content: `该代码执行配置正在被 [ ${usedAgents.join('、')} ] 智能体引用，删除后可能会影响上述智能体的正常使用！`,
+      content: `该执行环境配置正在被 [ ${usedAgents.join('、')} ] 智能体引用，删除后可能会影响上述智能体的正常使用！`,
       okText: '确认并继续删除',
       onOk: async () => {
         await codeExecutionConfigApi.remove([config.id])
@@ -177,7 +177,7 @@ onMounted(() => {
           v-model:value="selectedValue"
           :open="dropdownVisible"
           :loading="loading"
-          :placeholder="selectedLabel || '请选择代码执行配置'"
+          :placeholder="selectedLabel || '请选择执行环境配置'"
           option-label-prop="label"
           allow-clear
           @dropdown-visible-change="(visible: boolean) => dropdownVisible = visible"

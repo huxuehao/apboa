@@ -179,7 +179,7 @@ function handleCancel() {
 <template>
   <AModal
     :open="visible"
-    :title="isEdit ? '编辑代码执行配置' : '新增代码执行配置'"
+    :title="isEdit ? '编辑执行环境配置' : '新增执行环境配置'"
     :confirm-loading="submitting"
     :destroy-on-close="true"
     width="640px"
