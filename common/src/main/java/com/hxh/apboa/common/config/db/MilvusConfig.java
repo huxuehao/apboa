@@ -1,4 +1,4 @@
-package com.hxh.apboa.core.rag;
+package com.hxh.apboa.common.config.db;
 
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.grpc.ListDatabasesResponse;
