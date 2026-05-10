@@ -13,6 +13,8 @@ import com.hxh.apboa.common.vo.RagDocumentChunkVO;
 import com.hxh.apboa.core.rag.DocumentParser;
 import com.hxh.apboa.core.rag.EmbeddingService;
 import com.hxh.apboa.core.rag.QdrantVectorStore;
+import com.hxh.apboa.core.rag.rerank.ReRankResult;
+import com.hxh.apboa.core.rag.rerank.ReRankService;
 import com.hxh.apboa.knowledge.service.KnowledgeBaseConfigService;
 import com.hxh.apboa.core.rag.mapper.RagDocumentChunkMapper;
 import com.hxh.apboa.core.rag.mapper.RagDocumentMapper;
@@ -48,6 +50,7 @@ public class LocalRagService {
     private final RagDocumentChunkMapper ragDocumentChunkMapper;
     private final AttachService attachService;
     private final KnowledgeBaseConfigService knowledgeBaseConfigService;
+    private final ReRankService reRankService;
 
     public LocalRagService(DocumentParser documentParser,
                            TextChunker textChunker,
@@ -56,7 +59,8 @@ public class LocalRagService {
                            RagDocumentMapper ragDocumentMapper,
                            RagDocumentChunkMapper ragDocumentChunkMapper,
                            AttachService attachService,
-                           KnowledgeBaseConfigService knowledgeBaseConfigService) {
+                           KnowledgeBaseConfigService knowledgeBaseConfigService,
+                           ReRankService reRankService) {
         this.documentParser = documentParser;
         this.textChunker = textChunker;
         this.embeddingService = embeddingService;
@@ -65,6 +69,7 @@ public class LocalRagService {
         this.ragDocumentChunkMapper = ragDocumentChunkMapper;
         this.attachService = attachService;
         this.knowledgeBaseConfigService = knowledgeBaseConfigService;
+        this.reRankService = reRankService;
     }
 
     /**
@@ -161,8 +166,11 @@ public class LocalRagService {
                                            int limit, double scoreThreshold) {
         float[] queryEmbedding = embeddingService.embed(query, config);
 
+        // 扩大初始检索数量，为ReRank预留候选池
+        int initialLimit = reRankService.isEnabled(config) ? Math.max(limit * 4, 20) : limit;
+
         List<QdrantVectorStore.RetrievalResult> results = qdrantVectorStore.search(
-                queryEmbedding, config.getId(), limit, scoreThreshold);
+                queryEmbedding, config.getId(), initialLimit, scoreThreshold);
 
         List<RagDocumentChunkVO> chunks = new ArrayList<>();
         for (QdrantVectorStore.RetrievalResult result : results) {
@@ -175,7 +183,48 @@ public class LocalRagService {
             }
         }
 
+        // 执行ReRank重排序
+        if (reRankService.isEnabled(config) && chunks.size() > 1) {
+            chunks = applyReRank(query, chunks, config, limit);
+        }
+
         return chunks;
+    }
+
+    /**
+     * 应用ReRank重排序
+     */
+    private List<RagDocumentChunkVO> applyReRank(String query, List<RagDocumentChunkVO> candidates,
+                                                  KnowledgeBaseConfig config, int finalLimit) {
+        try {
+            List<String> documents = candidates.stream()
+                    .map(RagDocumentChunkVO::getContent)
+                    .toList();
+
+            List<ReRankResult> reRankResults = reRankService.rerank(query, documents, config);
+
+            List<RagDocumentChunkVO> rerankedChunks = new ArrayList<>();
+            for (ReRankResult reRankResult : reRankResults) {
+                int index = reRankResult.index();
+                if (index >= 0 && index < candidates.size()) {
+                    RagDocumentChunkVO chunkVo = candidates.get(index);
+                    chunkVo.setScore(reRankResult.score());
+                    rerankedChunks.add(chunkVo);
+                }
+            }
+
+            // 截取最终返回数量
+            if (rerankedChunks.size() > finalLimit) {
+                return rerankedChunks.subList(0, finalLimit);
+            }
+            return rerankedChunks;
+        } catch (Exception e) {
+            log.error("ReRank处理失败，回退到原始向量检索结果", e);
+            if (candidates.size() > finalLimit) {
+                return candidates.subList(0, finalLimit);
+            }
+            return candidates;
+        }
     }
 
     /**

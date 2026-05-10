@@ -101,7 +101,8 @@ const configSectionOptions = computed(() => {
   } else if (formData.kbType === 'LOCAL') {
     return [
       ...baseOptions,
-      { label: '检索配置', value: 'retrieval' }
+      { label: '检索配置', value: 'retrieval' },
+      { label: '重排序配置', value: 'reranking' }
     ]
   }
 
@@ -183,6 +184,16 @@ const localRetrieval = reactive({
   chunkDelimiters: '',
   topK: 5,
   scoreThreshold: 0.5
+})
+
+const localReranking = reactive({
+  enabled: false,
+  providerType: 'siliconflow' as 'siliconflow',
+  baseUrl: 'https://api.siliconflow.cn/v1/rerank',
+  apiKey: '',
+  model: 'BAAI/bge-reranker-v2-m3',
+  topN: 5,
+  bufferSizeMb: 50
 })
 
 /**
@@ -381,6 +392,17 @@ function loadConfigData() {
     if (retrievalConfig) {
       Object.assign(localRetrieval, retrievalConfig)
     }
+    if (rerankingConfig) {
+      Object.assign(localReranking, {
+        enabled: !!rerankingConfig.enabled,
+        providerType: rerankingConfig.providerType || 'siliconflow',
+        baseUrl: rerankingConfig.baseUrl || 'https://api.siliconflow.cn/v1/rerank',
+        apiKey: rerankingConfig.apiKey || '',
+        model: rerankingConfig.model || 'BAAI/bge-reranker-v2-m3',
+        topN: rerankingConfig.topN || 5,
+        bufferSizeMb: rerankingConfig.bufferSizeMb || 50
+      })
+    }
   }
 }
 
@@ -427,6 +449,15 @@ function resetForm() {
     batchSize: 10
   })
   Object.assign(localRetrieval, { chunkSize: 512, chunkOverlap: 64, chunkDelimiters: '', topK: 5, scoreThreshold: 0.5 })
+  Object.assign(localReranking, {
+    enabled: false,
+    providerType: 'siliconflow',
+    baseUrl: 'https://api.siliconflow.cn/v1/rerank',
+    apiKey: '',
+    model: 'BAAI/bge-reranker-v2-m3',
+    topN: 5,
+    bufferSizeMb: 50
+  })
 }
 
 /**
@@ -527,8 +558,20 @@ function buildSubmitData(): KnowledgeBaseConfig {
       batchSize: localConnection.batchSize
     }
     data.retrievalConfig = { ...localRetrieval }
+    if (localReranking.enabled) {
+      data.rerankingConfig = {
+        enabled: true,
+        providerType: localReranking.providerType,
+        baseUrl: localReranking.baseUrl,
+        apiKey: localReranking.apiKey || undefined,
+        model: localReranking.model,
+        topN: localReranking.topN,
+        bufferSizeMb: localReranking.bufferSizeMb
+      }
+    } else {
+      data.rerankingConfig = null
+    }
     data.endpointConfig = null
-    data.rerankingConfig = null
     data.queryRewriteConfig = null
     data.metadataFilters = null
     data.httpConfig = null
@@ -923,6 +966,40 @@ function removeMetadataCondition(index: number) {
               </AFormItem>
               <AFormItem label="Top N">
                 <AInputNumber v-model:value="difyReranking.topN" :min="1" :max="100" style="width: 100%" />
+              </AFormItem>
+            </template>
+          </template>
+
+          <template v-if="formData.kbType === 'LOCAL'">
+            <AFormItem label="启用重排序">
+              <ASwitch v-model:checked="localReranking.enabled" />
+            </AFormItem>
+            <template v-if="localReranking.enabled">
+              <AFormItem label="模型提供商">
+                <ASelect v-model:value="localReranking.providerType" style="width: 100%">
+                  <ASelectOption value="siliconflow">SiliconFlow</ASelectOption>
+                </ASelect>
+              </AFormItem>
+              <AFormItem label="API Key" :rules="[{ required: true, message: '请输入API Key' }]">
+                <AInputPassword v-model:value="localReranking.apiKey" placeholder="请输入API Key，支持 ${ENV_VAR} 引用环境变量" />
+              </AFormItem>
+              <AFormItem label="服务地址">
+                <AInput v-model:value="localReranking.baseUrl" placeholder="https://api.siliconflow.cn/v1/rerank" />
+              </AFormItem>
+              <AFormItem label="重排序模型">
+                <AInput v-model:value="localReranking.model" placeholder="例如: BAAI/bge-reranker-v2-m3" />
+              </AFormItem>
+              <AFormItem label="Top N">
+                <AInputNumber v-model:value="localReranking.topN" :min="1" :max="100" style="width: 100%" />
+                <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
+                  最终返回的文档数量，默认5
+                </div>
+              </AFormItem>
+              <AFormItem label="响应缓冲大小（单位MB）">
+                <AInputNumber v-model:value="localReranking.bufferSizeMb" :min="1" :max="512" style="width: 100%" />
+                <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
+                  默认50MB，大数据量时可适当增大
+                </div>
               </AFormItem>
             </template>
           </template>
