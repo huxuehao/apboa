@@ -2,6 +2,12 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
+-- 创建数据库（不存在则创建）
+-- ----------------------------
+CREATE DATABASE IF NOT EXISTS `apboa` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `apboa`;
+
+-- ----------------------------
 -- Table structure for account
 -- ----------------------------
 DROP TABLE IF EXISTS `account`;

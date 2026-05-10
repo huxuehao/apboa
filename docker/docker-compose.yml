@@ -1,0 +1,147 @@
+version: "3.8"
+
+services:
+  # ==================== MySQL ====================
+  apboa-mysql:
+    image: ${DOCKER_REGISTRY}mysql:8.0
+    container_name: apboa-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      TZ: Asia/Shanghai
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - /data/apboa/mysql_data:/var/lib/mysql
+      - ../docs/once_db_init/db_init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+08:00
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p\"$$MYSQL_ROOT_PASSWORD\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - apboa_network
+
+  # ==================== Redis ====================
+  apboa-redis:
+    image: ${DOCKER_REGISTRY}redis:7-alpine
+    container_name: apboa-redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      TZ: Asia/Shanghai
+    command: sh -c "redis-server --requirepass $$REDIS_PASSWORD"
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - /data/apboa/redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - apboa_network
+
+  # ==================== pgvector（向量库） ====================
+  apboa-pgvector:
+    image: ${DOCKER_REGISTRY}pgvector/pgvector:pg16
+    container_name: apboa-pgvector
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PG_DATABASE}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      TZ: Asia/Shanghai
+    ports:
+      - "${PG_PORT:-5432}:5432"
+    volumes:
+      - /data/apboa/pgvector_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - apboa_network
+
+  # ==================== 后端服务 ====================
+  apboa-backend:
+    build:
+      context: ..
+      dockerfile: docker/backend/Dockerfile
+      args:
+        MAVEN_IMAGE: ${DOCKER_REGISTRY}maven:3.9-eclipse-temurin-21
+        JRE_IMAGE: ${DOCKER_REGISTRY}eclipse-temurin:21-jre
+    container_name: apboa-backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_DATABASE: ${REDIS_DATABASE}
+      VECTOR_STORE_TYPE: ${VECTOR_STORE_TYPE}
+      PG_HOST: ${PG_HOST}
+      PG_PORT: ${PG_PORT}
+      PG_DATABASE: ${PG_DATABASE}
+      PG_USER: ${PG_USER}
+      PG_PASSWORD: ${PG_PASSWORD}
+      MILVUS_HOST: ${MILVUS_HOST}
+      MILVUS_PORT: ${MILVUS_PORT}
+      MILVUS_DATABASE: ${MILVUS_DATABASE}
+      QDRANT_HOST: ${QDRANT_HOST}
+      QDRANT_PORT: ${QDRANT_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      TZ: Asia/Shanghai
+    volumes:
+      - /data/apboa/backend/logs:/app/logs
+      - /data/apboa/backend/.apboa:/app/.apboa
+    ports:
+      - "${BACKEND_PORT}:3060"
+    depends_on:
+      apboa-mysql:
+        condition: service_healthy
+      apboa-redis:
+        condition: service_healthy
+      apboa-pgvector:
+        condition: service_healthy
+    networks:
+      - apboa_network
+
+  # ==================== 前端（Nginx） ====================
+  apboa-frontend:
+    build:
+      context: ..
+      dockerfile: docker/frontend/Dockerfile
+      args:
+        NODE_IMAGE: ${DOCKER_REGISTRY}node:22-alpine
+        NGINX_IMAGE: ${DOCKER_REGISTRY}nginx:alpine
+        VITE_APP_BASE_API: ${VITE_APP_BASE_API}
+        VITE_APP_CONTEXT_PATH: ${VITE_APP_CONTEXT_PATH}
+    container_name: apboa-frontend
+    restart: unless-stopped
+    volumes:
+      - /data/apboa/frontend/logs:/var/log/nginx
+    ports:
+      - "${FRONTEND_PORT}:80"
+    depends_on:
+      - apboa-backend
+    networks:
+      - apboa_network
+
+networks:
+  apboa_network:
+    name: apboa_network
+    driver: bridge

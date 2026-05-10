@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0
+                              https://maven.apache.org/xsd/settings-1.2.0.xsd">
+
+  <!--
+    在线模式（默认）：不配置 <mirrors>，Maven 自动连接 Maven Central。
+
+    离线/内网模式：取消下面两段注释，填写内网私有仓库地址和凭证。
+  -->
+
+  <!-- 私有仓库镜像 -->
+  <!--
+  <mirrors>
+    <mirror>
+      <id>private-maven</id>
+      <mirrorOf>*</mirrorOf>
+      <url>https://nexus.your-company.com/repository/maven-public/</url>
+    </mirror>
+  </mirrors>
+  -->
+
+  <!-- 私有仓库认证 -->
+  <!--
+  <servers>
+    <server>
+      <id>private-maven</id>
+      <username>deployer</username>
+      <password>your-password</password>
+    </server>
+  </servers>
+  -->
+</settings>
