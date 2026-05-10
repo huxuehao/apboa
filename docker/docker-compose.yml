@@ -13,7 +13,7 @@ services:
     ports:
       - "${MYSQL_PORT:-3306}:3306"
     volumes:
-      - /data/apboa/mysql_data:/var/lib/mysql
+      - ${DATA_PATH:-./data}/mysql_data:/var/lib/mysql
       - ../docs/once_db_init/db_init.sql:/docker-entrypoint-initdb.d/01-init.sql
     command:
       - --character-set-server=utf8mb4
@@ -40,7 +40,7 @@ services:
     ports:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
-      - /data/apboa/redis_data:/data
+      - ${DATA_PATH:-./data}/redis_data:/data
     healthcheck:
       test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping"]
       interval: 10s
@@ -62,7 +62,7 @@ services:
     ports:
       - "${PG_PORT:-5432}:5432"
     volumes:
-      - /data/apboa/pgvector_data:/var/lib/postgresql/data
+      - ${DATA_PATH:-./data}/pgvector_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
       interval: 10s
@@ -106,8 +106,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       TZ: Asia/Shanghai
     volumes:
-      - /data/apboa/backend/logs:/app/logs
-      - /data/apboa/backend/.apboa:/app/.apboa
+      - ${LOG_PATH:-./logs}/backend:/app/logs
+      - ${DATA_PATH:-./data}/backend/.apboa:/app/.apboa
     ports:
       - "${BACKEND_PORT}:3060"
     depends_on:
@@ -133,7 +133,7 @@ services:
     container_name: apboa-frontend
     restart: unless-stopped
     volumes:
-      - /data/apboa/frontend/logs:/var/log/nginx
+      - ${LOG_PATH:-./logs}/frontend:/var/log/nginx
     ports:
       - "${FRONTEND_PORT}:80"
     depends_on:
