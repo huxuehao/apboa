@@ -50,7 +50,7 @@ docker compose up -d --build
 ### 3. 访问系统
 
 - 主应用：http://localhost/web/
-- 默认管理员账号：`admin` / 密码：`admin`（MD5 加密存储）
+- 默认管理员账号：`admin` / 密码：`Admin@123.com`（MD5 加密存储）
 
 ### 4. 查看日志
 
