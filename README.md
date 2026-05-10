@@ -33,6 +33,8 @@
 - [技术栈](#-技术栈)
 - [项目结构](#-项目结构)
 - [快速启动](#-快速启动)
+  - [开发模式](#开发模式)
+  - [Docker Compose 部署](#docker-compose-部署)
 - [适用场景](#-适用场景)
 - [Roadmap](#-roadmap)
 - [参与贡献](#-参与贡献)
@@ -296,43 +298,23 @@ cluster ← 被 common / websocket 依赖（Redis 发布订阅）
 
 # 快速启动
 
-### 1. 克隆项目
+### 开发模式
+
+#### 1. 克隆项目
 
 ```bash
 git clone https://gitee.com/studioustiger/apboa.git
 cd apboa
 ```
 
-### 2. 初始化数据库
+#### 2. 初始化数据库
 
 ```bash
-# 创建数据库
-mysql -u root -p -e "CREATE DATABASE apboa CHARACTER SET utf8mb4;"
-
-# 执行基础表结构
-mysql -u root -p apboa < docs/schema.sql
-
-# 按时间顺序执行增量 SQL（必须全部执行）
-mysql -u root -p apboa < docs/2026-02-23-01.sql
-mysql -u root -p apboa < docs/2026-02-27-01.sql
-mysql -u root -p apboa < docs/2026-03-01-01.sql
-mysql -u root -p apboa < docs/2026-03-02-01.sql
-mysql -u root -p apboa < docs/2026-03-04-01.sql
-mysql -u root -p apboa < docs/2026-03-05-01.sql
-mysql -u root -p apboa < docs/2026-03-10-01.sql
-mysql -u root -p apboa < docs/2026-03-20-01.sql
-mysql -u root -p apboa < docs/2026-03-31-01.sql
-mysql -u root -p apboa < docs/2026-04-01-01.sql
-mysql -u root -p apboa < docs/2026-04-02-01.sql
-mysql -u root -p apboa < docs/2026-04-04-01.sql
-...
+# 一条命令完成建库、建表、初始数据
+mysql -u root -p < docs/once_db_init/db_init.sql
 ```
 
-> **注意：** `schema.sql` 为基础表结构，必须首先执行。其余 SQL 文件为增量更新脚本，请严格按照文件名中的日期顺序依次执行，不可跳过。
-
-> **注意：** apboa 支持 PostgreSQL/pgvector 和 Milvus 两种向量数据库，通过 `rag.store` 配置切换（`pgvector` 或 `milvus`）。如果您无本地知识库需求，将 `rag.store` 设为空或注释即可，系统会自动降级为空实现，不影响正常使用。
-
-### 3. 启动后端
+#### 3. 启动后端
 
 ```bash
 cd console
@@ -340,7 +322,7 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-### 4. 启动前端
+#### 4. 启动前端
 
 ```bash
 cd ui
@@ -348,13 +330,19 @@ pnpm install
 pnpm run dev
 ```
 
-### 5. 访问平台
+#### 5. 访问平台
 
 ```
 http://localhost:3000
 ```
 
-默认账号：`admin` / `Admin@123.com`
+默认账号：`admin` / 密码：`Admin@123.com`
+
+> 启动后访问 [部署文档](http://localhost:3000/doc.html#/build) 查看四种部署方案的完整说明。
+
+### 部署
+
+平台内置 [http://localhost:3000/doc.html#/build](http://localhost:3000/doc.html#/build) 部署文档，涵盖前后端分离、一体化 JAR、Docker Compose、Dockerfile 自定义四种方案
 
 ---
 

@@ -1,3 +1,8 @@
+# ============================================================
+# Docker 环境配置（spring.profiles.active=docker）
+# 所有值均从环境变量读取，由 docker-compose.yml 注入
+# ============================================================
+
 server:
   port: 3060
 
@@ -6,24 +11,14 @@ agentscope:
     path-prefix: /apboa/agui
     cors-enabled: true
     max-thread-sessions: 1000
-#  a2a:
-#    server:
-#      enabled: false
-#      card:
-#        name: my_assistant
-#        description: 智能助手
-#    nacos:
-#      server-addr: 192.168.174.130:8848
-#      username: nacos
-#      password: nacos
 
 spring:
   data:
     redis:
-      host: 127.0.0.1
-      port: 6379
-      password: "Redis@dhcc123.com"
-      database: 7
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:redis}
+      database: ${REDIS_DATABASE:7}
       timeout: 2000ms
       lettuce:
         pool:
@@ -34,9 +29,9 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/apboa?useSSL=false&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
-    username: root
-    password: root123123
+    url: jdbc:mysql://${MYSQL_HOST:mysql}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:apboa}?useSSL=false&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:root}
     druid:
       initial-size: 5
       min-idle: 5
@@ -53,22 +48,22 @@ jwt:
   secret: ${JWT_SECRET:ZJr8c2xF0y5b7yM+1H9v9cGZq6nZ5e0k5r3Cw7H8vJQ=}
 
 rag:
-  store: pgvector # pgvector | milvus | qdrant，向量存储类型
+  store: ${VECTOR_STORE_TYPE:pgvector}
   pgvector:
-    url: jdbc:postgresql://192.168.244.61:5432/apboa_vector
-    username: postgres
-    password: Wbmd@2024#$
+    url: jdbc:postgresql://${PG_HOST:pgvector}:${PG_PORT:5432}/${PG_DATABASE:apboa_vector}
+    username: ${PG_USER:postgres}
+    password: ${PG_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   milvus:
-    host: 127.0.0.1
-    port: 19530
-    username:          # Milvus 用户名，自建部署留空
-    password:          # Milvus 密码，自建部署留空
-    token:             # Milvus SaaS 认证 token，与用户名/密码二选一
-    database: default  # 默认库名
+    host: ${MILVUS_HOST:milvus}
+    port: ${MILVUS_PORT:19530}
+    username:
+    password:
+    token:
+    database: ${MILVUS_DATABASE:default}
   qdrant:
-    host: localhost
-    port: 6334
+    host: ${QDRANT_HOST:qdrant}
+    port: ${QDRANT_PORT:6334}
     api-key:
     collection-prefix: apboa_rag
 
@@ -84,8 +79,6 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
   configuration:
-    #    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
     map-underscore-to-camel-case: true
     call-setters-on-nulls: true
-
