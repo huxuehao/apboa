@@ -146,15 +146,13 @@ const aguiBodyExample = `{
       "content": "你好"
     }
   ],
-  "state": {},
-  "tools": [],
-  "context": [],
   "forwardedProps": {
-    "agentId": "2022979139770359809",
-    "agentCode": "test_agent",
-    "fileIds": [],
     "memoryActive": false,
     "planActive": false
+    "fileIds": [],
+    "params": {
+      "reqToken": "xxxxx"
+    }
   }
 }`
 

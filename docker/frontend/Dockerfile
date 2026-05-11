@@ -1,8 +1,9 @@
+ARG NODE_IMAGE=node:22-alpine
+ARG NGINX_IMAGE=nginx:alpine
 # ============================================================
 # 阶段一：Node 构建前端
 # ============================================================
 # 构建镜像（由 docker-compose.yml args 传入，支持私有仓库）
-ARG NODE_IMAGE=node:22-alpine
 FROM ${NODE_IMAGE} AS build
 
 WORKDIR /build
@@ -12,8 +13,6 @@ ARG VITE_APP_BASE_API=/web
 ARG VITE_APP_CONTEXT_PATH=/web
 ENV VITE_APP_BASE_API=${VITE_APP_BASE_API}
 ENV VITE_APP_CONTEXT_PATH=${VITE_APP_CONTEXT_PATH}
-ENV VITE_APP_TARGET=main
-
 # 安装 pnpm
 RUN corepack enable && corepack prepare pnpm@9.4.0 --activate
 
@@ -30,16 +29,15 @@ RUN pnpm install --frozen-lockfile
 COPY ui/ ./
 
 # 构建主应用（输出到 dist-main）
-RUN pnpm run build-only:main
+RUN VITE_APP_TARGET=main pnpm run build-only:main
 
 # 构建文档应用（输出到 dist-doc）
-RUN pnpm run build-only:doc
+RUN VITE_APP_TARGET=doc pnpm run build-only:doc
 
 # ============================================================
 # 阶段二：Nginx 运行
 # ============================================================
 # 运行镜像（由 docker-compose.yml args 传入，支持私有仓库）
-ARG NGINX_IMAGE=nginx:alpine
 FROM ${NGINX_IMAGE}
 
 # 复制构建产物：dist-main 内容映射到 /usr/share/nginx/html/web/

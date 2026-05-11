@@ -25,8 +25,8 @@ const formRef = ref<FormInstance>()
 const loading = ref(false)
 
 const formState = reactive<LoginForm>({
-  username: 'admin',
-  password: 'Admin@123.com',
+  username: '',
+  password: '',
   remember: false,
 })
 

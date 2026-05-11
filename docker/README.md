@@ -62,13 +62,53 @@ docker compose logs -f
 docker compose logs -f backend
 ```
 
-### 5. 停止服务
+### 5. 重启所有服务
+
+```bash
+docker compose restart
+```
+
+### 6. 重启单个服务
+
+```bash
+# 例如只重启后端
+docker compose restart apboa-backend
+```
+
+### 7. 停止后再启动
+
+```bash
+docker compose stop   # 停止所有
+docker compose start  # 启动所有（不重新构建）
+```
+
+### 8. 重新构建特定服务
+
+```bash
+# 重新构建后端（不使用缓存）
+docker compose build --no-cache apboa-backend
+
+# 重新构建并启动
+docker compose up -d --build apboa-backend
+```
+
+### 9. 重新构建所有服务
+
+```bash
+# 重新构建所有镜像
+docker-compose build --no-cache
+
+# 或构建并启动
+docker-compose up -d --build
+```
+
+### 10. 停止服务
 
 ```bash
 docker compose down
 ```
 
-### 6. 清理数据（慎用）
+### 11. 清理数据（慎用）
 
 ```bash
 docker compose down -v

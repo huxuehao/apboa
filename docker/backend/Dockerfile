@@ -1,16 +1,41 @@
+ARG MAVEN_IMAGE=maven:3.9-eclipse-temurin-21
+ARG JRE_IMAGE=eclipse-temurin:21-jre
 # ============================================================
 # 阶段一：Maven 构建
 # ============================================================
 # 构建镜像（由 docker-compose.yml args 传入，支持私有仓库）
-ARG MAVEN_IMAGE=maven:3.9-eclipse-temurin-21
 FROM ${MAVEN_IMAGE} AS build
 
 WORKDIR /build
 
 # 复制根 pom 及各模块 pom（保留目录结构），利用 Docker 缓存层加速
 COPY pom.xml .
-COPY --parents */pom.xml ./
-COPY --parents */*/pom.xml ./
+# 一级模块 pom
+COPY biz/pom.xml ./biz/
+COPY cluster/pom.xml ./cluster/
+COPY common/pom.xml ./common/
+COPY console/pom.xml ./console/
+COPY core/pom.xml ./core/
+COPY job/pom.xml ./job/
+COPY ui/pom.xml ./ui/
+COPY websocket/pom.xml ./websocket/
+# 二级模块 pom（biz 子模块）
+COPY biz/a2a/pom.xml ./biz/a2a/
+COPY biz/account/pom.xml ./biz/account/
+COPY biz/agent/pom.xml ./biz/agent/
+COPY biz/hook/pom.xml ./biz/hook/
+COPY biz/knowledge/pom.xml ./biz/knowledge/
+COPY biz/mcp/pom.xml ./biz/mcp/
+COPY biz/model/pom.xml ./biz/model/
+COPY biz/params/pom.xml ./biz/params/
+COPY biz/prompt/pom.xml ./biz/prompt/
+COPY biz/rag/pom.xml ./biz/rag/
+COPY biz/resource/pom.xml ./biz/resource/
+COPY biz/sensitive/pom.xml ./biz/sensitive/
+COPY biz/sk/pom.xml ./biz/sk/
+COPY biz/skill/pom.xml ./biz/skill/
+COPY biz/studio/pom.xml ./biz/studio/
+COPY biz/tool/pom.xml ./biz/tool/
 
 # 复制 Maven 私有仓库配置（在线模式为空壳，离线模式用户编辑）
 COPY docker/maven/settings.xml /root/.m2/settings.xml
@@ -26,7 +51,6 @@ RUN mvn package -pl console -am -DskipTests -q
 # 阶段二：运行镜像
 # ============================================================
 # 运行镜像（由 docker-compose.yml args 传入，支持私有仓库）
-ARG JRE_IMAGE=eclipse-temurin:21-jre
 FROM ${JRE_IMAGE}
 
 WORKDIR /app
