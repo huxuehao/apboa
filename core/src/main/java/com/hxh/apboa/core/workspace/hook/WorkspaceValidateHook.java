@@ -40,16 +40,16 @@ public class WorkspaceValidateHook implements Hook {
     @Override
     public <T extends HookEvent> Mono<T> onEvent(T event) {
         if (event instanceof PreActingEvent preActing) {
-            String threadId = extractThreadId(event);
-            if (threadId == null) {
-                return Mono.error(new RuntimeException("无法获取 Agent 上下文的 threadId"));
-            }
-
-            // 确保工作单元目录存在
-            FolderUtils.mkdirsByRelativePath(String.format("%s/%s", SysConst.WORKSPACE_PATH, threadId));
-
             ToolUseBlock toolUse = preActing.getToolUse();
             if (toolUse != null && WorkspaceToolConstants.PATH_SENSITIVE_TOOLS.contains(toolUse.getName())) {
+                // 获取当前会话的 threadId
+                String threadId = extractThreadId(event);
+                if (threadId == null) {
+                    return Mono.error(new RuntimeException("无法获取 Agent 上下文的 threadId"));
+                }
+
+                // 确保工作单元目录存在
+                FolderUtils.mkdirsByRelativePath(String.format("%s/%s", SysConst.WORKSPACE_PATH, threadId));
                 try {
                     validateToolUse(toolUse);
                 } catch (Exception e) {

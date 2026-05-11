@@ -179,7 +179,13 @@ public class AguiAgentAdapter {
                     if (config.isEnableReasoning()) {
                         String thinking = thinkingBlock.getThinking();
                         if (thinking != null && !thinking.isEmpty()) {
-                            String messageId = msg.getId();
+                            // Apboa 如果当前已有活跃的文本消息，复用其 messageId，避免产生多个 TEXT_MESSAGE_START
+                            String messageId;
+                            if (state.hasActiveTextMessage()) {
+                                messageId = state.getCurrentTextMessageId();
+                            } else {
+                                messageId = msg.getId();
+                            }
 
                             // Start reasoning message if not started
                             if (!state.hasStartedReasoningMessage(messageId)) {
