@@ -195,27 +195,61 @@ JWT_SECRET=your_secret
 ### 6.2 启动
 
 ```bash
+# 构建并启动
 cd docker
 docker compose up -d --build
+```
+
+
+```bash
+# 停止服务
+docker compose down
+
+# 停止服务，并清理数据（慎用！！！）
+docker compose down -v
+```
+
+
+```bash
+docker compose stop   # 停止所有
+docker compose start  # 启动所有（不重新构建）
+```
+
+
+```bash
+# 重新构建后端（不使用缓存）
+docker compose build --no-cache apboa-backend
+
+# 重新构建并启动
+docker compose up -d --build apboa-backend
+```
+
+
+```bash
+# 重新构建所有镜像
+docker-compose build --no-cache
+
+# 或构建并启动
+docker-compose up -d --build
 ```
 
 ### 6.3 访问
 
 - 主应用：`http://localhost/web/`
-- 默认管理员：`admin` / `admin`
+- 默认管理员：`admin` / `Admin@123.com`
 
 ### 6.4 服务架构
 
 ```
 ┌─────────────────────────────────────────┐
-│              Nginx (:80)                 │
-│         apboa-frontend                   │
-│    /web/   /web/doc/   /web/api/         │
+│              Nginx (:80)                │
+│         apboa-frontend                  │
+│    /web/   /web/doc/   /web/api/        │
 └──────────────┬──────────────────────────┘
                │ proxy_pass
 ┌──────────────▼──────────────────────────┐
-│        Spring Boot (:3060)               │
-│         apboa-backend                    │
+│        Spring Boot (:3060)              │
+│         apboa-backend                   │
 └──────┬──────────┬──────────┬────────────┘
        │          │          │
   ┌────▼──┐  ┌───▼───┐  ┌──▼──────┐
