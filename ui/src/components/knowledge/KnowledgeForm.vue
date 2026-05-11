@@ -169,10 +169,10 @@ const localConnection = reactive({
 /**
  * 切换提供商时自动重置服务地址和模型为默认值
  */
-watch(() => localConnection.providerType, () => {
+const handleProviderTypeChange = () => {
   localConnection.baseUrl = defaultBaseUrlHint.value
   localConnection.embeddingModel = defaultModelHint.value
-})
+}
 
 /**
  * 本地RAG检索配置
@@ -709,7 +709,7 @@ function removeMetadataCondition(index: number) {
           <!-- 本地RAG连接配置 -->
           <template v-if="formData.kbType === 'LOCAL'">
             <AFormItem label="模型提供商" :rules="[{ required: true, message: '请选择模型提供商' }]">
-              <ASelect v-model:value="localConnection.providerType" style="width: 100%">
+              <ASelect v-model:value="localConnection.providerType" @change="handleProviderTypeChange" style="width: 100%">
                 <ASelectOption value="ollama">Ollama</ASelectOption>
                 <ASelectOption value="bailian">Bailian</ASelectOption>
               </ASelect>
