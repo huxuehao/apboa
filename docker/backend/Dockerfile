@@ -55,6 +55,27 @@ FROM ${JRE_IMAGE}
 
 WORKDIR /app
 
+# ---------- 安装 Python 3 ----------
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        python3 \
+        python3-pip \
+        python3-venv \
+    && ln -sf /usr/bin/python3 /usr/bin/python \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# ---------- 安装 Node.js 22 ----------
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        curl \
+        ca-certificates \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# 验证运行时安装
+RUN python --version && node --version && npm --version
+
 # 复制构建产物
 COPY --from=build /build/console/target/console-*.jar app.jar
 
