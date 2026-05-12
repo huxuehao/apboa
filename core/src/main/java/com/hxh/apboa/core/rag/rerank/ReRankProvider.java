@@ -14,7 +14,7 @@ import java.util.List;
 public interface ReRankProvider {
 
     /**
-     * 返回提供商类型标识，如 "siliconflow"
+     * 返回提供商类型标识，如 "xinference"
      */
     String getType();
 

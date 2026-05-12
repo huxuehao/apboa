@@ -61,7 +61,7 @@ public class ReRankService {
 
         JsonNode rerankingConfig = config.getRerankingConfig();
         if (rerankingConfig == null || !rerankingConfig.has("providerType")) {
-            log.debug("ReRank配置未启用或providerType未设置");
+            log.error("ReRank配置未启用或providerType未设置");
             return buildDefaultResults(documents.size());
         }
 
@@ -105,13 +105,17 @@ public class ReRankService {
      */
     public boolean isEnabled(KnowledgeBaseConfig config) {
         JsonNode rerankingConfig = config.getRerankingConfig();
-        return rerankingConfig != null
-                && rerankingConfig.has("enabled")
-                && rerankingConfig.get("enabled").asBoolean();
+        if (rerankingConfig == null) {
+            return false;
+        }
+        if (rerankingConfig.has("enabled")) {
+            return rerankingConfig.get("enabled").asBoolean();
+        }
+        return rerankingConfig.has("providerType");
     }
 
     private ReRankProvider resolveProvider(JsonNode rerankingConfig) {
-        String providerType = JsonUtils.getStringValue(rerankingConfig, "providerType", "siliconflow");
+        String providerType = JsonUtils.getStringValue(rerankingConfig, "providerType", "xinference");
         ReRankProvider provider = providerMap.get(providerType.toLowerCase());
         if (provider == null) {
             throw new IllegalArgumentException("不支持的ReRank提供商: " + providerType + "，已注册: " + providerMap.keySet());

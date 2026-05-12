@@ -187,11 +187,10 @@ const localRetrieval = reactive({
 })
 
 const localReranking = reactive({
-  enabled: false,
-  providerType: 'siliconflow' as 'siliconflow',
-  baseUrl: 'https://api.siliconflow.cn/v1/rerank',
+  providerType: 'xinference' as 'xinference',
+  baseUrl: 'http://localhost:9997/v1/rerank',
   apiKey: '',
-  model: 'BAAI/bge-reranker-v2-m3',
+  model: 'Qwen3-Reranker-4B',
   topN: 5,
   bufferSizeMb: 50
 })
@@ -394,11 +393,10 @@ function loadConfigData() {
     }
     if (rerankingConfig) {
       Object.assign(localReranking, {
-        enabled: !!rerankingConfig.enabled,
-        providerType: rerankingConfig.providerType || 'siliconflow',
-        baseUrl: rerankingConfig.baseUrl || 'https://api.siliconflow.cn/v1/rerank',
+        providerType: rerankingConfig.providerType || 'xinference',
+        baseUrl: rerankingConfig.baseUrl || 'http://localhost:9997/v1/rerank',
         apiKey: rerankingConfig.apiKey || '',
-        model: rerankingConfig.model || 'BAAI/bge-reranker-v2-m3',
+        model: rerankingConfig.model || 'Qwen3-Reranker-4B',
         topN: rerankingConfig.topN || 5,
         bufferSizeMb: rerankingConfig.bufferSizeMb || 50
       })
@@ -450,11 +448,10 @@ function resetForm() {
   })
   Object.assign(localRetrieval, { chunkSize: 512, chunkOverlap: 64, chunkDelimiters: '', topK: 5, scoreThreshold: 0.5 })
   Object.assign(localReranking, {
-    enabled: false,
-    providerType: 'siliconflow',
-    baseUrl: 'https://api.siliconflow.cn/v1/rerank',
+    providerType: 'xinference',
+    baseUrl: 'http://localhost:9997/v1/rerank',
     apiKey: '',
-    model: 'BAAI/bge-reranker-v2-m3',
+    model: 'Qwen3-Reranker-4B',
     topN: 5,
     bufferSizeMb: 50
   })
@@ -558,18 +555,13 @@ function buildSubmitData(): KnowledgeBaseConfig {
       batchSize: localConnection.batchSize
     }
     data.retrievalConfig = { ...localRetrieval }
-    if (localReranking.enabled) {
-      data.rerankingConfig = {
-        enabled: true,
-        providerType: localReranking.providerType,
-        baseUrl: localReranking.baseUrl,
-        apiKey: localReranking.apiKey || undefined,
-        model: localReranking.model,
-        topN: localReranking.topN,
-        bufferSizeMb: localReranking.bufferSizeMb
-      }
-    } else {
-      data.rerankingConfig = null
+    data.rerankingConfig = {
+      providerType: localReranking.providerType,
+      baseUrl: localReranking.baseUrl,
+      apiKey: localReranking.apiKey || undefined,
+      model: localReranking.model,
+      topN: localReranking.topN,
+      bufferSizeMb: localReranking.bufferSizeMb
     }
     data.endpointConfig = null
     data.queryRewriteConfig = null
@@ -937,71 +929,56 @@ function removeMetadataCondition(index: number) {
           <h4 style="margin-bottom: 12px">重排序配置(可选)</h4>
 
           <template v-if="formData.kbType === 'BAILIAN'">
-            <AFormItem label="启用重排序">
-              <ASwitch v-model:checked="bailianReranking.enableReranking" />
+            <AFormItem label="Model Name" :rules="[{ required: true, message: '请输入Model Name' }]">
+              <AInput v-model:value="bailianReranking.modelName" placeholder="例如: gte-rerank-hybrid" />
             </AFormItem>
-            <template v-if="bailianReranking.enableReranking">
-              <AFormItem label="Model Name" :rules="[{ required: true, message: '请输入Model Name' }]">
-                <AInput v-model:value="bailianReranking.modelName" placeholder="例如: gte-rerank-hybrid" />
-              </AFormItem>
-              <AFormItem label="Rerank Min Score">
-                <AInputNumber v-model:value="bailianReranking.rerankMinScore" :min="0" :max="1" :step="0.1" style="width: 100%" />
-              </AFormItem>
-              <AFormItem label="Rerank Top N">
-                <AInputNumber v-model:value="bailianReranking.rerankTopN" :min="1" :max="100" style="width: 100%" />
-              </AFormItem>
-            </template>
+            <AFormItem label="Rerank Min Score">
+              <AInputNumber v-model:value="bailianReranking.rerankMinScore" :min="0" :max="1" :step="0.1" style="width: 100%" />
+            </AFormItem>
+            <AFormItem label="Rerank Top N">
+              <AInputNumber v-model:value="bailianReranking.rerankTopN" :min="1" :max="100" style="width: 100%" />
+            </AFormItem>
           </template>
 
           <template v-if="formData.kbType === 'DIFY'">
-            <AFormItem label="启用重排序">
-              <ASwitch v-model:checked="difyReranking.enableRerank" />
+            <AFormItem label="Provider Name" :rules="[{ required: true, message: '请输入Provider Name' }]">
+              <AInput v-model:value="difyReranking.providerName" placeholder="例如: cohere" />
             </AFormItem>
-            <template v-if="difyReranking.enableRerank">
-              <AFormItem label="Provider Name" :rules="[{ required: true, message: '请输入Provider Name' }]">
-                <AInput v-model:value="difyReranking.providerName" placeholder="例如: cohere" />
-              </AFormItem>
-              <AFormItem label="Model Name" :rules="[{ required: true, message: '请输入Model Name' }]">
-                <AInput v-model:value="difyReranking.modelName" placeholder="例如: rerank-english-v2.0" />
-              </AFormItem>
-              <AFormItem label="Top N">
-                <AInputNumber v-model:value="difyReranking.topN" :min="1" :max="100" style="width: 100%" />
-              </AFormItem>
-            </template>
+            <AFormItem label="Model Name" :rules="[{ required: true, message: '请输入Model Name' }]">
+              <AInput v-model:value="difyReranking.modelName" placeholder="例如: rerank-english-v2.0" />
+            </AFormItem>
+            <AFormItem label="Top N">
+              <AInputNumber v-model:value="difyReranking.topN" :min="1" :max="100" style="width: 100%" />
+            </AFormItem>
           </template>
 
           <template v-if="formData.kbType === 'LOCAL'">
-            <AFormItem label="启用重排序">
-              <ASwitch v-model:checked="localReranking.enabled" />
+            <AFormItem label="模型提供商">
+              <ASelect v-model:value="localReranking.providerType" style="width: 100%">
+                <ASelectOption value="xinference">Xinference</ASelectOption>
+              </ASelect>
             </AFormItem>
-            <template v-if="localReranking.enabled">
-              <AFormItem label="模型提供商">
-                <ASelect v-model:value="localReranking.providerType" style="width: 100%">
-                  <ASelectOption value="siliconflow">SiliconFlow</ASelectOption>
-                </ASelect>
-              </AFormItem>
-              <AFormItem label="API Key" :rules="[{ required: true, message: '请输入API Key' }]">
-                <AInputPassword v-model:value="localReranking.apiKey" placeholder="请输入API Key，支持 ${ENV_VAR} 引用环境变量" />
-              </AFormItem>
-              <AFormItem label="服务地址">
-                <AInput v-model:value="localReranking.baseUrl" placeholder="https://api.siliconflow.cn/v1/rerank" />
-              </AFormItem>
-              <AFormItem label="重排序模型">
-                <AInput v-model:value="localReranking.model" placeholder="例如: BAAI/bge-reranker-v2-m3" />
-              </AFormItem>
-              <AFormItem label="Top N">
-                <AInputNumber v-model:value="localReranking.topN" :min="1" :max="100" style="width: 100%" />
-                <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
-                  最终返回的文档数量，默认5
-                </div>
-              </AFormItem>
-              <AFormItem label="响应缓冲大小（单位MB）">
-                <AInputNumber v-model:value="localReranking.bufferSizeMb" :min="1" :max="512" style="width: 100%" />
-                <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
-                  默认50MB，大数据量时可适当增大
-                </div>
-              </AFormItem>
-            </template>
+            <AFormItem label="API Key">
+              <AInputPassword v-model:value="localReranking.apiKey" placeholder="请输入API Key，支持 ${ENV_VAR} 引用环境变量" />
+            </AFormItem>
+            <AFormItem label="服务地址">
+              <AInput v-model:value="localReranking.baseUrl" placeholder="http://localhost:9997/v1/rerank" />
+            </AFormItem>
+            <AFormItem label="重排序模型">
+              <AInput v-model:value="localReranking.model" placeholder="例如: Qwen3-Reranker-4B" />
+            </AFormItem>
+            <AFormItem label="Top N">
+              <AInputNumber v-model:value="localReranking.topN" :min="1" :max="100" style="width: 100%" />
+              <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
+                最终返回的文档数量，默认5
+              </div>
+            </AFormItem>
+            <AFormItem label="响应缓冲大小（单位MB）">
+              <AInputNumber v-model:value="localReranking.bufferSizeMb" :min="1" :max="512" style="width: 100%" />
+              <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
+                默认50MB，大数据量时可适当增大
+              </div>
+            </AFormItem>
           </template>
         </div>
 

@@ -13,30 +13,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * SiliconFlow 重排序服务提供商实现
+ * 描述：Xinference 重排序服务提供商实现
  * 兼容 OpenAI 标准 ReRank API 格式
  *
  * @author huxuehao
- */
+ **/
 @Component
-public class SiliconFlowReRankProvider implements ReRankProvider {
+public class XinferenceReRankProvider implements ReRankProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(SiliconFlowReRankProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(XinferenceReRankProvider.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public String getType() {
-        return "siliconflow";
+        return "xinference";
     }
 
     @Override
     public String getDefaultBaseUrl() {
-        return "https://api.siliconflow.cn/v1/rerank";
+        return "http://localhost:9997/v1/rerank";
     }
 
     @Override
     public String getDefaultModel() {
-        return "BAAI/bge-reranker-v2-m3";
+        return "Qwen3-Reranker-4B";
     }
 
     @Override
@@ -58,7 +58,6 @@ public class SiliconFlowReRankProvider implements ReRankProvider {
         try {
             JsonNode root = objectMapper.readTree(responseBody);
 
-            // OpenAI 兼容 ReRank 格式: {"results": [{"index": 0, "relevance_score": 0.95}, ...]}
             JsonNode resultsNode = root.get("results");
             if (resultsNode == null || !resultsNode.isArray()) {
                 throw new RuntimeException("ReRank响应格式异常: 缺少results字段");
@@ -71,11 +70,10 @@ public class SiliconFlowReRankProvider implements ReRankProvider {
                 results.add(new ReRankResult(index, score));
             }
 
-            // 按相关性分数降序排列
             results.sort((a, b) -> Double.compare(b.score(), a.score()));
             return results;
         } catch (Exception e) {
-            log.error("解析SiliconFlow ReRank响应失败", e);
+            log.error("解析Xinference ReRank响应失败", e);
             throw new RuntimeException("解析ReRank响应失败", e);
         }
     }
