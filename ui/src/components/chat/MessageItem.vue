@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { LoadingOutlined, BulbOutlined, DownOutlined } from '@ant-design/icons-vue'
 import MediaPreview from '@/components/common/MediaPreview.vue'
 import type { UploadedFileItem } from '@/types'
 import MediaIcon from '@/components/common/MediaIcon.vue'
@@ -75,6 +76,12 @@ const props = defineProps<{
   createdAt?: string
   agentHasResult?: boolean
   isStreaming?: boolean
+  /** 推理内容 */
+  reasoningContent?: string
+  /** 推理消息 ID */
+  reasoningMessageId?: string
+  /** 推理是否还在流式进行中 */
+  reasoningStreaming?: boolean
 }>()
 
 defineEmits(['inputTagPreview'])
@@ -90,6 +97,22 @@ const formattedTime = computed(() => formatTime(props.createdAt))
 // 预览相关状态
 const previewVisible = ref(false)
 const previewCurrentIndex = ref(0)
+
+// 推理面板展开状态
+const reasoningExpanded = ref(false)
+
+// 是否有推理内容
+const hasReasoning = computed(() => !!props.reasoningContent)
+
+// 推理进行中时自动展开面板
+watch(
+  () => props.reasoningStreaming,
+  (streaming) => {
+    if (streaming) {
+      reasoningExpanded.value = true
+    }
+  }
+)
 
 /**
  * 打开文件预览
@@ -127,17 +150,33 @@ const openPreview = (index: number) => {
     </template>
     <template v-else-if="isAssistant">
       <div class="chat-message-bubble">
-        <div v-if="!agentHasResult && !content" class="chat-loading-dots">
+        <div v-if="!agentHasResult && !content && !reasoningContent" class="chat-loading-dots">
           <span></span><span></span><span></span>
         </div>
-        <div v-else class="chat-md-content">
+        <!-- 推理过程面板（独立于正文显示） -->
+        <div v-if="hasReasoning" class="chat-reasoning-panel">
+          <div class="chat-reasoning-header" @click="reasoningExpanded = !reasoningExpanded">
+            <span class="chat-reasoning-icon">
+              <LoadingOutlined v-if="reasoningStreaming" spin />
+              <BulbOutlined v-else />
+            </span>
+            <span class="chat-reasoning-title">
+              {{ reasoningStreaming ? '思考中...' : '思考过程' }}
+            </span>
+          </div>
+          <div v-show="reasoningExpanded" class="chat-reasoning-content">
+            {{reasoningContent}}
+          </div>
+        </div>
+        <!-- 正文内容 -->
+        <div v-if="content" class="chat-md-content">
           <MarkdownRenderer :content="content" />
         </div>
       </div>
     </template>
     <template v-else-if="isTool">
       <div class="chat-message-bubble">
-        <div class="chat-md-content">
+        <div class="chat-md-content chat-tool-content">
           <MarkdownRenderer :content="content" />
         </div>
       </div>

@@ -123,6 +123,8 @@ const {
   agentHasResult,
   streamingContent,
   streamingMessageId,
+  reasoningContent,
+  reasoningMessageId,
   toolCallsInProgress,
   isRunning,
   sendMessage,
@@ -158,6 +160,22 @@ function buildFilesPrefix(files: UploadedFileItem[]): string {
   return JSON.stringify({ files }) + '@==##::::##==@'
 }
 
+/**
+ * 尝试从消息内容中解析推理和正文
+ * 如果内容为 JSON 格式 {reasoning, content}，则提取两部分；否则原样返回
+ */
+function parseMessageContent(raw: string): { content: string; reasoningContent?: string } {
+  try {
+    const parsed = JSON.parse(raw)
+    if (parsed && typeof parsed === 'object' && 'reasoning' in parsed && 'content' in parsed) {
+      return { content: parsed.content as string, reasoningContent: parsed.reasoning as string }
+    }
+  } catch {
+    // not JSON, return as-is
+  }
+  return { content: raw }
+}
+
 // 构建展示消息
 const displayMessages = computed<DisplayMessage[]>(() => {
   const list: DisplayMessage[] = []
@@ -175,12 +193,16 @@ const displayMessages = computed<DisplayMessage[]>(() => {
       }
     }
 
+    // 解析推理内容（如果是 JSON 格式 {reasoning, content}）
+    const parsed = m.role === 'assistant' ? parseMessageContent(m.content || '') : { content: m.content || '' }
+
     list.push({
       id: displayId,
       role: m.role as DisplayMessage['role'],
-      content: (m.content || '') as string,
+      content: parsed.content,
       createdAt: m.createdAt,
       isStreaming: false,
+      reasoningContent: parsed.reasoningContent,
     })
   }
 
@@ -195,10 +217,24 @@ const displayMessages = computed<DisplayMessage[]>(() => {
         role: 'assistant',
         content: streamingContent.value,
         isStreaming: true,
+        reasoningContent: reasoningContent.value || undefined,
+        reasoningMessageId: reasoningMessageId.value || undefined,
+        reasoningStreaming: !!reasoningMessageId.value,
       })
     }
+  } else if (reasoningContent.value) {
+    // 推理流进行中或刚完成（文本流尚未到达），渲染推理面板
+    list.push({
+      id: reasoningMessageId.value || 'reasoning_placeholder',
+      role: 'assistant',
+      content: '',
+      isStreaming: true,
+      reasoningContent: reasoningContent.value,
+      reasoningMessageId: reasoningMessageId.value || undefined,
+      reasoningStreaming: !!reasoningMessageId.value,
+    })
   } else {
-    // 响应加载动画
+    // 响应加载动画（没有任何推理或文本内容时）
     if (list[list.length - 1]?.role === 'user') {
       list.push({
         id: '',

@@ -32,6 +32,10 @@ export function useChatStream(
   const streamingContent = ref('')
   const streamingMessageId = ref<string | null>(null)
 
+  // 推理流式内容
+  const reasoningContent = ref('')
+  const reasoningMessageId = ref<string | null>(null)
+
   // 工具调用进度
   const toolCallsInProgress = ref<
     Array<{ id: string; name: string; args: string; result?: string; startTime: number; elapsed?: number, needConfirm?: boolean }>
@@ -42,6 +46,8 @@ export function useChatStream(
     handlers: {
       onRunStarted: () => {
         toolCallsInProgress.value = []
+        reasoningContent.value = ''
+        reasoningMessageId.value = null
       },
       onTextMessageStart: (e) => {
         streamingMessageId.value = e.messageId
@@ -53,11 +59,29 @@ export function useChatStream(
       },
       onTextMessageEnd: async (_e, finalText) => {
         if (currentSessionId.value && finalText) {
-          const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'assistant', content: finalText })
+          // 如果有推理内容，将推理和回复一起封装为 JSON 保存
+          const contentToSave = reasoningContent.value
+            ? JSON.stringify({ reasoning: reasoningContent.value, content: finalText })
+            : finalText
+          const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'assistant', content: contentToSave })
           onMessageSaved?.(res.data.data)
         }
         streamingContent.value = ''
         streamingMessageId.value = null
+        // 推理已随文本一起持久化，清除推理状态避免 displayMessages 重复渲染
+        reasoningContent.value = ''
+        reasoningMessageId.value = null
+      },
+      onReasoningMessageStart: (e) => {
+        reasoningMessageId.value = e.messageId
+        reasoningContent.value = ''
+      },
+      onReasoningMessageContent: (_e, currentText) => {
+        reasoningContent.value = currentText
+      },
+      onReasoningMessageEnd: (_e) => {
+        reasoningMessageId.value = null
+        // reasoning 内容已通过 onReasoningMessageContent 累积完成，此处保留供后续持久化使用
       },
       onToolCallStart: (e) => {
         agentHasResult.value = true
@@ -162,7 +186,10 @@ export function useChatStream(
       // 保存AI回复消息
       else {
         if (streamingContent.value) {
-          const res = await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'assistant', content: streamingContent.value })
+          const contentToSave = reasoningContent.value
+            ? JSON.stringify({ reasoning: reasoningContent.value, content: streamingContent.value })
+            : streamingContent.value
+          const res = await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'assistant', content: contentToSave })
           chatMsg = res.data.data
         }
       }
@@ -170,6 +197,8 @@ export function useChatStream(
       toolCallsInProgress.value = []
       streamingContent.value = ''
       streamingMessageId.value = null
+      reasoningContent.value = ''
+      reasoningMessageId.value = null
       isRunning.value = false
 
       if (chatMsg) {
@@ -220,6 +249,8 @@ export function useChatStream(
     agentHasResult,
     streamingContent,
     streamingMessageId,
+    reasoningContent,
+    reasoningMessageId,
     toolCallsInProgress,
     isRunning,
     abortRun,

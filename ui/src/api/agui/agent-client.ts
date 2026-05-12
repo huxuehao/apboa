@@ -23,6 +23,9 @@ import type {
   ActivityDeltaEvent,
   CustomEvent,
   RawEvent,
+  ReasoningMessageStartEvent,
+  ReasoningMessageContentEvent,
+  ReasoningMessageEndEvent,
   Message,
   RunAgentInput
 } from '@/types'
@@ -58,6 +61,9 @@ export interface EventHandlers {
   onCustom?: (event: CustomEvent) => void
   onRaw?: (event: RawEvent) => void
   onEvent?: (event: BaseEvent) => void
+  onReasoningMessageStart?: (event: ReasoningMessageStartEvent) => void
+  onReasoningMessageContent?: (event: ReasoningMessageContentEvent, currentText: string) => void
+  onReasoningMessageEnd?: (event: ReasoningMessageEndEvent, finalText: string) => void
 }
 
 /** 工具执行函数 */
@@ -80,6 +86,7 @@ export class AgentClient {
   private abortController: AbortController | null = null
   private messageBuffers: Record<string, string> = {}
   private toolCallBuffers: Record<string, ToolCallBuffer> = {}
+  private reasoningBuffers: Record<string, string> = {}
   private middlewares: EventMiddleware[] = []
   /** TEXT_MESSAGE_CHUNK 展开时追踪当前消息 ID */
   private chunkCurrentMessageId: string | null = null
@@ -421,6 +428,26 @@ export class AgentClient {
           )
           this.chunkCurrentMessageId = null
         }
+        break
+      }
+
+      case 'REASONING_MESSAGE_START': {
+        const e = event as ReasoningMessageStartEvent
+        this.reasoningBuffers[e.messageId] = ''
+        this.handlers.onReasoningMessageStart?.(e)
+        break
+      }
+      case 'REASONING_MESSAGE_CONTENT': {
+        const e = event as ReasoningMessageContentEvent
+        this.reasoningBuffers[e.messageId] = (this.reasoningBuffers[e.messageId] ?? '') + e.delta
+        this.handlers.onReasoningMessageContent?.(e, this.reasoningBuffers[e.messageId] as string)
+        break
+      }
+      case 'REASONING_MESSAGE_END': {
+        const e = event as ReasoningMessageEndEvent
+        const full = this.reasoningBuffers[e.messageId] ?? ''
+        delete this.reasoningBuffers[e.messageId]
+        this.handlers.onReasoningMessageEnd?.(e, full)
         break
       }
 

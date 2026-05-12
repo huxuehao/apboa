@@ -1096,3 +1096,121 @@ $small-mobile-breakpoint: 375px;
     background-color: rgba($chat-primary, 0.12);
   }
 }
+
+/**
+ * 工具内容样式
+ */
+.chat-tool-content {
+  :deep(summary) {
+    font-size: 12px;
+    color: #a7afbe;
+  }
+  :deep(p) {
+    font-size: 11px;
+    color: #788089;
+    padding: 0 18px;
+    display: none;
+  }
+  :deep(.md-code-block) {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin-top: 0;
+  }
+  :deep(pre) {
+    font-size: 12px;
+    color: #a7afbe;
+    padding: 0 16px;
+  }
+  :deep(code) {
+    max-height: 200px;
+    overflow: auto;
+
+    &::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: #ededee;
+    }
+  }
+  :deep(.md-code-header) {
+    display: none;
+  }
+
+  :deep(.hljs) {
+    background-color: rgba(248, 249, 250, 0.77) !important;
+    border-radius: 8px;
+    padding: 4px 6px !important;
+  }
+  :deep([class^="hljs-"]) {
+    font-size: 11px;
+    color: #a7afbe;
+    font-weight: lighter ;
+  }
+  :deep([class*="language-"]) {
+    font-size: 11px;
+    color: #a7afbe ;
+    font-weight: lighter ;
+  }
+}
+
+/**
+ * 推理过程面板样式
+ */
+.chat-reasoning-panel {
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.chat-reasoning-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease;
+}
+
+.chat-reasoning-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #7B7E80;
+  flex-shrink: 0;
+}
+
+.chat-reasoning-title {
+  font-size: 12px;
+  color: #7B7E80;
+  &:hover {
+    color: #454748;
+  }
+}
+
+.chat-reasoning-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  color: #9aa5b5;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+
+  &.expanded {
+    transform: rotate(180deg);
+  }
+}
+
+.chat-reasoning-content {
+  padding: 5px 20px 12px 20px;
+  font-size: 11px;
+  color: #a7afbe;
+  line-height: 1.7;
+  margin-top: 0;
+}

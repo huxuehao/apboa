@@ -5,4 +5,10 @@ export interface DisplayMessage {
   content: string
   createdAt?: string
   isStreaming?: boolean
+  /** 推理内容 */
+  reasoningContent?: string
+  /** 推理消息 ID */
+  reasoningMessageId?: string
+  /** 推理是否还在流式进行中 */
+  reasoningStreaming?: boolean
 }
