@@ -179,21 +179,20 @@ function parseMessageContent(raw: string): { content: string; reasoningContent?:
 // 构建展示消息
 const displayMessages = computed<DisplayMessage[]>(() => {
   const list: DisplayMessage[] = []
-  for (const m of messagesList.value) {
-    if (m.role === 'system' || !m.content) continue
+  for (let i = 0; i < messagesList.value.length; i++) {
+    const m = messagesList.value[i]
+    if (!m || m.role === 'system' || !m.content) continue
 
     let displayId = String(m.id)
     // key 桥接：流式刚结束时，将最后一条 assistant 消息的展示 key 替换为流式 ID
-    // 确保 Vue diff 时 key 不变，复用 DOM 而非销毁重建
     if (!streamingMessageId.value && lastStreamingKey.value && m.role === 'assistant') {
-      const idx = messagesList.value.indexOf(m)
-      const hasLaterAssistant = messagesList.value.slice(idx + 1).some(x => x.role === 'assistant')
+      const hasLaterAssistant = messagesList.value.slice(i + 1).some(x => x.role === 'assistant')
       if (!hasLaterAssistant) {
         displayId = lastStreamingKey.value
       }
     }
 
-    // 解析推理内容（如果是 JSON 格式 {reasoning, content}）
+    // 解析推理内容
     const parsed = m.role === 'assistant' ? parseMessageContent(m.content || '') : { content: m.content || '' }
 
     list.push({
@@ -207,9 +206,7 @@ const displayMessages = computed<DisplayMessage[]>(() => {
   }
 
   if (streamingMessageId.value) {
-    // 去重：若 messagesList 末尾的 assistant 消息内容与当前流式内容一致
-    // 说明流式刚保存完成（onTextMessageEnd 已推入 messagesList 但 streaming 尚未清除）
-    // 此时跳过流式条目，避免同一内容渲染两份
+    // 去重：若 messagesList 末尾的 assistant 消息内容与当前流式内容一致，跳过
     const lastMsg = list[list.length - 1]
     if (!(lastMsg?.role === 'assistant' && streamingContent.value && lastMsg.content === streamingContent.value)) {
       list.push({
@@ -217,13 +214,10 @@ const displayMessages = computed<DisplayMessage[]>(() => {
         role: 'assistant',
         content: streamingContent.value,
         isStreaming: true,
-        reasoningContent: reasoningContent.value || undefined,
-        reasoningMessageId: reasoningMessageId.value || undefined,
-        reasoningStreaming: !!reasoningMessageId.value,
       })
     }
   } else if (reasoningContent.value) {
-    // 推理流进行中或刚完成（文本流尚未到达），渲染推理面板
+    // 推理流进行中（文本流尚未到达），渲染推理面板
     list.push({
       id: reasoningMessageId.value || 'reasoning_placeholder',
       role: 'assistant',

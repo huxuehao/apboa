@@ -59,18 +59,14 @@ export function useChatStream(
       },
       onTextMessageEnd: async (_e, finalText) => {
         if (currentSessionId.value && finalText) {
-          // 如果有推理内容，将推理和回复一起封装为 JSON 保存
-          const contentToSave = reasoningContent.value
-            ? JSON.stringify({ reasoning: reasoningContent.value, content: finalText })
-            : finalText
+          // 纯文本保存，不再与推理打包
+          const contentToSave = JSON.stringify({ reasoning: '', content: finalText })
           const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'assistant', content: contentToSave })
           onMessageSaved?.(res.data.data)
         }
         streamingContent.value = ''
         streamingMessageId.value = null
-        // 推理已随文本一起持久化，清除推理状态避免 displayMessages 重复渲染
         reasoningContent.value = ''
-        reasoningMessageId.value = null
       },
       onReasoningMessageStart: (e) => {
         reasoningMessageId.value = e.messageId
@@ -79,11 +75,26 @@ export function useChatStream(
       onReasoningMessageContent: (_e, currentText) => {
         reasoningContent.value = currentText
       },
-      onReasoningMessageEnd: (_e) => {
+      onReasoningMessageEnd: async () => {
+        if (currentSessionId.value && reasoningContent.value) {
+          // 推理结束时立即保存为独立消息
+          const contentToSave = JSON.stringify({ reasoning: reasoningContent.value, content: '' })
+          const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'assistant', content: contentToSave })
+          onMessageSaved?.(res.data.data)
+        }
         reasoningMessageId.value = null
-        // reasoning 内容已通过 onReasoningMessageContent 累积完成，此处保留供后续持久化使用
+        reasoningContent.value = ''
       },
-      onToolCallStart: (e) => {
+      onToolCallStart:async (e) => {
+        if (currentSessionId.value && reasoningContent.value) {
+          // 推理结束时立即保存为独立消息
+          const contentToSave = JSON.stringify({ reasoning: reasoningContent.value, content: '' })
+          const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'assistant', content: contentToSave })
+          onMessageSaved?.(res.data.data)
+          reasoningMessageId.value = null
+          reasoningContent.value = ''
+        }
+
         agentHasResult.value = true
         toolCallsInProgress.value = [
           ...toolCallsInProgress.value,
@@ -186,10 +197,8 @@ export function useChatStream(
       // 保存AI回复消息
       else {
         if (streamingContent.value) {
-          const contentToSave = reasoningContent.value
-            ? JSON.stringify({ reasoning: reasoningContent.value, content: streamingContent.value })
-            : streamingContent.value
-          const res = await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'assistant', content: contentToSave })
+          // 推理已在 REASONING_MESSAGE_END 中独立保存，此处只保存纯文本
+          const res = await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'assistant', content: streamingContent.value })
           chatMsg = res.data.data
         }
       }
