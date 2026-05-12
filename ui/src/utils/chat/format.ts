@@ -27,8 +27,8 @@ export function buildToolCallsContent(
   const blocks: string[] = []
   for (const t of toolCalls) {
     let block = ''
-    if (t.args) block += '\n\n参数：\n````json\n' + formatToolDisplay(t.args) + '\n````\n'
-    if (t.result != null) block += '\n\n结果：\n````\n' + formatToolDisplay(t.result) + '\n````\n'
+    if (t.args) block += '\n````json\n' + formatToolDisplay(t.args) + '\n````\n'
+    if (t.result != null) block += '\n````\n' + formatToolDisplay(t.result) + '\n````\n'
     blocks.push(
       `<details> <summary> <span class="tool-call-title"> ${t.name}（耗时：${t.elapsed || 0}ms） </span> </summary>\n\n ${block} </details>`
     )
