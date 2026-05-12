@@ -153,6 +153,9 @@ public class AguiAgentAdapter {
                         // Start message if not started
                         if (!state.hasStartedMessage(messageId)) {
                             events.add(
+                                    new AguiEvent.ReasoningMessageEnd(
+                                            state.threadId, state.runId, messageId));
+                            events.add(
                                     new AguiEvent.TextMessageStart(
                                             state.threadId, state.runId, messageId, "assistant"));
                             state.startMessage(messageId);
@@ -220,6 +223,9 @@ public class AguiAgentAdapter {
                         String activeMessageId = state.getCurrentTextMessageId();
                         events.add(
                                 new AguiEvent.TextMessageEnd(
+                                        state.threadId, state.runId, activeMessageId));
+                        events.add(
+                                new AguiEvent.ReasoningMessageEnd(
                                         state.threadId, state.runId, activeMessageId));
                         state.endMessage(activeMessageId);
                     }

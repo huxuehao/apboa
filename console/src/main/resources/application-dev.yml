@@ -5,6 +5,8 @@ agentscope:
   agui:
     path-prefix: /apboa/agui
     cors-enabled: true
+    enable-reasoning: true
+    server-side-memory: true
     max-thread-sessions: 1000
 #  a2a:
 #    server:

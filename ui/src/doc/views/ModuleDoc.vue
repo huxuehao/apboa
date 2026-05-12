@@ -268,7 +268,6 @@ $doc-toc-width: 240px;
     font-size: 1.4em;
     margin-top: 2em;
     padding-top: 1.5em;
-    border-top: 1px solid #F3F4F6;
   }
 
   :deep(.md-h3) {
@@ -278,7 +277,7 @@ $doc-toc-width: 240px;
 
   /* 文档页特有样式：分隔线间距 */
   :deep(.md-hr) {
-    margin: 2em 0;
+    margin: 1em 0 !important;
   }
 }
 

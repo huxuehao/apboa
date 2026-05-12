@@ -123,6 +123,8 @@ const {
   agentHasResult,
   streamingContent,
   streamingMessageId,
+  reasoningContent,
+  reasoningMessageId,
   toolCallsInProgress,
   isRunning,
   sendMessage,
@@ -158,36 +160,53 @@ function buildFilesPrefix(files: UploadedFileItem[]): string {
   return JSON.stringify({ files }) + '@==##::::##==@'
 }
 
+/**
+ * 尝试从消息内容中解析推理和正文
+ * 如果内容为 JSON 格式 {reasoning, content}，则提取两部分；否则原样返回
+ */
+function parseMessageContent(raw: string): { content: string; reasoningContent?: string } {
+  try {
+    const parsed = JSON.parse(raw)
+    if (parsed && typeof parsed === 'object' && 'reasoning' in parsed && 'content' in parsed) {
+      return { content: parsed.content as string, reasoningContent: parsed.reasoning as string }
+    }
+  } catch {
+    // not JSON, return as-is
+  }
+  return { content: raw }
+}
+
 // 构建展示消息
 const displayMessages = computed<DisplayMessage[]>(() => {
   const list: DisplayMessage[] = []
-  for (const m of messagesList.value) {
-    if (m.role === 'system' || !m.content) continue
+  for (let i = 0; i < messagesList.value.length; i++) {
+    const m = messagesList.value[i]
+    if (!m || m.role === 'system' || !m.content) continue
 
     let displayId = String(m.id)
     // key 桥接：流式刚结束时，将最后一条 assistant 消息的展示 key 替换为流式 ID
-    // 确保 Vue diff 时 key 不变，复用 DOM 而非销毁重建
     if (!streamingMessageId.value && lastStreamingKey.value && m.role === 'assistant') {
-      const idx = messagesList.value.indexOf(m)
-      const hasLaterAssistant = messagesList.value.slice(idx + 1).some(x => x.role === 'assistant')
+      const hasLaterAssistant = messagesList.value.slice(i + 1).some(x => x.role === 'assistant')
       if (!hasLaterAssistant) {
         displayId = lastStreamingKey.value
       }
     }
 
+    // 解析推理内容
+    const parsed = m.role === 'assistant' ? parseMessageContent(m.content || '') : { content: m.content || '' }
+
     list.push({
       id: displayId,
       role: m.role as DisplayMessage['role'],
-      content: (m.content || '') as string,
+      content: parsed.content,
       createdAt: m.createdAt,
       isStreaming: false,
+      reasoningContent: parsed.reasoningContent,
     })
   }
 
   if (streamingMessageId.value) {
-    // 去重：若 messagesList 末尾的 assistant 消息内容与当前流式内容一致
-    // 说明流式刚保存完成（onTextMessageEnd 已推入 messagesList 但 streaming 尚未清除）
-    // 此时跳过流式条目，避免同一内容渲染两份
+    // 去重：若 messagesList 末尾的 assistant 消息内容与当前流式内容一致，跳过
     const lastMsg = list[list.length - 1]
     if (!(lastMsg?.role === 'assistant' && streamingContent.value && lastMsg.content === streamingContent.value)) {
       list.push({
@@ -197,8 +216,19 @@ const displayMessages = computed<DisplayMessage[]>(() => {
         isStreaming: true,
       })
     }
+  } else if (reasoningContent.value) {
+    // 推理流进行中（文本流尚未到达），渲染推理面板
+    list.push({
+      id: reasoningMessageId.value || 'reasoning_placeholder',
+      role: 'assistant',
+      content: '',
+      isStreaming: true,
+      reasoningContent: reasoningContent.value,
+      reasoningMessageId: reasoningMessageId.value || undefined,
+      reasoningStreaming: !!reasoningMessageId.value,
+    })
   } else {
-    // 响应加载动画
+    // 响应加载动画（没有任何推理或文本内容时）
     if (list[list.length - 1]?.role === 'user') {
       list.push({
         id: '',

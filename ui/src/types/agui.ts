@@ -141,6 +141,26 @@ export interface CustomEvent extends BaseEvent {
   value: unknown
 }
 
+/** 推理消息开始 */
+export interface ReasoningMessageStartEvent extends BaseEvent {
+  type: 'REASONING_MESSAGE_START'
+  messageId: string
+  role: string
+}
+
+/** 推理消息内容增量 */
+export interface ReasoningMessageContentEvent extends BaseEvent {
+  type: 'REASONING_MESSAGE_CONTENT'
+  messageId: string
+  delta: string
+}
+
+/** 推理消息结束 */
+export interface ReasoningMessageEndEvent extends BaseEvent {
+  type: 'REASONING_MESSAGE_END'
+  messageId: string
+}
+
 /** 原始事件 */
 export interface RawEvent extends BaseEvent {
   type: 'RAW'

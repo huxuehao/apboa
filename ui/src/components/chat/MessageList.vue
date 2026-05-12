@@ -27,6 +27,9 @@ const emit = defineEmits<{
       :created-at="msg.createdAt"
       :agent-has-result="agentHasResult"
       :is-streaming="msg.isStreaming"
+      :reasoning-content="msg.reasoningContent"
+      :reasoning-message-id="msg.reasoningMessageId"
+      :reasoning-streaming="msg.reasoningStreaming"
     />
     <ToolCallItem
       v-for="t in toolCalls"

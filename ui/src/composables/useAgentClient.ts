@@ -75,7 +75,10 @@ export function useAgentClient(options: UseAgentClientOptions = {}) {
       onActivitySnapshot: options.handlers?.onActivitySnapshot,
       onActivityDelta: options.handlers?.onActivityDelta,
       onCustom: options.handlers?.onCustom,
-      onRaw: options.handlers?.onRaw
+      onRaw: options.handlers?.onRaw,
+      onReasoningMessageStart: options.handlers?.onReasoningMessageStart,
+      onReasoningMessageContent: options.handlers?.onReasoningMessageContent,
+      onReasoningMessageEnd: options.handlers?.onReasoningMessageEnd
     },
     toolHandlers: options.toolHandlers
   })
