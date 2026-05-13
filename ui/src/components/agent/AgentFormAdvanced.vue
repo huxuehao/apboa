@@ -5,7 +5,6 @@
  */
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import SmartCodeEditor from '@/components/editor/SmartCodeEditor.vue'
 import StudioConfigSelect from '@/components/studio/StudioConfigSelect.vue'
 import CodeExecutionConfigSelect from "@/components/codeExecution/CodeExecutionConfigSelect.vue";
 import {InfoCircleOutlined} from "@ant-design/icons-vue";
@@ -78,12 +77,11 @@ const memoryCompressionForm = computed({
  */
 const rules = computed(() => {
   const baseRules: Record<string, unknown[]> = {}
-
+  baseRules.maxIterations = [
+    { required: true, message: '请输入最大迭代次数', trigger: 'blur' },
+    { type: 'number', min: 1, max: 1000, message: '最大迭代次数范围: 1-1000', trigger: 'blur' }
+  ]
   if (formData.value.enablePlanning) {
-    baseRules.maxIterations = [
-      { required: true, message: '请输入最大迭代次数', trigger: 'blur' },
-      { type: 'number', min: 1, max: 1000, message: '最大迭代次数范围: 1-1000', trigger: 'blur' }
-    ]
     baseRules.maxSubtasks = [
       { required: true, message: '请输入最大子任务数', trigger: 'blur' },
       { type: 'number', min: 1, max: 100, message: '最大子任务数范围: 1-100', trigger: 'blur' }
@@ -129,16 +127,6 @@ function handleEnableMemoryCompressionToggle(checked: boolean) {
 }
 
 /**
- * 处理结构化输出开关
- */
-function handleStructuredOutputToggle(checked: boolean) {
-  formData.value.structuredOutputEnabled = checked
-  // if (!checked) {
-  //   formData.value.structuredOutputSchema = ''
-  // }
-}
-
-/**
  * 验证表单
  */
 async function validate(): Promise<boolean> {
@@ -157,39 +145,64 @@ defineExpose({
 
 <template>
   <AForm ref="formRef" :model="formData" :rules="rules" layout="vertical">
-    <AFormItem label="显示工具调用历史">
-      <ASwitch
-        v-model:checked="formData.showToolProcess"
-        @change="handleShowToolProcessToggle"
-      />
-      <div class="text-placeholder text-xs mt-xs">
-        开启后,在对话过程中将会看到工具的调用历史，包括输入和输出
-      </div>
-    </AFormItem>
+    <!-- Row 1: 迭代次数 & 执行环境 -->
+    <ARow :gutter="16">
+      <ACol :span="12">
+        <AFormItem name="maxIterations">
+          <template #label>
+            <ATooltip title="智能体遵循「思考 - 执行」循环机制，单次完整循环即为一次迭代，用于限制最大循环次数，防止无限执行">
+              <span>最大迭代次数</span><InfoCircleOutlined class="text-secondary cursor-pointer" />
+            </ATooltip>
+          </template>
+          <AInputNumber
+            v-model:value="formData.maxIterations"
+            :min="1"
+            :max="1000"
+            style="width: 50%"
+            placeholder="默认50"
+          />
+          <div class="text-placeholder text-xs mt-xs">
+            设置「思考 - 执行」循环的最大次数，如果该智能体需要执行复杂任务，可能需要增加该值
+          </div>
+        </AFormItem>
+      </ACol>
+      <ACol :span="12">
+        <AFormItem>
+          <template #label>
+            <ATooltip title="配置后可开启工作空间，赋予智能体执行 Shell 脚本、读取&写入文件的能力">
+              <span>执行环境配置</span><InfoCircleOutlined class="text-secondary cursor-pointer" />
+            </ATooltip>
+          </template>
+          <CodeExecutionConfigSelect v-model="formData.codeExecutionConfigId"/>
+          <div class="text-placeholder text-xs mt-xs">
+            如果您希望 Skill 中的脚本可以被正常执行，那么请确保已正确配置此项
+          </div>
+        </AFormItem>
+      </ACol>
+    </ARow>
 
-    <AFormItem label="启用计划能力">
-      <ASwitch
-        v-model:checked="formData.enablePlanning"
-        @change="handleEnablePlanningToggle"
-      />
-      <div class="text-placeholder text-xs mt-xs">
-        开启后,智能体将具备任务规划能力,能够将复杂任务分解为多个子任务
-      </div>
-    </AFormItem>
+    <!-- Row 2: Studio & 计划能力 -->
+    <ARow :gutter="16">
+      <ACol :span="12">
+        <AFormItem label="Studio 可视化调试">
+          <StudioConfigSelect v-model="formData.studioConfigId" />
+          <div class="text-placeholder text-xs mt-xs">配置Studio服务地址，用于智能体可视化调试</div>
+        </AFormItem>
+      </ACol>
+      <ACol :span="12">
+        <AFormItem label="启用计划能力">
+          <ASwitch
+            v-model:checked="formData.enablePlanning"
+            @change="handleEnablePlanningToggle"
+          />
+          <div class="text-placeholder text-xs mt-xs">开启后智能体可将复杂任务分解为多个子任务</div>
+        </AFormItem>
+      </ACol>
+    </ARow>
 
-    <div v-if="formData.enablePlanning" class="planning-config-section">
+    <!-- 计划能力子配置 -->
+    <div v-if="formData.enablePlanning" class="config-section">
       <ARow :gutter="16">
-        <ACol :span="12">
-          <AFormItem label="最大迭代次数" name="maxIterations">
-            <AInputNumber
-              v-model:value="formData.maxIterations"
-              :min="1"
-              :max="1000"
-              placeholder="默认50"
-              style="width: 100%"
-            />
-          </AFormItem>
-        </ACol>
         <ACol :span="12">
           <AFormItem label="最大子任务数" name="maxSubtasks">
             <AInputNumber
@@ -201,37 +214,48 @@ defineExpose({
             />
           </AFormItem>
         </ACol>
+        <ACol :span="12">
+          <AFormItem label="需要确认计划">
+            <ASwitch v-model:checked="formData.requirePlanConfirmation" :disabled="!formData.enableMemory" />
+            <div class="text-placeholder text-xs mt-xs">需先开启记忆方可生效</div>
+          </AFormItem>
+        </ACol>
       </ARow>
-
-      <AFormItem label="需要确认计划">
-        <ASwitch v-model:checked="formData.requirePlanConfirmation" :disabled="!formData.enableMemory" />
-        <div class="text-placeholder text-xs mt-xs">
-          开启后,执行计划前需要用户确认（注意：需要开启记忆后方可生效）
-        </div>
-      </AFormItem>
     </div>
 
-    <AFormItem label="开启记忆">
-      <ASwitch v-model:checked="formData.enableMemory" />
-      <div class="text-placeholder text-xs mt-xs">
-        开启后,智能体将能够记住对话历史并持久化到数据库
-      </div>
-    </AFormItem>
+    <!-- Row 3: 记忆 & 工具调用历史 -->
+    <ARow :gutter="16">
+      <ACol :span="12">
+        <AFormItem label="开启记忆">
+          <ASwitch v-model:checked="formData.enableMemory" />
+          <div class="text-placeholder text-xs mt-xs">记住对话历史并持久化到数据库</div>
+        </AFormItem>
+      </ACol>
+      <ACol :span="12">
+        <AFormItem label="显示工具调用历史">
+          <ASwitch
+            v-model:checked="formData.showToolProcess"
+            @change="handleShowToolProcessToggle"
+          />
+          <div class="text-placeholder text-xs mt-xs">对话中显示工具调用的输入与输出</div>
+        </AFormItem>
+      </ACol>
+    </ARow>
 
+    <!-- 记忆压缩开关 -->
     <AFormItem v-if="formData.enableMemory" label="开启记忆压缩">
       <ASwitch
         v-model:checked="formData.enableMemoryCompression"
         @change="handleEnableMemoryCompressionToggle"
       />
-      <div class="text-placeholder text-xs mt-xs">
-        开启后,当记忆超过阈值时会自动压缩
-      </div>
+      <div class="text-placeholder text-xs mt-xs">记忆超过阈值时自动压缩</div>
     </AFormItem>
 
-    <div v-if="formData.enableMemory && formData.enableMemoryCompression" class="memory-config-section">
+    <!-- 记忆压缩子配置 -->
+    <div v-if="formData.enableMemory && formData.enableMemoryCompression" class="config-section">
       <ARow :gutter="16">
         <ACol :span="12">
-          <AFormItem label="最大Token数（maxToken）">
+          <AFormItem label="最大Token数">
             <AInputNumber
               v-model:value="memoryCompressionForm.maxToken"
               :min="1024"
@@ -241,7 +265,7 @@ defineExpose({
           </AFormItem>
         </ACol>
         <ACol :span="12">
-          <AFormItem label="消息阈值（msgThreshold）">
+          <AFormItem label="消息阈值">
             <AInputNumber
               v-model:value="memoryCompressionForm.msgThreshold"
               :min="10"
@@ -251,7 +275,7 @@ defineExpose({
           </AFormItem>
         </ACol>
         <ACol :span="12">
-          <AFormItem label="保留最近消息数（lastKeep）">
+          <AFormItem label="保留最近消息数">
             <AInputNumber
               v-model:value="memoryCompressionForm.lastKeep"
               :min="1"
@@ -261,7 +285,7 @@ defineExpose({
           </AFormItem>
         </ACol>
         <ACol :span="12">
-          <AFormItem label="Token比率（tokenRatio）">
+          <AFormItem label="Token比率">
             <AInputNumber
               v-model:value="memoryCompressionForm.tokenRatio"
               :min="0.1"
@@ -272,7 +296,7 @@ defineExpose({
           </AFormItem>
         </ACol>
         <ACol :span="12">
-          <AFormItem label="大负载阈值（largePayloadThreshold）">
+          <AFormItem label="大负载阈值">
             <AInputNumber
               v-model:value="memoryCompressionForm.largePayloadThreshold"
               style="width: 100%"
@@ -280,7 +304,7 @@ defineExpose({
           </AFormItem>
         </ACol>
         <ACol :span="12">
-          <AFormItem label="单个预览卸载阈值（offloadSinglePreview）">
+          <AFormItem label="单预览卸载阈值">
             <AInputNumber
               v-model:value="memoryCompressionForm.offloadSinglePreview"
               style="width: 100%"
@@ -288,7 +312,7 @@ defineExpose({
           </AFormItem>
         </ACol>
         <ACol :span="12">
-          <AFormItem label="最小连续工具消息数（minConsecutiveToolMessages）">
+          <AFormItem label="最小连续工具消息数">
             <AInputNumber
               v-model:value="memoryCompressionForm.minConsecutiveToolMessages"
               style="width: 100%"
@@ -296,7 +320,7 @@ defineExpose({
           </AFormItem>
         </ACol>
         <ACol :span="12">
-          <AFormItem label="当前轮压缩比（currentRoundCompressionRatio）">
+          <AFormItem label="当前轮压缩比">
             <AInputNumber
               v-model:value="memoryCompressionForm.currentRoundCompressionRatio"
               :min="0.1"
@@ -307,7 +331,7 @@ defineExpose({
           </AFormItem>
         </ACol>
         <ACol :span="12">
-          <AFormItem label="最小压缩令牌阈值（minCompressionTokenThreshold）">
+          <AFormItem label="最小压缩令牌阈值">
             <AInputNumber
               v-model:value="memoryCompressionForm.minCompressionTokenThreshold"
               style="width: 100%"
@@ -316,68 +340,11 @@ defineExpose({
         </ACol>
       </ARow>
     </div>
-
-<!--    <ARow :gutter="16">-->
-<!--      <ACol :span="12">-->
-<!--        <AFormItem label="启用结构化输出">-->
-<!--          <ASwitch-->
-<!--            v-model:checked="formData.structuredOutputEnabled"-->
-<!--            @change="handleStructuredOutputToggle"-->
-<!--          />-->
-<!--          <div class="text-placeholder text-xs mt-xs">-->
-<!--            开启后,智能体将按照指定的Schema输出结构化数据-->
-<!--          </div>-->
-<!--        </AFormItem>-->
-<!--      </ACol>-->
-<!--      <ACol :span="12" v-if="formData.structuredOutputEnabled">-->
-<!--        <AFormItem label="结构化输出模式">-->
-<!--          <ASelect-->
-<!--            ref="select"-->
-<!--            v-model:value="formData.structuredOutputReminder"-->
-<!--            :options="[-->
-<!--              {value: 'TOOL_CHOICE',label: 'TOOL_CHOICE（强制调用工具，一次 API 调用）'},-->
-<!--              {value: 'PROMPT',label: 'PROMPT（提示词引导，可能多次调用）'}-->
-<!--            ]"-->
-<!--          ></ASelect>-->
-<!--        </AFormItem>-->
-<!--      </ACol>-->
-<!--    </ARow>-->
-
-<!--    <AFormItem v-if="formData.structuredOutputEnabled" label="输出Schema">-->
-<!--      <SmartCodeEditor-->
-<!--        v-model="formData.structuredOutputSchema"-->
-<!--        language="json"-->
-<!--        height="250px"-->
-<!--      />-->
-<!--      <div class="text-placeholder text-xs mt-xs">-->
-<!--        定义输出的JSON Schema格式-->
-<!--      </div>-->
-<!--    </AFormItem>-->
-
-    <AFormItem>
-      <template #label>
-        <ATooltip title="该配置可开启 [工作空间]，同时可赋予智能体执行 Shell 脚本、读取&写入文件的能力">
-          <span>执行环境配置</span><InfoCircleOutlined class="text-secondary cursor-pointer" />
-        </ATooltip>
-      </template>
-      <CodeExecutionConfigSelect v-model="formData.codeExecutionConfigId" />
-      <div class="text-placeholder text-xs mt-xs">
-        配置后，可开启 [工作空间]，同时智能体可执行 Shell 脚本、读取&写入文件等操作。如果您希望 Skill 中的脚本可以被正常执行，那么请确保已正确配置此项。
-      </div>
-    </AFormItem>
-
-    <AFormItem label="Studio 可视化调试">
-      <StudioConfigSelect v-model="formData.studioConfigId" />
-      <div class="text-placeholder text-xs mt-xs">
-        配置Studio服务地址,用于智能体的可视化调试
-      </div>
-    </AFormItem>
   </AForm>
 </template>
 
 <style scoped lang="scss">
-.planning-config-section,
-.memory-config-section {
+.config-section {
   padding: var(--spacing-md);
   background-color: var(--color-bg-light);
   border-radius: var(--border-radius-md);
