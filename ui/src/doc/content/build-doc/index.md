@@ -423,7 +423,7 @@ graph TD
 
 
 
-## 八、方案五：Agent 容器化隔离部署
+## 八、方案五：Agent 容器化隔离部署（暂未上线）
 
 每个智能体拥有独立的 Docker 容器运行环境，实现文件系统和 Shell 执行的安全隔离，适用于云部署场景。
 
@@ -655,17 +655,26 @@ docker compose logs -f apboa-frontend
 方案五的 Nginx 配置与传统反向代理不同，使用了 Docker 内嵌 DNS 实现运行时动态路由：
 
 ```nginx
-# 指定 Docker 内嵌 DNS 服务器作为解析器
-resolver 127.0.0.11 valid=30s ipv6=off;
-
 # 动态路由：从 URL 中提取 agent_code，路由到同名容器
-location ~ ^/apboa/agui/(?<agent_code>[^/]+)(/.*)?$ {
-    proxy_pass http://$agent_code:3060/apboa/agui/$agent_code$2$is_args$args;
+location ~ ^/apboa/agui/(?<agent_code>[a-z0-9_-]+)(?<remaining>/.*)?$ {
+    resolver 127.0.0.11 ipv6=off;
+
+    # 使用 $remaining 确保路径完整传递
+    proxy_pass http://$agent_code:3060$remaining$is_args$args;
+
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Agent-Code $agent_code;
+
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";
+
     proxy_read_timeout 3600s;
     proxy_send_timeout 3600s;
+    proxy_buffering off;
 }
 ```
 
@@ -740,21 +749,7 @@ docker-agent/
         └── agent-b/              # 智能体 B 的工作目录
 ```
 
-### 8.10 与方案四的区别
-
-| 对比维度 | 方案四（Docker Compose） | 方案五（Agent 容器化隔离） |
-|----------|-------------------------|---------------------------|
-| 部署目录 | `docker/` | `docker-agent/` |
-| 智能体运行环境 | 所有智能体共享后端进程 | 每个智能体独立 Docker 容器 |
-| 文件安全 | 共享文件系统，智能体间可互访 | 独立 Workspace 卷，容器间隔离 |
-| Shell 安全 | Shell 命令在宿主机环境执行 | Shell 命令在容器沙箱内执行 |
-| 资源限制 | 无单智能体粒度限制 | CPU / 内存可按智能体单独限制 |
-| 数据库迁移 | 后端启动时自动执行 | 仅主控后端执行，Agent 容器禁用 |
-| 前端打包 | 后端镜像包含前端静态资源 | Agent Runner 不打包前端 |
-| Nginx 路由 | 静态反向代理 | Docker DNS 动态路由 |
-| 适用场景 | 单租户 / 可信内部环境 | ToB 多租户 / 需要安全隔离的生产环境 |
-
-### 8.11 Agent Runner 镜像自定义
+### 8.10 Agent Runner 镜像自定义
 
 如需在 Agent Runner 镜像中预装额外的运行时依赖，可编辑 `docker-agent/agent-runner/Dockerfile`：
 
