@@ -650,16 +650,16 @@ function removeMetadataCondition(index: number) {
 
           <!-- 百炼连接配置 -->
           <template v-if="formData.kbType === 'BAILIAN'">
-            <AFormItem label="Access Key ID" :rules="[{ required: true, message: '请输入Access Key ID' }]">
+            <AFormItem label="访问密钥ID（Access Key ID）" :rules="[{ required: true, message: '请输入Access Key ID' }]">
               <AInput v-model:value="bailianConnection.accessKeyId" placeholder="请输入Access Key ID" />
             </AFormItem>
-            <AFormItem label="Access Key Secret" :rules="[{ required: true, message: '请输入Access Key Secret' }]">
+            <AFormItem label="访问密钥Secret（Access Key Secret）" :rules="[{ required: true, message: '请输入Access Key Secret' }]">
               <AInputPassword v-model:value="bailianConnection.accessKeySecret" placeholder="请输入Access Key Secret" />
             </AFormItem>
-            <AFormItem label="Workspace ID" :rules="[{ required: true, message: '请输入Workspace ID' }]">
+            <AFormItem label="工作空间ID（Workspace ID）" :rules="[{ required: true, message: '请输入Workspace ID' }]">
               <AInput v-model:value="bailianConnection.workspaceId" placeholder="请输入Workspace ID" />
             </AFormItem>
-            <AFormItem label="Index ID" :rules="[{ required: true, message: '请输入Index ID' }]">
+            <AFormItem label="索引ID（Index ID）" :rules="[{ required: true, message: '请输入Index ID' }]">
               <AInput v-model:value="bailianConnection.indexId" placeholder="请输入Index ID" />
             </AFormItem>
             <AFormItem label="保存检索历史">
@@ -669,10 +669,10 @@ function removeMetadataCondition(index: number) {
 
           <!-- Dify连接配置 -->
           <template v-if="formData.kbType === 'DIFY'">
-            <AFormItem label="API Key" :rules="[{ required: true, message: '请输入API Key' }]">
+            <AFormItem label="API密钥（API Key）" :rules="[{ required: true, message: '请输入API Key' }]">
               <AInputPassword v-model:value="difyConnection.apiKey" placeholder="请输入API Key" />
             </AFormItem>
-            <AFormItem label="Dataset ID" :rules="[{ required: true, message: '请输入Dataset ID' }]">
+            <AFormItem label="数据集ID（Dataset ID）" :rules="[{ required: true, message: '请输入Dataset ID' }]">
               <AInput v-model:value="difyConnection.datasetId" placeholder="请输入Dataset ID" />
             </AFormItem>
             <AFormItem label="保存检索历史">
@@ -682,13 +682,13 @@ function removeMetadataCondition(index: number) {
 
           <!-- RAGFlow连接配置 -->
           <template v-if="formData.kbType === 'RAGFLOW'">
-            <AFormItem label="API Key" :rules="[{ required: true, message: '请输入API Key' }]">
+            <AFormItem label="API密钥（API Key）" :rules="[{ required: true, message: '请输入API Key' }]">
               <AInputPassword v-model:value="ragflowConnection.apiKey" placeholder="请输入API Key" />
             </AFormItem>
-            <AFormItem label="Base URL" :rules="[{ required: true, message: '请输入Base URL' }]">
+            <AFormItem label="基础地址（Base URL）" :rules="[{ required: true, message: '请输入Base URL' }]">
               <AInput v-model:value="ragflowConnection.baseUrl" placeholder="请输入Base URL" />
             </AFormItem>
-            <AFormItem label="Dataset IDs">
+            <AFormItem label="数据集ID列表（Dataset IDs）">
               <ASelect
                 v-model:value="ragflowConnection.datasetIds"
                 mode="tags"
@@ -696,7 +696,7 @@ function removeMetadataCondition(index: number) {
                 :token-separators="[',']"
               />
             </AFormItem>
-            <AFormItem label="Document IDs">
+            <AFormItem label="文档ID列表（Document IDs）">
               <ASelect
                 v-model:value="ragflowConnection.documentIds"
                 mode="tags"
@@ -719,7 +719,7 @@ function removeMetadataCondition(index: number) {
             </AFormItem>
 
             <template v-if="localConnection.providerType === 'bailian'">
-              <AFormItem label="API Key" :rules="[{ required: true, message: '请输入API Key' }]">
+              <AFormItem label="API密钥（API Key）" :rules="[{ required: true, message: '请输入API Key' }]">
                 <AInputPassword v-model:value="localConnection.apiKey" placeholder="请输入API Key，支持 ${ENV_VAR} 引用环境变量" />
               </AFormItem>
             </template>
@@ -781,13 +781,13 @@ function removeMetadataCondition(index: number) {
           <h4 style="margin-bottom: 12px">端点配置(可选)</h4>
 
           <template v-if="formData.kbType === 'BAILIAN'">
-            <AFormItem label="Endpoint">
+            <AFormItem label="端点地址（Endpoint）">
               <AInput v-model:value="bailianEndpoint.endpoint" placeholder="例如: bailian.cn-beijing.aliyuncs.com" />
             </AFormItem>
           </template>
 
           <template v-if="formData.kbType === 'DIFY'">
-            <AFormItem label="API Base URL">
+            <AFormItem label="API基础地址（API Base URL）">
               <AInput v-model:value="difyEndpoint.apiBaseUrl" placeholder="例如: https://api.dify.ai/v1" />
             </AFormItem>
           </template>
@@ -798,65 +798,65 @@ function removeMetadataCondition(index: number) {
           <h4 style="margin-bottom: 12px">检索配置(可选)</h4>
 
           <template v-if="formData.kbType === 'BAILIAN'">
-            <AFormItem label="Dense Similarity Top K">
+            <AFormItem label="稠密相似度Top K（Dense Similarity Top K）">
               <AInputNumber v-model:value="bailianRetrieval.denseSimilarityTopK" :min="1" :max="1000" style="width: 100%" />
             </AFormItem>
-            <AFormItem label="Sparse Similarity Top K">
+            <AFormItem label="稀疏相似度Top K（Sparse Similarity Top K）">
               <AInputNumber v-model:value="bailianRetrieval.sparseSimilarityTopK" :min="1" :max="1000" style="width: 100%" />
             </AFormItem>
           </template>
 
           <template v-if="formData.kbType === 'DIFY'">
-            <AFormItem label="Retrieval Mode">
+            <AFormItem label="检索模式（Retrieval Mode）">
               <ASelect v-model:value="difyRetrieval.retrievalMode">
                 <ASelectOption value="HYBRID_SEARCH">混合检索</ASelectOption>
                 <ASelectOption value="VECTOR">向量检索</ASelectOption>
                 <ASelectOption value="FULL_TEXT">全文检索</ASelectOption>
               </ASelect>
             </AFormItem>
-            <AFormItem label="Top K">
+            <AFormItem label="返回Top K（Top K）">
               <AInputNumber v-model:value="difyRetrieval.topK" :min="1" :max="100" style="width: 100%" />
             </AFormItem>
-            <AFormItem label="Score Threshold">
+            <AFormItem label="分数阈值（Score Threshold）">
               <AInputNumber v-model:value="difyRetrieval.scoreThreshold" :min="0" :max="1" :step="0.1" style="width: 100%" />
             </AFormItem>
-            <AFormItem label="Weights">
+            <AFormItem label="权重（Weights）">
               <AInputNumber v-model:value="difyRetrieval.weights" :min="0" :max="1" :step="0.1" style="width: 100%" />
             </AFormItem>
           </template>
 
           <template v-if="formData.kbType === 'RAGFLOW'">
-            <AFormItem label="Top K">
+            <AFormItem label="返回Top K（Top K）">
               <AInputNumber v-model:value="ragflowRetrieval.topK" :min="1" :max="2048" style="width: 100%" />
             </AFormItem>
-            <AFormItem label="Similarity Threshold">
+            <AFormItem label="相似度阈值（Similarity Threshold）">
               <AInputNumber v-model:value="ragflowRetrieval.similarityThreshold" :min="0" :max="1" :step="0.1" style="width: 100%" />
             </AFormItem>
-            <AFormItem label="Vector Similarity Weight">
+            <AFormItem label="向量相似度权重（Vector Similarity Weight）">
               <AInputNumber v-model:value="ragflowRetrieval.vectorSimilarityWeight" :min="0" :max="1" :step="0.1" style="width: 100%" />
             </AFormItem>
-            <AFormItem label="Page">
+            <AFormItem label="页码（Page）">
               <AInputNumber v-model:value="ragflowRetrieval.page" :min="1" style="width: 100%" />
             </AFormItem>
-            <AFormItem label="Page Size">
+            <AFormItem label="每页大小（Page Size）">
               <AInputNumber v-model:value="ragflowRetrieval.pageSize" :min="1" :max="100" style="width: 100%" />
             </AFormItem>
-            <AFormItem label="Use KG">
+            <AFormItem label="使用知识图谱（Use KG）">
               <ASwitch v-model:checked="ragflowRetrieval.useKg" />
             </AFormItem>
-            <AFormItem label="TOC Enhance">
+            <AFormItem label="目录增强（TOC Enhance）">
               <ASwitch v-model:checked="ragflowRetrieval.tocEnhance" />
             </AFormItem>
-            <AFormItem label="Rerank ID">
+            <AFormItem label="重排序ID（Rerank ID）">
               <AInputNumber v-model:value="ragflowRetrieval.rerankId" :min="0" style="width: 100%" />
             </AFormItem>
-            <AFormItem label="Keyword">
+            <AFormItem label="关键词搜索（Keyword）">
               <ASwitch v-model:checked="ragflowRetrieval.keyword" />
             </AFormItem>
-            <AFormItem label="Highlight">
+            <AFormItem label="高亮显示（Highlight）">
               <ASwitch v-model:checked="ragflowRetrieval.highlight" />
             </AFormItem>
-            <AFormItem label="Cross Languages">
+            <AFormItem label="跨语言搜索（Cross Languages）">
               <ASelect
                 v-model:value="ragflowRetrieval.crossLanguages"
                 mode="tags"
@@ -880,7 +880,7 @@ function removeMetadataCondition(index: number) {
             <AFormItem label="分块重叠(字符数)">
               <AInputNumber v-model:value="localRetrieval.chunkOverlap" :min="0" :max="1024" style="width: 100%" />
             </AFormItem>
-            <AFormItem label="Top K">
+            <AFormItem label="返回Top K（Top K）">
               <AInputNumber v-model:value="localRetrieval.topK" :min="1" :max="100" style="width: 100%" />
             </AFormItem>
             <AFormItem label="相似度阈值">
@@ -898,13 +898,13 @@ function removeMetadataCondition(index: number) {
               <ASwitch v-model:checked="bailianReranking.enableReranking" />
             </AFormItem>
             <template v-if="bailianReranking.enableReranking">
-              <AFormItem label="Model Name" :rules="[{ required: true, message: '请输入Model Name' }]">
+              <AFormItem label="模型名称（Model Name）" :rules="[{ required: true, message: '请输入Model Name' }]">
                 <AInput v-model:value="bailianReranking.modelName" placeholder="例如: gte-rerank-hybrid" />
               </AFormItem>
-              <AFormItem label="Rerank Min Score">
+              <AFormItem label="重排序最小分数（Rerank Min Score）">
                 <AInputNumber v-model:value="bailianReranking.rerankMinScore" :min="0" :max="1" :step="0.1" style="width: 100%" />
               </AFormItem>
-              <AFormItem label="Rerank Top N">
+              <AFormItem label="重排序返回Top N（Rerank Top N）">
                 <AInputNumber v-model:value="bailianReranking.rerankTopN" :min="1" :max="100" style="width: 100%" />
               </AFormItem>
             </template>
@@ -915,13 +915,13 @@ function removeMetadataCondition(index: number) {
               <ASwitch v-model:checked="difyReranking.enableRerank" />
             </AFormItem>
             <template v-if="difyReranking.enableRerank">
-              <AFormItem label="Provider Name" :rules="[{ required: true, message: '请输入Provider Name' }]">
+              <AFormItem label="提供商名称（Provider Name）" :rules="[{ required: true, message: '请输入Provider Name' }]">
                 <AInput v-model:value="difyReranking.providerName" placeholder="例如: cohere" />
               </AFormItem>
-              <AFormItem label="Model Name" :rules="[{ required: true, message: '请输入Model Name' }]">
+              <AFormItem label="模型名称（Model Name）" :rules="[{ required: true, message: '请输入Model Name' }]">
                 <AInput v-model:value="difyReranking.modelName" placeholder="例如: rerank-english-v2.0" />
               </AFormItem>
-              <AFormItem label="Top N">
+              <AFormItem label="返回Top N（Top N）">
                 <AInputNumber v-model:value="difyReranking.topN" :min="1" :max="100" style="width: 100%" />
               </AFormItem>
             </template>
@@ -936,7 +936,7 @@ function removeMetadataCondition(index: number) {
             <ASwitch v-model:checked="queryRewrite.enableRewrite" />
           </AFormItem>
           <template v-if="queryRewrite.enableRewrite">
-            <AFormItem label="Model Name" :rules="[{ required: true, message: '请输入Model Name' }]">
+            <AFormItem label="模型名称（Model Name）" :rules="[{ required: true, message: '请输入Model Name' }]">
               <AInput v-model:value="queryRewrite.modelName" placeholder="例如: conv-rewrite-qwen-1.8b" />
             </AFormItem>
           </template>
@@ -946,14 +946,14 @@ function removeMetadataCondition(index: number) {
         <div v-show="activeConfigSection === 'metadata'" class="config-content">
           <h4 style="margin-bottom: 12px">元数据过滤(可选)</h4>
 
-          <AFormItem label="Logical Operator">
+          <AFormItem label="逻辑运算符（Logical Operator）">
             <ASelect v-model:value="metadataFilters.logicalOperator">
               <ASelectOption value="AND">AND</ASelectOption>
               <ASelectOption value="OR">OR</ASelectOption>
             </ASelect>
           </AFormItem>
 
-          <AFormItem label="Conditions">
+          <AFormItem label="过滤条件（Conditions）">
             <div v-for="(condition, index) in metadataFilters.conditions" :key="index" class="flex gap-sm mb-sm">
               <AInput v-model:value="condition.name" placeholder="Name" style="flex: 1" />
               <ASelect v-model:value="condition.comparisonOperator" style="width: 100px">
@@ -976,28 +976,28 @@ function removeMetadataCondition(index: number) {
           <h4 style="margin-bottom: 12px">HTTP配置(可选)</h4>
 
           <template v-if="formData.kbType === 'DIFY'">
-            <AFormItem label="Connect Timeout">
+            <AFormItem label="连接超时（Connect Timeout）">
               <AInput v-model:value="difyHttp.connectTimeout" placeholder="例如: PT30S" />
             </AFormItem>
-            <AFormItem label="Read Timeout">
+            <AFormItem label="读取超时（Read Timeout）">
               <AInput v-model:value="difyHttp.readTimeout" placeholder="例如: PT60S" />
             </AFormItem>
-            <AFormItem label="Max Retries">
+            <AFormItem label="最大重试次数（Max Retries）">
               <AInputNumber v-model:value="difyHttp.maxRetries" :min="0" :max="10" style="width: 100%" />
             </AFormItem>
-            <AFormItem label="Custom Headers (JSON)">
+            <AFormItem label="自定义请求头JSON（Custom Headers (JSON)）">
               <ATextarea v-model:value="difyHttp.customHeaders" :rows="4" placeholder='{"X-Custom-Header": "value"}' />
             </AFormItem>
           </template>
 
           <template v-if="formData.kbType === 'RAGFLOW'">
-            <AFormItem label="Timeout">
+            <AFormItem label="超时时间（Timeout）">
               <AInput v-model:value="ragflowHttp.timeout" placeholder="例如: PT30S" />
             </AFormItem>
-            <AFormItem label="Max Retries">
+            <AFormItem label="最大重试次数（Max Retries）">
               <AInputNumber v-model:value="ragflowHttp.maxRetries" :min="0" :max="10" style="width: 100%" />
             </AFormItem>
-            <AFormItem label="Custom Headers (JSON)">
+            <AFormItem label="自定义请求头JSON（Custom Headers (JSON)）">
               <ATextarea v-model:value="ragflowHttp.customHeaders" :rows="4" placeholder='{"X-Custom-Header": "value"}' />
             </AFormItem>
           </template>

@@ -58,7 +58,12 @@ const memoryCompressionForm = computed({
         maxToken: 131072,
         msgThreshold: 100,
         lastKeep: 50,
-        tokenRatio: 0.75
+        tokenRatio: 0.75,
+        minCompressionTokenThreshold: 5000,
+        currentRoundCompressionRatio: 0.3,
+        minConsecutiveToolMessages: 6,
+        offloadSinglePreview: 200,
+        largePayloadThreshold: 5120,
       }
     }
     return formData.value.memoryCompressionConfig
@@ -226,7 +231,7 @@ defineExpose({
     <div v-if="formData.enableMemory && formData.enableMemoryCompression" class="memory-config-section">
       <ARow :gutter="16">
         <ACol :span="12">
-          <AFormItem label="最大Token数">
+          <AFormItem label="最大Token数（maxToken）">
             <AInputNumber
               v-model:value="memoryCompressionForm.maxToken"
               :min="1024"
@@ -236,7 +241,7 @@ defineExpose({
           </AFormItem>
         </ACol>
         <ACol :span="12">
-          <AFormItem label="消息阈值">
+          <AFormItem label="消息阈值（msgThreshold）">
             <AInputNumber
               v-model:value="memoryCompressionForm.msgThreshold"
               :min="10"
@@ -246,7 +251,7 @@ defineExpose({
           </AFormItem>
         </ACol>
         <ACol :span="12">
-          <AFormItem label="保留最近消息数">
+          <AFormItem label="保留最近消息数（lastKeep）">
             <AInputNumber
               v-model:value="memoryCompressionForm.lastKeep"
               :min="1"
@@ -256,12 +261,55 @@ defineExpose({
           </AFormItem>
         </ACol>
         <ACol :span="12">
-          <AFormItem label="Token比率">
+          <AFormItem label="Token比率（tokenRatio）">
             <AInputNumber
               v-model:value="memoryCompressionForm.tokenRatio"
               :min="0.1"
               :max="1"
               :step="0.05"
+              style="width: 100%"
+            />
+          </AFormItem>
+        </ACol>
+        <ACol :span="12">
+          <AFormItem label="大负载阈值（largePayloadThreshold）">
+            <AInputNumber
+              v-model:value="memoryCompressionForm.largePayloadThreshold"
+              style="width: 100%"
+            />
+          </AFormItem>
+        </ACol>
+        <ACol :span="12">
+          <AFormItem label="单个预览卸载阈值（offloadSinglePreview）">
+            <AInputNumber
+              v-model:value="memoryCompressionForm.offloadSinglePreview"
+              style="width: 100%"
+            />
+          </AFormItem>
+        </ACol>
+        <ACol :span="12">
+          <AFormItem label="最小连续工具消息数（minConsecutiveToolMessages）">
+            <AInputNumber
+              v-model:value="memoryCompressionForm.minConsecutiveToolMessages"
+              style="width: 100%"
+            />
+          </AFormItem>
+        </ACol>
+        <ACol :span="12">
+          <AFormItem label="当前轮压缩比（currentRoundCompressionRatio）">
+            <AInputNumber
+              v-model:value="memoryCompressionForm.currentRoundCompressionRatio"
+              :min="0.1"
+              :max="1"
+              :step="0.1"
+              style="width: 100%"
+            />
+          </AFormItem>
+        </ACol>
+        <ACol :span="12">
+          <AFormItem label="最小压缩令牌阈值（minCompressionTokenThreshold）">
+            <AInputNumber
+              v-model:value="memoryCompressionForm.minCompressionTokenThreshold"
               style="width: 100%"
             />
           </AFormItem>
