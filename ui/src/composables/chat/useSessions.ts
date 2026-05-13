@@ -30,7 +30,7 @@ export function useSessions(agentId: import('vue').Ref<string>) {
       const res = await chatSessionApi.pageSessions({
         agentId: agentId.value,
         isPinned: true,
-        current: 1,
+        page: 1,
         size: 999,
       })
       pinnedSessions.value = (res.data?.data?.records ?? []) as ChatSessionVO[]
@@ -49,7 +49,7 @@ export function useSessions(agentId: import('vue').Ref<string>) {
       const res = await chatSessionApi.pageSessions({
         agentId: agentId.value,
         isPinned: false,
-        current: currentPage.value,
+        page: currentPage.value,
         size: PAGE_SIZE,
       })
       const pageData = res.data?.data
@@ -79,7 +79,7 @@ export function useSessions(agentId: import('vue').Ref<string>) {
     try {
       const res = await chatSessionApi.pageSessions({
         agentId: agentId.value,
-        current: currentPage.value,
+        page: currentPage.value,
         size: PAGE_SIZE,
       })
       const pageData = res.data?.data

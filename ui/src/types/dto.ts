@@ -220,6 +220,6 @@ export interface ChatSessionQueryDTO {
   userId?: string
   agentId?: string
   isPinned?: boolean
-  current?: number
+  page?: number
   size?: number
 }

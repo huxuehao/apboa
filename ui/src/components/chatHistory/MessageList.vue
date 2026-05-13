@@ -15,7 +15,9 @@ defineProps<{
       :key="msg.id"
       :role="msg.role"
       :content="msg.content"
-      :is-streaming="msg.isStreaming"
+      :created-at="msg.createdAt"
+      :reasoning-content="msg.reasoningContent"
+      :reasoning-streaming="msg.reasoningStreaming"
     />
   </div>
 </template>
