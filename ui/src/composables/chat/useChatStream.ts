@@ -168,6 +168,9 @@ export function useChatStream(
             )
             onMessageSaved?.(res.data.data)
           }
+          // 保存完成后清除流式状态，避免与 messagesList 中已保存消息重复渲染
+          streamingContent.value = ''
+          streamingMessageId.value = null
         }
      }
     }
