@@ -135,6 +135,11 @@ public class ReActAgentHelper {
                         .msgThreshold(JsonUtils.getIntValue(config, "msgThreshold", 100))
                         .lastKeep(JsonUtils.getIntValue(config, "lastKeep", 50))
                         .tokenRatio(JsonUtils.getDoubleValue(config, "tokenRatio", 0.75F))
+                        .minCompressionTokenThreshold(JsonUtils.getIntValue(config, "minCompressionTokenThreshold", 5000))
+                        .currentRoundCompressionRatio(JsonUtils.getDoubleValue(config, "currentRoundCompressionRatio", 0.3))
+                        .minConsecutiveToolMessages(JsonUtils.getIntValue(config, "minConsecutiveToolMessages", 6))
+                        .offloadSinglePreview(JsonUtils.getIntValue(config, "offloadSinglePreview", 200))
+                        .largePayloadThreshold(JsonUtils.getLongValue(config, "largePayloadThreshold", 5120L))
                         .build();
                 builder.memory(new AutoContextMemory(autoContextConfig, model));
                 hooks.add(new AutoContextHook());
