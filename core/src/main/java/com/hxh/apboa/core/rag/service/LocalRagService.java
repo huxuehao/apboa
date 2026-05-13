@@ -316,6 +316,14 @@ public class LocalRagService {
         try {
             ragDocumentChunkMapper.deleteById(chunkId);
             qdrantVectorStore.deleteByChunkId(chunkId);
+
+            RagDocument document = ragDocumentMapper.selectById(chunk.getDocumentId());
+            if (document != null) {
+                document.setChunkCount(Math.max(0, (document.getChunkCount() != null ? document.getChunkCount() : 1) - 1));
+                document.setUpdatedAt(LocalDateTime.now());
+                ragDocumentMapper.updateById(document);
+            }
+
             log.info("分块删除成功, chunkId={}", chunkId);
         } catch (Exception e) {
             log.error("分块删除失败, chunkId={}", chunkId, e);
