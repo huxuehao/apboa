@@ -39,7 +39,7 @@ async function loadSessions() {
   try {
     const res = await chatSessionApi.pageSessions({
       agentId: props.agentId,
-      current: currentPage.value,
+      page: currentPage.value,
       size: pageSize.value
     })
     const page = res.data.data
@@ -81,11 +81,51 @@ function formatTime(time: string) {
 }
 
 /**
+ * 尝试从消息内容中解析推理和正文
+ * 如果内容为 JSON 格式 {reasoning, content}，则提取两部分；否则原样返回
+ */
+function parseMessageContent(raw: string): { content: string; reasoningContent?: string } {
+  try {
+    const parsed = JSON.parse(raw)
+    if (parsed && typeof parsed === 'object' && 'reasoning' in parsed && 'content' in parsed) {
+      return { content: parsed.content as string, reasoningContent: parsed.reasoning as string }
+    }
+  } catch {
+    // not JSON, return as-is
+  }
+  return { content: raw }
+}
+
+
+/**
  * 过滤掉 system 根消息
  */
-const visibleMessages = computed(() =>
-  messages.value.filter(m => !(m.role === 'system' && m.depth === 0 && !m.content))
-)
+const visibleMessages = computed(() =>{
+  const list: DisplayMessage[] = []
+  const messagesList = messages.value.filter(m => !(m.role === 'system' && m.depth === 0))
+
+  for (let i = 0; i < messagesList.length; i++) {
+    const m = messagesList[i]
+    if (m == null) {
+      continue
+    }
+    // 解析推理内容 - 不修改原数据
+    const parsed = m.role === 'assistant'
+      ? parseMessageContent(m.content || '')
+      : { content: m.content || '', reasoningContent: undefined }
+
+    list.push({
+      id: String(m.id),
+      role: m.role as DisplayMessage['role'],
+      content: parsed.content,
+      createdAt: m.createdAt,
+      isStreaming: false,
+      reasoningContent: parsed.reasoningContent,
+    })
+  }
+
+  return list
+})
 
 onMounted(() => loadSessions())
 </script>
