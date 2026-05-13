@@ -3,6 +3,7 @@ import { message } from 'ant-design-vue'
 import { useAgentClient } from '@/composables/useAgentClient'
 import * as chatSessionApi from '@/api/chatSession'
 import { buildToolCallsContent } from '@/utils/chat/format'
+import { chatMessageQueue } from '@/utils/chat/messageQueue'
 import type {ChatMessageVO, RawEvent} from '@/types'
 import { useAccountStore } from '@/stores'
 
@@ -48,6 +49,11 @@ export function useChatStream(
         toolCallsInProgress.value = []
         reasoningContent.value = ''
         reasoningMessageId.value = null
+        // 新 run 开始时清理上一轮残留的僵尸队列，防止异常中断留下的任务阻塞后续消息
+        const sid = currentSessionId.value
+        if (sid) {
+          chatMessageQueue.clear(sid)
+        }
       },
       onTextMessageStart: (e) => {
         streamingMessageId.value = e.messageId
@@ -58,10 +64,13 @@ export function useChatStream(
         streamingContent.value = currentText
       },
       onTextMessageEnd: async (_e, finalText) => {
-        if (currentSessionId.value && finalText) {
-          // 纯文本保存，不再与推理打包
+        const sid = currentSessionId.value
+        if (sid && finalText) {
+          // 纯文本保存，不再与推理打包，通过队列保证写入顺序
           const contentToSave = JSON.stringify({ reasoning: '', content: finalText })
-          const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'assistant', content: contentToSave })
+          const res = await chatMessageQueue.enqueue(sid, () =>
+            chatSessionApi.appendMessage(sid, { role: 'assistant', content: contentToSave })
+          )
           onMessageSaved?.(res.data.data)
         }
         streamingContent.value = ''
@@ -76,20 +85,26 @@ export function useChatStream(
         reasoningContent.value = currentText
       },
       onReasoningMessageEnd: async () => {
-        if (currentSessionId.value && reasoningContent.value) {
-          // 推理结束时立即保存为独立消息
+        const sid = currentSessionId.value
+        if (sid && reasoningContent.value) {
+          // 推理结束时立即保存为独立消息，通过队列保证写入顺序
           const contentToSave = JSON.stringify({ reasoning: reasoningContent.value, content: '' })
-          const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'assistant', content: contentToSave })
+          const res = await chatMessageQueue.enqueue(sid, () =>
+            chatSessionApi.appendMessage(sid, { role: 'assistant', content: contentToSave })
+          )
           onMessageSaved?.(res.data.data)
         }
         reasoningMessageId.value = null
         reasoningContent.value = ''
       },
       onToolCallStart:async (e) => {
-        if (currentSessionId.value && reasoningContent.value) {
-          // 推理结束时立即保存为独立消息
+        const sid = currentSessionId.value
+        if (sid && reasoningContent.value) {
+          // 推理结束时保存为独立消息，通过队列保证写入顺序
           const contentToSave = JSON.stringify({ reasoning: reasoningContent.value, content: '' })
-          const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'assistant', content: contentToSave })
+          const res = await chatMessageQueue.enqueue(sid, () =>
+            chatSessionApi.appendMessage(sid, { role: 'assistant', content: contentToSave })
+          )
           onMessageSaved?.(res.data.data)
           reasoningMessageId.value = null
           reasoningContent.value = ''
@@ -118,11 +133,14 @@ export function useChatStream(
             t.id === e.toolCallId ? { ...t, result: e.content, elapsed: Date.now() - t.startTime } : t
           )
 
-          // 保存工具调用消息
-          if (currentSessionId.value) {
+          // 保存工具调用消息，通过队列保证写入顺序
+          const sid = currentSessionId.value
+          if (sid) {
             const contentToSave = buildToolCallsContent(toolCallsInProgress.value)
             if (contentToSave) {
-              const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'tool', content: contentToSave })
+              const res = await chatMessageQueue.enqueue(sid, () =>
+                chatSessionApi.appendMessage(sid, { role: 'tool', content: contentToSave })
+              )
               onMessageSaved?.(res.data.data)
             }
           }
@@ -143,8 +161,11 @@ export function useChatStream(
         if(rawEvent.error) {
           streamingMessageId.value = new Date().getTime() + '' + Math.floor(Math.random() * 90000) + 10000
           streamingContent.value = rawEvent.error
-          if (currentSessionId.value) {
-            const res = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'error', content: rawEvent.error })
+          const sid = currentSessionId.value
+          if (sid) {
+            const res = await chatMessageQueue.enqueue(sid, () =>
+              chatSessionApi.appendMessage(sid, { role: 'error', content: rawEvent.error })
+            )
             onMessageSaved?.(res.data.data)
           }
         }
@@ -164,10 +185,13 @@ export function useChatStream(
 
     // 判断是否开启了显示工具调用
     if ((toolProcessActive?.value ?? true)) {
-      // 保存历史
+      const sid = currentSessionId.value as string
+      // 保存历史，通过队列保证写入顺序
       const contentToSave = buildToolCallsContent([{ id, name, args, result, elapsed: 0 }])
       if (contentToSave) {
-        const res = await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'tool', content: contentToSave })
+        const res = await chatMessageQueue.enqueue(sid, () =>
+          chatSessionApi.appendMessage(sid, { role: 'tool', content: contentToSave })
+        )
         toolCallsInProgress.value = toolCallsInProgress.value.filter(item => item.id != id)
         onMessageSaved?.(res.data.data)
       }
@@ -184,13 +208,16 @@ export function useChatStream(
   const abortRun = async  () => {
     await abort()
     agentHasResult.value = true
-    if (currentSessionId.value) {
+    const sid = currentSessionId.value
+    if (sid) {
       let chatMsg:ChatMessageVO | null = null;
-      // 保存工具调用消息
+      // 保存工具调用消息，通过队列保证写入顺序
       if (toolCallsInProgress.value.length > 0) {
         const contentToSave = buildToolCallsContent(toolCallsInProgress.value)
         if (contentToSave) {
-          const res = await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'tool', content: contentToSave })
+          const res = await chatMessageQueue.enqueue(sid, () =>
+            chatSessionApi.appendMessage(sid, { role: 'tool', content: contentToSave })
+          )
           chatMsg = res.data.data
         }
       }
@@ -198,7 +225,9 @@ export function useChatStream(
       else {
         if (streamingContent.value) {
           // 推理已在 REASONING_MESSAGE_END 中独立保存，此处只保存纯文本
-          const res = await chatSessionApi.appendMessage(currentSessionId.value as string, { role: 'assistant', content: streamingContent.value })
+          const res = await chatMessageQueue.enqueue(sid, () =>
+            chatSessionApi.appendMessage(sid, { role: 'assistant', content: streamingContent.value })
+          )
           chatMsg = res.data.data
         }
       }

@@ -1,5 +1,6 @@
 package com.hxh.apboa.agent.controller;
 
+import com.hxh.apboa.agent.lock.SessionLockManager;
 import com.hxh.apboa.agent.service.ChatSessionService;
 import com.hxh.apboa.common.config.auth.ChatKeyAccess;
 import com.hxh.apboa.common.config.auth.SkAccess;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 聊天会话 Controller：创建会话、追加/重新生成消息、切换分支、回显当前对话、会话列表与详情
@@ -28,6 +30,7 @@ import java.util.List;
 public class ChatSessionController {
 
     private final ChatSessionService chatSessionService;
+    private final SessionLockManager sessionLockManager;
 
     /**
      * 创建新会话（插入根消息并设置 current_message_id）
@@ -46,7 +49,14 @@ public class ChatSessionController {
     @ChatKeyAccess
     @PostMapping("/{sessionId}/message")
     public R<ChatMessageVO> appendMessage(@PathVariable("sessionId") Long sessionId, @RequestBody ChatMessageAppendDTO dto) {
-        return R.data(chatSessionService.appendMessage(sessionId, dto));
+        ReentrantLock lock = sessionLockManager.getLock(sessionId);
+        lock.lock();
+        try {
+            return R.data(chatSessionService.appendMessage(sessionId, dto));
+        } finally {
+            lock.unlock();
+            sessionLockManager.cleanupIfUnused(sessionId, lock);
+        }
     }
 
     /**
