@@ -436,6 +436,7 @@ CREATE TABLE `mcp_server`  (
 `timeout` int NULL DEFAULT 30 COMMENT '超时时间（秒）',
 `protocol_config` text NULL COMMENT '协议配置',
 `description` varchar(500) NULL DEFAULT NULL COMMENT '描述',
+`tool_schemas` text NULL COMMENT 'Cached MCP tool schemas JSON',
 `health_status` enum('HEALTHY','UNHEALTHY','UNKNOWN') NULL DEFAULT 'UNKNOWN' COMMENT '健康状态',
 `last_health_check` datetime NULL DEFAULT NULL COMMENT '最后健康检查时间',
 `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,

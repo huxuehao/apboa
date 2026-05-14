@@ -41,3 +41,7 @@ build/
 .claude
 .codex
 .trae
+.omc
+.omx
+.codex_tmp
+logs

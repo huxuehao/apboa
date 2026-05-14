@@ -55,6 +55,11 @@ public class McpServer extends BaseEntity {
     private String description;
 
     /**
+     * 缓存的工具Schema列表（JSON格式）
+     */
+    private String toolSchemas;
+
+    /**
      * 健康状态
      */
     private HealthStatus healthStatus;

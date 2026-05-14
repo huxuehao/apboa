@@ -7,6 +7,7 @@ import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.AgentMcpServer;
 import com.hxh.apboa.common.entity.McpServer;
+import com.hxh.apboa.common.mcp.ToolSchemaRefresher;
 import com.hxh.apboa.mcp.mapper.McpServerMapper;
 import com.hxh.apboa.mcp.service.AgentMcpServerService;
 import com.hxh.apboa.mcp.service.McpServerService;
@@ -31,6 +32,7 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
     private final JdbcTemplate jdbcTemplate;
     private final AgentMcpServerService agentMcpServerService;
     private final MessagePublisher messagePublisher;
+    private final ToolSchemaRefresher toolSchemaRefresher;
 
     @Override
     public List<Object> usedWithAgent(List<Long> ids) {
@@ -54,9 +56,17 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
     }
 
     @Override
+    public boolean save(McpServer entity) {
+        boolean result = super.save(entity);
+        toolSchemaRefresher.refreshToolSchemas(entity);
+        return result;
+    }
+
+    @Override
     public boolean doUpdate(McpServer entity) {
         boolean result = updateById(entity);
         publishAgentReregister(agentMcpServerService.getAgentIds(List.of(entity.getId())));
+        toolSchemaRefresher.refreshToolSchemas(entity);
         return result;
     }
 
