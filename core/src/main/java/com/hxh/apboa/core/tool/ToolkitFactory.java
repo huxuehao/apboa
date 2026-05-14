@@ -1,8 +1,11 @@
 package com.hxh.apboa.core.tool;
 
+import com.hxh.apboa.agent.service.AgentCodeExecutionService;
 import com.hxh.apboa.agent.service.AgentDefinitionService;
 import com.hxh.apboa.agent.service.AgentSubAgentService;
+import com.hxh.apboa.agent.service.CodeExecutionConfigService;
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.common.entity.CodeExecutionConfig;
 import com.hxh.apboa.common.entity.ToolConfig;
 import com.hxh.apboa.common.enums.ToolType;
 import com.hxh.apboa.core.agent.A2aAgentHelper;
@@ -11,6 +14,7 @@ import com.hxh.apboa.core.agui.AgentContext;
 import com.hxh.apboa.core.hook.builtins.IConfirmationHook;
 import com.hxh.apboa.core.mcp.McpClientFactory;
 import com.hxh.apboa.core.tool.dynamices.DynamicAgentTool;
+import com.hxh.apboa.core.workspace.tool.SearchReplaceFileTool;
 import com.hxh.apboa.tool.service.AgentToolService;
 import com.hxh.apboa.tool.service.ToolService;
 import io.agentscope.core.model.ExecutionConfig;
@@ -39,6 +43,8 @@ public class ToolkitFactory {
     private final A2aAgentHelper a2aAgentHelper;
     private final McpClientFactory mcpClientFactory;
     private final AgentDefinitionService agentDefinitionService;
+    private final AgentCodeExecutionService agentCodeExecutionService;
+    private final CodeExecutionConfigService codeExecutionConfigService;
 
     public ToolkitFactory(ToolService toolService,
                           AgentToolService agentToolService,
@@ -48,6 +54,8 @@ public class ToolkitFactory {
                           @Lazy
                           A2aAgentHelper a2aAgentHelper,
                           McpClientFactory mcpClientFactory,
+                          AgentCodeExecutionService agentCodeExecutionService,
+                          CodeExecutionConfigService codeExecutionConfigService,
                           AgentDefinitionService agentDefinitionService) {
         this.toolService = toolService;
         this.agentToolService = agentToolService;
@@ -55,6 +63,8 @@ public class ToolkitFactory {
         this.reActAgentHelper = reActAgentHelper;
         this.a2aAgentHelper = a2aAgentHelper;
         this.mcpClientFactory = mcpClientFactory;
+        this.agentCodeExecutionService = agentCodeExecutionService;
+        this.codeExecutionConfigService = codeExecutionConfigService;
         this.agentDefinitionService = agentDefinitionService;
     }
 
@@ -84,6 +94,17 @@ public class ToolkitFactory {
                         }
                     });
         }
+
+
+        // 注册文件搜索替换工具
+        Long codeExecutionId = agentCodeExecutionService.getCodeExecutionIdByAgentId(agentDefinition.getId());
+        if (codeExecutionId != null) {
+            CodeExecutionConfig config = codeExecutionConfigService.getById(codeExecutionId);
+            if (config != null && config.getEnabled() && config.getEnableWrite()) {
+                toolkit.registerTool(new SearchReplaceFileTool());
+            }
+        }
+
 
         // 注册MCP
         mcpClientFactory.getMcpClient(agentDefinition).forEach(

@@ -11,6 +11,7 @@ import com.hxh.apboa.common.key.SkillReferencesKey;
 import com.hxh.apboa.common.key.SkillScriptKey;
 import com.hxh.apboa.core.agui.AgentContext;
 import com.hxh.apboa.core.tool.ToolkitFactory;
+import com.hxh.apboa.core.workspace.skills.SearchReplaceSkill;
 import com.hxh.apboa.core.workspace.skills.WorkspaceSkill;
 import com.hxh.apboa.skill.service.AgentSkillPackageService;
 import com.hxh.apboa.skill.service.SkillPackageService;
@@ -50,9 +51,6 @@ public class SkillBoxFactory {
      */
     public SkillBox getSkillBox(AgentDefinition agentDefinition) {
         SkillBox skillBox = new SkillBox(new Toolkit());
-
-        // 配置工作空间专属skill
-        skillBox.registerSkill(WorkspaceSkill.getAgentSkill());
 
         // 注册技能包
         List<Long> skillPackageIds = agentSkillPackageService.getSkillPackageIds(agentDefinition.getId());
@@ -147,6 +145,9 @@ public class SkillBoxFactory {
             return;
         }
 
+        // 配置工作空间专属skill
+        skillBox.registerSkill(WorkspaceSkill.getAgentSkill());
+
         // 设置自动上传
         skillBox.setAutoUploadSkill(false);
 
@@ -168,6 +169,8 @@ public class SkillBoxFactory {
         }
         if (Boolean.TRUE.equals(config.getEnableWrite())) {
             codeExecutionBuilder.withWrite();
+            // 配置工作空间专属skill
+            skillBox.registerSkill(SearchReplaceSkill.getAgentSkill());
         }
 
         codeExecutionBuilder.enable();

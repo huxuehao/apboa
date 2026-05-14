@@ -32,6 +32,7 @@ public final class WorkspaceToolConstants {
             "list_directory",
             "insert_text_file",
             "write_text_file",
+            "search_replace_file",
             "execute_shell_command"
     ));
 
