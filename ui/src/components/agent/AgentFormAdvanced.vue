@@ -157,7 +157,7 @@ defineExpose({
           <AInputNumber
             v-model:value="formData.maxIterations"
             :min="1"
-            :max="1000"
+            :max="5000"
             style="width: 50%"
             placeholder="默认50"
           />
