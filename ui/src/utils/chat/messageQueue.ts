@@ -28,12 +28,21 @@ class ChatMessageQueue {
    *
    * @param sessionId 会话 ID
    * @param task      返回 Promise 的异步任务函数
+   * @param onSuccess 任务成功时的回调，在 Promise resolve 之前同步触发
    * @returns 任务执行结果的 Promise，按入队顺序依次 resolve
    */
-  enqueue<T>(sessionId: string, task: () => Promise<T>): Promise<T> {
+  enqueue<T>(sessionId: string, task: () => Promise<T>, onSuccess?: (result: T) => void): Promise<T> {
     return new Promise((resolve, reject) => {
+      const wrappedResolve = (value: unknown) => {
+        try {
+          onSuccess?.(value as T)
+        } catch {
+          // 回调异常不影响队列流程
+        }
+        ;(resolve as (v: unknown) => void)(value)
+      }
       const queue = this.queues.get(sessionId) ?? []
-      queue.push({ execute: task as () => Promise<unknown>, resolve: resolve as (value: unknown) => void, reject })
+      queue.push({ execute: task as () => Promise<unknown>, resolve: wrappedResolve, reject })
       this.queues.set(sessionId, queue)
       this.processQueue(sessionId)
     })
