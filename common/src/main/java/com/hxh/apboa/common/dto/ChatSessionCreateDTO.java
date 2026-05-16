@@ -20,4 +20,8 @@ public class ChatSessionCreateDTO implements SerializableEnable {
      * 会话标题，可选
      */
     private String title;
+    /**
+     * 是否初始化工作区
+     */
+    private Boolean initWorkspace;
 }

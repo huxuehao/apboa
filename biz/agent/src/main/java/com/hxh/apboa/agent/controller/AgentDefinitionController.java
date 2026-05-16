@@ -9,9 +9,7 @@ import com.hxh.apboa.common.config.auth.RoleNeed;
 import com.hxh.apboa.common.config.auth.SkAccess;
 import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.dto.AgentDefinitionDTO;
-import com.hxh.apboa.common.entity.AgentDefinition;
-import com.hxh.apboa.common.entity.AgentStudio;
-import com.hxh.apboa.common.entity.JobInfo;
+import com.hxh.apboa.common.entity.*;
 import com.hxh.apboa.common.enums.Role;
 import com.hxh.apboa.common.mp.support.MP;
 import com.hxh.apboa.common.mp.support.PageParams;
@@ -143,5 +141,25 @@ public class AgentDefinitionController {
     @GetMapping("/{id}/allow/file-type")
     public R<List<String>> allowFileType(@PathVariable("id") Long id) {
         return R.data(agentDefinitionService.allowFileType(id));
+    }
+
+    /**
+     * 获取Agent启用的工具
+     */
+    @SkAccess
+    @ChatKeyAccess
+    @GetMapping("/{agentId}/enabled/tools")
+    public R<List<ToolConfig>> getEnabledToolsOfAgent(@PathVariable("agentId") Long agentId) {
+        return R.data(agentDefinitionService.getEnabledToolsOfAgent(agentId));
+    }
+
+    /**
+     * 获取Agent启用的技能包
+     */
+    @SkAccess
+    @ChatKeyAccess
+    @GetMapping("/{agentId}/enabled/skills")
+    public R<List<SkillPackage>> getEnabledSkillsOfAgent(@PathVariable("agentId") Long agentId) {
+        return R.data(agentDefinitionService.getEnabledSkillsOfAgent(agentId));
     }
 }

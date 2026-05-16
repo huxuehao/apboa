@@ -108,7 +108,6 @@ const {
   historyLoading,
   selectSession,
   resetSession,
-  loadCurrentMessages,
   loadMoreHistory,
 } = useCurrentSession(agentId)
 
@@ -241,8 +240,6 @@ const displayMessages = computed<DisplayMessage[]>(() => {
   return list
 })
 
-const isWelcomeMode = computed(() => messagesList.value.length === 0 && !streamingMessageId.value)
-
 // 重命名模态框
 const renameModalVisible = ref(false)
 const renameSessionRef = ref<any>(null)
@@ -255,10 +252,29 @@ const handleNewSession = async () => {
     message.info('请等待当前对话完成')
     return
   }
-  resetSession()
-  // 可选：自动创建一个空会话？原逻辑是点击新建重置，不自动创建，发送时创建。这里保持原样。
-  // 但也可以在这里创建一个空白会话，原组件是 resetSession 后 currentSessionId 为 null，然后发送时创建。
-  // 无需额外操作
+
+  // 开启工作空间的情况特殊处理
+  if (hasCodeExecutionConfig.value) {
+    if (currentSessionTitle.value === '新对话') {
+      return
+    }
+
+    const existNewSession = otherSessions.value.find((s) => s.title === '新对话')
+    if (existNewSession) {
+      await selectSession({
+        id: existNewSession.id,
+        title: existNewSession.title || '新对话',
+      })
+
+      return
+    }
+
+    const newSession = await createSession(formatSessionTitle(null), true)
+    if (!newSession) return
+    resetSession( String(newSession.id), '新对话')
+  } else {
+    resetSession()
+  }
 }
 
 // 选择会话
@@ -323,12 +339,6 @@ const submitRename = async () => {
   }
 }
 
-function formatSessionTitleFromInput(text: string): string {
-  const t = (text || '').trim()
-  if (!t) return '新对话'
-  return t.length > 50 ? t.slice(0, 50) + '...' : t
-}
-
 // 发送工具执行结果
 const handelToolContent = async (value: any) => {
   await sendToolContent(value)
@@ -350,8 +360,8 @@ const handleSend = async () => {
 
   // 如果没有当前会话，先创建
   if (!currentSessionId.value) {
-    const titleInput = text || (hasFiles ? '附件' : '新对话')
-    const newSession = await createSession(formatSessionTitleFromInput(titleInput))
+    const titleInput = text || '新对话'
+    const newSession = await createSession(formatSessionTitle(titleInput))
     if (!newSession) return
     currentSessionId.value = String(newSession.id)
     currentSessionTitle.value = newSession.title || '新对话'
@@ -360,8 +370,8 @@ const handleSend = async () => {
   // 保存用户消息
   const userMsg = await chatSessionApi.appendMessage(currentSessionId.value, { role: 'user', content: finalText })
   // 如果是新会话，更新标题
-  if (messagesList.value.length === 0) {
-    const title = formatSessionTitle(text || (hasFiles ? '附件' : '新对话'))
+  if (messagesList.value.length <= 1) {
+    const title = formatSessionTitle(text || '新对话')
     await updateSessionTitle(currentSessionId.value, title)
     currentSessionTitle.value = title
   }
@@ -392,13 +402,6 @@ const workspacePanelRef = ref<InstanceType<typeof WorkspacePanel> | null>(null)
 const toggleWorkspace = () => {
   workspacePanelOpen.value = !workspacePanelOpen.value
 }
-
-watch(() => isWelcomeMode.value, () => {
-  if (isWelcomeMode.value) {
-    workspacePanelOpen.value = false
-  }
-})
-
 
 // 初始化加载会话列表
 onMounted(() => {
@@ -435,7 +438,7 @@ onMounted(() => {
     <ChatMain
       ref="chatMainRef"
       :title="currentSessionTitle || agentDetail?.name || '对话'"
-      :is-welcome-mode="isWelcomeMode"
+      :message-size="messagesList.length"
       :welcome-headline="`来和 ${agentDetail?.name || '智能体'} 聊聊吧`"
       :welcome-desc="agentDetail?.description || '有什么想说的，直接发给我就好～'"
       :messages="displayMessages"
@@ -443,6 +446,7 @@ onMounted(() => {
       :input-value="inputText"
       :uploaded-files="uploadedFiles"
       :isRunning="isRunning"
+      :agent-id="agentId"
       :memory-active="memoryActive"
       :plan-active="planActive"
       :enable-memory="enableMemory"
@@ -467,11 +471,12 @@ onMounted(() => {
       @toggle-sidebar="toggleSidebar"
       @toggle-workspace="toggleWorkspace"
       @load-more-history="loadMoreHistory"
+      @new-session="handleNewSession"
     />
 
     <!-- 工作空间面板（作为 flex 子项从右侧滑出） -->
     <WorkspacePanel
-      v-if="!isWelcomeMode && hasCodeExecutionConfig"
+      v-if="currentSessionId && hasCodeExecutionConfig"
       ref="workspacePanelRef"
       :session-id="currentSessionId"
       :class="{ open: workspacePanelOpen }"

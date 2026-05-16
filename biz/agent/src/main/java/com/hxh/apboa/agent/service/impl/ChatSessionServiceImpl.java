@@ -89,7 +89,10 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         session.setCurrentMessageId(root.getId());
         updateById(session);
 
-        FolderUtils.mkdirsByRelativePath(SysConst.WORKSPACE_PATH + "/" + session.getId());
+        if (dto.getInitWorkspace() != null && dto.getInitWorkspace()) {
+            FolderUtils.mkdirsByRelativePath(SysConst.WORKSPACE_PATH + "/" + session.getId());
+        }
+
         return toSessionVO(session);
     }
 

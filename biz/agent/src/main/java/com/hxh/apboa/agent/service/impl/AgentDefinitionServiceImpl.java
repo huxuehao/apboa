@@ -15,16 +15,20 @@ import com.hxh.apboa.common.enums.ModelType;
 import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.common.vo.AgentDefinitionVO;
+import com.hxh.apboa.common.vo.SkillPackageVO;
+import com.hxh.apboa.common.vo.ToolVO;
 import com.hxh.apboa.hook.service.AgentHookService;
 import com.hxh.apboa.knowledge.service.AgentKnowledgeBaseService;
 import com.hxh.apboa.mcp.service.AgentMcpServerService;
 import com.hxh.apboa.model.service.ModelConfigService;
 import com.hxh.apboa.params.core.ParamsAdapter;
 import com.hxh.apboa.skill.service.AgentSkillPackageService;
+import com.hxh.apboa.skill.service.SkillPackageService;
 import com.hxh.apboa.studio.service.AgentStudioService;
 import com.hxh.apboa.tool.service.AgentToolService;
 import com.hxh.apboa.agent.service.AgentCodeExecutionService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hxh.apboa.tool.service.ToolService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,11 +46,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMapper, AgentDefinition> implements AgentDefinitionService {
-    private final AgentHookService hookService;
-    private final AgentToolService toolService;
-    private final AgentMcpServerService mcpServerService;
-    private final AgentSkillPackageService skillPackageService;
-    private final AgentSubAgentService subAgentService;
+    private final AgentHookService agentHookService;
+    private final AgentToolService agentToolService;
+    private final ToolService toolService;
+    private final AgentMcpServerService agentMcpServerService;
+    private final AgentSkillPackageService agentSkillPackageService;
+    private final SkillPackageService skillPackageService;
+    private final AgentSubAgentService agentSubAgentService;
     private final AgentKnowledgeBaseService agentKnowledgeBaseService;
     private final ModelConfigService modelConfigService;
     private final ParamsAdapter paramsAdapter;
@@ -65,7 +71,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
 
         AgentDefinitionVO vo = BeanUtils.copy(entity, AgentDefinitionVO.class);
 
-        vo.setHook(hookService.getHookIds(id));
+        vo.setHook(agentHookService.getHookIds(id));
         Long studioConfigId = agentStudioService.getStudioIdByAgentId(id);
         if (studioConfigId != null) {
             vo.setStudioConfigId(studioConfigId);
@@ -76,10 +82,10 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         }
 
         if(entity.getAgentType() == AgentType.CUSTOM) {
-            vo.setTool(toolService.getToolIds(id));
-            vo.setMcp(mcpServerService.getMcpIds(id));
-            vo.setSkill(skillPackageService.getSkillPackageIds(id));
-            vo.setSubAgent(subAgentService.getSubAgentIds(id));
+            vo.setTool(agentToolService.getToolIds(id));
+            vo.setMcp(agentMcpServerService.getMcpIds(id));
+            vo.setSkill(agentSkillPackageService.getSkillPackageIds(id));
+            vo.setSubAgent(agentSubAgentService.getSubAgentIds(id));
             vo.setKnowledgeBase(agentKnowledgeBaseService.getKnowledgeIds(id));
         } else {
             vo.setAgentA2A(agentA2aService.getA2aConfigByAgentId(id));
@@ -130,12 +136,12 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
     }
 
     private void saveSubItems(AgentDefinitionVO vo) {
-        hookService.saveAgentHook(vo.getId(), vo.getHook());
+        agentHookService.saveAgentHook(vo.getId(), vo.getHook());
         if (vo.getAgentType() == AgentType.CUSTOM) {
-            subAgentService.saveSubAgent(vo.getId(), vo.getSubAgent());
-            toolService.saveAgentTool(vo.getId(), vo.getTool());
-            mcpServerService.saveAgentMcpServer(vo.getId(), vo.getMcp());
-            skillPackageService.saveAgentSkillPackage(vo.getId(), vo.getSkill());
+            agentSubAgentService.saveSubAgent(vo.getId(), vo.getSubAgent());
+            agentToolService.saveAgentTool(vo.getId(), vo.getTool());
+            agentMcpServerService.saveAgentMcpServer(vo.getId(), vo.getMcp());
+            agentSkillPackageService.saveAgentSkillPackage(vo.getId(), vo.getSkill());
             agentKnowledgeBaseService.saveAgentKnowledge(vo.getId(), vo.getKnowledgeBase());
             if (vo.getStudioConfigId() != null) {
                 agentStudioService.saveAgentStudio(vo.getId(), List.of(vo.getStudioConfigId()));
@@ -169,11 +175,11 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
 
         removeByIds(ids);
         agentA2aService.deleteA2aConfig(ids);
-        subAgentService.deleteSubAgent(ids);
-        hookService.deleteAgentHook(ids);
-        toolService.deleteAgentTool(ids);
-        mcpServerService.deleteAgentMcpServer(ids);
-        skillPackageService.deleteAgentSkillPackage(ids);
+        agentSubAgentService.deleteSubAgent(ids);
+        agentHookService.deleteAgentHook(ids);
+        agentToolService.deleteAgentTool(ids);
+        agentMcpServerService.deleteAgentMcpServer(ids);
+        agentSkillPackageService.deleteAgentSkillPackage(ids);
         agentKnowledgeBaseService.deleteAgentKnowledge(ids);
         agentStudioService.deleteAgentStudio(ids);
         agentCodeExecutionService.deleteAgentCodeExecution(ids);
@@ -189,7 +195,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
     public List<Object> usedWithAgent(List<Long> ids) {
         List<Object> names = new ArrayList<>();
         ids.forEach(id -> {
-            subAgentService.getSubAgentIds(id).forEach(subAgentId -> {
+            agentSubAgentService.getSubAgentIds(id).forEach(subAgentId -> {
                 AgentDefinition agentDefinition = getById(subAgentId);
                 if (agentDefinition != null) {
                     names.add(agentDefinition.getName());
@@ -247,6 +253,32 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
 
         String join = String.join(",", allowImageFileType);
         return List.of(join.split(","));
+    }
+
+    @Override
+    public List<ToolConfig> getEnabledToolsOfAgent(Long agentId) {
+        List<Long> toolIds = agentToolService.getToolIds(agentId);
+        if (!toolIds.isEmpty()) {
+            return toolService.list(
+                    new LambdaQueryWrapper<ToolConfig>()
+                            .select(ToolConfig::getId, ToolConfig::getName, ToolConfig::getToolId, ToolConfig::getDescription)
+                            .eq(ToolConfig::getEnabled, true)
+                            .in(ToolConfig::getId, toolIds));
+        }
+        return List.of();
+    }
+
+    @Override
+    public List<SkillPackage> getEnabledSkillsOfAgent(Long agentId) {
+        List<Long> skillPackageIds = agentSkillPackageService.getSkillPackageIds(agentId);
+        if (!skillPackageIds.isEmpty()) {
+            return skillPackageService.list(
+                    new LambdaQueryWrapper<SkillPackage>()
+                            .select(SkillPackage::getId, SkillPackage::getName, SkillPackage::getDescription)
+                            .eq(SkillPackage::getEnabled, true)
+                            .in(SkillPackage::getId, skillPackageIds));
+        }
+        return Collections.emptyList();
     }
 
     private List<String> parseModelType(JsonNode modelTypeJ) {

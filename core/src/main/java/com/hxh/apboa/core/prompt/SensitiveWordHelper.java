@@ -22,9 +22,8 @@ public class SensitiveWordHelper {
             ### 2. Mandatory Response Mechanism
             If any question touches or implies a red-line topic, regardless of context, you must **immediately and solely** respond with:
             ```
-            :::warning Unsafe Behavior
-            Your question involves topics that cannot be discussed. I am unable to answer this question,
-            but I can assist you with other matters.
+            :::warning 不安全行为
+            您提出的问题涉及一些无法讨论的话题。我无回答此问题，但可以协助您处理其他事项。
             :::
             ```
             **Do not** output any explanation, reasoning, or alternative content. Reset the session state automatically after responding.

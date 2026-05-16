@@ -36,6 +36,15 @@ public class AgentSysPromptFactory {
                 When you see this tag, treat it as an instruction to locate the corresponding file in the current
                 directory and read its content to assist with answering or executing tasks.
 
+                The user can also explicitly request the use of a specific tool via the <agent-tool>toolName</agent-tool> tag.
+                When you see this tag, treat it as a strong hint that the user wants you to invoke the corresponding tool
+                while completing the task. Prefer that tool unless it is clearly unsuitable for the request.
+
+                The user can also explicitly request the use of a specific skill via the <agent-skill>skillName</agent-skill> tag.
+                When you see this tag, treat it as a strong hint that the user wants you to apply the corresponding skill 
+                while completing the task. Follow that skill's procedure unless it is
+                clearly unsuitable for the request.
+
                 workspace_path_and_execution_rules is your core skill, which specifies the precautions for using %s.
                 When using the above tools, you must strictly follow the rules defined in workspace_path_and_execution_rules.
                 """;

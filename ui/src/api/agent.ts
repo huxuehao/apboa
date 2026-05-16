@@ -1,5 +1,10 @@
 import request from '@/utils/request'
-import type { ApiResponse, PageResult } from '@/types'
+import type {
+  ApiResponse,
+  PageResult,
+  SkillPackage,
+  ToolConfig,
+} from '@/types'
 import type { AgentDefinitionDTO, AgentDefinitionVO } from '@/types'
 
 /**
@@ -74,4 +79,18 @@ export function allowFileType(id: string) {
  */
 export function agentDoTool(toolName: string, args: any) {
   return request.post<ApiResponse<any>>(`/api/agent/endpoint/do/${toolName}/tool`, args)
+}
+
+/**
+ * 获取Agent启用的工具
+ */
+export function enabledToolsOfAgent(agentId: string) {
+  return request.get<ApiResponse<ToolConfig[]>>(`/api/agent/definition/${agentId}/enabled/tools`)
+}
+
+/**
+ * 获取Agent启用的技能包
+ */
+export function enabledSkillsOfAgent(agentId: string) {
+  return request.get<ApiResponse<SkillPackage[]>>(`/api/agent/definition/${agentId}/enabled/skills`)
 }

@@ -15,7 +15,7 @@ import WorkspaceFilePreview from "@/components/workspace/WorkspaceFilePreview.vu
 
 const props = defineProps<{
   title: string
-  isWelcomeMode: boolean
+  messageSize: number
   welcomeHeadline: string
   welcomeDesc?: string
   messages: DisplayMessage[]
@@ -23,6 +23,7 @@ const props = defineProps<{
   inputValue: string
   uploadedFiles?: UploadedFileItem[]
   isRunning: boolean
+  agentId: string
   memoryActive?: boolean
   planActive?: boolean
   enableMemory?: boolean
@@ -54,6 +55,7 @@ const emit = defineEmits<{
   (e: 'toggleWorkspace'): void
   /** 触发加载更多历史消息 */
   (e: 'loadMoreHistory'): void
+  (e: 'newSession'): void
 }>()
 
 // 滚动容器 ref
@@ -199,7 +201,7 @@ defineExpose({
       <!-- 工作空间入口按钮（与左侧菜单按钮对称） -->
       <ATooltip placement="left" title="工作空间">
         <button
-          v-if="!isWelcomeMode && hasCodeExecutionConfig"
+          v-if="sessionId && hasCodeExecutionConfig"
           type="button"
           class="chat-workspace-btn"
           :class="{ 'is-active': workspacePanelOpen }"
@@ -212,11 +214,13 @@ defineExpose({
 
     </header>
 
-    <div v-if="isWelcomeMode" class="chat-welcome-container">
+    <div v-if="messageSize <= 1" class="chat-welcome-container">
       <Welcome
+        :message-size="messageSize"
         :headline="welcomeHeadline"
-        :description="welcomeDesc"
         :input-value="inputValue"
+        :agent-id="agentId"
+        :description="welcomeDesc"
         :uploaded-files="uploadedFiles"
         :isRunning="isRunning"
         :memory-active="memoryActive"
@@ -227,13 +231,15 @@ defineExpose({
         :show-tool-process="showToolProcess"
         :tool-process-active="toolProcessActive"
         :session-id="sessionId"
-        :workspace-panel-open="workspacePanelOpen"
+        :has-code-execution-config="hasCodeExecutionConfig"
+        :mention-allowed="true"
         @update:input-value="$emit('update:inputValue', $event)"
         @update:uploaded-files="$emit('update:uploadedFiles', $event)"
         @memory="$emit('memory', $event)"
         @plan="$emit('plan', $event)"
         @toolProcess="$emit('toolProcess', $event)"
         @send="handleSend"
+        @new-session="$emit('newSession')"
       />
     </div>
 
@@ -265,6 +271,7 @@ defineExpose({
         <div class="chat-input-outer">
           <ChatInput
             :model-value="inputValue"
+            :agent-id="agentId"
             :uploaded-files="uploadedFiles"
             :isRunning="isRunning"
             :memory-active="memoryActive"
@@ -275,7 +282,7 @@ defineExpose({
             :show-tool-process="showToolProcess"
             :tool-process-active="toolProcessActive"
             :session-id="sessionId"
-            :workspace-panel-open="workspacePanelOpen"
+            :mention-allowed="true"
             @inputTagPreview="inputTagPreviewHandle"
             @update:model-value="$emit('update:inputValue', $event)"
             @update:uploaded-files="$emit('update:uploadedFiles', $event)"

@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import ChatInput from './ChatInput.vue'
+import { computed } from "vue";
 
-defineProps<{
+const props = defineProps<{
+  messageSize: number
   headline: string
-  description?: string
   inputValue: string
+  agentId: string
+  description?: string
   uploadedFiles?: import('@/types').UploadedFileItem[]
   isRunning?: boolean
   memoryActive?: boolean
@@ -15,8 +18,13 @@ defineProps<{
   showToolProcess?: boolean
   allowUploadFileType?: string[]
   sessionId?: string | null
-  workspacePanelOpen?: boolean
+  mentionAllowed?: boolean
+  hasCodeExecutionConfig?: boolean
 }>()
+
+const needInit = computed(() => {
+  return props.hasCodeExecutionConfig && props.messageSize === 0
+})
 
 defineEmits<{
   (e: 'update:inputValue', value: string): void
@@ -25,6 +33,7 @@ defineEmits<{
   (e: 'memory', value: boolean): void
   (e: 'plan', value: boolean): void
   (e: 'toolProcess', value: boolean): void
+  (e: 'newSession'): void
 }>()
 </script>
 
@@ -35,6 +44,7 @@ defineEmits<{
     <div class="chat-input-outer chat-welcome-input">
       <ChatInput
         :model-value="inputValue"
+        :agent-id="agentId"
         :uploaded-files="uploadedFiles"
         :isRunning="isRunning"
         :memory-active="memoryActive"
@@ -45,13 +55,15 @@ defineEmits<{
         :show-tool-process="showToolProcess"
         :tool-process-active="toolProcessActive"
         :session-id="sessionId"
-        :workspace-panel-open="workspacePanelOpen"
+        :mention-allowed="mentionAllowed"
+        :need-init="needInit"
         @update:model-value="$emit('update:inputValue', $event)"
         @update:uploaded-files="$emit('update:uploadedFiles', $event)"
         @memory="$emit('memory', $event)"
         @plan="$emit('plan', $event)"
         @toolProcess="$emit('toolProcess', $event)"
         @send="$emit('send')"
+        @new-session="$emit('newSession')"
       />
     </div>
   </div>

@@ -27,3 +27,5 @@ export * from './agui'
 
 // Chat 累成
 export * from './chat'
+
+export * from './chat-mention'

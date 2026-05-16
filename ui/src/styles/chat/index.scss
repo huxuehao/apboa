@@ -366,6 +366,25 @@ $small-mobile-breakpoint: 375px;
   }
 }
 
+.chat-welcome-send {
+  padding: 10px 15px;
+  text-align: center;
+  justify-content: center;
+  border: 1px solid var(--color-border-light);
+  width: 150px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #5c5c5c;
+  font-weight: 500;
+  transition: $chat-transition;
+
+  &:hover {
+    background-color: #F2F4F7;
+    border: 1px solid #FFFFFF;
+    color: #232323;
+  }
+}
+
 .chat-main-header {
   padding: var(--spacing-base) $chat-main-padding-h;
   //border-bottom: 1px solid var(--color-border-extra-light);
@@ -387,11 +406,12 @@ $small-mobile-breakpoint: 375px;
 .chat-main-title {
   font-size: var(--font-size-lg);
   font-weight: 600;
+  max-width: 90%;
+  margin: 0 auto;
   color: var(--color-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 100%;
 
   /* 移动端适配：调整标题大小 */
   @media (max-width: $mobile-breakpoint) {
@@ -694,7 +714,7 @@ $small-mobile-breakpoint: 375px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 150px $chat-main-padding-h;
+  padding: 200px $chat-main-padding-h;
   text-align: center;
   min-width: 0;
 
