@@ -31,7 +31,7 @@ const props = withDefaults(
     showToolProcess?: boolean
     allowUploadFileType?: string[]
     sessionId?: string | null
-    workspacePanelOpen?: boolean
+    mentionAllowed?: boolean
   }>(),
   {
     uploadedFiles: () => [],
@@ -42,7 +42,7 @@ const props = withDefaults(
     toolProcessActive: false,
     showToolProcess: false,
     sessionId: null,
-    workspacePanelOpen: false
+    mentionAllowed: false
   }
 )
 
@@ -301,7 +301,7 @@ const sanitizeEmptyEditor = () => {
 
 /** 检测 @mention 触发 */
 const checkMentionTrigger = () => {
-  if (!props.workspacePanelOpen) {
+  if (!props.mentionAllowed) {
     return;
   }
 
@@ -847,7 +847,7 @@ watch(
         <!-- @ 添加上下文按钮 -->
         <ATooltip placement="bottom" title="添加上下文">
           <button
-            :disabled="!workspacePanelOpen"
+            :disabled="!mentionAllowed"
             type="button"
             class="chat-toolbar-btn chat-toolbar-btn-icon chat-toolbar-btn-circle"
             @mousedown.prevent
