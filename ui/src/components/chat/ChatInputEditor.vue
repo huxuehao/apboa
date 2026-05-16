@@ -10,10 +10,22 @@ import { message } from 'ant-design-vue'
 import ResourceMentionDropdown from './ResourceMentionDropdown.vue'
 import { type FlatFileItem, useWorkspaceFiles } from '@/composables/chat/useWorkspaceFiles'
 import { extractTextFromEditor, renderTaggedTextToHtml } from '@/utils/chat/tagSystem'
+import type {
+  AgentSkillItem,
+  AgentToolItem,
+  MentionResourceItem
+} from '@/types/chat-mention'
+import {
+  RESOURCE_CATEGORY_REGISTRY,
+  findKindByTagName
+} from '@/composables/chat/useResourceCategories'
+import { enabledToolsOfAgent, enabledSkillsOfAgent } from "@/api/agent"
+import type {SkillPackage, ToolConfig} from "@/types";
 
 const props = withDefaults(
   defineProps<{
     modelValue: string
+    agentId: string
     placeholder?: string
     sessionId?: string | null
     mentionAllowed?: boolean
@@ -49,6 +61,37 @@ const mentionQuery = ref('')
 const sessionIdRef = computed(() => props.sessionId ?? null)
 const { flatFiles, fetchFiles } = useWorkspaceFiles(sessionIdRef)
 
+/** Agent 工具列表 */
+const agentTools = ref<AgentToolItem[]>([])
+/** Agent 技能列表 */
+const agentSkills = ref<AgentSkillItem[]>([])
+
+watch(() => props.agentId, () => {
+  enabledToolsOfAgent(props.agentId).then((toolRes) => {
+    if (toolRes.data.data) {
+      agentTools.value = toolRes.data.data.map((item:ToolConfig) => {
+        return {
+          id: item.toolId,
+          name: item.name,
+          description: item.description
+        }
+      })
+    }
+  })
+  enabledSkillsOfAgent(props.agentId).then((skills) => {
+    if (skills.data.data) {
+      agentSkills.value = skills.data.data.map((item:SkillPackage) => {
+        return {
+          id: item.name,
+          name: item.name,
+          description: item.description
+        }
+      })
+    }
+  })
+}, { immediate: true })
+
+
 /**
  * 判断编辑器是否有内容（含纯文本或标签）
  */
@@ -75,16 +118,22 @@ const escapeHtml = (str: string): string => {
 }
 
 /**
- * 渲染标签为 HTML 字符串
+ * 渲染标签为 HTML 字符串（采用注册表）
  *
  * @param tagName 标签名
  * @param tagContent 标签内容
  * @return 渲染后的 HTML
  */
 const renderTagToHtml = (tagName: string, tagContent: string): string => {
-  if (tagName === 'workspace-file') {
-    const name = tagContent.split('/').pop() || tagContent
-    return `<span contenteditable="false" class="editor-tag editor-tag-${tagName}" data-tag="${tagName}" data-content="${escapeHtml(tagContent)}"><span class="editor-tag-inner"><span class="editor-tag-name">${escapeHtml(name)}</span></span></span>`
+  const kind = findKindByTagName(tagName)
+  if (kind) {
+    const meta = RESOURCE_CATEGORY_REGISTRY[kind]
+    const display = meta.resolveDisplayFromContent(tagContent, {
+      workspaceFiles: flatFiles.value,
+      agentTools: agentTools.value,
+      agentSkills: agentSkills.value
+    })
+    return `<span contenteditable="false" class="editor-tag editor-tag-${tagName}" data-tag="${tagName}" data-content="${escapeHtml(tagContent)}"><span class="editor-tag-inner"><span class="editor-tag-name">${escapeHtml(display)}</span></span></span>`
   }
   // 未知标签，显示原始文本
   return escapeHtml(`<${tagName}>${tagContent}</${tagName}>`)
@@ -226,12 +275,11 @@ const findMentionAtInEditor = (): { textNode: Text; atIndex: number } | null => 
 }
 
 /**
- * 插入工作空间文件标签
+ * 插入资源标签（工作空间文件 / 工具 / 技能）
  *
- * @param item 文件项
+ * @param item 资源项
  */
-const insertWorkspaceFileTag = (item: FlatFileItem) => {
-  const path = item.path
+const insertResourceTag = (item: MentionResourceItem) => {
   const editor = editorRef.value
   if (!editor) {
     mentionVisible.value = false
@@ -244,6 +292,11 @@ const insertWorkspaceFileTag = (item: FlatFileItem) => {
     mentionVisible.value = false
     return
   }
+
+  const meta = RESOURCE_CATEGORY_REGISTRY[item.kind]
+  const tagName = meta.tagName
+  const tagContent = meta.resolveTagContent(item)
+  const display = meta.resolveTagDisplay(item)
 
   const { textNode, atIndex } = match
   const text = textNode.textContent || ''
@@ -259,16 +312,19 @@ const insertWorkspaceFileTag = (item: FlatFileItem) => {
   // 创建标签元素
   const tagEl = document.createElement('span')
   tagEl.contentEditable = 'false'
-  tagEl.className = 'editor-tag editor-tag-workspace-file'
-  tagEl.setAttribute('data-tag', 'workspace-file')
-  tagEl.setAttribute('data-content', path)
+  tagEl.className = `editor-tag editor-tag-${tagName}`
+  tagEl.setAttribute('data-tag', tagName)
+  tagEl.setAttribute('data-content', tagContent)
+  tagEl.innerHTML = `<span class="editor-tag-inner"><span class="editor-tag-name">${escapeHtml(display)}</span></span>`
 
-  const name = path.split('/').pop() || path
-  tagEl.innerHTML = `<span class="editor-tag-inner"><span class="editor-tag-name">${escapeHtml(name)}</span></span>`
-
-  // 添加点击事件监听（预览）
-  const innerSpan = tagEl.querySelector('.editor-tag-inner')
-  innerSpan?.addEventListener('click', () => emit('inputTagPreview', item))
+  // 仅工作空间文件需要点击预览
+  if (item.kind === 'workspace-file') {
+    const innerSpan = tagEl.querySelector('.editor-tag-inner')
+    const file = item.raw as FlatFileItem | undefined
+    if (innerSpan && file) {
+      innerSpan.addEventListener('click', () => emit('inputTagPreview', file))
+    }
+  }
 
   const parent = textNode.parentNode!
   parent.insertBefore(tagEl, textNode.nextSibling)
@@ -627,9 +683,11 @@ watch(
     <ResourceMentionDropdown
       ref="dropdownRef"
       :visible="mentionVisible"
-      :items="flatFiles"
+      :workspace-files="flatFiles"
+      :agent-tools="agentTools"
+      :agent-skills="agentSkills"
       :keyword="mentionQuery"
-      @select="insertWorkspaceFileTag"
+      @select="insertResourceTag"
       @close="mentionVisible = false"
     />
   </div>

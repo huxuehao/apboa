@@ -23,6 +23,7 @@ const props = defineProps<{
   inputValue: string
   uploadedFiles?: UploadedFileItem[]
   isRunning: boolean
+  agentId: string
   memoryActive?: boolean
   planActive?: boolean
   enableMemory?: boolean
@@ -215,8 +216,9 @@ defineExpose({
     <div v-if="isWelcomeMode" class="chat-welcome-container">
       <Welcome
         :headline="welcomeHeadline"
-        :description="welcomeDesc"
         :input-value="inputValue"
+        :agent-id="agentId"
+        :description="welcomeDesc"
         :uploaded-files="uploadedFiles"
         :isRunning="isRunning"
         :memory-active="memoryActive"
@@ -265,6 +267,7 @@ defineExpose({
         <div class="chat-input-outer">
           <ChatInput
             :model-value="inputValue"
+            :agent-id="agentId"
             :uploaded-files="uploadedFiles"
             :isRunning="isRunning"
             :memory-active="memoryActive"

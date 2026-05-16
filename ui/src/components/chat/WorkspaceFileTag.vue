@@ -3,8 +3,8 @@ import { computed } from 'vue'
 import FileIcon from "@/components/workspace/FileIcon.vue";
 
 const props = defineProps<{
-  /** 文件在工作空间中的相对路径 */
-  path: string
+  /** 文件在工作空间中的相对路径（标签内容） */
+  content: string
 }>()
 
 defineEmits(['inputTagPreview'])
@@ -13,7 +13,7 @@ defineEmits(['inputTagPreview'])
  * 从路径中提取文件名和父文件夹路径
  */
 const fileInfo = computed(() => {
-  const path = props.path
+  const path = props.content
   const lastSlash = path.lastIndexOf('/')
   const name = lastSlash > -1 ? path.slice(lastSlash + 1) : path
   const folder = lastSlash > -1 ? path.slice(0, lastSlash) : ''
@@ -32,14 +32,14 @@ const extension = computed(() => {
 
 <template>
   <span class="workspace-file-tag" @click="$emit('inputTagPreview', {
-    path: props.path,
+    path: props.content,
     name: fileInfo.name,
     fullName: fileInfo.name,
     folderPath: fileInfo.folder,
     extension
   })">
     <FileIcon :file-name="fileInfo.name" width="14" />
-    <span class="workspace-file-tag-name" :title="path">{{ fileInfo.name }}</span>
+    <span class="workspace-file-tag-name" :title="content">{{ fileInfo.name }}</span>
   </span>
 </template>
 

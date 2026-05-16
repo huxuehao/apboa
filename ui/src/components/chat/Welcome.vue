@@ -3,8 +3,9 @@ import ChatInput from './ChatInput.vue'
 
 defineProps<{
   headline: string
-  description?: string
   inputValue: string
+  agentId: string
+  description?: string
   uploadedFiles?: import('@/types').UploadedFileItem[]
   isRunning?: boolean
   memoryActive?: boolean
@@ -35,6 +36,7 @@ defineEmits<{
     <div class="chat-input-outer chat-welcome-input">
       <ChatInput
         :model-value="inputValue"
+        :agent-id="agentId"
         :uploaded-files="uploadedFiles"
         :isRunning="isRunning"
         :memory-active="memoryActive"

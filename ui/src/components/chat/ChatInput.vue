@@ -16,6 +16,7 @@ import type { UploadedFileItem } from '@/types'
 const props = withDefaults(
   defineProps<{
     modelValue: string
+    agentId: string
     uploadedFiles?: UploadedFileItem[]
     isRunning?: boolean
     placeholder?: string
@@ -106,6 +107,7 @@ const handleEditorUpdate = (value: string) => {
 
     <ChatInputEditor
       ref="editorRef"
+      :agent-id="agentId"
       :model-value="modelValue"
       :placeholder="placeholder || '输入消息...'"
       :session-id="sessionId"

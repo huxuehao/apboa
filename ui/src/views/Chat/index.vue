@@ -443,6 +443,7 @@ onMounted(() => {
       :input-value="inputText"
       :uploaded-files="uploadedFiles"
       :isRunning="isRunning"
+      :agent-id="agentId"
       :memory-active="memoryActive"
       :plan-active="planActive"
       :enable-memory="enableMemory"

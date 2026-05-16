@@ -2,15 +2,26 @@
 import { computed } from 'vue'
 import { parseTaggedContent, TagRegistry } from '@/utils/chat/tagSystem'
 import WorkspaceFileTag from './WorkspaceFileTag.vue'
+import AgentToolTag from './AgentToolTag.vue'
+import AgentSkillTag from './AgentSkillTag.vue'
 
 defineEmits(['inputTagPreview'])
 
 /**
  * 注册内置标签渲染器
+ * 所有标签组件统一接收 content prop
  */
 TagRegistry.register({
   tagName: 'workspace-file',
   component: WorkspaceFileTag
+})
+TagRegistry.register({
+  tagName: 'agent-tool',
+  component: AgentToolTag
+})
+TagRegistry.register({
+  tagName: 'agent-skill',
+  component: AgentSkillTag
 })
 
 const props = defineProps<{
@@ -34,12 +45,12 @@ const segments = computed(() => parseTaggedContent(props.content || ''))
           <br v-if="lineIdx < (seg.content || '').split('\n').length - 1" />
         </template>
       </template>
-      <!-- 标签段 -->
+      <!-- 标签段：统一使用 content prop -->
       <component
         v-else-if="seg.type === 'tag' && seg.tagName && TagRegistry.get(seg.tagName)"
         :is="TagRegistry.get(seg.tagName)"
         @inputTagPreview="$emit('inputTagPreview', $event)"
-        :path="seg.tagContent"
+        :content="seg.tagContent"
       />
       <!-- 未知标签或空内容 -->
       <span v-else>{{ seg.content }}</span>
