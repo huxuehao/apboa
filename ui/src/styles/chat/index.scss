@@ -366,6 +366,25 @@ $small-mobile-breakpoint: 375px;
   }
 }
 
+.chat-welcome-send {
+  padding: 10px 15px;
+  text-align: center;
+  justify-content: center;
+  border: 1px solid var(--color-border-light);
+  width: 150px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #5c5c5c;
+  font-weight: 500;
+  transition: $chat-transition;
+
+  &:hover {
+    background-color: #F2F4F7;
+    border: 1px solid #FFFFFF;
+    color: #232323;
+  }
+}
+
 .chat-main-header {
   padding: var(--spacing-base) $chat-main-padding-h;
   //border-bottom: 1px solid var(--color-border-extra-light);

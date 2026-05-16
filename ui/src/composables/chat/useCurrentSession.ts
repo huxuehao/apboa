@@ -77,9 +77,9 @@ export function useCurrentSession(agentId: import('vue').Ref<string>) {
     currentSessionTitle.value = session.title || '新对话'
   }
 
-  const resetSession = () => {
-    currentSessionId.value = null
-    currentSessionTitle.value = ''
+  const resetSession = (sessionId: string | null = null, sessionTitle: string = '') => {
+    currentSessionId.value = sessionId
+    currentSessionTitle.value = sessionTitle
     messagesList.value = []
     hasMoreHistory.value = false
     nextBeforeDepth.value = null

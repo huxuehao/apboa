@@ -130,8 +130,8 @@ export function useSessions(agentId: import('vue').Ref<string>) {
     await resetAndReload()
   }
 
-  const createSession = async (title: string = '新对话') => {
-    const res = await chatSessionApi.createSession({ agentId: agentId.value, title })
+  const createSession = async (title: string = '新对话', initWorkspace: boolean = false) => {
+    const res = await chatSessionApi.createSession({ agentId: agentId.value, title, initWorkspace })
     const session = res.data?.data as ChatSessionVO
     if (session) {
       otherSessions.value = [session, ...otherSessions.value]

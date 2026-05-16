@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import ChatInput from './ChatInput.vue'
+import {MessageOutlined} from "@ant-design/icons-vue";
 
 defineProps<{
+  messageSize: number
   headline: string
   inputValue: string
   agentId: string
@@ -17,6 +19,7 @@ defineProps<{
   allowUploadFileType?: string[]
   sessionId?: string | null
   mentionAllowed?: boolean
+  hasCodeExecutionConfig?: boolean
 }>()
 
 defineEmits<{
@@ -26,6 +29,7 @@ defineEmits<{
   (e: 'memory', value: boolean): void
   (e: 'plan', value: boolean): void
   (e: 'toolProcess', value: boolean): void
+  (e: 'newSession'): void
 }>()
 </script>
 
@@ -33,7 +37,10 @@ defineEmits<{
   <div class="chat-welcome">
     <h2 class="chat-welcome-title" :title="headline">{{ headline }}</h2>
     <p v-if="description" class="chat-welcome-desc" :title="description">{{ description }}</p>
-    <div class="chat-input-outer chat-welcome-input">
+    <div v-if="hasCodeExecutionConfig && messageSize === 0" class="chat-welcome-send" @click="$emit('newSession')">
+      <MessageOutlined /> <span>开启对话</span>
+    </div>
+    <div v-else class="chat-input-outer chat-welcome-input">
       <ChatInput
         :model-value="inputValue"
         :agent-id="agentId"

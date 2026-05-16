@@ -379,13 +379,7 @@ const transitionName = computed(() =>
         <Transition :name="transitionName">
           <!-- 主页 -->
           <div v-if="view === 'main'" key="main" class="dropdown-page main-page">
-            <div ref="mainListRef" class="main-files-area">
-              <div
-                v-if="filteredFlatItems.length === 0"
-                class="dropdown-empty"
-              >
-                <span>未找到匹配的文件</span>
-              </div>
+            <div v-if="filteredFlatItems.length > 0" ref="mainListRef" class="main-files-area">
               <div
                 v-for="(entry, index) in mainEntries.slice(0, filteredFlatItems.length)"
                 :key="`flat-${entry.kind === 'flat' ? entry.item.id : index}`"
@@ -549,6 +543,7 @@ const transitionName = computed(() =>
   overflow-y: auto;
   overflow-x: hidden;
   padding: 6px;
+  border-bottom: 1px solid #ecf0f2;
   scrollbar-width: thin;
   scrollbar-color: var(--color-border-light) transparent;
 
@@ -573,7 +568,6 @@ const transitionName = computed(() =>
   display: flex;
   flex-direction: column;
   gap: 2px;
-  border-top: 1px solid #ecf0f2;
 }
 
 /* 详情页布局：头部固定不滚，内容区滚动 */

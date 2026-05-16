@@ -203,6 +203,7 @@ export interface UpdateProfileRequest {
 export interface ChatSessionCreateDTO {
   agentId: string
   title?: string
+  initWorkspace?: boolean
 }
 
 /**

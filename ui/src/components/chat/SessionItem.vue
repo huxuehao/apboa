@@ -28,7 +28,7 @@ const emit = defineEmits<{
       <template #overlay>
         <AMenu @click="({ key }:MenuClickEvent) => emit('menu', key as string)">
           <AMenuItem key="rename">重命名</AMenuItem>
-          <AMenuItem :key="session.isPinned ? 'unpin' : 'pin'">
+          <AMenuItem v-if="session.title !== '新对话'" :key="session.isPinned ? 'unpin' : 'pin'">
             {{ session.isPinned ? '取消置顶' : '置顶' }}
           </AMenuItem>
           <AMenuItem key="delete" danger>删除</AMenuItem>
