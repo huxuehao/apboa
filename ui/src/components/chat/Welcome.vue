@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import ChatInput from './ChatInput.vue'
-import {MessageOutlined} from "@ant-design/icons-vue";
+import { computed } from "vue";
 
-defineProps<{
+const props = defineProps<{
   messageSize: number
   headline: string
   inputValue: string
@@ -22,6 +22,10 @@ defineProps<{
   hasCodeExecutionConfig?: boolean
 }>()
 
+const needInit = computed(() => {
+  return props.hasCodeExecutionConfig && props.messageSize === 0
+})
+
 defineEmits<{
   (e: 'update:inputValue', value: string): void
   (e: 'update:uploadedFiles', value: import('@/types').UploadedFileItem[]): void
@@ -37,10 +41,7 @@ defineEmits<{
   <div class="chat-welcome">
     <h2 class="chat-welcome-title" :title="headline">{{ headline }}</h2>
     <p v-if="description" class="chat-welcome-desc" :title="description">{{ description }}</p>
-    <div v-if="hasCodeExecutionConfig && messageSize === 0" class="chat-welcome-send" @click="$emit('newSession')">
-      <MessageOutlined /> <span>开启对话</span>
-    </div>
-    <div v-else class="chat-input-outer chat-welcome-input">
+    <div class="chat-input-outer chat-welcome-input">
       <ChatInput
         :model-value="inputValue"
         :agent-id="agentId"
@@ -55,12 +56,14 @@ defineEmits<{
         :tool-process-active="toolProcessActive"
         :session-id="sessionId"
         :mention-allowed="mentionAllowed"
+        :need-init="needInit"
         @update:model-value="$emit('update:inputValue', $event)"
         @update:uploaded-files="$emit('update:uploadedFiles', $event)"
         @memory="$emit('memory', $event)"
         @plan="$emit('plan', $event)"
         @toolProcess="$emit('toolProcess', $event)"
         @send="$emit('send')"
+        @new-session="$emit('newSession')"
       />
     </div>
   </div>
