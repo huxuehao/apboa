@@ -25,6 +25,8 @@ export interface FlatFileItem {
   folderPath: string
   /** 文件大小可读格式 */
   readableSize?: string
+  /** 文件最后修改时间 */
+  lastModifiedTime?: string
 }
 
 /**
@@ -52,7 +54,8 @@ export function flattenFileTree(
         path: node.path,
         extension: node.extension,
         folderPath: parentPath,
-        readableSize: node.readableSize
+        readableSize: node.readableSize,
+        lastModifiedTime: node.lastModifiedTime
       })
     }
   }

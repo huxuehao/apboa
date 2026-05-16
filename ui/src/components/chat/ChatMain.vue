@@ -227,7 +227,7 @@ defineExpose({
         :show-tool-process="showToolProcess"
         :tool-process-active="toolProcessActive"
         :session-id="sessionId"
-        :mention-allowed="false"
+        :mention-allowed="true"
         @update:input-value="$emit('update:inputValue', $event)"
         @update:uploaded-files="$emit('update:uploadedFiles', $event)"
         @memory="$emit('memory', $event)"

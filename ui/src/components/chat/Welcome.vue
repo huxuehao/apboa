@@ -15,7 +15,7 @@ defineProps<{
   showToolProcess?: boolean
   allowUploadFileType?: string[]
   sessionId?: string | null
-  workspacePanelOpen?: boolean
+  mentionAllowed?: boolean
 }>()
 
 defineEmits<{
@@ -45,7 +45,7 @@ defineEmits<{
         :show-tool-process="showToolProcess"
         :tool-process-active="toolProcessActive"
         :session-id="sessionId"
-        :workspace-panel-open="workspacePanelOpen"
+        :mention-allowed="mentionAllowed"
         @update:model-value="$emit('update:inputValue', $event)"
         @update:uploaded-files="$emit('update:uploadedFiles', $event)"
         @memory="$emit('memory', $event)"
