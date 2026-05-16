@@ -406,11 +406,12 @@ $small-mobile-breakpoint: 375px;
 .chat-main-title {
   font-size: var(--font-size-lg);
   font-weight: 600;
+  max-width: 90%;
+  margin: 0 auto;
   color: var(--color-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 100%;
 
   /* 移动端适配：调整标题大小 */
   @media (max-width: $mobile-breakpoint) {
