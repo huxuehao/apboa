@@ -55,18 +55,18 @@ FROM ${JRE_IMAGE}
 
 WORKDIR /app
 
-# ==================== 安全加固：创建非root用户 ====================
 # 以非root运行可缩小内核攻击面，配合cap_drop=ALL和no-new-privileges，阻断容器→宿主机逃逸路径
 RUN groupadd -r apboa -g 1001 && \
     useradd -r -g apboa -u 1001 -m -s /sbin/nologin -d /app apboa && \
     chown -R apboa:apboa /app
 
-# ---------- 安装 Python 3 ----------
+# ---------- 安装 Python 3 + gosu（降权工具） ----------
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         python3 \
         python3-pip \
         python3-venv \
+        gosu \
     && ln -sf /usr/bin/python3 /usr/bin/python \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -95,8 +95,8 @@ RUN mkdir -p /app/data /app/logs && \
 EXPOSE 3060
 
 ENV TZ=Asia/Shanghai
-ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC"
+ENV JAVA_OPTS="-Xms4g -Xmx4g -XX:+UseG1GC -XX:+UseContainerSupport"
 
-# 以 root 启动 shell → chown 修复 volume 挂载目录权限 → exec su 切到 apboa 用户启动 Java
-# 配合 cap_drop=ALL + no-new-privileges，root 仅能做 chown，无其他内核能力
-ENTRYPOINT ["sh", "-c", "chown -R apboa:apboa /app/logs /app/.apboa 2>/dev/null; exec su apboa -c 'java ${JAVA_OPTS} -jar app.jar'"]
+# 以 root 启动 shell → chown 修复 volume 挂载目录权限 → gosu 切到 apboa 用户启动 Java
+# gosu 专为容器降权设计，不走 PAM 不弹密码；配合 cap_drop=ALL + no-new-privileges
+ENTRYPOINT ["sh", "-c", "chown -R apboa:apboa /app/logs /app/.apboa 2>/dev/null; exec gosu apboa java ${JAVA_OPTS} -jar app.jar"]

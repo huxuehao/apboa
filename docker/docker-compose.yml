@@ -85,7 +85,6 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
-    user: "1001:1001"
     pids_limit: ${BACKEND_PIDS_LIMIT}
     mem_limit: ${BACKEND_MEM_LIMIT}
     cpus: ${BACKEND_CPU_LIMIT}
