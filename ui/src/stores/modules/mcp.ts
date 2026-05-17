@@ -50,6 +50,7 @@ export const useMcpStore = defineStore('mcp', () => {
       currentPage.value = page
     } catch (error) {
       console.error('加载数据失败:', error)
+      throw error
     } finally {
       loading.value = false
     }

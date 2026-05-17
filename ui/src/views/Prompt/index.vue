@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, h, watch } from 'vue'
 import { Modal } from 'ant-design-vue'
-import {SearchOutlined, FileTextOutlined, LoadingOutlined} from '@ant-design/icons-vue'
+import {SearchOutlined, FileTextOutlined} from '@ant-design/icons-vue'
 import { usePromptStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as promptApi from '@/api/prompt'
@@ -15,8 +15,7 @@ import PromptCard from '@/components/prompt/PromptCard.vue'
 import CreateCard from '@/components/prompt/CreateCard.vue'
 import PromptForm from '@/components/prompt/PromptForm.vue'
 import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
-import InfiniteLoading from "v3-infinite-loading";
-import "v3-infinite-loading/lib/style.css";
+import ApboaInfiniteLoading from '@/components/common/ApboaInfiniteLoading.vue'
 
 const store = usePromptStore()
 const { list, categories, selectedCategory, keyword, loading, hasMore } = storeToRefs(store)
@@ -190,6 +189,8 @@ async function handleInfiniteLoading($state: {
         $state.complete();
       }
     } catch {
+      // 失败时重置首次加载标记，确保重试走正确的首次加载路径
+      isFirstLoad.value = true;
       $state.error();
     }
     return;
@@ -271,26 +272,10 @@ onMounted(() => {
         />
       </div>
 
-      <InfiniteLoading
-        :key="infiniteLoadingKey"
+      <ApboaInfiniteLoading
+        :loading-key="infiniteLoadingKey"
         @infinite="handleInfiniteLoading"
-      >
-        <template #spinner>
-          <div class="load-indicator mt-md">
-            <span class="ml-sm text-secondary"><LoadingOutlined style="margin-right: 6px" />加载中</span>
-          </div>
-        </template>
-        <template #complete>
-          <div class="no-more-indicator text-secondary mt-md">
-            没有更多数据了
-          </div>
-        </template>
-        <template #empty>
-          <div class="empty-indicator mt-lg">
-            <AEmpty description="暂无数据" />
-          </div>
-        </template>
-      </InfiniteLoading>
+      />
     </section>
 
     <PromptForm

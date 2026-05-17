@@ -88,7 +88,7 @@ COPY --from=build /build/console/target/console-*.jar app.jar
 # 复制 Docker 环境配置文件到 classpath
 COPY docker/backend/application-docker.yml /app/config/application-docker.yml
 
-# 创建数据目录并设置权限
+# 创建数据目录并将 /app 全部赋权给 apboa（logback 相对路径依赖 /app 可写）
 RUN mkdir -p /app/data /app/logs && \
     chown -R apboa:apboa /app
 
@@ -97,7 +97,6 @@ EXPOSE 3060
 ENV TZ=Asia/Shanghai
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC"
 
-# 切换到非root用户（防宿主机逃逸的关键一环）
-USER apboa
-
-ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar app.jar"]
+# 以 root 启动 shell → chown 修复 volume 挂载目录权限 → exec su 切到 apboa 用户启动 Java
+# 配合 cap_drop=ALL + no-new-privileges，root 仅能做 chown，无其他内核能力
+ENTRYPOINT ["sh", "-c", "chown -R apboa:apboa /app/logs /app/.apboa 2>/dev/null; exec su apboa -c 'java ${JAVA_OPTS} -jar app.jar'"]
