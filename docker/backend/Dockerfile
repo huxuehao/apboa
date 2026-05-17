@@ -95,8 +95,11 @@ RUN mkdir -p /app/data /app/logs && \
 EXPOSE 3060
 
 ENV TZ=Asia/Shanghai
-ENV JAVA_OPTS="-Xms4g -Xmx4g -XX:+UseG1GC -XX:+UseContainerSupport"
+# ---------- 启动脚本 ----------
+# 复制 entrypoint.sh（动态 JVM 堆计算 + 权限修复 + gosu 降权启动）
+COPY docker/backend/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-# 以 root 启动 shell → chown 修复 volume 挂载目录权限 → gosu 切到 apboa 用户启动 Java
+# 以 root 启动 → entrypoint.sh chown 修复 volume 挂载目录权限 → gosu 切到 apboa 用户启动 Java
 # gosu 专为容器降权设计，不走 PAM 不弹密码；配合 cap_drop=ALL + no-new-privileges
-ENTRYPOINT ["sh", "-c", "chown -R apboa:apboa /app/logs /app/.apboa 2>/dev/null; exec gosu apboa java ${JAVA_OPTS} -jar app.jar"]
+ENTRYPOINT ["/app/entrypoint.sh"]

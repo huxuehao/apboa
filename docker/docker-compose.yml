@@ -83,6 +83,10 @@ services:
     restart: unless-stopped
     cap_drop:
       - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - CHOWN
     security_opt:
       - no-new-privileges:true
     pids_limit: ${BACKEND_PIDS_LIMIT}
@@ -116,6 +120,7 @@ services:
       QDRANT_HOST: ${QDRANT_HOST}
       QDRANT_PORT: ${QDRANT_PORT}
       JWT_SECRET: ${JWT_SECRET}
+      BACKEND_JAVA_HEAP_PERCENTAGE: ${BACKEND_JAVA_HEAP_PERCENTAGE:-75.0}
       TZ: Asia/Shanghai
     volumes:
       - ${LOG_PATH:-./logs}/backend:/app/logs
