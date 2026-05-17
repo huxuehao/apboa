@@ -61,42 +61,14 @@ export function createDeleteItem(): CardMenuItem {
  * 创建「去对话」菜单项
  */
 export function createGoVisitItem(): CardMenuItem {
-  return { key: 'goVisit', label: '去对话', icon: () => h(MessageOutlined) }
-}
-
-/**
- * 创建「访问历史」菜单项
- */
-export function createAccessLogItem(): CardMenuItem {
-  return { key: 'accessLog', label: '历史对话', icon: () => h(HistoryOutlined) }
+  return { key: 'goVisit', label: '对话', icon: () => h(MessageOutlined) }
 }
 
 /**
  * 创建「配置模型」菜单项
  */
 export function createConfigItem(): CardMenuItem {
-  return { key: 'config', label: '配置模型', icon: () => h(SettingOutlined) }
-}
-
-/**
- * 创建「协议配置」菜单项
- */
-export function createProtocolConfigItem(): CardMenuItem {
-  return { key: 'protocolConfig', label: '协议配置', icon: () => h(SettingOutlined) }
-}
-
-/**
- * 创建「架构图」菜单项
- */
-export function createArchitectureItem(): CardMenuItem {
-  return { key: 'architecture', label: '架构图', icon: () => h(ApartmentOutlined) }
-}
-
-/**
- * 创建「架构图」菜单项
- */
-export function createTimingItem(): CardMenuItem {
-  return { key: 'timing', label: '定时', icon: () => h(ClockCircleOutlined) }
+  return { key: 'config', label: '模型', icon: () => h(SettingOutlined) }
 }
 
 /**

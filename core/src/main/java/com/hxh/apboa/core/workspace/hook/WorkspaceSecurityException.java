@@ -7,7 +7,7 @@ package com.hxh.apboa.core.workspace.hook;
  **/
 public class WorkspaceSecurityException extends RuntimeException {
 
-    private static final String HINT_SUFFIX = " 请阅读并遵守技能 'workspace_path_and_execution_rules'。";
+    private static final String HINT_SUFFIX = " Please read and follow the skill 'workspace_path_and_execution_rules'.";
 
     public WorkspaceSecurityException(String message) {
         super(message + HINT_SUFFIX);

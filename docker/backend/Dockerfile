@@ -55,12 +55,18 @@ FROM ${JRE_IMAGE}
 
 WORKDIR /app
 
-# ---------- 安装 Python 3 ----------
+# 以非root运行可缩小内核攻击面，配合cap_drop=ALL和no-new-privileges，阻断容器→宿主机逃逸路径
+RUN groupadd -r apboa -g 1001 && \
+    useradd -r -g apboa -u 1001 -m -s /sbin/nologin -d /app apboa && \
+    chown -R apboa:apboa /app
+
+# ---------- 安装 Python 3 + gosu（降权工具） ----------
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         python3 \
         python3-pip \
         python3-venv \
+        gosu \
     && ln -sf /usr/bin/python3 /usr/bin/python \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -82,12 +88,18 @@ COPY --from=build /build/console/target/console-*.jar app.jar
 # 复制 Docker 环境配置文件到 classpath
 COPY docker/backend/application-docker.yml /app/config/application-docker.yml
 
-# 创建数据目录
-RUN mkdir -p /app/data /app/logs
+# 创建数据目录并将 /app 全部赋权给 apboa（logback 相对路径依赖 /app 可写）
+RUN mkdir -p /app/data /app/logs && \
+    chown -R apboa:apboa /app
 
 EXPOSE 3060
 
 ENV TZ=Asia/Shanghai
-ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC"
+# ---------- 启动脚本 ----------
+# 复制 entrypoint.sh（动态 JVM 堆计算 + 权限修复 + gosu 降权启动）
+COPY docker/backend/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar app.jar"]
+# 以 root 启动 → entrypoint.sh chown 修复 volume 挂载目录权限 → gosu 切到 apboa 用户启动 Java
+# gosu 专为容器降权设计，不走 PAM 不弹密码；配合 cap_drop=ALL + no-new-privileges
+ENTRYPOINT ["/app/entrypoint.sh"]

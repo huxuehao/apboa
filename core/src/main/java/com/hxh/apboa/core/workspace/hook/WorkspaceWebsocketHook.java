@@ -37,7 +37,7 @@ public class WorkspaceWebsocketHook implements Hook {
             }
 
             ToolUseBlock toolUse = postActingEvent.getToolUse();
-            if (toolUse != null && WorkspaceToolConstants.PATH_SENSITIVE_TOOLS.contains(toolUse.getName())) {
+            if (toolUse != null && ToolConstants.PATH_SENSITIVE_TOOLS.contains(toolUse.getName())) {
                 sendWebsocketToWorkspace(threadId, toolUse);
             }
         }

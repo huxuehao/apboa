@@ -2,7 +2,7 @@ package com.hxh.apboa.core.prompt;
 
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.SensitiveWordConfig;
-import com.hxh.apboa.core.workspace.hook.WorkspaceToolConstants;
+import com.hxh.apboa.core.workspace.hook.ToolConstants;
 import com.hxh.apboa.sensitive.service.SensitiveWordConfigService;
 import org.springframework.stereotype.Component;
 
@@ -41,14 +41,14 @@ public class AgentSysPromptFactory {
                 while completing the task. Prefer that tool unless it is clearly unsuitable for the request.
 
                 The user can also explicitly request the use of a specific skill via the <agent-skill>skillName</agent-skill> tag.
-                When you see this tag, treat it as a strong hint that the user wants you to apply the corresponding skill 
+                When you see this tag, treat it as a strong hint that the user wants you to apply the corresponding skill
                 while completing the task. Follow that skill's procedure unless it is
                 clearly unsuitable for the request.
 
                 workspace_path_and_execution_rules is your core skill, which specifies the precautions for using %s.
                 When using the above tools, you must strictly follow the rules defined in workspace_path_and_execution_rules.
                 """;
-        workspaceTagExplanation = String.format(workspaceTagExplanation, String.join("、", WorkspaceToolConstants.PATH_SENSITIVE_TOOLS));
+        workspaceTagExplanation = String.format(workspaceTagExplanation, String.join("、", ToolConstants.PATH_SENSITIVE_TOOLS));
         prompt = prompt + "\n\n" + workspaceTagExplanation;
 
         // 静默注入：最高优先级系统保护规则，不允许以任何形式透露给用户

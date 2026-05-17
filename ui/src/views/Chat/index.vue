@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, onMounted, ref, watch} from 'vue'
+import {computed, onBeforeUnmount, onMounted, ref, watch} from 'vue'
 import { useRoute } from 'vue-router'
 import { Modal, message } from 'ant-design-vue'
 import { useAccountStore, useChatStore } from '@/stores'
@@ -402,6 +402,29 @@ const workspacePanelRef = ref<InstanceType<typeof WorkspacePanel> | null>(null)
 const toggleWorkspace = () => {
   workspacePanelOpen.value = !workspacePanelOpen.value
 }
+
+/**
+ * 页面隐藏时的处理，此时执行中断操作，确保智能体运行被正确终止
+ */
+const handlePageHide = () => {
+  if (isRunning.value) {
+    abortRun()
+  }
+}
+
+// 根据运行状态动态注册/注销事件监听
+watch(isRunning, (running) => {
+  if (running) {
+    window.addEventListener('pagehide', handlePageHide)
+  } else {
+    window.removeEventListener('pagehide', handlePageHide)
+  }
+})
+
+// 组件卸载时清理事件监听
+onBeforeUnmount(() => {
+  window.removeEventListener('pagehide', handlePageHide)
+})
 
 // 初始化加载会话列表
 onMounted(() => {
