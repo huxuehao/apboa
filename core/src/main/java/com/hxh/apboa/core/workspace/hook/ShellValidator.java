@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static com.hxh.apboa.core.workspace.hook.WorkspaceToolConstants.ALLOWED_SKILLS_PREFIX;
-import static com.hxh.apboa.core.workspace.hook.WorkspaceToolConstants.COMMAND_NAME_PATTERN;
-import static com.hxh.apboa.core.workspace.hook.WorkspaceToolConstants.DANGEROUS_SHELL_PATTERN;
+import static com.hxh.apboa.core.workspace.hook.ToolConstants.ALLOWED_SKILLS_PREFIX;
+import static com.hxh.apboa.core.workspace.hook.ToolConstants.COMMAND_NAME_PATTERN;
+import static com.hxh.apboa.core.workspace.hook.ToolConstants.DANGEROUS_SHELL_PATTERN;
 
 /**
- * 描述：工作空间 Shell 命令安全验证器
+ * 描述：Shell 命令安全验证器
  * <p>
  * 负责多维度校验 Shell 命令的安全性：
  * <ul>
@@ -21,11 +21,11 @@ import static com.hxh.apboa.core.workspace.hook.WorkspaceToolConstants.DANGEROUS
  *
  * @author huxuehao
  **/
-public class WorkspaceShellValidator {
+public class ShellValidator {
 
-    private final WorkspacePathValidator pathValidator;
+    private final PathValidator pathValidator;
 
-    public WorkspaceShellValidator(WorkspacePathValidator pathValidator) {
+    public ShellValidator(PathValidator pathValidator) {
         this.pathValidator = pathValidator;
     }
 
@@ -43,7 +43,7 @@ public class WorkspaceShellValidator {
         // 1. 危险模式检测
         if (DANGEROUS_SHELL_PATTERN.matcher(command).find()) {
             throw new WorkspaceSecurityException(
-                    "Shell 命令包含不安全的展开或替换，已被禁止。请使用简单、无动态求值的命令。");
+                    "Shell command contains unsafe expansions or substitutions, which are prohibited. Please use simple commands without dynamic evaluation.");
         }
 
         // 2. 分词后逐 token 检测
@@ -68,8 +68,6 @@ public class WorkspaceShellValidator {
             }
         }
     }
-
-    // ==================== Shell 分词器 ====================
 
     /**
      * Shell 命令分词器
@@ -127,8 +125,6 @@ public class WorkspaceShellValidator {
         return tokens;
     }
 
-    // ==================== 内联代码检测 ====================
-
     /**
      * 检测 token 是否为内联代码片段（如 -e "print('hello')"）
      */
@@ -176,13 +172,13 @@ public class WorkspaceShellValidator {
         Pattern drivePattern = Pattern.compile("[a-zA-Z]:[/\\\\]");
         if (drivePattern.matcher(code).find()) {
             throw new WorkspaceSecurityException(
-                    "内联代码中发现盘符路径（如 'D:\\' 或 'C:/'），绝对路径被禁止，请使用相对路径。");
+                    "Drive letter path detected in inline code (e.g., 'D:\\' or 'C:/'), absolute paths are prohibited. Please use relative paths.");
         }
 
         // 2. 检测以 / 开头的绝对路径
         if (code.startsWith("/") || Pattern.compile("\\s/").matcher(code).find()) {
             throw new WorkspaceSecurityException(
-                    "内联代码中发现绝对路径（以 / 开头），请使用相对路径。");
+                    "Absolute path (starting with /) detected in inline code. Please use relative paths.");
         }
 
         // 3. 检测 .. 逃逸，但允许 ../../skills/ 前缀
@@ -191,7 +187,7 @@ public class WorkspaceShellValidator {
             boolean isAllowed = idx >= 2 && code.startsWith(ALLOWED_SKILLS_PREFIX, idx - 2);
             if (!isAllowed) {
                 throw new WorkspaceSecurityException(
-                        "内联代码中发现路径逃逸 '..'，仅技能脚本可使用 ../../skills/ 前缀。");
+                        "Path escape '..' detected in inline code. Only skill scripts may use ../../skills/ prefix.");
             }
             idx += 2;
         }
@@ -203,11 +199,11 @@ public class WorkspaceShellValidator {
             String cleaned = part.replaceAll("^[\"']|[\"']$", "");
             if (cleaned.startsWith("/") || cleaned.matches("^[a-zA-Z]:[/\\\\].*")) {
                 throw new WorkspaceSecurityException(
-                        "内联代码中发现绝对路径 '" + cleaned + "'，请使用相对路径。");
+                        "Absolute path '" + cleaned + "' detected in inline code. Please use relative paths.");
             }
             if (cleaned.contains("..") && !cleaned.startsWith(ALLOWED_SKILLS_PREFIX)) {
                 throw new WorkspaceSecurityException(
-                        "内联代码中发现路径逃逸 '" + cleaned + "'，仅技能脚本可使用 ../../skills/ 前缀。");
+                        "Path escape '" + cleaned + "' detected in inline code. Only skill scripts may use ../../skills/ prefix.");
             }
         }
     }

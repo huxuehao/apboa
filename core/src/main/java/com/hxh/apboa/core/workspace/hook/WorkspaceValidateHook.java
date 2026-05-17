@@ -19,9 +19,8 @@ import java.util.Map;
  * <p>
  * 作为 Hook 生命周期入口，编排以下验证器完成安全校验：
  * <ul>
- *   <li>{@link WorkspacePathValidator} —— 路径合法性校验</li>
- *   <li>{@link WorkspaceScriptValidator} —— 脚本文件内容校验</li>
- *   <li>{@link WorkspaceShellValidator} —— Shell 命令安全校验</li>
+ *   <li>{@link PathValidator} —— 路径合法性校验</li>
+ *   <li>{@link ShellValidator} —— Shell 命令安全校验</li>
  * </ul>
  *
  * @author huxuehao
@@ -29,23 +28,18 @@ import java.util.Map;
 @Slf4j
 public class WorkspaceValidateHook implements Hook {
 
-    // ==================== 组合的验证器 ====================
-
-    private final WorkspacePathValidator pathValidator = new WorkspacePathValidator();
-    private final WorkspaceScriptValidator scriptValidator = new WorkspaceScriptValidator(pathValidator);
-    private final WorkspaceShellValidator shellValidator = new WorkspaceShellValidator(pathValidator);
-
-    // ==================== Hook 生命周期 ====================
+    private final PathValidator pathValidator = new PathValidator();
+    private final ShellValidator shellValidator = new ShellValidator(pathValidator);
 
     @Override
     public <T extends HookEvent> Mono<T> onEvent(T event) {
         if (event instanceof PreActingEvent preActing) {
             ToolUseBlock toolUse = preActing.getToolUse();
-            if (toolUse != null && WorkspaceToolConstants.PATH_SENSITIVE_TOOLS.contains(toolUse.getName())) {
+            if (toolUse != null && ToolConstants.PATH_SENSITIVE_TOOLS.contains(toolUse.getName())) {
                 // 获取当前会话的 threadId
                 String threadId = extractThreadId(event);
                 if (threadId == null) {
-                    return Mono.error(new RuntimeException("无法获取 Agent 上下文的 threadId"));
+                    return Mono.error(new RuntimeException("Unable to obtain threadId from Agent context"));
                 }
 
                 // 确保工作单元目录存在
@@ -61,8 +55,6 @@ public class WorkspaceValidateHook implements Hook {
         return Mono.just(event);
     }
 
-    // ==================== 工具校验路由 ====================
-
     /**
      * 根据工具名称将校验请求路由至对应的验证器
      *
@@ -73,15 +65,14 @@ public class WorkspaceValidateHook implements Hook {
         Map<String, Object> input = toolUse.getInput();
 
         switch (name) {
-            case "view_text_file":
-                pathValidator.validatePathParam(input, "file_path", false);
-                break;
             case "list_directory":
                 pathValidator.validatePathParam(input, "dir_path", false);
                 break;
+            case "view_text_file":
             case "insert_text_file":
             case "write_text_file":
-                scriptValidator.validatePathAndContent(input, "file_path");
+            case "search_replace_file":
+                pathValidator.validatePathParam(input, "file_path", false);
                 break;
             case "execute_shell_command":
                 shellValidator.validateShellCommand(input);
@@ -90,8 +81,6 @@ public class WorkspaceValidateHook implements Hook {
                 break;
         }
     }
-
-    // ==================== 辅助方法 ====================
 
     /**
      * 构建携带校验错误信息的 ToolUseBlock

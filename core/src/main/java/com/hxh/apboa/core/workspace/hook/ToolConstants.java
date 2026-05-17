@@ -8,13 +8,13 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * 描述：工作空间工具校验常量定义
+ * 描述：工具校验常量定义
  *
  * @author huxuehao
  **/
-public final class WorkspaceToolConstants {
+public final class ToolConstants {
 
-    private WorkspaceToolConstants() {
+    private ToolConstants() {
         // 工具类，禁止实例化
     }
 
@@ -23,8 +23,6 @@ public final class WorkspaceToolConstants {
 
     /** Shell 中唯一允许的 .. 前缀：../../skills/ */
     public static final String ALLOWED_SKILLS_PREFIX = "../../" + SKILLS_DIR_NAME + "/";
-
-    // ==================== 路径敏感工具集 ====================
 
     /** 需要拦截进行路径校验的工具名称集合 */
     public static final Set<String> PATH_SENSITIVE_TOOLS = new HashSet<>(Arrays.asList(
@@ -36,14 +34,10 @@ public final class WorkspaceToolConstants {
             "execute_shell_command"
     ));
 
-    // ==================== 脚本文件后缀 ====================
-
     /** 脚本文件后缀集合（用于判断是否需要校验文件内容中的路径） */
     public static final Set<String> SCRIPT_EXTENSIONS = new HashSet<>(Arrays.asList(
             ".sh", ".bash", ".zsh", ".py", ".js", ".ts", ".rb", ".pl", ".php", ".ps1", ".bat", ".cmd"
     ));
-
-    // ==================== Shell 安全正则 ====================
 
     /** 禁止的 Shell 危险模式（变量展开、命令替换等） */
     public static final Pattern DANGEROUS_SHELL_PATTERN =

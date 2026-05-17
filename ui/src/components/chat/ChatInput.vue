@@ -124,7 +124,7 @@ onMounted(() => {
     <div class="chat-welcome-face" :aria-hidden="!needInit">
       <span class="chat-welcome-shine" aria-hidden="true"></span>
       <MessageOutlined class="chat-welcome-icon" />
-      <span class="chat-welcome-label">开启对话</span>
+      <span class="chat-welcome-label">开始对话</span>
     </div>
 
     <!-- 展开态内容：高度随容器裁剪，透明度与轻位移着色 -->

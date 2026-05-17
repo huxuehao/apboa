@@ -31,21 +31,21 @@ public class SearchReplaceFileTool {
             description =
                     "Performs precise incremental text editing on a file using SEARCH/REPLACE blocks."
                             + " Reads the file at file_path, applies all SEARCH/REPLACE transformations"
-                            + " provided in instructions, then writes the updated content back to the same file."
+                            + " provided in content, then writes the updated content back to the same file."
                             + " Supports insert, modify, and delete operations on both code and plain text files."
                             + " Recommended when the modification scope is less than 30% of the file;"
                             + " not recommended for large-scale rewrites exceeding 30% of the file content."
-                            + " For the instructions format, refer to the search_replace_skill_guide skill.")
+                            + " For the content format, refer to the search_replace_skill_guide skill.")
     public Object searchReplaceFile(
             @ToolParam(name = "file_path", description = "The target file path to edit") String filePath,
-            @ToolParam(name = "instructions", description = "One or more SEARCH/REPLACE blocks defining the edits to apply") String instructions,
+            @ToolParam(name = "content", description = "One or more SEARCH/REPLACE blocks defining the edits to apply") String content,
             AgentContext agentContext) {
         // 参数校验
         if (filePath == null || filePath.isBlank()) {
             return "Failure: file_path must not be empty";
         }
-        if (instructions == null || instructions.isBlank()) {
-            return "Failure: instructions must not be empty";
+        if (content == null || content.isBlank()) {
+            return "Failure: content must not be empty";
         }
 
         if (agentContext == null) {
@@ -79,7 +79,7 @@ public class SearchReplaceFileTool {
         }
 
         // 应用增量更新
-        UpdateResult result = updater.apply(instructions, source);
+        UpdateResult result = updater.apply(content, source);
         if (!result.isSuccess()) {
             return "Failure: " + result.getError();
         }

@@ -41,7 +41,10 @@ export function buildToolCallsContent(
  * 根据用户输入生成会话标题（截取前50字符）
  */
 export function formatSessionTitle(input: string | null): string {
-  const t = (input || '').trim()
+  let t = (input || '').trim()
   if (!t) return '新对话'
+
+  t = t.replace(/<\/?(?:workspace-file|agent-tool|agent-skill)>/g, '')
+
   return t.length > 50 ? t.slice(0, 50) + '...' : t
 }

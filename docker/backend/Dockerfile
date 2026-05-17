@@ -55,6 +55,12 @@ FROM ${JRE_IMAGE}
 
 WORKDIR /app
 
+# ==================== 安全加固：创建非root用户 ====================
+# 以非root运行可缩小内核攻击面，配合cap_drop=ALL和no-new-privileges，阻断容器→宿主机逃逸路径
+RUN groupadd -r apboa -g 1001 && \
+    useradd -r -g apboa -u 1001 -m -s /sbin/nologin -d /app apboa && \
+    chown -R apboa:apboa /app
+
 # ---------- 安装 Python 3 ----------
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -82,12 +88,16 @@ COPY --from=build /build/console/target/console-*.jar app.jar
 # 复制 Docker 环境配置文件到 classpath
 COPY docker/backend/application-docker.yml /app/config/application-docker.yml
 
-# 创建数据目录
-RUN mkdir -p /app/data /app/logs
+# 创建数据目录并设置权限
+RUN mkdir -p /app/data /app/logs && \
+    chown -R apboa:apboa /app
 
 EXPOSE 3060
 
 ENV TZ=Asia/Shanghai
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC"
+
+# 切换到非root用户（防宿主机逃逸的关键一环）
+USER apboa
 
 ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar app.jar"]

@@ -81,6 +81,19 @@ services:
         JRE_IMAGE: ${DOCKER_REGISTRY}eclipse-temurin:21-jre
     container_name: apboa-backend
     restart: unless-stopped
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "1001:1001"
+    pids_limit: ${BACKEND_PIDS_LIMIT}
+    mem_limit: ${BACKEND_MEM_LIMIT}
+    cpus: ${BACKEND_CPU_LIMIT}
+    ulimits:
+      nproc: ${BACKEND_NPROC_LIMIT}
+      nofile:
+        soft: ${BACKEND_NOFILE_SOFT}
+        hard: ${BACKEND_NOFILE_HARD}
     environment:
       SPRING_PROFILES_ACTIVE: docker
       MYSQL_HOST: ${MYSQL_HOST}

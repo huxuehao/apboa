@@ -2,11 +2,11 @@ package com.hxh.apboa.core.workspace.hook;
 
 import java.util.Map;
 
-import static com.hxh.apboa.core.workspace.hook.WorkspaceToolConstants.ALLOWED_SKILLS_PREFIX;
-import static com.hxh.apboa.core.workspace.hook.WorkspaceToolConstants.SCRIPT_EXTENSIONS;
+import static com.hxh.apboa.core.workspace.hook.ToolConstants.ALLOWED_SKILLS_PREFIX;
+import static com.hxh.apboa.core.workspace.hook.ToolConstants.SCRIPT_EXTENSIONS;
 
 /**
- * 描述：工作空间路径安全验证器
+ * 描述：路径安全验证器
  * <p>
  * 负责校验所有文件路径是否合法：
  * <ul>
@@ -17,7 +17,7 @@ import static com.hxh.apboa.core.workspace.hook.WorkspaceToolConstants.SCRIPT_EX
  *
  * @author huxuehao
  **/
-public class WorkspacePathValidator {
+public class PathValidator {
 
     /**
      * 从输入 Map 中提取路径参数并校验
@@ -54,7 +54,7 @@ public class WorkspacePathValidator {
         // 绝对路径拒绝
         if (normalized.startsWith("/") || (normalized.length() > 2 && normalized.charAt(1) == ':')) {
             throw new WorkspaceSecurityException(
-                    String.format("参数 '%s' 使用了绝对路径 '%s'，绝对路径被禁止，请使用相对路径。", paramName, path));
+                    String.format("Parameter '%s' uses absolute path '%s', absolute paths are prohibited. Please use relative paths.", paramName, path));
         }
 
         // 含 .. 的处理
@@ -64,12 +64,12 @@ public class WorkspacePathValidator {
                 String after = normalized.substring(ALLOWED_SKILLS_PREFIX.length());
                 if (after.contains("..")) {
                     throw new WorkspaceSecurityException(
-                            String.format("参数 '%s' 的技能路径中包含多余的 '..'，逃逸被禁止：%s", paramName, path));
+                            String.format("Parameter '%s' contains extra '..' in skill path, escape prohibited: %s", paramName, path));
                 }
                 return; // 合法
             }
             throw new WorkspaceSecurityException(
-                    String.format("参数 '%s' 使用了 '..' 进行路径逃逸：'%s'，仅 Shell 调用技能脚本时允许 ../../skills/ 前缀。",
+                    String.format("Parameter '%s' uses '..' for path escape: '%s', only ../../skills/ prefix is allowed for Shell skill script calls.",
                             paramName, path));
         }
     }
