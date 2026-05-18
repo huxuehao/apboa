@@ -10,14 +10,13 @@ import io.modelcontextprotocol.spec.McpSchema;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
 /**
- * 根据缓存的模式注册 MCP 工具，并仅在调用时初始化 MCP 客户端。
+ * 基于缓存工具目录注册的懒加载 MCP 工具。
  */
 public class LazyMcpAgentTool implements AgentTool {
 
@@ -25,18 +24,17 @@ public class LazyMcpAgentTool implements AgentTool {
 
     private final String mcpServerName;
     private final McpSchema.Tool toolSchema;
-    private final Supplier<McpClientWrapper> clientSupplier;
+    private final Supplier<Mono<McpClientWrapper>> initializedClientSupplier;
     private final Map<String, Object> parameters;
     private final Map<String, Object> outputSchema;
-    private final AtomicReference<Mono<McpClientWrapper>> initAttempt = new AtomicReference<>();
 
     public LazyMcpAgentTool(
             String mcpServerName,
             McpSchema.Tool toolSchema,
-            Supplier<McpClientWrapper> clientSupplier) {
+            Supplier<Mono<McpClientWrapper>> initializedClientSupplier) {
         this.mcpServerName = mcpServerName;
         this.toolSchema = toolSchema;
-        this.clientSupplier = clientSupplier;
+        this.initializedClientSupplier = initializedClientSupplier;
         this.parameters = McpTool.convertMcpSchemaToParameters(toolSchema.inputSchema(), Set.of());
         this.outputSchema = toolSchema.outputSchema() != null
                 ? new HashMap<>(toolSchema.outputSchema())
@@ -65,7 +63,7 @@ public class LazyMcpAgentTool implements AgentTool {
 
     @Override
     public Mono<ToolResultBlock> callAsync(ToolCallParam param) {
-        return initializedClient()
+        return initializedClientSupplier.get()
                 .flatMap(client -> client.callTool(getName(), param.getInput()))
                 .map(McpContentConverter::convertCallToolResult)
                 .onErrorResume(e -> {
@@ -73,27 +71,6 @@ public class LazyMcpAgentTool implements AgentTool {
                             getName(), mcpServerName, e.getMessage());
                     return Mono.just(ToolResultBlock.error(unavailableMessage(e)));
                 });
-    }
-
-    private Mono<McpClientWrapper> initializedClient() {
-        Mono<McpClientWrapper> existing = initAttempt.get();
-        if (existing != null) {
-            return existing;
-        }
-
-        AtomicReference<Mono<McpClientWrapper>> self = new AtomicReference<>();
-        Mono<McpClientWrapper> created = Mono.defer(() -> {
-                    McpClientWrapper client = clientSupplier.get();
-                    return client.initialize().thenReturn(client);
-                })
-                .doOnError(e -> initAttempt.compareAndSet(self.get(), null))
-                .cache();
-        self.set(created);
-
-        if (initAttempt.compareAndSet(null, created)) {
-            return created;
-        }
-        return initAttempt.get();
     }
 
     private String unavailableMessage(Throwable e) {

@@ -16,6 +16,8 @@ import type {
   ModelType,
   HealthStatus,
   KbType,
+  McpActivationStatus,
+  McpToolExposureMode,
   McpMode,
   McpProtocol,
   SensitiveWordAction,
@@ -99,6 +101,16 @@ export interface AgentMcpServer {
   id: string
   agentDefinitionId: string
   mcpServerId: string
+  exposureMode: McpToolExposureMode
+}
+
+/**
+ * 智能体与 MCP 工具局部选择关联
+ */
+export interface AgentMcpTool {
+  id: string
+  agentDefinitionId: string
+  mcpToolId: string
 }
 
 /**
@@ -169,8 +181,36 @@ export interface McpServer extends BaseEntity {
   timeout: number
   protocolConfig: Record<string, any> | null
   description: string
+  toolSchemas?: string | null
   healthStatus: HealthStatus
   lastHealthCheck: string
+  activationStatus: McpActivationStatus
+  activationMessage: string
+  lastActivationTime: string | null
+  lastToolSyncTime: string | null
+  toolCount: number
+  availableToolCount?: number
+  activationRevision?: string | number | null
+  configHash?: string | null
+  needsSync: boolean
+  activationRequestId?: string | null
+}
+
+/**
+ * MCP 工具目录
+ */
+export interface McpTool extends BaseEntity {
+  mcpServerId: string
+  toolName: string
+  description: string
+  inputSchema: Record<string, unknown> | null
+  outputSchema: Record<string, unknown> | null
+  rawSchema: Record<string, unknown> | null
+  schemaHash: string | null
+  missing: boolean
+  sort: number
+  lastDiscoveredAt: string | null
+  lastSeenAt: string | null
 }
 
 /**

@@ -31,6 +31,7 @@ public class AgentDefinitionVO implements SerializableEnable {
     private List<Long> skill;
     private List<Long> tool;
     private List<Long> mcp;
+    private List<AgentMcpBindingVO> mcpBindings;
     private List<Long> hook;
     private List<Long> subAgent;
     private List<Long> knowledgeBase;

@@ -166,11 +166,26 @@ CREATE TABLE `agent_mcp_servers`  (
 `id` bigint NOT NULL,
 `agent_definition_id` bigint NOT NULL,
 `mcp_server_id` bigint NOT NULL,
+`exposure_mode` enum('ALL_GLOBAL','SELECTED_ONLY') NOT NULL DEFAULT 'ALL_GLOBAL' COMMENT 'Agent 侧 MCP 工具暴露模式',
 PRIMARY KEY (`id`) USING BTREE,
 UNIQUE INDEX `uk_agent_mcp`(`agent_definition_id` ASC, `mcp_server_id` ASC) USING BTREE,
 INDEX `idx_agent_id`(`agent_definition_id` ASC) USING BTREE,
 INDEX `idx_mcp_id`(`mcp_server_id` ASC) USING BTREE
 ) COMMENT = '智能体与MCP服务器关联表';
+
+-- ----------------------------
+-- Table structure for agent_mcp_tool
+-- ----------------------------
+DROP TABLE IF EXISTS `agent_mcp_tool`;
+CREATE TABLE `agent_mcp_tool`  (
+`id` bigint NOT NULL,
+`agent_definition_id` bigint NOT NULL,
+`mcp_tool_id` bigint NOT NULL,
+PRIMARY KEY (`id`) USING BTREE,
+UNIQUE INDEX `uk_agent_mcp_tool`(`agent_definition_id` ASC, `mcp_tool_id` ASC) USING BTREE,
+INDEX `idx_agent_mcp_tool_agent`(`agent_definition_id` ASC) USING BTREE,
+INDEX `idx_agent_mcp_tool_tool`(`mcp_tool_id` ASC) USING BTREE
+) COMMENT = 'Agent 与 MCP 工具局部选择关联表';
 
 -- ----------------------------
 -- Table structure for agent_skill_packages
@@ -437,6 +452,15 @@ CREATE TABLE `mcp_server`  (
 `protocol_config` text NULL COMMENT '协议配置',
 `description` varchar(500) NULL DEFAULT NULL COMMENT '描述',
 `tool_schemas` text NULL COMMENT 'Cached MCP tool schemas JSON',
+`activation_status` enum('NOT_ACTIVATED','ACTIVATING','ACTIVE','FAILED') NOT NULL DEFAULT 'NOT_ACTIVATED' COMMENT 'MCP 激活状态',
+`activation_message` varchar(500) NULL DEFAULT NULL COMMENT '激活或同步说明',
+`last_activation_time` datetime NULL DEFAULT NULL COMMENT '上次激活时间',
+`last_tool_sync_time` datetime NULL DEFAULT NULL COMMENT '上次工具同步时间',
+`tool_count` int NOT NULL DEFAULT 0 COMMENT '当前工具数量',
+`activation_revision` bigint NOT NULL DEFAULT 0 COMMENT '激活版本号',
+`config_hash` varchar(64) NULL DEFAULT NULL COMMENT '当前连接配置哈希',
+`needs_sync` tinyint(1) NOT NULL DEFAULT 1 COMMENT '是否需要同步工具列表',
+`activation_request_id` varchar(64) NULL DEFAULT NULL COMMENT '当前激活请求标识',
 `health_status` enum('HEALTHY','UNHEALTHY','UNKNOWN') NULL DEFAULT 'UNKNOWN' COMMENT '健康状态',
 `last_health_check` datetime NULL DEFAULT NULL COMMENT '最后健康检查时间',
 `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -771,5 +795,33 @@ INDEX `idx_tool_category`(`category` ASC) USING BTREE
 INSERT INTO `tool_config` (`id`, `name`, `tool_id`, `description`, `category`, `tool_type`, `input_schema`, `output_schema`, `class_path`, `language`, `code`, `need_confirm`, `enabled`, `version`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES (2020017365391609857, 'get_current_datetime', 'get_current_datetime', '获取当前的日期时间', '通用', 'BUILTIN', '[{\"name\":\"format\",\"description\":\"日期时间格式，默认值 yyyy-MM-dd HH:mm:ss\",\"type\":\"string\",\"defaultValue\":null,\"required\":false}]', NULL, 'com.hxh.apboa.core.tool.builtins.GetCurrentTimeTool', NULL, NULL, 0, 1, '1.0.0', '2026-02-07 14:10:45', '2026-03-02 14:34:27', NULL, 0);
 INSERT INTO `tool_config` (`id`, `name`, `tool_id`, `description`, `category`, `tool_type`, `input_schema`, `output_schema`, `class_path`, `language`, `code`, `need_confirm`, `enabled`, `version`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES (2021603578967851010, '获取当前用户的个人信息', 'get_current_userinfo', '通过此工具，你可以获取到当前和你对话用户的个人信息，包括：姓名、年龄、性别和爱好。\n', '通用', 'CUSTOM', '[]', NULL, NULL, 'JAVA', 'import java.util.*;\nimport com.hxh.apboa.core.tool.dynamices.IDynamicAgentTool;\nimport com.hxh.apboa.core.agui.AgentContext;\n\npublic class CustomTool implements IDynamicAgentTool {\n\n    @Override\n    public Object execute(AgentContext context, Object... args) {\n        Map<String, Object> resMap = new HashMap<String, Object>() {{\n            put(\"name\", \"胡学好\");\n            put(\"age\", 28);\n            put(\"gender\", \"男\");\n            put(\"hobby\", \"跑步、乒乓球、编程\");\n        }};\n      \n        return resMap;\n    }\n}', 0, 1, '1.0.0', '2026-02-11 23:13:47', '2026-05-08 22:16:52', 1111111111111111111, 1111111111111111111);
 INSERT INTO `tool_config` (`id`, `name`, `tool_id`, `description`, `category`, `tool_type`, `input_schema`, `output_schema`, `class_path`, `language`, `code`, `need_confirm`, `enabled`, `version`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES (2025895208227008514, '数学计算函数', 'math_calculator', '通用数学计算工具，支持加、减、乘、除、取余、幂运算等基本数学运算，接收两个数字字符串和一个运算符，返回计算结果及详细运算信息。', '通用', 'CUSTOM', '[{\"name\":\"num1\",\"description\":\"第一个数字\",\"type\":\"string\",\"defaultValue\":\"\",\"required\":true},{\"name\":\"num2\",\"description\":\"第二个数字\",\"type\":\"string\",\"defaultValue\":\"\",\"required\":true},{\"name\":\"operator\",\"description\":\"运算符，只支持 \\\"+\\\", \\\"-\\\", \\\"*\\\", \\\"/\\\", \\\"%\\\", \\\"pow\\\"\",\"type\":\"string\",\"defaultValue\":\"\",\"required\":true}]', NULL, NULL, 'JAVA', 'import java.util.*;\nimport com.hxh.apboa.core.tool.dynamices.IDynamicAgentTool;\nimport com.hxh.apboa.core.agui.AgentContext;\n\npublic class CustomTool implements IDynamicAgentTool {\n\n    @Override\n    public Object execute(AgentContext context, Object... args) {\n        // 参数验证\n        if (args == null || args.length < 3) {\n            Map<String, Object> errorMap = new HashMap<>();\n            errorMap.put(\"error\", \"参数不足，需要3个参数：数字1、数字2、运算符\");\n            errorMap.put(\"required_format\", \"第一个参数: 数字1(字符串), 第二个参数: 数字2(字符串), 第三个参数: 运算符(字符串)\");\n            return errorMap;\n        }\n\n        try {\n            // 获取参数（都是字符串类型）\n            String num1Str = args[0].toString();\n            String num2Str = args[1].toString();\n            String operator = args[2].toString();\n\n            // 转换为数字\n            double num1 = Double.parseDouble(num1Str);\n            double num2 = Double.parseDouble(num2Str);\n\n            // 计算结果\n            double result = 0;\n            String calculation = \"\";\n\n            switch (operator) {\n                case \"+\":\n                    result = num1 + num2;\n                    calculation = num1 + \" + \" + num2 + \" = \" + result;\n                    break;\n                case \"-\":\n                    result = num1 - num2;\n                    calculation = num1 + \" - \" + num2 + \" = \" + result;\n                    break;\n                case \"*\":\n                    result = num1 * num2;\n                    calculation = num1 + \" × \" + num2 + \" = \" + result;\n                    break;\n                case \"/\":\n                    if (num2 == 0) {\n                        throw new ArithmeticException(\"除数不能为0\");\n                    }\n                    result = num1 / num2;\n                    calculation = num1 + \" ÷ \" + num2 + \" = \" + result;\n                    break;\n                case \"%\":\n                    result = num1 % num2;\n                    calculation = num1 + \" % \" + num2 + \" = \" + result;\n                    break;\n                case \"pow\":\n                    result = Math.pow(num1, num2);\n                    calculation = num1 + \" ^ \" + num2 + \" = \" + result;\n                    break;\n                default:\n                    Map<String, Object> errorMap = new HashMap<>();\n                    errorMap.put(\"error\", \"不支持的运算符: \" + operator);\n                    errorMap.put(\"supported_operators\", \"+, -, *, /, %, pow\");\n                    return errorMap;\n            }\n\n            // 构建返回结果\n            Map<String, Object> resMap = new HashMap<String, Object>() {{\n                put(\"num1\", num1Str);\n                put(\"num2\", num2Str);\n                put(\"operator\", operator);\n                put(\"result\", result);\n                put(\"calculation\", calculation);\n                put(\"timestamp\", new Date().toString());\n            }};\n\n            return resMap;\n\n        } catch (NumberFormatException e) {\n            Map<String, Object> errorMap = new HashMap<>();\n            errorMap.put(\"error\", \"数字格式错误，请确保传入有效的数字字符串\");\n            errorMap.put(\"message\", e.getMessage());\n            return errorMap;\n        } catch (ArithmeticException e) {\n            Map<String, Object> errorMap = new HashMap<>();\n            errorMap.put(\"error\", \"数学运算错误\");\n            errorMap.put(\"message\", e.getMessage());\n            return errorMap;\n        } catch (Exception e) {\n            Map<String, Object> errorMap = new HashMap<>();\n            errorMap.put(\"error\", \"未知错误\");\n            errorMap.put(\"message\", e.getMessage());\n            return errorMap;\n        }\n    }\n}', 0, 1, '1.0.0', '2026-02-23 19:27:12', '2026-05-08 22:16:37', 1111111111111111111, 1111111111111111111);
+
+-- ----------------------------
+-- Table structure for mcp_tool
+-- ----------------------------
+DROP TABLE IF EXISTS `mcp_tool`;
+CREATE TABLE `mcp_tool`  (
+`id` bigint NOT NULL,
+`mcp_server_id` bigint NOT NULL COMMENT '所属 MCP 服务 ID',
+`tool_name` varchar(200) NOT NULL COMMENT '工具名',
+`description` varchar(1000) NULL DEFAULT NULL COMMENT '工具描述',
+`input_schema` json NULL COMMENT '输入 Schema',
+`output_schema` json NULL COMMENT '输出 Schema',
+`raw_schema` json NULL COMMENT '原始工具 Schema',
+`schema_hash` varchar(64) NULL DEFAULT NULL COMMENT 'Schema 摘要',
+`missing` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否已从当前 MCP 服务中消失',
+`sort` int NOT NULL DEFAULT 0 COMMENT '排序',
+`enabled` tinyint(1) NOT NULL DEFAULT 1 COMMENT '是否全局可用',
+`last_discovered_at` datetime NULL DEFAULT NULL COMMENT '首次发现时间',
+`last_seen_at` datetime NULL DEFAULT NULL COMMENT '最近发现时间',
+`created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+`updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+`created_by` bigint NULL DEFAULT NULL,
+`updated_by` bigint NULL DEFAULT NULL,
+PRIMARY KEY (`id`) USING BTREE,
+UNIQUE INDEX `uk_mcp_tool_name`(`mcp_server_id` ASC, `tool_name` ASC) USING BTREE,
+INDEX `idx_mcp_tool_server`(`mcp_server_id` ASC) USING BTREE,
+INDEX `idx_mcp_tool_runtime`(`mcp_server_id` ASC, `enabled` ASC, `missing` ASC) USING BTREE
+) COMMENT = 'MCP 工具目录表';
 
 SET FOREIGN_KEY_CHECKS = 1;

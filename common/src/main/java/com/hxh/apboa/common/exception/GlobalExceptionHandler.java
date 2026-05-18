@@ -52,6 +52,8 @@ public class GlobalExceptionHandler {
         INDEX_FIELD_MAPPING.put("agent_hooks.uk_agent_hook", "智能体Hook");
         INDEX_FIELD_MAPPING.put("agent_knowledge_bases.uk_agent_kb", "智能体知识库");
         INDEX_FIELD_MAPPING.put("agent_mcp_servers.uk_agent_mcp", "智能体MCP");
+        INDEX_FIELD_MAPPING.put("mcp_tool.uk_mcp_tool_name", "MCP工具");
+        INDEX_FIELD_MAPPING.put("agent_mcp_tool.uk_agent_mcp_tool", "智能体MCP工具");
         INDEX_FIELD_MAPPING.put("agent_skill_packages.uk_agent_skill", "智能体Kill");
         INDEX_FIELD_MAPPING.put("agent_sub_agents.uk_parent_sub_agent", "智能体AgentAsTool");
     }

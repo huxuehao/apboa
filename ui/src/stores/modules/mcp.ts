@@ -1,24 +1,24 @@
 /**
- * MCP服务器配置状态管理
+ * MCP 服务配置状态管理
  *
  * @author huxuehao
  */
 
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type {McpServerVO, McpServerDTO, McpServer} from '@/types'
-import { McpProtocol } from '@/types'
-import * as mcpApi from '@/api/mcp'
 import { message } from 'ant-design-vue'
+import type { McpServer, McpServerDTO, McpServerVO } from '@/types'
+import { McpActivationStatus, McpProtocol } from '@/types'
+import * as mcpApi from '@/api/mcp'
 
 export const useMcpStore = defineStore('mcp', () => {
   const list = ref<McpServerVO[]>([])
   const selectedProtocol = ref<string | null>(null)
-  const keyword = ref<string>('')
-  const loading = ref<boolean>(false)
-  const hasMore = ref<boolean>(true)
-  const currentPage = ref<number>(1)
-  const pageSize = ref<number>(50)
+  const keyword = ref('')
+  const loading = ref(false)
+  const hasMore = ref(true)
+  const currentPage = ref(1)
+  const pageSize = ref(50)
 
   /**
    * 加载分页数据
@@ -65,7 +65,7 @@ export const useMcpStore = defineStore('mcp', () => {
   }
 
   /**
-   * 设置协议类型（仅更新状态，不触发加载）
+   * 设置协议类型
    *
    * @param protocol 协议类型
    */
@@ -74,9 +74,9 @@ export const useMcpStore = defineStore('mcp', () => {
   }
 
   /**
-   * 设置搜索关键词（仅更新状态，不触发加载）
+   * 设置搜索关键字
    *
-   * @param value 关键词
+   * @param value 关键字
    */
   function setKeyword(value: string) {
     keyword.value = value
@@ -93,7 +93,7 @@ export const useMcpStore = defineStore('mcp', () => {
   }
 
   /**
-   * 重置分页状态（不加载数据）
+   * 重置分页状态
    */
   function resetPagination() {
     currentPage.value = 1
@@ -103,7 +103,7 @@ export const useMcpStore = defineStore('mcp', () => {
   /**
    * 删除配置
    *
-   * @param id 配置ID
+   * @param id 配置 ID
    */
   async function deleteConfig(id: string) {
     await mcpApi.remove([id])
@@ -113,8 +113,7 @@ export const useMcpStore = defineStore('mcp', () => {
   /**
    * 检查是否被智能体使用
    *
-   * @param id 配置ID
-   * @returns 是否被使用
+   * @param id 配置 ID
    */
   async function checkUsedWithAgent(id: string): Promise<string[]> {
     const response = await mcpApi.usedWithAgent([id])
@@ -124,7 +123,7 @@ export const useMcpStore = defineStore('mcp', () => {
   /**
    * 切换启用状态
    *
-   * @param id 配置ID
+   * @param id 配置 ID
    * @param enabled 启用状态
    */
   async function toggleEnabled(id: string, enabled: boolean) {
@@ -133,12 +132,59 @@ export const useMcpStore = defineStore('mcp', () => {
 
     const entity: McpServer = {
       id: item.id,
-      enabled,
+      enabled
     } as McpServer
 
-    await mcpApi.update(entity)
-    item.enabled = enabled
-    message.success('操作成功')
+    const response = await mcpApi.update(entity)
+    patchItem(response.data.data)
+    message.success(enabled ? '已启用' : '已停用')
+  }
+
+  /**
+   * 手动连接
+   *
+   * @param id MCP ID
+   * @param action 操作文案
+   */
+  async function activateServer(id: string, action = '连接') {
+    const response = await mcpApi.activate(id)
+    patchItem(response.data.data)
+    showConnectionMessage(response.data.data, action)
+    return response.data.data
+  }
+
+  /**
+   * 手动刷新工具目录
+   *
+   * @param id MCP ID
+   * @param action 操作文案
+   */
+  async function syncServerTools(id: string, action = '刷新工具') {
+    const response = await mcpApi.syncTools(id)
+    patchItem(response.data.data)
+    showConnectionMessage(response.data.data, action)
+    return response.data.data
+  }
+
+  function patchItem(next: McpServerVO) {
+    const index = list.value.findIndex(item => item.id === next.id)
+    if (index >= 0) {
+      list.value[index] = next
+    }
+  }
+
+  function showConnectionMessage(server: McpServerVO, action: string) {
+    if (server.activationStatus === McpActivationStatus.FAILED) {
+      message.error(`${action}失败，${server.activationMessage || '请检查 MCP 配置'}`)
+      return
+    }
+
+    if (server.toolCount === 0) {
+      message.warning(`${action}完成：连接成功，但未发现可用工具`)
+      return
+    }
+
+    message.success(`${action}成功`)
   }
 
   return {
@@ -155,6 +201,8 @@ export const useMcpStore = defineStore('mcp', () => {
     resetPagination,
     deleteConfig,
     checkUsedWithAgent,
-    toggleEnabled
+    toggleEnabled,
+    activateServer,
+    syncServerTools
   }
 })

@@ -22,6 +22,7 @@ target/
 /nbproject/private/
 /nbbuild/
 /dist/
+ui/dist-zip/
 /nbdist/
 /.nb-gradle/
 build/
@@ -45,3 +46,4 @@ build/
 .omx
 .codex_tmp
 logs
+.m2

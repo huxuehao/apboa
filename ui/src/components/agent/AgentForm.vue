@@ -71,6 +71,7 @@ const formData = ref({
   knowledge: {
     knowledgeBase: [] as string[],
     mcp: [] as string[],
+    mcpBindings: [] as AgentDefinitionVO['mcpBindings'],
     subAgent: [] as string[]
   },
   advanced: {
@@ -159,6 +160,7 @@ watch(
         formData.value.knowledge = {
           knowledgeBase: props.data.knowledgeBase || [],
           mcp: props.data.mcp || [],
+          mcpBindings: props.data.mcpBindings || [],
           subAgent: props.data.subAgent || []
         }
         formData.value.advanced = {
@@ -214,6 +216,7 @@ function resetForm() {
     knowledge: {
       knowledgeBase: [],
       mcp: [],
+      mcpBindings: [],
       subAgent: []
     },
     advanced: {
@@ -294,6 +297,7 @@ async function handleSubmit() {
       sensitiveFilterEnabled: formData.value.tools.sensitiveFilterEnabled,
       knowledgeBase: formData.value.knowledge.knowledgeBase,
       mcp: formData.value.knowledge.mcp,
+      mcpBindings: formData.value.knowledge.mcpBindings,
       subAgent: formData.value.knowledge.subAgent,
       hook: formData.value.tools.hook,
       enablePlanning: formData.value.advanced.enablePlanning,

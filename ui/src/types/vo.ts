@@ -13,6 +13,8 @@ import type {
   ModelType,
   HealthStatus,
   KbType,
+  McpActivationStatus,
+  McpToolExposureMode,
   McpMode,
   McpProtocol,
   SensitiveWordAction,
@@ -50,6 +52,7 @@ export interface AgentDefinitionVO {
   skill: string[]
   tool: string[]
   mcp: string[]
+  mcpBindings: AgentMcpBindingVO[]
   hook: string[]
   subAgent: string[]
   knowledgeBase: string[]
@@ -131,12 +134,45 @@ export interface McpServerVO {
   description: string
   healthStatus: HealthStatus
   lastHealthCheck: string
+  activationStatus: McpActivationStatus
+  activationMessage: string
+  lastActivationTime: string | null
+  lastToolSyncTime: string | null
+  toolCount: number
+  availableToolCount: number
+  needsSync: boolean
   enabled: boolean
   createdAt: string
   updatedAt: string
   createdBy: string
   updatedBy: string
   used: string[]
+}
+
+/**
+ * Agent MCP 绑定信息
+ */
+export interface AgentMcpBindingVO {
+  mcpServerId: string
+  exposureMode: McpToolExposureMode
+  mcpToolIds: string[]
+}
+
+/**
+ * MCP 工具 VO
+ */
+export interface McpToolVO {
+  id: string | number
+  mcpServerId: string | number
+  toolName: string
+  description: string
+  inputSchema: Record<string, unknown> | null
+  outputSchema: Record<string, unknown> | null
+  enabled: boolean
+  missing: boolean
+  sort: number
+  lastDiscoveredAt: string | null
+  lastSeenAt: string | null
 }
 
 /**

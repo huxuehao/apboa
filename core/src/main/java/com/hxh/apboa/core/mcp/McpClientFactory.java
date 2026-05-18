@@ -1,29 +1,38 @@
 package com.hxh.apboa.core.mcp;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.McpServer;
+import com.hxh.apboa.common.entity.McpTool;
+import com.hxh.apboa.common.enums.McpActivationStatus;
 import com.hxh.apboa.common.enums.McpProtocol;
-import com.hxh.apboa.common.mcp.ToolSchemaRefresher;
+import com.hxh.apboa.common.enums.McpToolExposureMode;
+import com.hxh.apboa.common.vo.AgentMcpBindingVO;
 import com.hxh.apboa.core.mcp.impl.HttpMcpClientConfig;
 import com.hxh.apboa.core.mcp.impl.SseMcpClientConfig;
 import com.hxh.apboa.core.mcp.impl.StdioMcpClientConfig;
 import com.hxh.apboa.mcp.service.AgentMcpServerService;
 import com.hxh.apboa.mcp.service.McpServerService;
+import com.hxh.apboa.mcp.service.McpToolService;
 import io.agentscope.core.tool.AgentTool;
 import io.agentscope.core.tool.mcp.McpClientWrapper;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 /**
- * 描述：MCP客户端工厂类
+ * MCP 客户端工厂
  *
  * @author huxuehao
  */
@@ -40,8 +49,9 @@ public class McpClientFactory {
 
     private final McpServerService mcpServerService;
     private final AgentMcpServerService agentMcpServerService;
+    private final McpToolService mcpToolService;
     private final ObjectMapper objectMapper;
-    private final ToolSchemaRefresher toolSchemaRefresher;
+    private final Map<Long, SharedMcpClientContext> sharedContexts = new ConcurrentHashMap<>();
 
     public List<McpClientWrapper> getMcpClient(AgentDefinition agentDefinition) {
         List<McpClientWrapper> mcpClients = new ArrayList<>();
@@ -49,7 +59,8 @@ public class McpClientFactory {
         List<Long> mcpIds = agentMcpServerService.getMcpIds(agentDefinition.getId());
         for (Long mcpId : mcpIds) {
             McpServer mcpServer = mcpServerService.getById(mcpId);
-            if (!mcpServer.getEnabled()) {
+            if (!isRuntimeAvailable(mcpServer)) {
+                closeStaleContext(mcpId);
                 continue;
             }
 
@@ -60,51 +71,152 @@ public class McpClientFactory {
     }
 
     /**
-     * 为单个 MCP 服务器创建一个客户端包装器。供模式刷新任务使用，而非智能体启动时使用。
+     * 为单个 MCP 服务创建客户端包装器，供刷新工具目录时使用。
      */
     public McpClientWrapper getMcpClientForServer(McpServer mcpServer) {
         return INSTANCE.get(mcpServer.getProtocol()).getMcpClient(mcpServer);
     }
 
     /**
-     * 根据缓存的模式构建 MCP 工具，且在创建智能体期间不连接 MCP 服务器。
+     * 根据落库的工具目录构建 MCP 工具，并且在创建智能体期间不连接 MCP 服务。
      */
     public List<AgentTool> getLazyMcpTools(AgentDefinition agentDefinition) {
         List<AgentTool> result = new ArrayList<>();
-        List<Long> mcpIds = agentMcpServerService.getMcpIds(agentDefinition.getId());
+        List<AgentMcpBindingVO> bindings = agentMcpServerService.getBindings(agentDefinition.getId());
 
-        for (Long mcpId : mcpIds) {
+        for (AgentMcpBindingVO binding : bindings) {
+            Long mcpId = binding.getMcpServerId();
             McpServer mcpServer = mcpServerService.getById(mcpId);
-            if (mcpServer == null || !mcpServer.getEnabled()) {
+            if (!isRuntimeAvailable(mcpServer)) {
+                closeStaleContext(mcpId);
                 continue;
             }
 
-            List<McpSchema.Tool> cachedTools = parseCachedTools(mcpServer.getToolSchemas());
-            if (cachedTools.isEmpty()) {
-                log.warn("MCP '{}' has no cached tool schemas; skip lazy registration",
+            mcpToolService.ensureBackfilledFromCache(mcpServer);
+            List<McpTool> runtimeTools = mcpToolService.listRuntimeTools(mcpId);
+            if (binding.getExposureMode() == McpToolExposureMode.SELECTED_ONLY) {
+                Set<Long> selectedIds = new HashSet<>(binding.getMcpToolIds() == null
+                        ? List.of()
+                        : binding.getMcpToolIds());
+                runtimeTools = runtimeTools.stream()
+                        .filter(tool -> selectedIds.contains(tool.getId()))
+                        .toList();
+            }
+
+            if (runtimeTools.isEmpty()) {
+                closeStaleContext(mcpId);
+                log.warn("MCP '{}' has no runtime tools after governance filtering; skip lazy registration",
                         mcpServer.getName());
-                toolSchemaRefresher.refreshToolSchemas(mcpServer);
                 continue;
             }
 
-            cachedTools.forEach(tool -> result.add(new LazyMcpAgentTool(
-                    mcpServer.getName(),
-                    tool,
-                    () -> INSTANCE.get(mcpServer.getProtocol()).getMcpClient(mcpServer))));
+            runtimeTools.forEach(tool -> {
+                McpSchema.Tool toolSchema = parseToolSchema(tool);
+                if (toolSchema == null) {
+                    return;
+                }
+                result.add(new LazyMcpAgentTool(
+                        mcpServer.getName(),
+                        toolSchema,
+                        () -> getInitializedClient(mcpServer.getId())));
+            });
         }
         return result;
     }
 
-    private List<McpSchema.Tool> parseCachedTools(String toolSchemasJson) {
-        if (toolSchemasJson == null || toolSchemasJson.isBlank()) {
-            return List.of();
+    public Mono<McpClientWrapper> getInitializedClient(Long mcpServerId) {
+        McpServer current = mcpServerService.getById(mcpServerId);
+        if (!isRuntimeAvailable(current)) {
+            closeStaleContext(mcpServerId);
+            return Mono.error(new IllegalStateException("MCP 当前不可用"));
+        }
+
+        String contextKey = buildContextKey(current);
+        SharedMcpClientContext context = sharedContexts.compute(mcpServerId, (id, existing) -> {
+            if (existing != null && Objects.equals(existing.contextKey, contextKey)) {
+                return existing;
+            }
+
+            SharedMcpClientContext created = createContext(current, contextKey);
+            if (existing != null) {
+                closeContext(existing);
+            }
+            return created;
+        });
+
+        return context.initializedClient;
+    }
+
+    private SharedMcpClientContext createContext(McpServer mcpServer, String contextKey) {
+        SharedMcpClientContext context = new SharedMcpClientContext(contextKey);
+        context.initializedClient = Mono.defer(() -> {
+                    McpClientWrapper client = getMcpClientForServer(mcpServer);
+                    context.clientRef.set(client);
+                    return client.initialize().thenReturn(client);
+                })
+                .doOnError(e -> {
+                    SharedMcpClientContext current = sharedContexts.get(mcpServer.getId());
+                    if (current == context) {
+                        sharedContexts.remove(mcpServer.getId());
+                    }
+                    closeContext(context);
+                })
+                .cache();
+        return context;
+    }
+
+    private void closeContext(SharedMcpClientContext context) {
+        McpClientWrapper client = context.clientRef.getAndSet(null);
+        if (client != null) {
+            try {
+                client.close();
+            } catch (Exception e) {
+                log.debug("Close MCP client context failed: {}", e.getMessage());
+            }
+        }
+    }
+
+    private void closeStaleContext(Long mcpServerId) {
+        SharedMcpClientContext context = sharedContexts.remove(mcpServerId);
+        if (context != null) {
+            closeContext(context);
+        }
+    }
+
+    private boolean isRuntimeAvailable(McpServer mcpServer) {
+        return mcpServer != null
+                && Boolean.TRUE.equals(mcpServer.getEnabled())
+                && mcpServer.getActivationStatus() == McpActivationStatus.ACTIVE;
+    }
+
+    private String buildContextKey(McpServer mcpServer) {
+        return mcpServer.getId()
+                + ":"
+                + (mcpServer.getActivationRevision() == null ? 0L : mcpServer.getActivationRevision())
+                + ":"
+                + (mcpServer.getConfigHash() == null ? "" : mcpServer.getConfigHash());
+    }
+
+    private McpSchema.Tool parseToolSchema(McpTool tool) {
+        if (tool.getRawSchema() == null) {
+            log.warn("MCP tool '{}' raw schema is empty", tool.getToolName());
+            return null;
         }
         try {
-            return objectMapper.readValue(toolSchemasJson,
-                    new TypeReference<List<McpSchema.Tool>>() {});
+            return objectMapper.treeToValue(tool.getRawSchema(), McpSchema.Tool.class);
         } catch (Exception e) {
-            log.warn("Failed to parse cached MCP tool schemas", e);
-            return List.of();
+            log.warn("Failed to parse MCP tool schema '{}': {}", tool.getToolName(), e.getMessage());
+            return null;
+        }
+    }
+
+    private static final class SharedMcpClientContext {
+        private final String contextKey;
+        private final AtomicReference<McpClientWrapper> clientRef = new AtomicReference<>();
+        private Mono<McpClientWrapper> initializedClient;
+
+        private SharedMcpClientContext(String contextKey) {
+            this.contextKey = contextKey;
         }
     }
 }

@@ -1,42 +1,59 @@
 /**
- * 智能体知识库与MCP表单组件
+ * 智能体知识库与 MCP 表单组件
  *
  * @author huxuehao
  */
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RoutePaths } from '@/router/constants.ts'
 import * as knowledgeApi from '@/api/knowledge'
 import * as mcpApi from '@/api/mcp'
 import * as agentApi from '@/api/agent'
-import type { KnowledgeBaseConfigVO, McpServerVO, AgentDefinitionVO } from '@/types'
+import type {
+  KnowledgeBaseConfigVO,
+  McpServerVO,
+  AgentDefinitionVO,
+  AgentMcpBindingVO,
+  McpToolVO
+} from '@/types'
+import { McpActivationStatus, McpToolExposureMode } from '@/types'
 import { countCommonElements } from '@/utils/tools'
+import {
+  getMcpConnectionStatusColor,
+  getMcpConnectionStatusText,
+  getMcpUnavailableReason
+} from '@/composables/useMcpPresentation'
+
+interface KnowledgeFormModel {
+  knowledgeBase: string[]
+  mcp: string[]
+  mcpBindings: AgentMcpBindingVO[]
+  subAgent: string[]
+}
 
 /**
- * Props定义
+ * Props 定义
  */
 const props = defineProps<{
-  modelValue: {
-    knowledgeBase: string[]
-    mcp: string[]
-    subAgent: string[]
-  }
+  modelValue: KnowledgeFormModel
   currentAgentId?: string | number | undefined
 }>()
 
 /**
- * Emits定义
+ * Emits 定义
  */
 const emit = defineEmits<{
-  'update:modelValue': [value: typeof props.modelValue]
+  'update:modelValue': [value: KnowledgeFormModel]
 }>()
 
 const formRef = ref()
 const loading = ref(false)
+const toolLoadingMap = ref<Record<string, boolean>>({})
 
 const allKnowledgeBases = ref<KnowledgeBaseConfigVO[]>([])
 const allMcpServers = ref<McpServerVO[]>([])
 const allAgents = ref<AgentDefinitionVO[]>([])
+const mcpToolMap = ref<Record<string, McpToolVO[]>>({})
 
 /**
  * 表单数据
@@ -64,12 +81,10 @@ const knowledgeBasesByType = computed(() => {
 /**
  * 知识库类型列表
  */
-const knowledgeBaseTypes = computed(() => {
-  return Object.keys(knowledgeBasesByType.value)
-})
+const knowledgeBaseTypes = computed(() => Object.keys(knowledgeBasesByType.value))
 
 /**
- * 按协议分组的MCP服务器
+ * 按协议分组的 MCP 服务
  */
 const mcpServersByProtocol = computed(() => {
   const groups: Record<string, McpServerVO[]> = {}
@@ -84,18 +99,112 @@ const mcpServersByProtocol = computed(() => {
 })
 
 /**
- * MCP协议列表
+ * MCP 协议列表
  */
-const mcpProtocols = computed(() => {
-  return Object.keys(mcpServersByProtocol.value)
-})
+const mcpProtocols = computed(() => Object.keys(mcpServersByProtocol.value))
 
 /**
- * 可选的子智能体列表(排除当前智能体)
+ * 可选的子智能体列表
  */
 const availableAgents = computed(() => {
   return allAgents.value.filter(a => a.id !== props.currentAgentId)
 })
+
+/**
+ * 已选 MCP ID 集合
+ */
+const selectedMcpIds = computed(() => {
+  return new Set((formData.value.mcpBindings || []).map(item => String(item.mcpServerId)))
+})
+
+/**
+ * 暴露模式选项
+ */
+const exposureModeOptions = [
+  { label: '继承全局', value: McpToolExposureMode.ALL_GLOBAL },
+  { label: '局部选择', value: McpToolExposureMode.SELECTED_ONLY }
+]
+
+function ensureMcpBindings() {
+  if (!Array.isArray(formData.value.mcpBindings)) {
+    formData.value.mcpBindings = []
+  }
+  if (!Array.isArray(formData.value.mcp)) {
+    formData.value.mcp = []
+  }
+
+  if (formData.value.mcpBindings.length === 0 && formData.value.mcp.length > 0) {
+    formData.value.mcpBindings = [...new Set(formData.value.mcp)].map(id => ({
+      mcpServerId: id,
+      exposureMode: McpToolExposureMode.ALL_GLOBAL,
+      mcpToolIds: []
+    }))
+  }
+
+  syncLegacyMcpIds()
+}
+
+function syncLegacyMcpIds() {
+  formData.value.mcp = (formData.value.mcpBindings || []).map(item => String(item.mcpServerId))
+}
+
+function getBinding(mcpId: string): AgentMcpBindingVO | undefined {
+  return (formData.value.mcpBindings || []).find(item => String(item.mcpServerId) === mcpId)
+}
+
+function isMcpSelected(mcpId: string) {
+  return selectedMcpIds.value.has(mcpId)
+}
+
+function isMcpRuntimeAvailable(mcp: McpServerVO) {
+  return Boolean(mcp.enabled)
+    && mcp.activationStatus === McpActivationStatus.ACTIVE
+    && (mcp.availableToolCount || 0) > 0
+}
+
+function isMcpSelectable(mcp: McpServerVO) {
+  return isMcpRuntimeAvailable(mcp) || isMcpSelected(String(mcp.id))
+}
+
+function getMcpTools(mcpId: string) {
+  return mcpToolMap.value[mcpId] || []
+}
+
+function isToolLoading(mcpId: string) {
+  return Boolean(toolLoadingMap.value[mcpId])
+}
+
+function isToolAvailable(tool: McpToolVO) {
+  return Boolean(tool.enabled) && !tool.missing
+}
+
+function isToolSelected(mcpId: string, toolId: string) {
+  return getBinding(mcpId)?.mcpToolIds?.includes(toolId) || false
+}
+
+function isToolSelectable(mcpId: string, tool: McpToolVO) {
+  return isToolAvailable(tool) || isToolSelected(mcpId, String(tool.id))
+}
+
+async function loadMcpTools(mcpId: string) {
+  if (mcpToolMap.value[mcpId]) {
+    return
+  }
+  toolLoadingMap.value[mcpId] = true
+  try {
+    const response = await mcpApi.listTools(mcpId)
+    mcpToolMap.value[mcpId] = response.data.data || []
+  } finally {
+    toolLoadingMap.value[mcpId] = false
+  }
+}
+
+async function preloadSelectedMcpTools() {
+  const targets = (formData.value.mcpBindings || [])
+    .filter(item => item.exposureMode === McpToolExposureMode.SELECTED_ONLY)
+    .map(item => String(item.mcpServerId))
+  await Promise.all(targets.map(id => loadMcpTools(id)))
+}
 
 /**
  * 加载所有知识库
@@ -111,11 +220,11 @@ async function loadAllKnowledgeBases() {
 }
 
 /**
- * 加载所有MCP服务器
+ * 加载所有 MCP 服务
  */
 async function loadAllMcpServers() {
   const response = await mcpApi.page({ page: 1, size: 1000 })
-  allMcpServers.value = response.data.data.records.filter(item => item.enabled) || []
+  allMcpServers.value = response.data.data.records || []
 }
 
 /**
@@ -138,43 +247,81 @@ async function validate(): Promise<boolean> {
   }
 }
 
-const handleKBChange = (kbId: string, checked: boolean) => {
+function handleKBChange(kbId: string, checked: boolean) {
   if (checked) {
-    formData.value.knowledgeBase.push(kbId);
+    formData.value.knowledgeBase.push(kbId)
   } else {
-    const index = formData.value.knowledgeBase.indexOf(kbId);
+    const index = formData.value.knowledgeBase.indexOf(kbId)
     if (index > -1) {
-      formData.value.knowledgeBase.splice(index, 1);
+      formData.value.knowledgeBase.splice(index, 1)
     }
   }
-};
+}
 
-const handleMcpChange = (mcpId: string, checked: boolean) => {
+function handleMcpChange(mcpId: string, checked: boolean) {
+  const bindings = formData.value.mcpBindings || []
   if (checked) {
-    formData.value.mcp.push(mcpId);
+    if (!bindings.some(item => String(item.mcpServerId) === mcpId)) {
+      bindings.push({
+        mcpServerId: mcpId,
+        exposureMode: McpToolExposureMode.ALL_GLOBAL,
+        mcpToolIds: []
+      })
+    }
   } else {
-    const index = formData.value.mcp.indexOf(mcpId);
+    formData.value.mcpBindings = bindings.filter(item => String(item.mcpServerId) !== mcpId)
+  }
+  syncLegacyMcpIds()
+}
+
+async function handleExposureModeChange(mcpId: string, exposureMode: McpToolExposureMode) {
+  const binding = getBinding(mcpId)
+  if (!binding) {
+    return
+  }
+  binding.exposureMode = exposureMode
+  if (exposureMode === McpToolExposureMode.SELECTED_ONLY) {
+    await loadMcpTools(mcpId)
+  }
+}
+
+function handleMcpToolChange(mcpId: string, toolId: string, checked: boolean) {
+  const binding = getBinding(mcpId)
+  if (!binding) {
+    return
+  }
+  if (!Array.isArray(binding.mcpToolIds)) {
+    binding.mcpToolIds = []
+  }
+
+  if (checked) {
+    if (!binding.mcpToolIds.includes(toolId)) {
+      binding.mcpToolIds.push(toolId)
+    }
+  } else {
+    binding.mcpToolIds = binding.mcpToolIds.filter(id => id !== toolId)
+  }
+}
+
+function handleSubAgentChange(agentId: string, checked: boolean) {
+  if (checked) {
+    formData.value.subAgent.push(agentId)
+  } else {
+    const index = formData.value.subAgent.indexOf(agentId)
     if (index > -1) {
-      formData.value.mcp.splice(index, 1);
+      formData.value.subAgent.splice(index, 1)
     }
   }
-};
+}
 
-const handleSubAgentChange = (agentId: string, checked: boolean) => {
-  if (checked) {
-    formData.value.subAgent.push(agentId);
-  } else {
-    const index = formData.value.subAgent.indexOf(agentId);
-    if (index > -1) {
-      formData.value.subAgent.splice(index, 1);
-    }
-  }
-};
-
-onMounted(() => {
-  loadAllKnowledgeBases()
-  loadAllMcpServers()
-  loadAllAgents()
+onMounted(async () => {
+  ensureMcpBindings()
+  await Promise.all([
+    loadAllKnowledgeBases(),
+    loadAllMcpServers(),
+    loadAllAgents()
+  ])
+  await preloadSelectedMcpTools()
 })
 
 defineExpose({
@@ -194,11 +341,10 @@ defineExpose({
             <div class="checkbox-grid">
               <ACheckbox
                 v-for="kb in knowledgeBasesByType[type]"
-                :checked="formData.knowledgeBase.includes(kb.id as string)"
-                @change="(e: any) => handleKBChange(kb.id as string, e.target.checked)"
                 :key="kb.id"
-                :value="kb.id"
+                :checked="formData.knowledgeBase.includes(kb.id as string)"
                 class="checkbox-item"
+                @change="(e: any) => handleKBChange(kb.id as string, e.target.checked)"
               >
                 <div class="item-info">
                   <div class="item-name text-ellipsis" :title="kb.name">{{ kb.name }}</div>
@@ -209,37 +355,124 @@ defineExpose({
           </ACollapsePanel>
         </ACollapse>
         <div v-else class="text-placeholder mt-xs">
-          <AButton type="text">未配置知识库？</AButton>
+          <AButton type="text">未配置知识库</AButton>
           <AButton type="link" :href="`/#/${RoutePaths.KNOWLEDGE}`" target="_blank">去配置</AButton>
           <AButton type="link" @click="loadAllKnowledgeBases">刷新</AButton>
         </div>
       </AFormItem>
 
-      <AFormItem label="MCP服务器">
+      <AFormItem label="MCP 服务">
         <ACollapse v-if="mcpProtocols?.length > 0">
           <ACollapsePanel
             v-for="protocol in mcpProtocols"
             :key="protocol"
             :header="`${protocol}（${countCommonElements(mcpServersByProtocol[protocol]?.map(i => i.id) || [], formData.mcp)}/${mcpServersByProtocol[protocol]?.length}）`">
-            <div class="checkbox-grid">
-              <ACheckbox
+            <div class="mcp-grid">
+              <div
                 v-for="mcp in mcpServersByProtocol[protocol]"
-                :checked="formData.mcp.includes(mcp.id as string)"
-                @change="(e: any) => handleMcpChange(mcp.id as string, e.target.checked)"
                 :key="mcp.id"
-                :value="mcp.id"
-                class="checkbox-item"
+                class="mcp-item"
+                :class="{
+                  selected: isMcpSelected(mcp.id as string),
+                  unavailable: !isMcpRuntimeAvailable(mcp)
+                }"
               >
-                <div class="item-info">
-                  <div class="item-name text-ellipsis" :title="mcp.name">{{ mcp.name }}</div>
-                  <div class="item-desc text-placeholder text-xs text-ellipsis" :title="mcp.description">{{ mcp.description }}</div>
+                <div class="mcp-item-header">
+                  <ACheckbox
+                    :checked="isMcpSelected(mcp.id as string)"
+                    :disabled="!isMcpSelectable(mcp)"
+                    @change="(e: any) => handleMcpChange(mcp.id as string, e.target.checked)"
+                  >
+                    <div class="item-info">
+                      <div class="item-name text-ellipsis" :title="mcp.name">{{ mcp.name }}</div>
+                      <div class="item-desc text-placeholder text-xs" :title="mcp.description">{{ mcp.description }}</div>
+                    </div>
+                  </ACheckbox>
+                    <div class="mcp-tag-group">
+                      <ATag color="default">{{ mcp.protocol }}</ATag>
+                      <ATag :color="getMcpConnectionStatusColor(mcp)">
+                        {{ getMcpConnectionStatusText(mcp) }}
+                      </ATag>
+                      <ATag color="processing">全局可用 {{ mcp.availableToolCount || 0 }}</ATag>
+                      <ATag v-if="!isMcpRuntimeAvailable(mcp)" color="warning">
+                        {{ getMcpUnavailableReason(mcp) }}
+                    </ATag>
+                  </div>
                 </div>
-              </ACheckbox>
+
+                <div
+                  v-if="isMcpSelected(mcp.id as string)"
+                  class="mcp-binding-panel"
+                >
+                  <div class="binding-row">
+                    <span class="binding-label">工具暴露</span>
+                    <ASegmented
+                      :value="getBinding(mcp.id as string)?.exposureMode || McpToolExposureMode.ALL_GLOBAL"
+                      :options="exposureModeOptions"
+                      size="small"
+                      @change="(value: McpToolExposureMode) => handleExposureModeChange(mcp.id as string, value)"
+                    />
+                  </div>
+
+                  <div
+                    v-if="!isMcpRuntimeAvailable(mcp)"
+                    class="binding-tip warning"
+                  >
+                    当前绑定会保留用于展示，但运行时不会注册该 MCP 的工具。
+                  </div>
+
+                  <template v-if="getBinding(mcp.id as string)?.exposureMode === McpToolExposureMode.SELECTED_ONLY">
+                    <div class="binding-tip">
+                      仅注册下方勾选、且当前仍全局可用的工具。
+                    </div>
+                    <ASpin :spinning="isToolLoading(mcp.id as string)">
+                      <AButton
+                        v-if="!mcpToolMap[mcp.id as string]"
+                        type="link"
+                        class="tool-load-action"
+                        @click="loadMcpTools(mcp.id as string)"
+                      >
+                        加载工具目录
+                      </AButton>
+                      <AEmpty
+                        v-else-if="!getMcpTools(mcp.id as string).length"
+                        description="暂无工具目录"
+                      />
+                      <div v-else class="tool-grid">
+                        <div
+                          v-for="tool in getMcpTools(mcp.id as string)"
+                          :key="tool.id"
+                          class="tool-item"
+                          :class="{ unavailable: !isToolAvailable(tool) }"
+                        >
+                          <ACheckbox
+                            :checked="isToolSelected(mcp.id as string, tool.id as string)"
+                            :disabled="!isToolSelectable(mcp.id as string, tool)"
+                            @change="(e: any) => handleMcpToolChange(mcp.id as string, tool.id as string, e.target.checked)"
+                          >
+                            <div class="tool-item-info">
+                              <div class="tool-item-name-row">
+                                <span class="tool-item-name">{{ tool.toolName }}</span>
+                                <ATag v-if="tool.missing" color="warning">已消失</ATag>
+                                <ATag v-else-if="tool.enabled" color="success">全局可用</ATag>
+                                <ATag v-else color="default">全局禁用</ATag>
+                              </div>
+                              <div class="tool-item-desc text-placeholder text-xs">
+                                {{ tool.description || '暂无描述' }}
+                              </div>
+                            </div>
+                          </ACheckbox>
+                        </div>
+                      </div>
+                    </ASpin>
+                  </template>
+                </div>
+              </div>
             </div>
           </ACollapsePanel>
         </ACollapse>
         <div v-else class="text-placeholder mt-xs">
-          <AButton type="text">未配置MCP服务？</AButton>
+          <AButton type="text">未配置 MCP 服务</AButton>
           <AButton type="link" :href="`/#/${RoutePaths.MCP}`" target="_blank">去配置</AButton>
           <AButton type="link" @click="loadAllMcpServers">刷新</AButton>
         </div>
@@ -250,27 +483,26 @@ defineExpose({
           <div class="checkbox-grid">
             <ACheckbox
               v-for="agent in availableAgents"
-              :checked="formData.subAgent.includes(agent.id as string)"
               :key="agent.id"
-              :value="agent.id"
-              @change="(e: any) => handleSubAgentChange(agent.id as string, e.target.checked)"
+              :checked="formData.subAgent.includes(agent.id as string)"
               class="checkbox-item"
+              @change="(e: any) => handleSubAgentChange(agent.id as string, e.target.checked)"
             >
               <div class="item-info">
                 <div class="item-name text-ellipsis" :title="agent.name">{{ agent.name }}</div>
                 <div class="item-desc text-placeholder text-xs text-ellipsis" :title="agent.description">
-                  <span style="color: #0F74FF">{{ agent.agentType == 'CUSTOM'? '自定义': 'A2A' }}</span> &nbsp;
-                  <span>{{ agent.description }}</span>
+                  <span style="color: #0F74FF">{{ agent.agentType === 'CUSTOM' ? '自定义' : 'A2A' }}</span>
+                  <span>&nbsp;{{ agent.description }}</span>
                 </div>
               </div>
             </ACheckbox>
           </div>
           <div class="text-placeholder text-xs mt-sm">
-            选中的智能体，将会被当前智能体作为工具进行使用。
+            选中的智能体将作为当前智能体的可调用子智能体。
           </div>
         </template>
         <div v-else class="text-placeholder mt-xs">
-          <AButton type="text">未添加子智能体？</AButton>
+          <AButton type="text">未添加子智能体</AButton>
           <AButton type="link" :href="`/#/${RoutePaths.AGENT}`" target="_blank">去添加</AButton>
           <AButton type="link" @click="loadAllAgents">刷新</AButton>
         </div>
@@ -291,7 +523,7 @@ defineExpose({
   border: 1px solid var(--color-border-base);
   border-radius: var(--border-radius-md);
   margin: 0 !important;
-  width:300px;
+  width: 300px;
   transition: all var(--transition-base);
 
   &:hover {
@@ -304,7 +536,7 @@ defineExpose({
   .item-name {
     font-weight: 500;
     margin-bottom: 4px;
-    width:250px;
+    width: 250px;
   }
 
   .item-desc {
@@ -312,10 +544,115 @@ defineExpose({
   }
 }
 
+.mcp-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mcp-item {
+  border: 1px solid var(--color-border-base);
+  border-radius: 8px;
+  padding: 12px;
+  transition: all var(--transition-base);
+
+  &.selected {
+    border-color: rgba(15, 116, 255, 0.4);
+    background: rgba(15, 116, 255, 0.03);
+  }
+
+  &.unavailable {
+    background: rgba(15, 23, 42, 0.02);
+  }
+}
+
+.mcp-item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mcp-tag-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.mcp-binding-panel {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.binding-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.binding-label {
+  font-weight: 500;
+}
+
+.binding-tip {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+
+  &.warning {
+    color: #d48806;
+  }
+}
+
+.tool-load-action {
+  padding-left: 0;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.tool-item {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
+  padding: 10px;
+
+  &.unavailable {
+    background: rgba(15, 23, 42, 0.02);
+  }
+}
+
+.tool-item-info {
+  min-width: 0;
+}
+
+.tool-item-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tool-item-name {
+  font-weight: 500;
+}
+
+.tool-item-desc {
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
 .text-ellipsis {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  width:250px;
+  width: 250px;
 }
 </style>

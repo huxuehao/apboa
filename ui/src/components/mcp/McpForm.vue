@@ -1,43 +1,33 @@
 /**
- * MCP服务器配置表单组件
+ * MCP 服务器配置表单组件
  *
  * @author huxuehao
  */
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { message } from 'ant-design-vue'
-import { MinusCircleOutlined, PlusOutlined, CloudServerOutlined } from '@ant-design/icons-vue'
+import { CloudServerOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons-vue'
 import type { McpServerVO, McpServer } from '@/types'
-import { McpProtocol, McpMode } from '@/types'
+import { McpActivationStatus, McpMode, McpProtocol } from '@/types'
 import * as mcpApi from '@/api/mcp'
 
-/**
- * Props定义
- */
 const props = defineProps<{
   visible: boolean
   data?: McpServerVO
   initialProtocol?: McpProtocol
 }>()
 
-/**
- * Emits定义
- */
 const emit = defineEmits<{
   'update:visible': [value: boolean]
   success: []
 }>()
 
-/**
- * 表单引用
- */
 const formRef = ref()
+const submitting = ref(false)
+const isEdit = computed(() => !!props.data)
 
-/**
- * 表单数据
- */
 const formData = ref({
-  used: [],
+  used: [] as string[],
   name: '',
   description: '',
   protocol: McpProtocol.HTTP,
@@ -45,18 +35,12 @@ const formData = ref({
   timeout: 30000
 })
 
-/**
- * HTTP/SSE协议配置
- */
 const httpConfig = ref({
   url: '',
   queryParams: [] as Array<{ key: string; value: string }>,
   headers: [] as Array<{ key: string; value: string }>
 })
 
-/**
- * STDIO协议配置
- */
 const stdioConfig = ref({
   command: '',
   args: [] as string[],
@@ -65,62 +49,37 @@ const stdioConfig = ref({
   encoding: 'UTF-8'
 })
 
-/**
- * 提交中状态
- */
-const submitting = ref(false)
-
-/**
- * 是否编辑模式
- */
-const isEdit = computed(() => !!props.data)
-
-/**
- * 表单验证规则
- */
 const rules = {
   name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
   protocol: [{ required: true, message: '请选择协议', trigger: 'blur' }],
   mode: [{ required: true, message: '请选择运行模式', trigger: 'blur' }],
   description: [
     { required: true, message: '请输入描述', trigger: 'blur' },
-    { max: 200, message: '描述长度不能超过200个字符', trigger: 'blur' }
-  ],
+    { max: 200, message: '描述长度不能超过 200 个字符', trigger: 'blur' }
+  ]
 }
 
-/**
- * 协议选项
- */
 const protocolOptions = [
   { label: 'HTTP', value: McpProtocol.HTTP },
   { label: 'SSE', value: McpProtocol.SSE },
   { label: 'STDIO', value: McpProtocol.STDIO }
 ]
 
-/**
- * 运行模式选项
- */
 const modeOptions = [
   { label: '同步', value: McpMode.SYNC },
   { label: '异步', value: McpMode.ASYNC }
 ]
 
-/**
- * 监听弹窗显示状态
- */
-watch(() => props.visible, (val) => {
-  if (val) {
+watch(() => props.visible, (visible) => {
+  if (visible) {
     initForm()
   }
 })
 
-/**
- * 初始化表单
- */
 function initForm() {
   if (props.data) {
     formData.value = {
-      used: props.data.used as [],
+      used: props.data.used as string[] || [],
       name: props.data.name,
       description: props.data.description,
       protocol: props.data.protocol,
@@ -128,22 +87,20 @@ function initForm() {
       timeout: props.data.timeout
     }
     parseProtocolConfig(props.data.protocolConfig)
-  } else {
-    formData.value = {
-      used: [],
-      name: '',
-      description: '',
-      protocol: props.initialProtocol || McpProtocol.HTTP,
-      mode: McpMode.SYNC,
-      timeout: 30000
-    }
-    resetProtocolConfig()
+    return
   }
+
+  formData.value = {
+    used: [],
+    name: '',
+    description: '',
+    protocol: props.initialProtocol || McpProtocol.HTTP,
+    mode: McpMode.SYNC,
+    timeout: 30000
+  }
+  resetProtocolConfig()
 }
 
-/**
- * 解析协议配置
- */
 function parseProtocolConfig(config: Record<string, unknown> | null) {
   if (!config) {
     resetProtocolConfig()
@@ -153,23 +110,21 @@ function parseProtocolConfig(config: Record<string, unknown> | null) {
   if (formData.value.protocol === McpProtocol.HTTP || formData.value.protocol === McpProtocol.SSE) {
     httpConfig.value = {
       url: (config.url as string) || '',
-      queryParams: Array.isArray(config.queryParams) ? config.queryParams : [],
-      headers: Array.isArray(config.headers) ? config.headers : []
+      queryParams: Array.isArray(config.queryParams) ? config.queryParams as Array<{ key: string; value: string }> : [],
+      headers: Array.isArray(config.headers) ? config.headers as Array<{ key: string; value: string }> : []
     }
-  } else if (formData.value.protocol === McpProtocol.STDIO) {
-    stdioConfig.value = {
-      command: (config.command as string) || '',
-      args: Array.isArray(config.args) ? config.args : [],
-      env: Array.isArray(config.env) ? config.env : [],
-      cwd: (config.cwd as string) || '',
-      encoding: (config.encoding as string) || 'UTF-8'
-    }
+    return
+  }
+
+  stdioConfig.value = {
+    command: (config.command as string) || '',
+    args: Array.isArray(config.args) ? config.args as string[] : [],
+    env: Array.isArray(config.env) ? config.env as Array<{ key: string; value: string }> : [],
+    cwd: (config.cwd as string) || '',
+    encoding: (config.encoding as string) || 'UTF-8'
   }
 }
 
-/**
- * 重置协议配置
- */
 function resetProtocolConfig() {
   httpConfig.value = {
     url: '',
@@ -185,37 +140,22 @@ function resetProtocolConfig() {
   }
 }
 
-/**
- * 添加键值对
- */
 function addKeyValue(list: Array<{ key: string; value: string }>) {
   list.push({ key: '', value: '' })
 }
 
-/**
- * 删除键值对
- */
 function removeKeyValue(list: Array<{ key: string; value: string }>, index: number) {
   list.splice(index, 1)
 }
 
-/**
- * 添加参数值
- */
 function addValue(list: string[]) {
   list.push('')
 }
 
-/**
- * 删除参数值
- */
 function removeValue(list: string[], index: number) {
   list.splice(index, 1)
 }
 
-/**
- * 组装协议配置
- */
 function buildProtocolConfig(): Record<string, unknown> {
   if (formData.value.protocol === McpProtocol.HTTP || formData.value.protocol === McpProtocol.SSE) {
     return {
@@ -223,32 +163,35 @@ function buildProtocolConfig(): Record<string, unknown> {
       queryParams: httpConfig.value.queryParams,
       headers: httpConfig.value.headers
     }
-  } else if (formData.value.protocol === McpProtocol.STDIO) {
-    const config: Record<string, unknown> = {
-      command: stdioConfig.value.command,
-      args: stdioConfig.value.args,
-      env: stdioConfig.value.env
-    }
-    if (stdioConfig.value.cwd) {
-      config.cwd = stdioConfig.value.cwd
-    }
-    if (stdioConfig.value.encoding) {
-      config.encoding = stdioConfig.value.encoding
-    }
-    return config
   }
-  return {}
+
+  const config: Record<string, unknown> = {
+    command: stdioConfig.value.command,
+    args: stdioConfig.value.args,
+    env: stdioConfig.value.env
+  }
+  if (stdioConfig.value.cwd) {
+    config.cwd = stdioConfig.value.cwd
+  }
+  if (stdioConfig.value.encoding) {
+    config.encoding = stdioConfig.value.encoding
+  }
+  return config
 }
 
-/**
- * 提交表单
- */
 async function handleSubmit() {
   try {
     await formRef.value.validate()
     submitting.value = true
 
-    const entity: Partial<McpServer> & { name: string; description: string; protocol: McpProtocol; mode: McpMode; timeout: number; protocolConfig: Record<string, unknown> } = {
+    const entity: Partial<McpServer> & {
+      name: string
+      description: string
+      protocol: McpProtocol
+      mode: McpMode
+      timeout: number
+      protocolConfig: Record<string, unknown>
+    } = {
       name: formData.value.name,
       description: formData.value.description,
       protocol: formData.value.protocol,
@@ -262,15 +205,25 @@ async function handleSubmit() {
       entity.enabled = props.data!.enabled
       entity.healthStatus = props.data!.healthStatus
       entity.lastHealthCheck = props.data!.lastHealthCheck
-      entity.createdAt = props.data!.createdAt
-      entity.updatedAt = props.data!.updatedAt
-      entity.createdBy = props.data!.createdBy
-      entity.updatedBy = props.data!.updatedBy
-      await mcpApi.update(entity as McpServer)
-      message.success('更新成功')
+      entity.activationStatus = props.data!.activationStatus
+      entity.activationMessage = props.data!.activationMessage
+      entity.lastActivationTime = props.data!.lastActivationTime
+      entity.lastToolSyncTime = props.data!.lastToolSyncTime
+      entity.toolCount = props.data!.toolCount
+      entity.needsSync = props.data!.needsSync
+
+      const response = await mcpApi.update(entity as McpServer)
+      const server = response.data.data
+      if (props.data?.activationStatus === McpActivationStatus.ACTIVE && server.activationStatus === McpActivationStatus.FAILED) {
+        message.warning(`配置已保存，但自动重连失败：${server.activationMessage || '请检查 MCP 配置'}`)
+      } else if (server.activationStatus === McpActivationStatus.ACTIVE && server.toolCount === 0) {
+        message.warning('配置已保存，连接成功，但未发现可用工具')
+      } else {
+        message.success('更新成功')
+      }
     } else {
       await mcpApi.save(entity as McpServer)
-      message.success('创建成功')
+      message.success('创建成功，保存后可手动连接')
     }
 
     emit('update:visible', false)
@@ -282,9 +235,6 @@ async function handleSubmit() {
   }
 }
 
-/**
- * 取消
- */
 function handleCancel() {
   emit('update:visible', false)
 }
@@ -294,7 +244,7 @@ function handleCancel() {
   <ApboaModal
     :open="visible"
     :title-icon="CloudServerOutlined"
-    :title="isEdit ? '编辑MCP服务器' : '新增MCP服务器'"
+    :title="isEdit ? '编辑 MCP 服务器' : '新增 MCP 服务器'"
     destroyOnClose
     @cancel="handleCancel"
   >
@@ -305,7 +255,7 @@ function handleCancel() {
       layout="vertical"
     >
       <AFormItem label="关联智能体" v-if="isEdit">
-        <div class="code-wrapper ">
+        <div class="code-wrapper">
           {{ formData?.used?.join('、') || '无' }}
         </div>
       </AFormItem>
@@ -342,7 +292,7 @@ function handleCancel() {
 
       <template v-if="formData.protocol === McpProtocol.HTTP || formData.protocol === McpProtocol.SSE">
         <AFormItem label="URL">
-          <AInput v-model:value="httpConfig.url" placeholder="请输入URL" />
+          <AInput v-model:value="httpConfig.url" placeholder="请输入 URL" />
         </AFormItem>
 
         <AFormItem label="查询参数">
@@ -363,14 +313,14 @@ function handleCancel() {
         <AFormItem label="请求头">
           <div class="param-list">
             <div v-for="(item, index) in httpConfig.headers" :key="index" class="param-item flex gap-sm items-center mb-sm">
-              <AInput v-model:value="item.key" placeholder="Header名" style="flex: 1" />
-              <AInput v-model:value="item.value" placeholder="Header值" style="flex: 1" />
+              <AInput v-model:value="item.key" placeholder="Header 名" style="flex: 1" />
+              <AInput v-model:value="item.value" placeholder="Header 值" style="flex: 1" />
               <AButton type="text" danger @click="removeKeyValue(httpConfig.headers, index)">
                 <MinusCircleOutlined />
               </AButton>
             </div>
             <AButton type="dashed" block @click="addKeyValue(httpConfig.headers)">
-              <PlusOutlined /> 添加Header
+              <PlusOutlined /> 添加 Header
             </AButton>
           </div>
         </AFormItem>
@@ -415,7 +365,7 @@ function handleCancel() {
         </AFormItem>
 
         <AFormItem label="字符编码(可选)">
-          <AInput v-model:value="stdioConfig.encoding" placeholder="默认UTF-8" />
+          <AInput v-model:value="stdioConfig.encoding" placeholder="默认 UTF-8" />
         </AFormItem>
       </template>
     </AForm>

@@ -1,40 +1,49 @@
 /**
- * MCP服务器配置卡片组件
+ * MCP 服务配置卡片组件
  *
  * @author huxuehao
  */
 <script setup lang="ts">
 import { computed } from 'vue'
-import { EllipsisOutlined, CloudServerOutlined } from '@ant-design/icons-vue'
-import type { McpServerVO } from '@/types'
 import {
-  createViewItem,
-  createEditItem,
-  createEnableItem,
+  CheckCircleOutlined,
+  CloudServerOutlined,
+  EllipsisOutlined,
+  ExclamationCircleOutlined,
+  LoadingOutlined
+} from '@ant-design/icons-vue'
+import type { McpServerVO } from '@/types'
+import { McpActivationStatus } from '@/types'
+import {
+  createActivateItem,
   createDeleteItem,
   createDivider,
+  createEditItem,
+  createEnableItem,
+  createSyncItem,
+  createToolGovernanceItem,
+  createViewItem
 } from '@/composables/useCardMenuItems'
+import {
+  getMcpConnectionStatusColor,
+  getMcpConnectionStatusText,
+  getMcpPrimaryAction
+} from '@/composables/useMcpPresentation'
 
-/**
- * Props定义
- */
 const props = defineProps<{
   data: McpServerVO
 }>()
 
-/**
- * Emits定义
- */
 const emit = defineEmits<{
   view: [id: string]
   edit: [id: string]
   delete: [id: string]
   enable: [id: string]
+  activate: [id: string]
+  sync: [id: string]
+  toolGovernance: [id: string]
 }>()
 
-/**
- * 格式化更新时间
- */
 const formattedTime = computed(() => {
   if (!props.data.updatedAt) return ''
   const date = new Date(props.data.updatedAt)
@@ -47,34 +56,38 @@ const formattedTime = computed(() => {
   })
 })
 
-/**
- * 协议类型显示文本
- */
-const protocolText = computed(() => {
-  return props.data.protocol
-})
-
-/**
- * 运行模式显示文本
- */
 const modeText = computed(() => {
   return props.data.mode === 'SYNC' ? '同步' : '异步'
 })
 
-/**
- * 操作菜单项
- */
-const menuItems = computed(() => [
-  createViewItem(),
-  createEditItem(),
-  createEnableItem(props.data.enabled),
-  createDivider(),
-  createDeleteItem(),
-])
+const connectionText = computed(() => getMcpConnectionStatusText(props.data))
 
-/**
- * 处理菜单点击
- */
+const connectionColor = computed(() => getMcpConnectionStatusColor(props.data))
+
+const primaryAction = computed(() => getMcpPrimaryAction(props.data))
+
+const menuItems = computed(() => {
+  const items = [
+    createViewItem(),
+    createEditItem()
+  ]
+
+  if (primaryAction.value?.key === 'activate') {
+    items.push(createActivateItem(primaryAction.value.label))
+  } else if (primaryAction.value?.key === 'sync') {
+    items.push(createSyncItem(primaryAction.value.label))
+  }
+
+  items.push(
+    createToolGovernanceItem(),
+    createEnableItem(props.data.enabled),
+    createDivider(),
+    createDeleteItem()
+  )
+
+  return items
+})
+
 function handleMenuClick({ key }: { key: string }) {
   switch (key) {
     case 'view':
@@ -82,6 +95,15 @@ function handleMenuClick({ key }: { key: string }) {
       break
     case 'edit':
       emit('edit', props.data.id as string)
+      break
+    case 'activate':
+      emit('activate', props.data.id as string)
+      break
+    case 'sync':
+      emit('sync', props.data.id as string)
+      break
+    case 'toolGovernance':
+      emit('toolGovernance', props.data.id as string)
       break
     case 'enable':
       emit('enable', props.data.id as string)
@@ -96,8 +118,12 @@ function handleMenuClick({ key }: { key: string }) {
 <template>
   <div class="mcp-card">
     <div class="card-header flex items-center gap-sm">
-      <div class="card-avatar flex-center" :class="{ disabled: !data.enabled }"><CloudServerOutlined /></div>
-      <div class="card-name flex-1 truncate" :title="data.name" @click="emit('view', data.id as string)">{{ data.name }}</div>
+      <div class="card-avatar flex-center" :class="{ disabled: !data.enabled }">
+        <CloudServerOutlined />
+      </div>
+      <div class="card-name flex-1 truncate" :title="data.name" @click="emit('view', data.id as string)">
+        {{ data.name }}
+      </div>
       <ADropdown :trigger="['hover']">
         <AButton type="text" size="small" v-permission="['EDIT','ADMIN']">
           <EllipsisOutlined />
@@ -112,19 +138,44 @@ function handleMenuClick({ key }: { key: string }) {
       {{ data.description }}
     </div>
 
+    <div class="card-status flex items-center gap-xs">
+      <ATag :color="connectionColor" class="tag">{{ connectionText }}</ATag>
+      <ATag v-if="data.needsSync" color="warning" class="tag">待刷新</ATag>
+      <ATag color="default" class="tag">工具 {{ data.toolCount || 0 }}</ATag>
+      <ATag color="processing" class="tag">全局可用 {{ data.availableToolCount || 0 }}</ATag>
+    </div>
+
     <div class="card-footer flex items-center justify-between">
       <div class="card-tags flex items-center gap-xs">
-        <ATag color="default" class="tag">{{ protocolText }}</ATag>
+        <ATag color="default" class="tag">{{ data.protocol }}</ATag>
         <ATag color="default" class="tag">{{ modeText }}</ATag>
       </div>
       <div class="card-time text-placeholder text-xs">更新于 {{ formattedTime }}</div>
+    </div>
+
+    <div class="card-hint text-placeholder text-xs">
+      <template v-if="data.activationStatus === McpActivationStatus.ACTIVATING">
+        <LoadingOutlined style="margin-right: 4px" />{{ data.activationMessage || '正在连接 MCP 并刷新工具目录' }}
+      </template>
+      <template v-else-if="data.activationStatus === McpActivationStatus.FAILED">
+        <ExclamationCircleOutlined style="margin-right: 4px" />{{ data.activationMessage || '连接失败' }}
+      </template>
+      <template v-else-if="data.activationStatus === McpActivationStatus.ACTIVE && data.toolCount > 0">
+        <CheckCircleOutlined style="margin-right: 4px" />{{ data.activationMessage || '连接可用，工具目录已就绪' }}
+      </template>
+      <template v-else-if="data.activationStatus === McpActivationStatus.ACTIVE">
+        <CheckCircleOutlined style="margin-right: 4px" />{{ data.activationMessage || '连接成功，但当前未发现可用工具' }}
+      </template>
+      <template v-else>
+        {{ data.activationMessage || '保存后可手动连接' }}
+      </template>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
 .mcp-card {
-  min-height: 180px;
+  min-height: 220px;
   padding: var(--spacing-md);
   background-color: var(--color-bg-white);
   border-radius: var(--border-radius-lg);
@@ -157,10 +208,6 @@ function handleMenuClick({ key }: { key: string }) {
       color: var(--color-text-primary);
       cursor: pointer;
       transition: color var(--transition-base);
-
-      //&:hover {
-      //  color: #66bb6a;
-      //}
     }
   }
 
@@ -178,6 +225,10 @@ function handleMenuClick({ key }: { key: string }) {
     max-height: 65px;
   }
 
+  .card-status {
+    flex-wrap: wrap;
+  }
+
   .card-footer {
     padding-top: var(--spacing-xs);
 
@@ -188,6 +239,11 @@ function handleMenuClick({ key }: { key: string }) {
     .card-time {
       white-space: nowrap;
     }
+  }
+
+  .card-hint {
+    line-height: 1.5;
+    min-height: 20px;
   }
 
   .disabled {
