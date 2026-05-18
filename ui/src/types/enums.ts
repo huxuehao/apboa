@@ -123,6 +123,14 @@ export enum McpActivationStatus {
 }
 
 /**
+ * MCP 失败来源
+ */
+export enum McpFailureSource {
+  NONE = 'NONE',
+  RUNTIME_AUTO_DEGRADE = 'RUNTIME_AUTO_DEGRADE'
+}
+
+/**
  * MCP 工具暴露模式
  */
 export enum McpToolExposureMode {

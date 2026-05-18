@@ -14,6 +14,7 @@ import type {
   HealthStatus,
   KbType,
   McpActivationStatus,
+  McpFailureSource,
   McpToolExposureMode,
   McpMode,
   McpProtocol,
@@ -136,10 +137,13 @@ export interface McpServerVO {
   lastHealthCheck: string
   activationStatus: McpActivationStatus
   activationMessage: string
+  failureSource: McpFailureSource
+  activationStatusChangedAt: string | null
   lastActivationTime: string | null
   lastToolSyncTime: string | null
   toolCount: number
   availableToolCount: number
+  runtimeFailThreshold: number
   needsSync: boolean
   enabled: boolean
   createdAt: string

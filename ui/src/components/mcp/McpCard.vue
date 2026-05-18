@@ -13,7 +13,7 @@ import {
   LoadingOutlined
 } from '@ant-design/icons-vue'
 import type { McpServerVO } from '@/types'
-import { McpActivationStatus } from '@/types'
+import { McpActivationStatus, McpFailureSource } from '@/types'
 import {
   createActivateItem,
   createDeleteItem,
@@ -65,6 +65,11 @@ const connectionText = computed(() => getMcpConnectionStatusText(props.data))
 const connectionColor = computed(() => getMcpConnectionStatusColor(props.data))
 
 const primaryAction = computed(() => getMcpPrimaryAction(props.data))
+
+const isRuntimeDegraded = computed(() => {
+  return props.data.activationStatus === McpActivationStatus.FAILED
+    && props.data.failureSource === McpFailureSource.RUNTIME_AUTO_DEGRADE
+})
 
 const menuItems = computed(() => {
   const items = [
@@ -141,6 +146,7 @@ function handleMenuClick({ key }: { key: string }) {
     <div class="card-status flex items-center gap-xs">
       <ATag :color="connectionColor" class="tag">{{ connectionText }}</ATag>
       <ATag v-if="data.needsSync" color="warning" class="tag">待刷新</ATag>
+      <ATag v-if="isRuntimeDegraded && data.toolCount > 0" color="default" class="tag">上次缓存</ATag>
       <ATag color="default" class="tag">工具 {{ data.toolCount || 0 }}</ATag>
       <ATag color="processing" class="tag">全局可用 {{ data.availableToolCount || 0 }}</ATag>
     </div>

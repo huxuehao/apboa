@@ -16,16 +16,18 @@ import com.hxh.apboa.common.entity.McpServer;
 import com.hxh.apboa.common.entity.McpTool;
 import com.hxh.apboa.common.enums.HealthStatus;
 import com.hxh.apboa.common.enums.McpActivationStatus;
+import com.hxh.apboa.common.enums.McpFailureSource;
 import com.hxh.apboa.common.enums.McpMode;
 import com.hxh.apboa.common.enums.McpProtocol;
+import com.hxh.apboa.common.exception.BusinessException;
 import com.hxh.apboa.common.mcp.ToolSchemaRefreshResult;
 import com.hxh.apboa.common.mcp.ToolSchemaRefresher;
-import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.util.CryptoUtils;
 import com.hxh.apboa.common.vo.McpToolVO;
 import com.hxh.apboa.mcp.mapper.McpServerMapper;
 import com.hxh.apboa.mcp.service.AgentMcpServerService;
 import com.hxh.apboa.mcp.service.AgentMcpToolService;
+import com.hxh.apboa.mcp.service.McpRuntimeDegradeService;
 import com.hxh.apboa.mcp.service.McpServerService;
 import com.hxh.apboa.mcp.service.McpToolService;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -51,6 +53,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @RequiredArgsConstructor
 public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer> implements McpServerService {
     private static final String CONFIG_HASH_SALT = "MCP_CONFIG_HASH";
+    private static final int DEFAULT_RUNTIME_FAIL_THRESHOLD = 3;
 
     private final JdbcTemplate jdbcTemplate;
     private final AgentMcpServerService agentMcpServerService;
@@ -58,6 +61,7 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
     private final McpToolService mcpToolService;
     private final MessagePublisher messagePublisher;
     private final ToolSchemaRefresher toolSchemaRefresher;
+    private final McpRuntimeDegradeService mcpRuntimeDegradeService;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -87,11 +91,15 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
 
     @Override
     public boolean save(McpServer entity) {
+        LocalDateTime now = LocalDateTime.now();
         entity.setActivationStatus(McpActivationStatus.NOT_ACTIVATED);
-        entity.setActivationMessage("未激活");
+        entity.setActivationMessage("未连接");
+        entity.setFailureSource(McpFailureSource.NONE);
+        entity.setActivationStatusChangedAt(now);
         entity.setToolCount(0);
         entity.setActivationRevision(0L);
         entity.setNeedsSync(true);
+        entity.setRuntimeFailThreshold(normalizeRuntimeFailThreshold(entity.getRuntimeFailThreshold()));
         entity.setConfigHash(buildConfigHash(
                 entity.getProtocol(),
                 entity.getMode(),
@@ -111,6 +119,10 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
                     current.getMode(),
                     current.getTimeout(),
                     current.getProtocolConfig());
+        }
+
+        if (entity.getRuntimeFailThreshold() != null) {
+            entity.setRuntimeFailThreshold(normalizeRuntimeFailThreshold(entity.getRuntimeFailThreshold()));
         }
 
         String mergedConfigHash = buildConfigHash(
@@ -158,7 +170,8 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
     @Override
     @Transactional(rollbackFor = Exception.class)
     public McpServer updateToolGlobalEnabled(Long id, McpToolEnabledDTO dto) {
-        requireServer(id);
+        McpServer server = requireServer(id);
+        ensureToolGovernanceWritable(server);
         List<Long> toolIds = dto == null || dto.getToolIds() == null
                 ? List.of()
                 : new ArrayList<>(new LinkedHashSet<>(dto.getToolIds()));
@@ -184,16 +197,19 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
 
         current = requireServer(id);
         ToolSchemaRefreshResult refreshResult = toolSchemaRefresher.refreshToolSchemas(current);
+        LocalDateTime now = LocalDateTime.now();
         McpServer update = new McpServer();
         update.setId(id);
         update.setActivationMessage(refreshResult.getMessage());
-        update.setLastToolSyncTime(LocalDateTime.now());
-        update.setLastHealthCheck(LocalDateTime.now());
+        update.setFailureSource(McpFailureSource.NONE);
+        update.setActivationStatusChangedAt(now);
+        update.setLastToolSyncTime(now);
+        update.setLastHealthCheck(now);
         update.setConfigHash(configHash);
         update.setNeedsSync(!refreshResult.isSuccess());
 
         if (markActivationTime) {
-            update.setLastActivationTime(LocalDateTime.now());
+            update.setLastActivationTime(now);
         }
 
         if (refreshResult.isSuccess()) {
@@ -209,7 +225,13 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
 
         boolean applied = finishActivation(id, requestId, configHash, update);
         if (applied && refreshResult.isSuccess()) {
-            mcpToolService.syncServerTools(requireServer(id), parseToolSchemas(refreshResult.getToolSchemas()));
+            McpServer refreshed = requireServer(id);
+            mcpToolService.syncServerTools(refreshed, parseToolSchemas(refreshResult.getToolSchemas()));
+            mcpRuntimeDegradeService.recordSuccess(
+                    refreshed.getId(),
+                    refreshed.getActivationRevision(),
+                    refreshed.getConfigHash(),
+                    refreshed.getRuntimeFailThreshold());
         }
         if (applied) {
             publishAgentReregisterAfterCommit(agentMcpServerService.getAgentIds(List.of(id)));
@@ -220,7 +242,9 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
     private boolean beginActivation(McpServer current, String requestId, String configHash) {
         McpServer update = new McpServer();
         update.setActivationStatus(McpActivationStatus.ACTIVATING);
-        update.setActivationMessage("正在刷新 MCP 工具目录");
+        update.setActivationMessage("正在连接 MCP 并刷新工具目录");
+        update.setFailureSource(McpFailureSource.NONE);
+        update.setActivationStatusChangedAt(LocalDateTime.now());
         update.setActivationRequestId(requestId);
         update.setConfigHash(configHash);
         update.setNeedsSync(true);
@@ -268,6 +292,13 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
         return currentRevision == null ? 1L : currentRevision + 1L;
     }
 
+    private int normalizeRuntimeFailThreshold(Integer runtimeFailThreshold) {
+        if (runtimeFailThreshold == null) {
+            return DEFAULT_RUNTIME_FAIL_THRESHOLD;
+        }
+        return Math.max(runtimeFailThreshold, 0);
+    }
+
     private String buildConfigHash(McpProtocol protocol,
                                    McpMode mode,
                                    Integer timeout,
@@ -281,6 +312,13 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
                 + "|"
                 + configJson;
         return CryptoUtils.md5(raw, CONFIG_HASH_SALT);
+    }
+
+    private void ensureToolGovernanceWritable(McpServer server) {
+        if (server.getActivationStatus() == McpActivationStatus.FAILED
+                && server.getFailureSource() == McpFailureSource.RUNTIME_AUTO_DEGRADE) {
+            throw new BusinessException("当前 MCP 处于运行时自动降级状态，仅可查看上次缓存，重新连接成功前不可修改工具治理");
+        }
     }
 
     private <T> T firstNonNull(T value, T fallback) {

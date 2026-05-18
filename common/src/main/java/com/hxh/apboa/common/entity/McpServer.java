@@ -7,6 +7,7 @@ import com.hxh.apboa.common.config.mybatis.JsonNodeTypeHandler;
 import com.hxh.apboa.common.consts.TableConst;
 import com.hxh.apboa.common.enums.HealthStatus;
 import com.hxh.apboa.common.enums.McpActivationStatus;
+import com.hxh.apboa.common.enums.McpFailureSource;
 import com.hxh.apboa.common.enums.McpMode;
 import com.hxh.apboa.common.enums.McpProtocol;
 import java.time.LocalDateTime;
@@ -80,6 +81,16 @@ public class McpServer extends BaseEntity {
     private String activationMessage;
 
     /**
+     * 失败来源
+     */
+    private McpFailureSource failureSource;
+
+    /**
+     * 激活状态最近一次变更时间
+     */
+    private LocalDateTime activationStatusChangedAt;
+
+    /**
      * 上次激活时间
      */
     private LocalDateTime lastActivationTime;
@@ -93,6 +104,11 @@ public class McpServer extends BaseEntity {
      * 当前工具数量
      */
     private Integer toolCount;
+
+    /**
+     * 自动降级连续失败阈值
+     */
+    private Integer runtimeFailThreshold;
 
     /**
      * 激活版本号

@@ -32,7 +32,8 @@ const formData = ref({
   description: '',
   protocol: McpProtocol.HTTP,
   mode: McpMode.SYNC,
-  timeout: 30000
+  timeout: 30000,
+  runtimeFailThreshold: 3
 })
 
 const httpConfig = ref({
@@ -84,7 +85,8 @@ function initForm() {
       description: props.data.description,
       protocol: props.data.protocol,
       mode: props.data.mode,
-      timeout: props.data.timeout
+      timeout: props.data.timeout,
+      runtimeFailThreshold: props.data.runtimeFailThreshold ?? 3
     }
     parseProtocolConfig(props.data.protocolConfig)
     return
@@ -96,7 +98,8 @@ function initForm() {
     description: '',
     protocol: props.initialProtocol || McpProtocol.HTTP,
     mode: McpMode.SYNC,
-    timeout: 30000
+    timeout: 30000,
+    runtimeFailThreshold: 3
   }
   resetProtocolConfig()
 }
@@ -197,6 +200,7 @@ async function handleSubmit() {
       protocol: formData.value.protocol,
       mode: formData.value.mode,
       timeout: formData.value.timeout,
+      runtimeFailThreshold: formData.value.runtimeFailThreshold,
       protocolConfig: buildProtocolConfig()
     }
 
@@ -211,6 +215,8 @@ async function handleSubmit() {
       entity.lastToolSyncTime = props.data!.lastToolSyncTime
       entity.toolCount = props.data!.toolCount
       entity.needsSync = props.data!.needsSync
+      entity.failureSource = props.data!.failureSource
+      entity.activationStatusChangedAt = props.data!.activationStatusChangedAt
 
       const response = await mcpApi.update(entity as McpServer)
       const server = response.data.data
@@ -286,6 +292,19 @@ function handleCancel() {
 
       <AFormItem label="超时时间(毫秒)" name="timeout">
         <AInputNumber v-model:value="formData.timeout" :min="1000" :step="1000" style="width: 100%" />
+      </AFormItem>
+
+      <AFormItem label="自动降级失败次数">
+        <AInputNumber
+          v-model:value="formData.runtimeFailThreshold"
+          :min="0"
+          :step="1"
+          style="width: 100%"
+          placeholder="0 表示关闭自动降级"
+        />
+        <div class="text-placeholder text-xs mt-xs">
+          设置为 0 表示关闭运行时自动降级；大于 0 时，连续出现该次数的连接或传输失败后会自动置为连接失败。
+        </div>
       </AFormItem>
 
       <ADivider orientation="left">协议配置</ADivider>

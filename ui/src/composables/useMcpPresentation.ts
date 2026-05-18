@@ -1,7 +1,10 @@
 import type { McpServerVO } from '@/types'
-import { McpActivationStatus } from '@/types'
+import { McpActivationStatus, McpFailureSource } from '@/types'
 
-type McpPresentationTarget = Pick<McpServerVO, 'enabled' | 'activationStatus' | 'toolCount' | 'availableToolCount'>
+type McpPresentationTarget = Pick<
+  McpServerVO,
+  'enabled' | 'activationStatus' | 'toolCount' | 'availableToolCount' | 'failureSource'
+>
 
 export interface McpPrimaryAction {
   key: 'activate' | 'sync'
@@ -74,6 +77,9 @@ export function getMcpUnavailableReason(mcp: McpPresentationTarget): string {
     return '连接中'
   }
   if (mcp.activationStatus === McpActivationStatus.FAILED) {
+    if (mcp.failureSource === McpFailureSource.RUNTIME_AUTO_DEGRADE) {
+      return '连接失败（已自动降级）'
+    }
     return '连接失败'
   }
   if (mcp.activationStatus !== McpActivationStatus.ACTIVE) {

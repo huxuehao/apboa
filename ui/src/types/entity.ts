@@ -17,6 +17,7 @@ import type {
   HealthStatus,
   KbType,
   McpActivationStatus,
+  McpFailureSource,
   McpToolExposureMode,
   McpMode,
   McpProtocol,
@@ -186,10 +187,13 @@ export interface McpServer extends BaseEntity {
   lastHealthCheck: string
   activationStatus: McpActivationStatus
   activationMessage: string
+  failureSource?: McpFailureSource | null
+  activationStatusChangedAt?: string | null
   lastActivationTime: string | null
   lastToolSyncTime: string | null
   toolCount: number
   availableToolCount?: number
+  runtimeFailThreshold?: number
   activationRevision?: string | number | null
   configHash?: string | null
   needsSync: boolean

@@ -12,6 +12,7 @@ import com.hxh.apboa.core.mcp.impl.HttpMcpClientConfig;
 import com.hxh.apboa.core.mcp.impl.SseMcpClientConfig;
 import com.hxh.apboa.core.mcp.impl.StdioMcpClientConfig;
 import com.hxh.apboa.mcp.service.AgentMcpServerService;
+import com.hxh.apboa.mcp.service.McpRuntimeDegradeService;
 import com.hxh.apboa.mcp.service.McpServerService;
 import com.hxh.apboa.mcp.service.McpToolService;
 import io.agentscope.core.tool.AgentTool;
@@ -50,6 +51,7 @@ public class McpClientFactory {
     private final McpServerService mcpServerService;
     private final AgentMcpServerService agentMcpServerService;
     private final McpToolService mcpToolService;
+    private final McpRuntimeDegradeService mcpRuntimeDegradeService;
     private final ObjectMapper objectMapper;
     private final Map<Long, SharedMcpClientContext> sharedContexts = new ConcurrentHashMap<>();
 
@@ -110,15 +112,23 @@ public class McpClientFactory {
                 continue;
             }
 
+            LazyMcpAgentTool.RuntimeDegradeContext degradeContext = new LazyMcpAgentTool.RuntimeDegradeContext(
+                    mcpServer.getId(),
+                    mcpServer.getName(),
+                    mcpServer.getActivationRevision(),
+                    mcpServer.getConfigHash(),
+                    mcpServer.getRuntimeFailThreshold());
+
             runtimeTools.forEach(tool -> {
                 McpSchema.Tool toolSchema = parseToolSchema(tool);
                 if (toolSchema == null) {
                     return;
                 }
                 result.add(new LazyMcpAgentTool(
-                        mcpServer.getName(),
+                        degradeContext,
                         toolSchema,
-                        () -> getInitializedClient(mcpServer.getId())));
+                        () -> getInitializedClient(mcpServer.getId()),
+                        mcpRuntimeDegradeService));
             });
         }
         return result;
