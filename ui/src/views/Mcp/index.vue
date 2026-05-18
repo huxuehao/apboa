@@ -5,7 +5,7 @@
  */
 <script setup lang="ts">
 /* eslint-disable vue/multi-word-component-names */
-import { computed, h, ref, watch } from 'vue'
+import { computed, h, onActivated, onBeforeMount, ref, watch } from 'vue'
 import { message, Modal } from 'ant-design-vue'
 import { CloudServerOutlined, SearchOutlined } from '@ant-design/icons-vue'
 import { storeToRefs } from 'pinia'
@@ -28,6 +28,7 @@ const currentData = ref<McpServerVO | undefined>(undefined)
 const initialProtocol = ref<McpProtocol | undefined>(undefined)
 const infiniteLoadingKey = ref(0)
 const isFirstLoad = ref(true)
+const hasActivatedOnce = ref(false)
 const toolModalVisible = ref(false)
 const toolLoading = ref(false)
 const currentToolServer = ref<McpServerVO | undefined>(undefined)
@@ -109,6 +110,12 @@ function resetListAndRebuild() {
   store.resetPagination()
   isFirstLoad.value = true
   infiniteLoadingKey.value++
+}
+
+function resetListState() {
+  list.value = []
+  store.resetPagination()
+  isFirstLoad.value = true
 }
 
 async function handleDelete(id: string) {
@@ -258,10 +265,19 @@ async function handleInfiniteLoading($state: {
 }
 
 watch([selectedProtocol, keyword], () => {
-  list.value = []
-  store.resetPagination()
-  isFirstLoad.value = true
-  infiniteLoadingKey.value++
+  resetListAndRebuild()
+})
+
+onBeforeMount(() => {
+  resetListState()
+})
+
+onActivated(() => {
+  if (!hasActivatedOnce.value) {
+    hasActivatedOnce.value = true
+    return
+  }
+  resetListAndRebuild()
 })
 </script>
 

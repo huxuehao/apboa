@@ -27,11 +27,15 @@ public class UserUtils {
     }
 
     public static UserDetail getUserDetail() {
-        HttpServletRequest request = WebUtils.getRequest();
-        if (request == null) {
+        try {
+            HttpServletRequest request = WebUtils.getRequest();
+            if (request == null) {
+                return null;
+            }
+            return (UserDetail) request.getAttribute(SysConst.USER_DETAIL);
+        } catch (IllegalStateException e) {
+            // 异步线程或请求生命周期结束后，request 可能已回收，此时按匿名上下文处理。
             return null;
         }
-
-        return (UserDetail) request.getAttribute(SysConst.USER_DETAIL);
     }
 }

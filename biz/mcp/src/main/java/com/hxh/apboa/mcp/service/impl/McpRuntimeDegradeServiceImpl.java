@@ -1,7 +1,6 @@
 package com.hxh.apboa.mcp.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hxh.apboa.cluster.core.MessagePublisher;
 import com.hxh.apboa.common.consts.RedisChannelTopic;
 import com.hxh.apboa.common.entity.McpServer;
@@ -11,15 +10,14 @@ import com.hxh.apboa.common.enums.McpFailureSource;
 import com.hxh.apboa.mcp.mapper.McpServerMapper;
 import com.hxh.apboa.mcp.service.AgentMcpServerService;
 import com.hxh.apboa.mcp.service.McpRuntimeDegradeService;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -36,7 +34,7 @@ public class McpRuntimeDegradeServiceImpl implements McpRuntimeDegradeService {
     private static final long KEY_TTL_SECONDS = 3600L;
     private static final String FAILURE_EVENT = "FAILURE";
 
-    private static final String RECORD_FAILURE_SCRIPT = """
+    private static final DefaultRedisScript<String> RECORD_FAILURE_SCRIPT = buildScript("""
             local key = KEYS[1]
             local threshold = tonumber(ARGV[1])
             local ttlSeconds = tonumber(ARGV[2])
@@ -53,15 +51,10 @@ public class McpRuntimeDegradeServiceImpl implements McpRuntimeDegradeService {
             if threshold > 0 and count >= threshold then
                 reached = 1
             end
-            return cjson.encode({
-                failureCount = count,
-                eventSeq = seq,
-                reachedThreshold = reached,
-                lastEventType = 'FAILURE'
-            })
-            """;
+            return tostring(count) .. '|' .. tostring(seq) .. '|' .. tostring(reached) .. '|FAILURE'
+            """);
 
-    private static final String RECORD_SUCCESS_SCRIPT = """
+    private static final DefaultRedisScript<String> RECORD_SUCCESS_SCRIPT = buildScript("""
             local key = KEYS[1]
             local ttlSeconds = tonumber(ARGV[1])
             local seq = tonumber(redis.call('HGET', key, 'event_seq') or '0')
@@ -71,16 +64,10 @@ public class McpRuntimeDegradeServiceImpl implements McpRuntimeDegradeService {
                 'event_seq', tostring(seq),
                 'last_event_type', 'SUCCESS')
             redis.call('EXPIRE', key, ttlSeconds)
-            return cjson.encode({
-                failureCount = 0,
-                eventSeq = seq,
-                reachedThreshold = 0,
-                lastEventType = 'SUCCESS'
-            })
-            """;
+            return '0|' .. tostring(seq) .. '|0|SUCCESS'
+            """);
 
     private final StringRedisTemplate stringRedisTemplate;
-    private final ObjectMapper objectMapper;
     private final McpRuntimeFailureClassifier failureClassifier;
     private final McpServerMapper mcpServerMapper;
     private final AgentMcpServerService agentMcpServerService;
@@ -104,7 +91,7 @@ public class McpRuntimeDegradeServiceImpl implements McpRuntimeDegradeService {
                     serverId, activationRevision, configHash, state.eventSeq());
         } catch (Exception e) {
             log.warn("记录 MCP 运行时成功失败，已忽略自动降级状态更新: serverId={}, activationRevision={}, configHash={}, reason={}",
-                    serverId, activationRevision, configHash, e.getMessage());
+                    serverId, activationRevision, configHash, e.getMessage(), e);
         }
     }
 
@@ -134,7 +121,7 @@ public class McpRuntimeDegradeServiceImpl implements McpRuntimeDegradeService {
             }
         } catch (Exception e) {
             log.warn("记录 MCP 运行时失败失败，已忽略自动降级状态更新: serverId={}, activationRevision={}, configHash={}, reason={}",
-                    serverId, activationRevision, configHash, e.getMessage());
+                    serverId, activationRevision, configHash, e.getMessage(), e);
         }
     }
 
@@ -203,32 +190,29 @@ public class McpRuntimeDegradeServiceImpl implements McpRuntimeDegradeService {
                     String.valueOf(stateMap.getOrDefault("last_event_type", "")));
         } catch (Exception e) {
             log.warn("读取 MCP 自动降级状态失败，已忽略本次自动降级判定: serverId={}, activationRevision={}, configHash={}, reason={}",
-                    serverId, activationRevision, configHash, e.getMessage());
+                    serverId, activationRevision, configHash, e.getMessage(), e);
             return null;
         }
     }
 
-    private RuntimeDegradeState executeStateScript(String script, String key, String... args) throws Exception {
-        byte[] resultBytes = stringRedisTemplate.execute(connection ->
-                        connection.scriptingCommands().eval(
-                                script.getBytes(StandardCharsets.UTF_8),
-                                ReturnType.VALUE,
-                                1,
-                                buildScriptArguments(key, args)),
-                true);
-        if (resultBytes == null || resultBytes.length == 0) {
+    private RuntimeDegradeState executeStateScript(DefaultRedisScript<String> script, String key, String... args) {
+        String result = stringRedisTemplate.execute(script, List.of(key), (Object[]) args);
+        if (!StringUtils.hasText(result)) {
             throw new IllegalStateException("Redis 脚本未返回状态");
         }
-        return objectMapper.readValue(resultBytes, RuntimeDegradeState.class);
+        return parseState(result);
     }
 
-    private byte[][] buildScriptArguments(String key, String[] args) {
-        byte[][] result = new byte[args.length + 1][];
-        result[0] = key.getBytes(StandardCharsets.UTF_8);
-        for (int i = 0; i < args.length; i++) {
-            result[i + 1] = args[i].getBytes(StandardCharsets.UTF_8);
+    private RuntimeDegradeState parseState(String result) {
+        String[] parts = result.split("\\|", 4);
+        if (parts.length != 4) {
+            throw new IllegalStateException("Redis 脚本返回格式不正确: " + result);
         }
-        return result;
+        return new RuntimeDegradeState(
+                Long.parseLong(parts[0]),
+                Long.parseLong(parts[1]),
+                "1".equals(parts[2]),
+                parts[3]);
     }
 
     private void publishAgentReregister(List<Long> agentIds) {
@@ -284,6 +268,13 @@ public class McpRuntimeDegradeServiceImpl implements McpRuntimeDegradeService {
                 : throwable.getMessage();
         return "运行时自动降级：连续 " + failureCount + " 次连接或传输失败，已达到阈值 "
                 + normalizeThreshold(threshold) + "。请检查服务后手动连接或刷新工具。原因：" + reason;
+    }
+
+    private static DefaultRedisScript<String> buildScript(String scriptText) {
+        DefaultRedisScript<String> script = new DefaultRedisScript<>();
+        script.setScriptText(scriptText);
+        script.setResultType(String.class);
+        return script;
     }
 
     private record RuntimeDegradeState(long failureCount,
