@@ -84,6 +84,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         if(entity.getAgentType() == AgentType.CUSTOM) {
             vo.setTool(agentToolService.getToolIds(id));
             vo.setMcp(agentMcpServerService.getMcpIds(id));
+            vo.setMcpBindings(agentMcpServerService.getBindings(id));
             vo.setSkill(agentSkillPackageService.getSkillPackageIds(id));
             vo.setSubAgent(agentSubAgentService.getSubAgentIds(id));
             vo.setKnowledgeBase(agentKnowledgeBaseService.getKnowledgeIds(id));
@@ -140,7 +141,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         if (vo.getAgentType() == AgentType.CUSTOM) {
             agentSubAgentService.saveSubAgent(vo.getId(), vo.getSubAgent());
             agentToolService.saveAgentTool(vo.getId(), vo.getTool());
-            agentMcpServerService.saveAgentMcpServer(vo.getId(), vo.getMcp());
+            agentMcpServerService.saveAgentMcpServer(vo.getId(), vo.getMcp(), vo.getMcpBindings());
             agentSkillPackageService.saveAgentSkillPackage(vo.getId(), vo.getSkill());
             agentKnowledgeBaseService.saveAgentKnowledge(vo.getId(), vo.getKnowledgeBase());
             if (vo.getStudioConfigId() != null) {

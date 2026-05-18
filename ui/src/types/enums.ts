@@ -113,6 +113,32 @@ export enum McpProtocol {
 }
 
 /**
+ * MCP 激活状态
+ */
+export enum McpActivationStatus {
+  NOT_ACTIVATED = 'NOT_ACTIVATED',
+  ACTIVATING = 'ACTIVATING',
+  ACTIVE = 'ACTIVE',
+  FAILED = 'FAILED'
+}
+
+/**
+ * MCP 失败来源
+ */
+export enum McpFailureSource {
+  NONE = 'NONE',
+  RUNTIME_AUTO_DEGRADE = 'RUNTIME_AUTO_DEGRADE'
+}
+
+/**
+ * MCP 工具暴露模式
+ */
+export enum McpToolExposureMode {
+  ALL_GLOBAL = 'ALL_GLOBAL',
+  SELECTED_ONLY = 'SELECTED_ONLY'
+}
+
+/**
  * 敏感词处理动作
  */
 export enum SensitiveWordAction {

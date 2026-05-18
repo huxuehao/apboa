@@ -21,18 +21,17 @@ import io.agentscope.core.model.ExecutionConfig;
 import io.agentscope.core.tool.Toolkit;
 import io.agentscope.core.tool.ToolkitConfig;
 import io.agentscope.core.tool.subagent.SubAgentConfig;
+import java.time.Duration;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-import java.util.List;
-
 /**
- * 描述：钩子工厂
+ * 描述：工具工厂
  *
  * @author huxuehao
- **/
+ */
 @Slf4j
 @Component
 public class ToolkitFactory {
@@ -81,9 +80,8 @@ public class ToolkitFactory {
                         // 内置工具注册
                         if (toolConfig.getToolType() == ToolType.BUILTIN) {
                             toolkit.registerTool(ToolsRegister.getTool(toolConfig.getClassPath()));
-                        }
-                        // 动态工具注册
-                        else {
+                        } else {
+                            // 动态工具注册
                             toolkit.registerTool(new DynamicAgentTool(toolConfig));
                         }
 
@@ -95,7 +93,6 @@ public class ToolkitFactory {
                     });
         }
 
-
         // 注册文件搜索替换工具
         Long codeExecutionId = agentCodeExecutionService.getCodeExecutionIdByAgentId(agentDefinition.getId());
         if (codeExecutionId != null) {
@@ -105,10 +102,8 @@ public class ToolkitFactory {
             }
         }
 
-
-        // 注册MCP
-        mcpClientFactory.getMcpClient(agentDefinition).forEach(
-                (mcpClient) -> toolkit.registerMcpClient(mcpClient).block());
+        // 此处仅注册缓存的 MCP 工具模式，真正的 MCP 连接会在调用时打开。
+        mcpClientFactory.getLazyMcpTools(agentDefinition).forEach(toolkit::registerAgentTool);
 
         // 注册 Agent as Tool
         List<Long> subAgentIds = agentSubAgentService.getSubAgentIds(agentDefinition.getId());
@@ -126,7 +121,7 @@ public class ToolkitFactory {
                         .parallel(false)
                         // 禁止删除工具
                         .allowToolDeletion(false)
-                        // 设置工具执行超时时间为60秒
+                        // 设置工具执行超时时间为 60 秒
                         .executionConfig(ExecutionConfig.builder().timeout(Duration.ofSeconds(60)).build())
                         .build());
         if (!toolIds.isEmpty()) {
@@ -140,9 +135,8 @@ public class ToolkitFactory {
                         // 内置工具注册
                         if (toolConfig.getToolType() == ToolType.BUILTIN) {
                             toolkit.registerTool(ToolsRegister.getTool(toolConfig.getClassPath()));
-                        }
-                        // 动态工具注册
-                        else {
+                        } else {
+                            // 动态工具注册
                             toolkit.registerTool(new DynamicAgentTool(toolConfig));
                         }
 

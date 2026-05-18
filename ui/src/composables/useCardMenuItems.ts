@@ -1,25 +1,27 @@
 /**
  * 卡片操作菜单项 composable
- * 统一管理各卡片组件的操作菜单项及图标，便于后期统一修改
+ * 统一管理各卡片组件的操作菜单项及图标，便于后续统一修改
  *
  * @author huxuehao
  */
 import { h } from 'vue'
 import type { VNode } from 'vue'
 import {
-  EyeOutlined,
-  EditOutlined,
-  CheckCircleOutlined,
-  StopOutlined,
-  MessageOutlined,
-  HistoryOutlined,
-  DeleteOutlined,
-  SettingOutlined,
   ApartmentOutlined,
-  ClockCircleOutlined
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  HistoryOutlined,
+  MessageOutlined,
+  PlayCircleOutlined,
+  SettingOutlined,
+  StopOutlined,
+  SyncOutlined
 } from '@ant-design/icons-vue'
 
-/** 菜单项类型（兼容 Ant Design Menu items） */
+/** 菜单项类型 */
 export type CardMenuItem =
   | { key: string; label: string; icon?: () => VNode; danger?: boolean }
   | { type: 'divider' }
@@ -40,13 +42,14 @@ export function createEditItem(): CardMenuItem {
 
 /**
  * 创建「启用/禁用」菜单项
+ *
  * @param enabled 当前是否启用
  */
 export function createEnableItem(enabled: boolean): CardMenuItem {
   return {
     key: 'enable',
     label: enabled ? '禁用' : '启用',
-    icon: () => h(enabled ? StopOutlined : CheckCircleOutlined),
+    icon: () => h(enabled ? StopOutlined : CheckCircleOutlined)
   }
 }
 
@@ -61,7 +64,14 @@ export function createDeleteItem(): CardMenuItem {
  * 创建「去对话」菜单项
  */
 export function createGoVisitItem(): CardMenuItem {
-  return { key: 'goVisit', label: '对话', icon: () => h(MessageOutlined) }
+  return { key: 'goVisit', label: '去对话', icon: () => h(MessageOutlined) }
+}
+
+/**
+ * 创建「访问历史」菜单项
+ */
+export function createAccessLogItem(): CardMenuItem {
+  return { key: 'accessLog', label: '历史对话', icon: () => h(HistoryOutlined) }
 }
 
 /**
@@ -72,7 +82,49 @@ export function createConfigItem(): CardMenuItem {
 }
 
 /**
- * 创建「配置」菜单项（聚合编辑/定时/架构图/历史等）
+ * 创建「协议配置」菜单项
+ */
+export function createProtocolConfigItem(): CardMenuItem {
+  return { key: 'protocolConfig', label: '协议配置', icon: () => h(SettingOutlined) }
+}
+
+/**
+ * 创建「架构图」菜单项
+ */
+export function createArchitectureItem(): CardMenuItem {
+  return { key: 'architecture', label: '架构图', icon: () => h(ApartmentOutlined) }
+}
+
+/**
+ * 创建「定时」菜单项
+ */
+export function createTimingItem(): CardMenuItem {
+  return { key: 'timing', label: '定时', icon: () => h(ClockCircleOutlined) }
+}
+
+/**
+ * 创建「连接」菜单项
+ */
+export function createActivateItem(label = '连接'): CardMenuItem {
+  return { key: 'activate', label, icon: () => h(PlayCircleOutlined) }
+}
+
+/**
+ * 创建「刷新工具」菜单项
+ */
+export function createSyncItem(label = '刷新工具'): CardMenuItem {
+  return { key: 'sync', label, icon: () => h(SyncOutlined) }
+}
+
+/**
+ * 创建“工具治理”菜单项
+ */
+export function createToolGovernanceItem(): CardMenuItem {
+  return { key: 'toolGovernance', label: '工具治理', icon: () => h(SettingOutlined) }
+}
+
+/**
+ * 创建「配置」菜单项
  */
 export function createConfigPanelItem(): CardMenuItem {
   return { key: 'configPanel', label: '设计', icon: () => h(SettingOutlined) }

@@ -22,6 +22,7 @@ target/
 /nbproject/private/
 /nbbuild/
 /dist/
+ui/dist-zip/
 /nbdist/
 /.nb-gradle/
 build/
@@ -41,3 +42,8 @@ build/
 .claude
 .codex
 .trae
+.omc
+.omx
+.codex_tmp
+logs
+.m2

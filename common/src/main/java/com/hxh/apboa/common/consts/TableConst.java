@@ -17,6 +17,7 @@ public class TableConst {
     public static final String PROVIDER = "model_provider";
     public static final String MODEL = "model_config";
     public static final String MCP = "mcp_server";
+    public static final String MCP_TOOL = "mcp_tool";
     public static final String KNOWLEDGE = "knowledge_base_config";
     public static final String HOOK = "hook_config";
     public static final String CHAT_SESSION = "chat_session";
@@ -31,6 +32,7 @@ public class TableConst {
     public static final String AGENT_AGENT = "agent_sub_agents";
     public static final String AGENT_SKILL = "agent_skill_packages";
     public static final String AGENT_MCP = "agent_mcp_servers";
+    public static final String AGENT_MCP_TOOL = "agent_mcp_tool";
     public static final String AGENT_KNOWLEDGE = "agent_knowledge_bases";
     public static final String AGENT_HOOKS = "agent_hooks";
     public static final String AGENT_STUDIO = "agent_studio";

@@ -1,18 +1,19 @@
 package com.hxh.apboa.common.vo;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.hxh.apboa.common.config.SerializableEnable;
 import com.hxh.apboa.common.enums.HealthStatus;
+import com.hxh.apboa.common.enums.McpActivationStatus;
+import com.hxh.apboa.common.enums.McpFailureSource;
 import com.hxh.apboa.common.enums.McpMode;
 import com.hxh.apboa.common.enums.McpProtocol;
-import com.fasterxml.jackson.databind.JsonNode;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 /**
- * MCP服务器VO
+ * MCP 服务器 VO
  *
  * @author huxuehao
  */
@@ -28,6 +29,16 @@ public class McpServerVO implements SerializableEnable {
     private String description;
     private HealthStatus healthStatus;
     private LocalDateTime lastHealthCheck;
+    private McpActivationStatus activationStatus;
+    private String activationMessage;
+    private McpFailureSource failureSource;
+    private LocalDateTime activationStatusChangedAt;
+    private LocalDateTime lastActivationTime;
+    private LocalDateTime lastToolSyncTime;
+    private Integer toolCount;
+    private Integer availableToolCount;
+    private Integer runtimeFailThreshold;
+    private Boolean needsSync;
     private Boolean enabled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
