@@ -64,7 +64,7 @@ export function createDeleteItem(): CardMenuItem {
  * 创建「去对话」菜单项
  */
 export function createGoVisitItem(): CardMenuItem {
-  return { key: 'goVisit', label: '去对话', icon: () => h(MessageOutlined) }
+  return { key: 'goVisit', label: '对话', icon: () => h(MessageOutlined) }
 }
 
 /**
