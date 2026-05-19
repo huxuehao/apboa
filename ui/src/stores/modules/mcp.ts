@@ -147,6 +147,13 @@ export const useMcpStore = defineStore('mcp', () => {
    * @param action 操作文案
    */
   async function activateServer(id: string, action = '连接') {
+    // 乐观更新：先将状态置为激活中，让卡片立即显示加载动画
+    const item = list.value.find((x) => x.id === id)
+    if (item) {
+      item.activationStatus = McpActivationStatus.ACTIVATING
+      item.activationMessage = '正在连接 MCP 并刷新工具目录'
+    }
+
     const response = await mcpApi.activate(id)
     patchItem(response.data.data)
     showConnectionMessage(response.data.data, action)
@@ -160,6 +167,13 @@ export const useMcpStore = defineStore('mcp', () => {
    * @param action 操作文案
    */
   async function syncServerTools(id: string, action = '刷新工具') {
+    // 乐观更新：先将状态置为激活中，让卡片立即显示加载动画
+    const item = list.value.find((x) => x.id === id)
+    if (item) {
+      item.activationStatus = McpActivationStatus.ACTIVATING
+      item.activationMessage = '正在刷新工具目录'
+    }
+
     const response = await mcpApi.syncTools(id)
     patchItem(response.data.data)
     showConnectionMessage(response.data.data, action)

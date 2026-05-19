@@ -115,12 +115,17 @@ function handleMenuClick({ key }: { key: string }) {
 <template>
   <div class="agent-card">
     <div class="card-header flex items-center gap-sm">
-      <div  class="card-avatar flex-center" :class="{ disabled: !data.enabled }">
-        <RobotOutlined />
-        <ClockCircleOutlined
+      <div class="card-avatar-wrapper">
+        <div class="card-avatar flex-center" :class="{ disabled: !data.enabled }">
+          <RobotOutlined />
+        </div>
+        <span
           v-if="data?.jobInfo"
-          class="timing"
-          :class="{'timing_start' : data?.jobInfo?.enabled && data.enabled}" />
+          class="avatar-corner-badge"
+          :class="{ 'badge-active': data?.jobInfo?.enabled && data.enabled }"
+        >
+          <ClockCircleOutlined />
+        </span>
       </div>
       <div class="card-name flex-1 truncate" :title="data.name" @click="handleTitleClick">
         {{ data.name }}
@@ -175,8 +180,12 @@ function handleMenuClick({ key }: { key: string }) {
   }
 
   .card-header {
-    .card-avatar {
+    .card-avatar-wrapper {
       position: relative;
+      flex-shrink: 0;
+    }
+
+    .card-avatar {
       width: 40px;
       height: 40px;
       background-color: #e8eaf6;
@@ -185,17 +194,25 @@ function handleMenuClick({ key }: { key: string }) {
       font-size: var(--font-size-2xl);
       font-weight: 600;
       flex-shrink: 0;
+    }
 
-      .timing {
-        position: absolute;
-        right: -7px;
-        bottom: 0;
-        font-size: 16px;
-        color: #8a8a8a;
+    .avatar-corner-badge {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px var(--color-bg-white);
+      background: #fff;
+      color: #8a8a8a;
+      font-size: 12px;
 
-        &_start {
-          color: #4449d0;
-        }
+      &.badge-active {
+        color: #4449d0;
       }
     }
   }
