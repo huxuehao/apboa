@@ -66,11 +66,9 @@ public class WorkspaceValidateHook implements Hook {
 
         switch (name) {
             case "list_directory":
-                pathValidator.validatePathParam(input, "dir_path", true);
+                pathValidator.validatePathParam(input, "dir_path", false);
                 break;
             case "view_text_file":
-                pathValidator.validatePathParam(input, "file_path", true);
-                break;
             case "insert_text_file":
             case "write_text_file":
             case "search_replace_file":
