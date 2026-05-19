@@ -126,6 +126,8 @@ const {
   reasoningMessageId,
   toolCallsInProgress,
   isRunning,
+  currentPlan,
+  hasPlan,
   sendMessage,
   sendToolContent,
   abortRun
@@ -483,6 +485,7 @@ onMounted(() => {
       :session-id="currentSessionId"
       :has-more-history="hasMoreHistory"
       :history-loading="historyLoading"
+      :current-plan="currentPlan"
       @update:input-value="inputText = $event"
       @update:uploaded-files="uploadedFiles = $event"
       @memory="handleMemoryChange"
@@ -495,6 +498,7 @@ onMounted(() => {
       @toggle-workspace="toggleWorkspace"
       @load-more-history="loadMoreHistory"
       @new-session="handleNewSession"
+      @plan-destroyed="currentPlan = null"
     />
 
     <!-- 工作空间面板（作为 flex 子项从右侧滑出） -->

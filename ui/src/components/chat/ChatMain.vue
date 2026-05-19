@@ -9,7 +9,8 @@ import {
 import MessageList from './MessageList.vue'
 import ChatInput from './ChatInput.vue'
 import Welcome from './Welcome.vue'
-import type { DisplayMessage, UploadedFileItem } from '@/types'
+import PlanPanel from './PlanPanel.vue'
+import type { DisplayMessage, UploadedFileItem, PlanInfo } from '@/types'
 import type {FlatFileItem} from "@/composables/chat/useWorkspaceFiles.ts";
 import WorkspaceFilePreview from "@/components/workspace/WorkspaceFilePreview.vue";
 
@@ -39,6 +40,8 @@ const props = defineProps<{
   hasMoreHistory?: boolean
   /** 历史消息加载中 */
   historyLoading?: boolean
+  /** 当前计划信息 */
+  currentPlan?: PlanInfo | null
 }>()
 
 const emit = defineEmits<{
@@ -56,6 +59,8 @@ const emit = defineEmits<{
   /** 触发加载更多历史消息 */
   (e: 'loadMoreHistory'): void
   (e: 'newSession'): void
+  /** 计划面板销毁 */
+  (e: 'planDestroyed'): void
 }>()
 
 // 滚动容器 ref
@@ -291,6 +296,12 @@ defineExpose({
             <span>下拉加载更多历史消息</span>
           </template>
         </div>
+        <PlanPanel
+          v-if="currentPlan"
+          :plan="currentPlan"
+          :is-running="isRunning"
+          @destroy="$emit('planDestroyed')"
+        />
         <MessageList
           :agent-has-result="agentHasResult"
           :messages="messages"

@@ -434,7 +434,7 @@ const transitionName = computed(() =>
                   <component :is="section.meta.folderIcon" />
                 </span>
                 <span class="folder-label">{{ section.meta.label }}</span>
-                <span class="folder-count">{{ section.items.length }}</span>
+                <span class="folder-count">{{ section.items.length }} 个</span>
               </div>
             </div>
           </div>
@@ -597,7 +597,7 @@ const transitionName = computed(() =>
   transition: background-color 0.15s ease, color 0.15s ease;
 
   &:hover {
-    background: rgba(15, 116, 255, 0.08);
+    background: rgba(116, 116, 116, 0.08);
     color: var(--color-text-primary);
   }
 }
@@ -676,7 +676,7 @@ const transitionName = computed(() =>
 
   &:hover,
   &.active {
-    background-color: rgba(15, 116, 255, 0.08);
+    background-color: rgba(116, 116, 116, 0.08);
   }
 }
 
@@ -731,7 +731,7 @@ const transitionName = computed(() =>
 
   &:hover,
   &.active {
-    background-color: rgba(15, 116, 255, 0.08);
+    background-color: rgba(116, 116, 116, 0.08);
   }
 }
 
@@ -757,7 +757,6 @@ const transitionName = computed(() =>
   flex-shrink: 0;
   font-size: 12px;
   color: var(--color-text-placeholder);
-  background: rgba(0, 0, 0, 0.04);
   padding: 1px 8px;
   border-radius: 10px;
 }
