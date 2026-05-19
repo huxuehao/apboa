@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, nextTick, watch, onMounted} from 'vue'
+import {ref, watch, onMounted} from 'vue'
 import {
   MenuOutlined,
   FolderOutlined,
@@ -45,7 +45,7 @@ const emit = defineEmits<{
   (e: 'update:inputValue', value: string): void
   (e: 'update:uploadedFiles', value: UploadedFileItem[]): void
   (e: 'send'): void
-  (e: 'scroll', event: UIEvent): void
+  (e: 'scroll', event: Event): void
   (e: 'toolContent', value: any): void
   (e: 'abort'): void
   (e: 'memory', value: boolean): void
@@ -71,20 +71,38 @@ const savedScrollTop = ref(0)
 const workspaceFilePreviewVisible = ref(false)
 const workspaceFilePreviewNode = ref<FlatFileItem | null>(null)
 
-// 滚动到底部
-const scrollToBottom = (smooth = false) => {
+// 标志位：区分程序化滚动与用户手动滚动，防止 scrollToBottom 触发的 scroll 事件错误更新 shouldAutoScroll
+let programmaticScrolling = false
+// 待执行的自动滚动 rAF ID，用于在用户主动上滑时立即取消，打破"抗衡"
+let scrollRafId: number | null = null
+
+/**
+ * 滚动到底部
+ * 使用 requestAnimationFrame 确保在浏览器绘制前拿到最新的 scrollHeight。
+ * 每次调度前取消上一次的待执行回调，执行时二次校验 shouldAutoScroll，
+ * 防止用户上滑后被已调度的回调拉回底部。
+ */
+const scrollToBottom = () => {
   const el = messagesScrollRef.value
   if (!el) return
 
-  nextTick(() => {
-    if (smooth) {
-      el.scrollTo({
-        top: el.scrollHeight,
-        behavior: 'smooth'
-      })
-    } else {
-      el.scrollTop = el.scrollHeight
-    }
+  // 取消上一次待执行的自动滚动，避免 rAF 堆积
+  if (scrollRafId !== null) {
+    cancelAnimationFrame(scrollRafId)
+    scrollRafId = null
+  }
+
+  scrollRafId = requestAnimationFrame(() => {
+    scrollRafId = null
+    if (!el) return
+
+    // 二次校验：rAF 回调执行时用户可能已经上滑，此时应放弃自动滚底
+    if (!shouldAutoScroll.value) return
+
+    programmaticScrolling = true
+    el.scrollTop = el.scrollHeight
+    // 延迟重置标志位，确保本次 scroll 事件已触发并被跳过
+    setTimeout(() => { programmaticScrolling = false }, 100)
   })
 }
 
@@ -99,8 +117,20 @@ const checkAndUpdateAutoScroll = () => {
 }
 
 // 处理滚动事件
-const handleScroll = (event: UIEvent | any) => {
+const handleScroll = (event: Event) => {
+  // 跳过程序化滚动触发的事件，避免展开面板/DOM变化时错误更新 shouldAutoScroll
+  if (programmaticScrolling) {
+    emit('scroll', event)
+    return
+  }
+
   checkAndUpdateAutoScroll()
+
+  // 用户主动上滑离开底部时，立即取消待执行的自动滚动，消除"抗衡感"
+  if (!shouldAutoScroll.value && scrollRafId !== null) {
+    cancelAnimationFrame(scrollRafId)
+    scrollRafId = null
+  }
 
   // 触顶检测：向上滚动接近顶部时加载更多历史消息
   const el = messagesScrollRef.value
@@ -123,19 +153,21 @@ const handleScroll = (event: UIEvent | any) => {
  * 加载历史消息后保持滚动位置不变（视觉上不跳动）
  */
 const maintainScrollPosition = () => {
-  nextTick(() => {
+  requestAnimationFrame(() => {
     const el = messagesScrollRef.value
     if (!el) return
     const heightDiff = el.scrollHeight - savedScrollHeight.value
+    programmaticScrolling = true
     el.scrollTop = savedScrollTop.value + heightDiff
+    setTimeout(() => { programmaticScrolling = false }, 100)
   })
 }
 
 const handleSend = () => {
   emit('send')
-  // 发送后强制自动滚动到底部，带丝滑动画
+  // 发送后强制自动滚动到底部
   shouldAutoScroll.value = true
-  scrollToBottom(true)
+  scrollToBottom()
 }
 
 // 预览输入tag
