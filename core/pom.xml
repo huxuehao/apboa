@@ -17,19 +17,6 @@
     </properties>
 
     <dependencies>
-        <!-- Docker Java Client（可选，仅方案五容器化部署时使用） -->
-        <dependency>
-            <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java-core</artifactId>
-            <version>3.3.6</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java-transport-httpclient5</artifactId>
-            <version>3.3.6</version>
-            <optional>true</optional>
-        </dependency>
         <dependency>
             <groupId>com.hxh.apboa</groupId>
             <artifactId>agent</artifactId>
