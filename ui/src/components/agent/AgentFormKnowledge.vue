@@ -389,12 +389,12 @@ defineExpose({
                     </div>
                   </ACheckbox>
                     <div class="mcp-tag-group">
-                      <ATag color="default">{{ mcp.protocol }}</ATag>
-                      <ATag :color="getMcpConnectionStatusColor(mcp)">
+                      <ATag color="default" :bordered="false">{{ mcp.protocol }}</ATag>
+                      <ATag :bordered="false" :color="getMcpConnectionStatusColor(mcp)">
                         {{ getMcpConnectionStatusText(mcp) }}
                       </ATag>
-                      <ATag color="processing">全局可用 {{ mcp.availableToolCount || 0 }}</ATag>
-                      <ATag v-if="!isMcpRuntimeAvailable(mcp)" color="warning">
+                      <ATag :bordered="false" color="processing">全局可用 {{ mcp.availableToolCount || 0 }}</ATag>
+                      <ATag v-if="!isMcpRuntimeAvailable(mcp)" :bordered="false" color="warning">
                         {{ getMcpUnavailableReason(mcp) }}
                     </ATag>
                   </div>
@@ -450,17 +450,14 @@ defineExpose({
                             :disabled="!isToolSelectable(mcp.id as string, tool)"
                             @change="(e: any) => handleMcpToolChange(mcp.id as string, tool.id as string, e.target.checked)"
                           >
-                            <div class="tool-item-info">
-                              <div class="tool-item-name-row">
-                                <span class="tool-item-name">{{ tool.toolName }}</span>
-                                <ATag v-if="tool.missing" color="warning">已消失</ATag>
-                                <ATag v-else-if="tool.enabled" color="success">全局可用</ATag>
-                                <ATag v-else color="default">全局禁用</ATag>
-                              </div>
-                              <div class="tool-item-desc text-placeholder text-xs">
-                                {{ tool.description || '暂无描述' }}
-                              </div>
+                          <div class="item-info">
+                            <div class="item-name text-ellipsis tool-item-name" :title="tool.toolName">
+                              {{ tool.toolName }}
                             </div>
+                            <div class="item-desc text-placeholder text-xs text-ellipsis tool-item-desc" :title="tool.description">
+                              {{ tool.description || '暂无描述' }}
+                            </div>
+                          </div>
                           </ACheckbox>
                         </div>
                       </div>
@@ -623,30 +620,20 @@ defineExpose({
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 8px;
   padding: 10px;
+  width: 270px;
 
   &.unavailable {
     background: rgba(15, 23, 42, 0.02);
   }
 }
 
-.tool-item-info {
-  min-width: 0;
-}
-
-.tool-item-name-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
 .tool-item-name {
   font-weight: 500;
+  width: 220px !important;
 }
 
 .tool-item-desc {
-  margin-top: 4px;
-  line-height: 1.5;
+   width: 220px !important;
 }
 
 .text-ellipsis {
