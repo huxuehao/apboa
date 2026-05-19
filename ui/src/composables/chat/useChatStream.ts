@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { message } from 'ant-design-vue'
 import { useAgentClient } from '@/composables/useAgentClient'
+import { usePlanTracking } from '@/composables/chat/usePlanTracking'
 import * as chatSessionApi from '@/api/chatSession'
 import { buildToolCallsContent } from '@/utils/chat/format'
 import { chatMessageQueue } from '@/utils/chat/messageQueue'
@@ -18,6 +19,16 @@ export function useChatStream(
   onMessageSaved?: (chatMsg: ChatMessageVO) => void) {
 
   const { userInfo } = useAccountStore()
+
+  // 计划追踪
+  const {
+    currentPlan,
+    hasPlan,
+    onToolStart: onPlanToolStart,
+    onToolArgs: onPlanToolArgs,
+    onToolResult: onPlanToolResult,
+    resetPlan
+  } = usePlanTracking()
 
   const getForwardedProps = () => ({
     agentId: agentId.value,
@@ -104,6 +115,9 @@ export function useChatStream(
         }
       },
       onToolCallStart: (e) => {
+        // 计划追踪：记录工具调用名称
+        onPlanToolStart(e.toolCallId, e.toolCallName)
+
         agentHasResult.value = true
         toolCallsInProgress.value = [
           ...toolCallsInProgress.value,
@@ -126,12 +140,18 @@ export function useChatStream(
         }
       },
       onToolCallArgs: (_e, partialArgs) => {
+        // 计划追踪：累积工具参数
+        onPlanToolArgs(_e.toolCallId, partialArgs)
+
         const arr = [...toolCallsInProgress.value]
         const last = arr[arr.length - 1]
         if (last) last.args = partialArgs
         toolCallsInProgress.value = arr
       },
       onToolCallResult: (e) => {
+        // 计划追踪：处理工具结果
+        onPlanToolResult(e.toolCallId)
+
         try {
           // 判断是否开启了显示工具调用
           if (!(toolProcessActive?.value ?? true)) {
@@ -225,6 +245,10 @@ export function useChatStream(
   const abortRun = async  () => {
     await abort()
     agentHasResult.value = true
+
+    // 重置计划状态
+    resetPlan()
+
     const sid = currentSessionId.value
     if (sid) {
       // 保存工具调用消息，通过队列保证写入顺序
@@ -304,6 +328,8 @@ export function useChatStream(
     reasoningMessageId,
     toolCallsInProgress,
     isRunning,
+    currentPlan,
+    hasPlan,
     abortRun,
     sendMessage,
     sendToolContent,

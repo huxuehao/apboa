@@ -25,7 +25,10 @@ export * from './dto'
 // AGUI 协议类型
 export * from './agui'
 
-// Chat 累成
+// Chat 类型
 export * from './chat'
 
 export * from './chat-mention'
+
+// Plan 类型
+export * from './plan'
