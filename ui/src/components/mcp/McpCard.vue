@@ -6,14 +6,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import {
-  CheckCircleOutlined,
+  CheckCircleFilled,
+  CloseCircleFilled,
   CloudServerOutlined,
   EllipsisOutlined,
-  ExclamationCircleOutlined,
-  LoadingOutlined
+  LoadingOutlined,
+  WarningFilled
 } from '@ant-design/icons-vue'
 import type { McpServerVO } from '@/types'
-import { McpActivationStatus, McpFailureSource } from '@/types'
+import { McpActivationStatus } from '@/types'
 import {
   createActivateItem,
   createDeleteItem,
@@ -24,11 +25,7 @@ import {
   createToolGovernanceItem,
   createViewItem
 } from '@/composables/useCardMenuItems'
-import {
-  getMcpConnectionStatusColor,
-  getMcpConnectionStatusText,
-  getMcpPrimaryAction
-} from '@/composables/useMcpPresentation'
+import { getMcpPrimaryAction } from '@/composables/useMcpPresentation'
 
 const props = defineProps<{
   data: McpServerVO
@@ -60,15 +57,71 @@ const modeText = computed(() => {
   return props.data.mode === 'SYNC' ? '同步' : '异步'
 })
 
-const connectionText = computed(() => getMcpConnectionStatusText(props.data))
-
-const connectionColor = computed(() => getMcpConnectionStatusColor(props.data))
-
 const primaryAction = computed(() => getMcpPrimaryAction(props.data))
 
-const isRuntimeDegraded = computed(() => {
-  return props.data.activationStatus === McpActivationStatus.FAILED
-    && props.data.failureSource === McpFailureSource.RUNTIME_AUTO_DEGRADE
+/* ============================================================
+ * 头像角标状态系统
+ * 六种状态：停用 disabled | 待连接 not-activated | 连接中 activating
+ *          | 已激活 active | 激活失败 failed | 激活中无工具 active-no-tool
+ * ============================================================ */
+
+const isDisabled = computed(() => !props.data.enabled)
+
+const isActivating = computed(() => props.data.activationStatus === McpActivationStatus.ACTIVATING)
+
+const isFailed = computed(() => props.data.activationStatus === McpActivationStatus.FAILED)
+
+const isActive = computed(() => props.data.activationStatus === McpActivationStatus.ACTIVE)
+
+const isNotActivated = computed(() => props.data.activationStatus === McpActivationStatus.NOT_ACTIVATED)
+
+/** 已激活但无工具（有连接但工具目录为空） */
+const isActiveNoTool = computed(() => isActive.value && (props.data.toolCount || 0) === 0)
+
+/** 头像样式类 */
+const avatarClass = computed(() => ({
+  disabled: isDisabled.value,
+  activating: isActivating.value,
+  failed: isFailed.value,
+  'no-tool': isActiveNoTool.value
+}))
+
+/**
+ * 角标提示文本
+ * 仅当角标可见时提供 tooltip 内容
+ */
+const cornerTooltip = computed(() => {
+  if (isDisabled.value) return 'MCP 服务已停用'
+  if (isActivating.value) return 'MCP 服务正在连接中，请稍候'
+  if (isNotActivated.value) {
+    return 'MCP 服务尚未连接，请通过菜单中的「连接」操作发起连接并刷新工具目录'
+  }
+  if (isFailed.value) {
+    return props.data.activationMessage || 'MCP 服务连接失败，请通过菜单中的「重试连接」操作重新连接'
+  }
+  if (isActive.value) {
+    const total = props.data.toolCount || 0
+    const available = props.data.availableToolCount || 0
+    return `工具总数: ${total}，全局可用: ${available}`
+  }
+  return '未知状态'
+})
+
+/**
+ * 角标内容类型
+ * - none:     不显示角标（停用 / 激活中）
+ * - warning:  黄色叹号（待连接 / 已连接无工具）
+ * - error:    红色叉号（激活失败）
+ * - success:  绿色对号（已激活且有工具）
+ */
+type CornerBadgeType = 'none' | 'warning' | 'error' | 'success'
+
+const cornerBadgeType = computed<CornerBadgeType>(() => {
+  if (isDisabled.value || isActivating.value) return 'none'
+  if (isFailed.value) return 'error'
+  if (isNotActivated.value || isActiveNoTool.value) return 'warning'
+  if (isActive.value) return 'success'
+  return 'none'
 })
 
 const menuItems = computed(() => {
@@ -123,8 +176,19 @@ function handleMenuClick({ key }: { key: string }) {
 <template>
   <div class="mcp-card">
     <div class="card-header flex items-center gap-sm">
-      <div class="card-avatar flex-center" :class="{ disabled: !data.enabled }">
-        <CloudServerOutlined />
+      <div class="card-avatar-wrapper">
+        <ATooltip :title="cornerTooltip" placement="top">
+          <div class="card-avatar flex-center" :class="avatarClass">
+            <LoadingOutlined v-if="isActivating" spin />
+            <CloudServerOutlined v-else />
+          </div>
+          <!-- 角标 -->
+          <span class="avatar-corner-badge" :class="`badge-${cornerBadgeType}`">
+            <WarningFilled v-if="cornerBadgeType === 'warning'" />
+            <CloseCircleFilled v-else-if="cornerBadgeType === 'error'" />
+            <CheckCircleFilled v-else-if="cornerBadgeType === 'success'" />
+          </span>
+        </ATooltip>
       </div>
       <div class="card-name flex-1 truncate" :title="data.name" @click="emit('view', data.id as string)">
         {{ data.name }}
@@ -143,14 +207,6 @@ function handleMenuClick({ key }: { key: string }) {
       {{ data.description }}
     </div>
 
-    <div class="card-status flex items-center gap-xs">
-      <ATag :color="connectionColor" class="tag">{{ connectionText }}</ATag>
-      <ATag v-if="data.needsSync" color="warning" class="tag">待刷新</ATag>
-      <ATag v-if="isRuntimeDegraded && data.toolCount > 0" color="default" class="tag">上次缓存</ATag>
-      <ATag color="default" class="tag">工具 {{ data.toolCount || 0 }}</ATag>
-      <ATag color="processing" class="tag">全局可用 {{ data.availableToolCount || 0 }}</ATag>
-    </div>
-
     <div class="card-footer flex items-center justify-between">
       <div class="card-tags flex items-center gap-xs">
         <ATag color="default" class="tag">{{ data.protocol }}</ATag>
@@ -158,30 +214,12 @@ function handleMenuClick({ key }: { key: string }) {
       </div>
       <div class="card-time text-placeholder text-xs">更新于 {{ formattedTime }}</div>
     </div>
-
-    <div class="card-hint text-placeholder text-xs">
-      <template v-if="data.activationStatus === McpActivationStatus.ACTIVATING">
-        <LoadingOutlined style="margin-right: 4px" />{{ data.activationMessage || '正在连接 MCP 并刷新工具目录' }}
-      </template>
-      <template v-else-if="data.activationStatus === McpActivationStatus.FAILED">
-        <ExclamationCircleOutlined style="margin-right: 4px" />{{ data.activationMessage || '连接失败' }}
-      </template>
-      <template v-else-if="data.activationStatus === McpActivationStatus.ACTIVE && data.toolCount > 0">
-        <CheckCircleOutlined style="margin-right: 4px" />{{ data.activationMessage || '连接可用，工具目录已就绪' }}
-      </template>
-      <template v-else-if="data.activationStatus === McpActivationStatus.ACTIVE">
-        <CheckCircleOutlined style="margin-right: 4px" />{{ data.activationMessage || '连接成功，但当前未发现可用工具' }}
-      </template>
-      <template v-else>
-        {{ data.activationMessage || '保存后可手动连接' }}
-      </template>
-    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
 .mcp-card {
-  min-height: 220px;
+  min-height: 180px;
   padding: var(--spacing-md);
   background-color: var(--color-bg-white);
   border-radius: var(--border-radius-lg);
@@ -197,6 +235,12 @@ function handleMenuClick({ key }: { key: string }) {
   }
 
   .card-header {
+    .card-avatar-wrapper {
+      position: relative;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
     .card-avatar {
       width: 40px;
       height: 40px;
@@ -206,6 +250,68 @@ function handleMenuClick({ key }: { key: string }) {
       font-size: var(--font-size-2xl);
       font-weight: 600;
       flex-shrink: 0;
+      transition: background-color var(--transition-base), color var(--transition-base);
+
+      /* 停用态 */
+      &.disabled {
+        color: #757575 !important;
+        background-color: #e7e7e7 !important;
+      }
+
+      /* 激活中 - 加载动画 */
+      &.activating {
+        background-color: #e3f2fd;
+        color: #42a5f5;
+      }
+
+      /* 激活失败 */
+      &.failed {
+        background-color: #ffebee;
+        color: #ef5350;
+      }
+
+      /* 已激活但无工具 */
+      &.no-tool {
+        background-color: #fff8e1;
+        color: #ffa726;
+      }
+    }
+
+    /* 角标 - 定位于头像右下角 */
+    .avatar-corner-badge {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px var(--color-bg-white);
+      cursor: pointer;
+      font-size: 12px;
+
+      /* 图标型角标 */
+      &.badge-warning {
+        width: 18px;
+        height: 18px;
+        background: #fff;
+        color: #faad14;
+      }
+
+      &.badge-error {
+        width: 18px;
+        height: 18px;
+        background: #fff;
+        color: #ff4d4f;
+      }
+
+      /* 绿色对号型角标 */
+      &.badge-success {
+        width: 18px;
+        height: 18px;
+        background: #fff;
+        color: #52c41a;
+      }
     }
 
     .card-name {
@@ -231,10 +337,6 @@ function handleMenuClick({ key }: { key: string }) {
     max-height: 65px;
   }
 
-  .card-status {
-    flex-wrap: wrap;
-  }
-
   .card-footer {
     padding-top: var(--spacing-xs);
 
@@ -245,16 +347,6 @@ function handleMenuClick({ key }: { key: string }) {
     .card-time {
       white-space: nowrap;
     }
-  }
-
-  .card-hint {
-    line-height: 1.5;
-    min-height: 20px;
-  }
-
-  .disabled {
-    color: #757575 !important;
-    background-color: #e7e7e7 !important;
   }
 }
 </style>

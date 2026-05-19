@@ -42,12 +42,17 @@ const descriptionText = computed(() => {
     <Handle type="source" :position="Position.Left" id="left" />
 
     <div class="node-header">
-      <div class="node-avatar">
-        <RobotOutlined />
-        <ClockCircleOutlined
+      <div class="node-avatar-wrapper">
+        <div class="node-avatar">
+          <RobotOutlined />
+        </div>
+        <span
           v-if="data.agent?.jobInfo"
-          class="timing"
-          :class="{'timing_start' : data.agent?.jobInfo?.enabled && data.agent.enabled}" />
+          class="avatar-corner-badge"
+          :class="{ 'badge-active': data.agent?.jobInfo?.enabled && data.agent.enabled }"
+        >
+          <ClockCircleOutlined />
+        </span>
       </div>
       <div class="node-title">
         <div class="node-name">{{ data.agent.name }}</div>
@@ -92,8 +97,12 @@ const descriptionText = computed(() => {
     gap: 12px;
     margin-bottom: 12px;
 
-    .node-avatar {
+    .node-avatar-wrapper {
       position: relative;
+      flex-shrink: 0;
+    }
+
+    .node-avatar {
       width: 48px;
       height: 48px;
       display: flex;
@@ -103,17 +112,25 @@ const descriptionText = computed(() => {
       border-radius: 12px;
       font-size: 24px;
       color: #4449D0;
+    }
 
-      .timing {
-        position: absolute;
-        right: -7px;
-        bottom:-0px;
-        font-size: 16px;
-        color: #8a8a8a;
+    .avatar-corner-badge {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px #ffffff;
+      background: #fff;
+      color: #8a8a8a;
+      font-size: 12px;
 
-        &_start {
-          color: #4449d0;
-        }
+      &.badge-active {
+        color: #4449d0;
       }
     }
 

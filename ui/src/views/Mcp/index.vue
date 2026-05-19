@@ -380,9 +380,9 @@ onActivated(() => {
               <div class="tool-item-main">
                 <div class="tool-item-name-row">
                   <div class="tool-item-name">{{ tool.toolName }}</div>
-                  <ATag v-if="tool.missing" color="warning">已消失</ATag>
-                  <ATag v-else-if="tool.enabled" color="success">全局可用</ATag>
-                  <ATag v-else color="default">全局禁用</ATag>
+                  <ATag v-if="tool.missing" color="warning" :bordered="false">已消失</ATag>
+                  <ATag v-else-if="tool.enabled" color="success" :bordered="false">全局可用</ATag>
+                  <ATag v-else color="default" :bordered="false">全局禁用</ATag>
                 </div>
                 <div class="tool-item-desc text-placeholder">
                   {{ tool.description || '暂无描述' }}
@@ -427,7 +427,7 @@ onActivated(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: 560px;
+  max-height: calc(100vh - 150px);
   overflow-y: auto;
 }
 
