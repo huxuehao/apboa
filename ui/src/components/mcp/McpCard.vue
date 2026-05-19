@@ -83,7 +83,7 @@ const avatarClass = computed(() => ({
   disabled: isDisabled.value,
   activating: isActivating.value,
   failed: isFailed.value,
-  'no-tool': isActiveNoTool.value
+  'no-tool': isNotActivated.value || isActiveNoTool.value
 }))
 
 /**
@@ -270,7 +270,7 @@ function handleMenuClick({ key }: { key: string }) {
         color: #ef5350;
       }
 
-      /* 已激活但无工具 */
+      /* 已激活但无工具, 或待连接 */
       &.no-tool {
         background-color: #fff8e1;
         color: #ffa726;
