@@ -42,7 +42,7 @@ const formData = ref({
   enableShell: true,
   enableRead: false,
   enableWrite: false,
-  command: ['python3', 'python','bash','node', 'npm'] as string[]
+  command: ['python3', 'python','node','bash','sh'] as string[]
 })
 
 /**
@@ -81,7 +81,7 @@ function resetForm() {
     enableShell: true,
     enableRead: false,
     enableWrite: false,
-    command: ['python3', 'python', 'bash','node', 'npm']
+    command: ['python3', 'python','node','bash','sh']
   }
   newCommand.value = ''
   formRef.value?.resetFields()

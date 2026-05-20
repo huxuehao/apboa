@@ -5,7 +5,8 @@ spring:
     name: Apboa
   servlet:
     multipart:
-      max-file-size: 30MB
+      max-file-size: 30MB # 单个文件最大 30MB
+      max-request-size: 100MB # 请求总大小最大 100MB（假设最多3个30MB文件）
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai

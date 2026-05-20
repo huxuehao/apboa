@@ -11,6 +11,7 @@
     <module>common</module>
     <module>console</module>
     <module>core</module>
+    <module>security</module>
     <module>websocket</module>
     <module>job</module>
     <module>biz</module>
@@ -218,6 +219,11 @@
       <dependency>
         <groupId>com.hxh.apboa</groupId>
         <artifactId>ui</artifactId>
+        <version>1.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>com.hxh.apboa</groupId>
+        <artifactId>script-security</artifactId>
         <version>1.0-SNAPSHOT</version>
       </dependency>
     </dependencies>

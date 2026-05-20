@@ -23,6 +23,11 @@
             <groupId>com.hxh.apboa</groupId>
             <artifactId>cluster</artifactId>
         </dependency>
+        <!--script-security模块：脚本安全执行-->
+        <dependency>
+            <groupId>com.hxh.apboa</groupId>
+            <artifactId>script-security</artifactId>
+        </dependency>
         <!--agentscope核心包-->
         <dependency>
             <groupId>io.agentscope</groupId>
