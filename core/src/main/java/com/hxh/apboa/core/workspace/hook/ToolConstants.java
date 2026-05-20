@@ -34,11 +34,6 @@ public final class ToolConstants {
             "execute_shell_command"
     ));
 
-    /** 脚本文件后缀集合（用于判断是否需要校验文件内容中的路径） */
-    public static final Set<String> SCRIPT_EXTENSIONS = new HashSet<>(Arrays.asList(
-            ".sh", ".bash", ".zsh", ".py", ".js", ".ts", ".rb", ".pl", ".php", ".ps1", ".bat", ".cmd"
-    ));
-
     /** 禁止的 Shell 危险模式（变量展开、命令替换等） */
     public static final Pattern DANGEROUS_SHELL_PATTERN =
             Pattern.compile("\\$([{(])|`[^`]*`|\\$[A-Za-z_][A-Za-z0-9_]*|\\$\\(<[^)]*\\)|\\$\\(\\([^)]*\\)\\)");

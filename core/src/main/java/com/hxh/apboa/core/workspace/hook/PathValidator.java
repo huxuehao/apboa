@@ -3,7 +3,6 @@ package com.hxh.apboa.core.workspace.hook;
 import java.util.Map;
 
 import static com.hxh.apboa.core.workspace.hook.ToolConstants.ALLOWED_SKILLS_PREFIX;
-import static com.hxh.apboa.core.workspace.hook.ToolConstants.SCRIPT_EXTENSIONS;
 
 /**
  * 描述：路径安全验证器
@@ -83,19 +82,5 @@ public class PathValidator {
     public boolean isPathViolation(String path) {
         String p = path.replace('\\', '/');
         return p.startsWith("/") || (p.length() > 2 && p.charAt(1) == ':') || p.contains("..");
-    }
-
-    /**
-     * 检测文件是否为脚本文件
-     *
-     * @param filePath 文件路径
-     * @return true 表示是脚本文件
-     */
-    public boolean isScriptFile(String filePath) {
-        String lower = filePath.toLowerCase();
-        for (String ext : SCRIPT_EXTENSIONS) {
-            if (lower.endsWith(ext)) return true;
-        }
-        return false;
     }
 }
