@@ -268,6 +268,16 @@ export interface SkillPackageVO {
 }
 
 /**
+ * 技能包导入结果
+ */
+export interface SkillImportResult {
+  importedCount: number
+  skippedCount: number
+  totalCount: number
+  hintMessage?: string | null
+}
+
+/**
  * 系统提示词模板VO
  */
 export interface SystemPromptTemplateVO {

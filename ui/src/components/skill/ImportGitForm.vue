@@ -8,6 +8,7 @@ import { ref, watch } from 'vue'
 import { message } from 'ant-design-vue'
 import { GithubOutlined, InfoCircleOutlined, AppstoreOutlined } from '@ant-design/icons-vue'
 import * as skillApi from '@/api/skill'
+import { finishSkillImport } from '@/utils/skillImportMessage'
 import type { GitImportConfig } from '@/types'
 
 /**
@@ -22,7 +23,7 @@ const props = defineProps<{
  */
 const emit = defineEmits<{
   'update:visible': [value: boolean]
-  success: []
+  success: [category?: string]
 }>()
 
 const formRef = ref()
@@ -67,10 +68,8 @@ async function handleSubmit() {
   try {
     await formRef.value?.validate()
     loading.value = true
-    await skillApi.importFromGit(form.value)
-    message.success('Git 技能包导入成功')
-    emit('update:visible', false)
-    emit('success')
+    const response = await skillApi.importFromGit(form.value)
+    finishSkillImport(response.data.data, emit, form.value.category)
   } catch (error) {
     console.error('导入失败:', error)
   } finally {
