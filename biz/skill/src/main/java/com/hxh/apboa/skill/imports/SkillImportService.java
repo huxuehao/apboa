@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.entity.SkillPackage;
 import com.hxh.apboa.common.util.FolderUtils;
+import com.hxh.apboa.common.vo.SkillImportResult;
+import com.hxh.apboa.skill.SkillScriptLoadHelper;
 import com.hxh.apboa.skill.imports.config.GitImportConfig;
 import com.hxh.apboa.skill.imports.config.LocalImportConfig;
 import com.hxh.apboa.skill.imports.config.UploadImportConfig;
@@ -16,10 +18,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.Files;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -39,13 +42,13 @@ public class SkillImportService {
      *
      * @param config 配置
      */
-    public boolean importFromGit(GitImportConfig config) {
+    public SkillImportResult importFromGit(GitImportConfig config) {
         Path tempDir = createTempDir();
         try {
             GitSkillRepository repo = new GitSkillRepository(config.getRepoUrl(), tempDir);
             try {
-                Path skillsDir = resolveSkillsDir(tempDir);
-                doImport(skillsDir, repo, config.isCover(), config.getCategory());
+                Path skillsDir = SkillImportPathResolver.resolveSkillsDir(tempDir);
+                return doImport(skillsDir, repo, config.isCover(), config.getCategory());
             } finally {
                 closeQuietly(repo);
             }
@@ -53,7 +56,6 @@ public class SkillImportService {
             FolderUtils.deleteRecursively(tempDir.toAbsolutePath().toString());
             log.info("清理 Git 临时目录: {}", tempDir.toAbsolutePath());
         }
-        return true;
     }
 
     /**
@@ -62,12 +64,11 @@ public class SkillImportService {
      *
      * @param config 配置
      */
-    public boolean importFromLocal(LocalImportConfig config) {
+    public SkillImportResult importFromLocal(LocalImportConfig config) {
         Path skillsDir = Path.of(config.getPath());
         try (AgentSkillRepository repo = new FileSystemSkillRepository(skillsDir)) {
-            doImport(skillsDir, repo, config.isCover(), config.getCategory());
+            return doImport(skillsDir, repo, config.isCover(), config.getCategory());
         }
-        return true;
     }
 
     /**
@@ -76,19 +77,19 @@ public class SkillImportService {
      *
      * @param config 配置
      */
-    public boolean importFromUpload(UploadImportConfig config) {
+    public SkillImportResult importFromUpload(UploadImportConfig config) {
         Path skillsPath = Path.of(config.getTemplatePath());
+        Path tempRoot = config.getExtractDirPath() != null
+                ? Path.of(config.getExtractDirPath())
+                : skillsPath.getParent();
         try (AgentSkillRepository repo = new FileSystemSkillRepository(skillsPath)) {
-            doImport(skillsPath, repo, config.isCover(), config.getCategory());
+            return doImport(skillsPath, repo, config.isCover(), config.getCategory());
         } finally {
-            // 基于 templatePath 向上一层定位 UUID 临时目录并删除
-            Path tempUuidDir = skillsPath.getParent();
-            if (tempUuidDir != null) {
-                FolderUtils.deleteRecursively(tempUuidDir.toAbsolutePath().toString());
-                log.info("清理上传临时目录: {}", tempUuidDir.toAbsolutePath());
+            if (tempRoot != null) {
+                FolderUtils.deleteRecursively(tempRoot.toAbsolutePath().toString());
+                log.info("清理上传临时目录: {}", tempRoot.toAbsolutePath());
             }
         }
-        return true;
     }
 
     /**
@@ -99,20 +100,36 @@ public class SkillImportService {
      * @param isCover   是否覆盖
      * @param category  分类
      */
-    private void doImport(Path skillsDir, AgentSkillRepository repo, boolean isCover, String category) {
+    private SkillImportResult doImport(Path skillsDir, AgentSkillRepository repo, boolean isCover, String category) {
+        try {
+            SkillImportNormalizer.normalizeSkillFiles(skillsDir);
+        } catch (IOException e) {
+            log.warn("Normalize skill files failed: {}", e.getMessage());
+        }
+
         List<String> allSkillNames = repo.getAllSkillNames();
+        if (allSkillNames.isEmpty()) {
+            return SkillImportResult.withHint(0, 0, 0, SkillImportInspector.buildHint(skillsDir));
+        }
+
+        int importedCount = 0;
+        int skippedCount = 0;
 
         for (String skillName : allSkillNames) {
-            Path sourceSkillDir = skillsDir.resolve(skillName);
-
-            // 安装技能包目录到 SKILLS_DIR（含覆盖策略）
-            boolean installed = SkillInstaller.install(sourceSkillDir, skillName, isCover);
-            if (!installed) {
-                log.info("技能包 {} 已存在且跳过覆盖", skillName);
+            Optional<Path> sourceSkillDir = SkillImportInspector.findSkillDirectory(skillsDir, skillName);
+            if (sourceSkillDir.isEmpty()) {
+                log.warn("技能 {} 源目录未找到，跳过安装", skillName);
+                skippedCount++;
                 continue;
             }
 
-            // DB 持久化
+            boolean installed = SkillInstaller.install(sourceSkillDir.get(), skillName, isCover);
+            if (!installed) {
+                log.info("技能包 {} 已存在且跳过覆盖", skillName);
+                skippedCount++;
+                continue;
+            }
+
             AgentSkill agentSkill = repo.getSkill(skillName);
             SkillPackage skillPackage = SkillPackageBuilder.build(agentSkill, category);
 
@@ -125,9 +142,15 @@ public class SkillImportService {
                 skillPackageService.save(skillPackage);
             } else {
                 skillPackage.setId(oldSkillPackage.getId());
+                skillPackage.setEnabled(oldSkillPackage.getEnabled() != null ? oldSkillPackage.getEnabled() : Boolean.TRUE);
                 skillPackageService.updateById(skillPackage);
             }
+
+            SkillScriptLoadHelper.loadScripts(skillPackage);
+            importedCount++;
         }
+
+        return new SkillImportResult(importedCount, skippedCount, allSkillNames.size());
     }
 
     /**
@@ -141,21 +164,6 @@ public class SkillImportService {
         Path tempDir = tempBase.resolve(UUID.randomUUID().toString());
         FolderUtils.mkdirsByAbsolutePath(tempDir.toAbsolutePath().toString());
         return tempDir;
-    }
-
-    /**
-     * 解析技能包根目录
-     * 优先使用 skills/ 子目录，否则使用根目录
-     *
-     * @param baseDir 基础目录
-     * @return 技能包根目录
-     */
-    private Path resolveSkillsDir(Path baseDir) {
-        Path skillsSubDir = baseDir.resolve(SysConst.SKILLS_DIR_NAME);
-        if (Files.isDirectory(skillsSubDir)) {
-            return skillsSubDir;
-        }
-        return baseDir;
     }
 
     /**

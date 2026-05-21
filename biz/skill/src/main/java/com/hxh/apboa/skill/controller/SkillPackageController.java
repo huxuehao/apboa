@@ -1,6 +1,7 @@
 package com.hxh.apboa.skill.controller;
 
 import cn.hutool.core.io.FileUtil;
+import com.hxh.apboa.common.exception.BusinessException;
 import com.hxh.apboa.common.config.auth.RoleNeed;
 import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.dto.SkillPackageDTO;
@@ -10,8 +11,11 @@ import com.hxh.apboa.common.mp.support.MP;
 import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.util.BeanUtils;
+import com.hxh.apboa.common.util.ZipExtractUtils;
+import com.hxh.apboa.common.vo.SkillImportResult;
 import com.hxh.apboa.common.vo.SkillPackageVO;
 import com.hxh.apboa.skill.SkillScriptLoadHelper;
+import com.hxh.apboa.skill.imports.SkillImportPathResolver;
 import com.hxh.apboa.skill.imports.SkillImportService;
 import com.hxh.apboa.skill.imports.SkillInstaller;
 import com.hxh.apboa.skill.imports.config.GitImportConfig;
@@ -25,14 +29,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * 技能包Controller
@@ -141,7 +142,7 @@ public class SkillPackageController {
      */
     @PostMapping("/import/git")
     @RoleNeed({Role.ADMIN, Role.EDIT})
-    public R<Boolean> importFromGit(@RequestBody GitImportConfig config) {
+    public R<SkillImportResult> importFromGit(@RequestBody GitImportConfig config) {
         return R.data(skillImportService.importFromGit(config));
     }
 
@@ -150,7 +151,7 @@ public class SkillPackageController {
      */
     @PostMapping("/import/local")
     @RoleNeed({Role.ADMIN, Role.EDIT})
-    public R<Boolean> importFromLocal(@RequestBody LocalImportConfig config) {
+    public R<SkillImportResult> importFromLocal(@RequestBody LocalImportConfig config) {
         return R.data(skillImportService.importFromLocal(config));
     }
     /**
@@ -162,7 +163,7 @@ public class SkillPackageController {
      */
     @PostMapping("/import/upload")
     @RoleNeed({Role.ADMIN, Role.EDIT})
-    public R<Boolean> importFromUpload(
+    public R<SkillImportResult> importFromUpload(
             @RequestParam("file") MultipartFile file,
             @RequestParam("category") String category,
             @RequestParam("cover") boolean cover) throws IOException {
@@ -176,35 +177,28 @@ public class SkillPackageController {
         Path extractDir = tempBase.resolve(uuid);
         Files.createDirectories(extractDir);
 
-        // 将压缩包解压到 .apboa/temp/[UUID]/ 下
-        try (InputStream is = file.getInputStream();
-             ZipInputStream zis = new ZipInputStream(is)) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                Path entryPath = extractDir.resolve(entry.getName()).normalize();
-                // 防止 zip slip 攻击
-                if (!entryPath.startsWith(extractDir)) {
-                    throw new IOException("非法的压缩包路径: " + entry.getName());
-                }
-                if (entry.isDirectory()) {
-                    Files.createDirectories(entryPath);
-                } else {
-                    Files.createDirectories(entryPath.getParent());
-                    Files.copy(zis, entryPath);
-                }
-                zis.closeEntry();
-            }
+        Path tempZip = tempBase.resolve(uuid + ".zip");
+        try {
+            ZipExtractUtils.extractZipSafely(file.getInputStream(), extractDir, tempZip);
         } catch (IOException e) {
-            // 解压失败时清理已创建的临时目录，避免泄漏
             FileUtil.del(extractDir.toFile());
-            throw new RuntimeException(e);
+            throw new BusinessException("压缩包解压失败，请确认文件为有效 zip 格式: " + e.getMessage());
         }
 
-        // 构建导入配置，templatePath 指向解压目录中的 skills/ 子目录
+        // 解析 skills 根目录（兼容压缩包多套一层目录的结构）
+        Path skillsDir;
+        try {
+            skillsDir = SkillImportPathResolver.resolveUploadedSkillsDir(extractDir);
+        } catch (RuntimeException e) {
+            FileUtil.del(extractDir.toFile());
+            throw e;
+        }
+
         UploadImportConfig config = UploadImportConfig.builder()
                 .category(category)
                 .cover(cover)
-                .templatePath(extractDir.resolve(SysConst.SKILLS_DIR_NAME).toString())
+                .templatePath(skillsDir.toString())
+                .extractDirPath(extractDir.toString())
                 .build();
 
         return R.data(skillImportService.importFromUpload(config));

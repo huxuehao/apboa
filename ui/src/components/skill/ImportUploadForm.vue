@@ -4,22 +4,26 @@
  * @author huxuehao
  */
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed, defineComponent } from 'vue'
 import { message } from 'ant-design-vue'
 import {
   InboxOutlined,
   FileZipOutlined,
   FolderOutlined,
   InfoCircleOutlined,
-  AppstoreOutlined
+  AppstoreOutlined,
+  PlusOutlined
 } from '@ant-design/icons-vue'
 import * as skillApi from '@/api/skill'
+import { finishSkillImport } from '@/utils/skillImportMessage'
 
 /**
  * Props定义
  */
 const props = defineProps<{
   visible: boolean
+  categories: string[]
+  defaultCategory?: string | null
 }>()
 
 /**
@@ -27,7 +31,7 @@ const props = defineProps<{
  */
 const emit = defineEmits<{
   'update:visible': [value: boolean]
-  success: []
+  success: [category?: string]
 }>()
 
 const formRef = ref()
@@ -36,23 +40,51 @@ const uploadFile = ref<File | null>(null)
 const isDragging = ref(false)
 
 const form = ref({
-  category: 'Zip导入',
+  category: '',
   cover: false
+})
+
+const categoryOptions = ref<string[]>([])
+const categorySearchText = ref('')
+const newCategoryInput = ref('')
+const categoryInputRef = ref()
+
+const filteredCategories = computed(() => {
+  if (!categorySearchText.value) {
+    return categoryOptions.value
+  }
+  const searchLower = categorySearchText.value.toLowerCase()
+  const filtered = categoryOptions.value.filter(cat =>
+    cat.toLowerCase().includes(searchLower)
+  )
+  if (!filtered.includes(categorySearchText.value)) {
+    filtered.unshift(categorySearchText.value)
+  }
+  return filtered
 })
 
 /**
  * 表单校验规则
  */
 const rules = {
-  category: [{ required: true, message: '请输入技能分类', trigger: 'blur' }]
+  category: [
+    { required: true, message: '请选择或输入标签', trigger: 'blur' },
+    { max: 6, message: '标签长度不能超过6个字符', trigger: 'blur' }
+  ]
 }
 
 /**
  * 重置表单
  */
 function resetForm() {
-  form.value = { category: 'Zip导入', cover: false }
+  categoryOptions.value = [...props.categories]
+  form.value = {
+    category: props.defaultCategory || '',
+    cover: false
+  }
   uploadFile.value = null
+  categorySearchText.value = ''
+  newCategoryInput.value = ''
 }
 
 /**
@@ -131,10 +163,8 @@ async function handleSubmit() {
   try {
     await formRef.value?.validate()
     loading.value = true
-    await skillApi.importFromUpload(uploadFile.value, form.value.category, form.value.cover)
-    message.success('压缩包技能包导入成功')
-    emit('update:visible', false)
-    emit('success')
+    const response = await skillApi.importFromUpload(uploadFile.value, form.value.category, form.value.cover)
+    finishSkillImport(response.data.data, emit, form.value.category)
   } catch (error) {
     console.error('导入失败:', error)
   } finally {
@@ -147,6 +177,37 @@ async function handleSubmit() {
  */
 function handleCancel() {
   emit('update:visible', false)
+}
+
+const VNodes = defineComponent({
+  props: {
+    vnodes: {
+      type: Object,
+      required: true
+    }
+  },
+  render() {
+    return this.vnodes
+  }
+})
+
+function addCategoryItem(e: Event) {
+  e.preventDefault()
+  const value = newCategoryInput.value?.trim()
+  if (!value) return
+  if (value.length > 6) {
+    message.warning('标签长度不能超过6个字符')
+    return
+  }
+  if (!categoryOptions.value.includes(value)) {
+    categoryOptions.value.push(value)
+  }
+  form.value.category = value
+  newCategoryInput.value = ''
+}
+
+function handleCategorySearch(value: string) {
+  categorySearchText.value = value
 }
 
 watch(() => props.visible, (val) => {
@@ -177,7 +238,7 @@ watch(() => props.visible, (val) => {
         <span class="struct-guide__title">压缩包结构说明</span>
       </div>
       <div class="struct-guide__body">
-        <p class="struct-guide__desc">请按以下结构组织压缩包内容，确保技能文件可以被正确识别和导入：</p>
+        <p class="struct-guide__desc">请按以下结构组织压缩包内容。可直接打包 <code>skills</code> 目录，也支持多套一层文件夹（如 <code>my-skills/skills/...</code>）：</p>
         <div class="file-tree">
           <div class="file-tree__item file-tree__item--root">
             <FileZipOutlined class="file-tree__icon file-tree__icon--zip" />
@@ -190,14 +251,12 @@ watch(() => props.visible, (val) => {
           </div>
           <div class="file-tree__item file-tree__item--l2">
             <FolderOutlined class="file-tree__icon file-tree__icon--file" />
-            <span class="file-tree__name">技能一</span>
+            <span class="file-tree__name">cust_query/</span>
           </div>
-          <div class="file-tree__item file-tree__item--l2">
-            <FolderOutlined class="file-tree__icon file-tree__icon--file" />
-            <span class="file-tree__name">技能二</span>
-          </div>
-          <div class="file-tree__item file-tree__item--l2">
-            <span class="file-tree__name file-tree__name--more">... 更多技能文件夹</span>
+          <div class="file-tree__item file-tree__item--l3">
+            <FileZipOutlined class="file-tree__icon file-tree__icon--file" />
+            <span class="file-tree__name">SKILL.md</span>
+            <span class="file-tree__tag">必须大写，含 name/description</span>
           </div>
         </div>
       </div>
@@ -254,13 +313,38 @@ watch(() => props.visible, (val) => {
         </div>
       </AFormItem>
 
-      <AFormItem label="技能分类" name="category">
-        <AInput
+      <AFormItem label="标签" name="category">
+        <ASelect
           v-model:value="form.category"
-          placeholder="请输入技能分类标签"
-          allow-clear
-        />
-        <template #extra>导入的技能包将被归入此分类</template>
+          placeholder="选择或输入标签"
+          show-search
+          :filter-option="false"
+          @search="handleCategorySearch"
+        >
+          <ASelectOption v-for="cat in filteredCategories" :key="cat" :value="cat">
+            {{ cat }}
+          </ASelectOption>
+          <template #dropdownRender="{ menuNode: menu }">
+            <VNodes :vnodes="menu" />
+            <ADivider style="margin: 4px 0" />
+            <ASpace style="padding: 4px 8px">
+              <AInput
+                ref="categoryInputRef"
+                v-model:value="newCategoryInput"
+                style="width: 300px"
+                placeholder="输入新标签"
+                :maxlength="6"
+              />
+              <AButton type="text" @click="addCategoryItem">
+                <template #icon>
+                  <PlusOutlined />
+                </template>
+                添加
+              </AButton>
+            </ASpace>
+          </template>
+        </ASelect>
+        <template #extra>导入的技能包将归入所选标签；未选择时无法导入</template>
       </AFormItem>
 
       <AFormItem label="覆盖策略" name="cover">
@@ -337,6 +421,7 @@ watch(() => props.visible, (val) => {
     &--root { padding-left: 0; }
     &--l1 { padding-left: 20px; }
     &--l2 { padding-left: 40px; }
+    &--l3 { padding-left: 60px; }
   }
 
   &__icon {

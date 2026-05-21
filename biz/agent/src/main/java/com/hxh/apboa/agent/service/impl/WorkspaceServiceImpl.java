@@ -6,19 +6,18 @@ import com.hxh.apboa.agent.service.WorkspaceService;
 import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.exception.BusinessException;
 import com.hxh.apboa.common.vo.WorkspaceFileNode;
+import com.hxh.apboa.common.util.ZipExtractUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -334,29 +333,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
      * 安全解压 ZIP 文件，逐条校验 ZipEntry 路径防止 Zip Slip 攻击
      */
     private void extractZipSafely(Path zipFile, Path targetDir) throws IOException {
-        try (InputStream fis = Files.newInputStream(zipFile);
-             ZipInputStream zis = new ZipInputStream(fis, StandardCharsets.UTF_8)) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                Path entryPath = targetDir.resolve(entry.getName()).normalize();
-
-                // Zip Slip 核心校验
-                if (!entryPath.startsWith(targetDir)) {
-                    log.warn("检测到 Zip Slip 攻击路径: {}", entry.getName());
-                    throw new BusinessException("压缩包内包含非法路径: " + entry.getName());
-                }
-
-                if (entry.isDirectory()) {
-                    FileUtil.mkdir(entryPath.toFile());
-                } else {
-                    // 确保父目录存在
-                    FileUtil.mkdir(entryPath.getParent().toFile());
-                    // 写入文件
-                    Files.copy(zis, entryPath, StandardCopyOption.REPLACE_EXISTING);
-                }
-
-                zis.closeEntry();
+        try {
+            ZipExtractUtils.extractZipSafely(zipFile, targetDir);
+        } catch (IOException e) {
+            if (e.getMessage() != null && e.getMessage().startsWith("非法的压缩包路径")) {
+                log.warn("检测到 Zip Slip 攻击路径");
+                throw new BusinessException("压缩包内包含非法路径: " + e.getMessage());
             }
+            throw e;
         }
     }
 

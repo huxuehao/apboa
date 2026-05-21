@@ -22,7 +22,12 @@ public class UploadImportConfig {
      */
     private boolean cover;
     /**
-     * 临时路径
+     * 解析后的 skills 根目录
      */
     private String templatePath;
+
+    /**
+     * 压缩包解压根目录（{@code .apboa/temp/{uuid}/}），用于导入完成后清理
+     */
+    private String extractDirPath;
 }

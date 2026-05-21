@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 import type { ApiResponse, PageResult } from '@/types'
-import type { SkillPackageDTO, SkillPackageVO, LocalImportConfig, GitImportConfig } from '@/types'
+import type { SkillPackageDTO, SkillPackageVO, LocalImportConfig, GitImportConfig, SkillImportResult } from '@/types'
 import type { SkillPackage } from '@/types'
 
 /**
@@ -66,7 +66,7 @@ export function listCategories() {
  * POST /skill/import/local
  */
 export function importFromLocal(config: LocalImportConfig) {
-  return request.post<ApiResponse<boolean>>('/api/skill/import/local', config)
+  return request.post<ApiResponse<SkillImportResult>>('/api/skill/import/local', config)
 }
 
 /**
@@ -74,7 +74,7 @@ export function importFromLocal(config: LocalImportConfig) {
  * POST /skill/import/git
  */
 export function importFromGit(config: GitImportConfig) {
-  return request.post<ApiResponse<boolean>>('/api/skill/import/git', config)
+  return request.post<ApiResponse<SkillImportResult>>('/api/skill/import/git', config)
 }
 
 /**
@@ -86,7 +86,7 @@ export function importFromUpload(file: File, category: string, cover: boolean) {
   formData.append('file', file)
   formData.append('category', category)
   formData.append('cover', String(cover))
-  return request.post<ApiResponse<boolean>>('/api/skill/import/upload', formData, {
+  return request.post<ApiResponse<SkillImportResult>>('/api/skill/import/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   })
 }

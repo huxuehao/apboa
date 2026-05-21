@@ -246,17 +246,24 @@ async function handleDelete(id: string) {
 /**
  * 处理表单提交成功
  */
-function handleFormSuccess() {
-  resetListAndRebuild()
-  store.fetchCategories()
+async function handleFormSuccess() {
+  await store.fetchCategories()
+  await store.resetAndFetch()
+  isFirstLoad.value = true
+  infiniteLoadingKey.value++
 }
 
 /**
- * 处理导入成功
+ * 处理导入成功：切换到导入分类并主动刷新列表（避免分类筛选 + InfiniteLoading 未重载导致不可见）
  */
-function handleImportSuccess() {
-  resetListAndRebuild()
-  store.fetchCategories()
+async function handleImportSuccess(importCategory?: string) {
+  await store.fetchCategories()
+  keyword.value = ''
+  store.setKeyword('')
+  store.setCategory(importCategory ?? null)
+  await store.resetAndFetch()
+  isFirstLoad.value = true
+  infiniteLoadingKey.value++
 }
 
 /**
@@ -438,6 +445,8 @@ onMounted(() => {
 
     <ImportUploadForm
       v-model:visible="importUploadVisible"
+      :categories="categories"
+      :default-category="selectedCategory"
       @success="handleImportSuccess"
     />
   </div>
