@@ -52,6 +52,7 @@ const props = withDefaults(
     okButtonProps?: Record<string, unknown>
     /** 取消按钮附加 props */
     cancelButtonProps?: Record<string, unknown>
+    backgroundColor?: string
   }>(),
   {
     open: false,
@@ -63,6 +64,7 @@ const props = withDefaults(
     okText: '确定',
     cancelText: '取消',
     okType: 'primary',
+    backgroundColor: '#FFFFFF',
   }
 )
 
@@ -151,7 +153,7 @@ watch(
       <div class="apboa-side apboa-side-left" />
 
       <!-- 中间内容区域 -->
-      <div class="apboa-center" :style="{ width: centerWidth }">
+      <div class="apboa-center" :style="{ width: centerWidth, backgroundColor: backgroundColor }">
         <!-- header -->
         <div class="apboa-center-header">
           <div class="apboa-center-header-title">
@@ -305,7 +307,6 @@ watch(
   padding: 0 18px;
   transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  background-color: #FFFFFF;
 }
 
 /* ===================== Header ===================== */
