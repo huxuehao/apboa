@@ -98,7 +98,7 @@ public class AgentDefinitionController {
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> save(@RequestBody AgentDefinitionVO vo) {
         agentDefinitionService.saveAgentDefinition(vo);
-        messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(vo.getId()));
+        messagePublisher.publishAfterCommit(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(vo.getId()));
         return R.data(true);
     }
 

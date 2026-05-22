@@ -8,9 +8,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 描述：Redis集群消息配置
@@ -38,6 +40,8 @@ public class ClusterRedisConfig {
 
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
+        // 配置消息分发线程池，避免单个订阅者阻塞影响所有频道
+        container.setTaskExecutor(redisListenerExecutor());
 
         // 注册所有订阅者
         if (subscribers != null && !subscribers.isEmpty()) {
@@ -57,5 +61,25 @@ public class ClusterRedisConfig {
         }
 
         return container;
+    }
+
+    /**
+     * Redis 消息监听分发线程池
+     * 将消息接收与处理分离，subscriber.onMessage() 在线程池中异步执行，
+     * 避免某个订阅者阻塞（如打断点）影响其他频道的消息处理。
+     */
+    @Bean("redisListenerExecutor")
+    public ThreadPoolTaskExecutor redisListenerExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(8);
+        executor.setQueueCapacity(200);
+        executor.setKeepAliveSeconds(60);
+        executor.setThreadNamePrefix("redis-listener-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(30);
+        executor.initialize();
+        return executor;
     }
 }
