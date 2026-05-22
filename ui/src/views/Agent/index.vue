@@ -461,6 +461,7 @@ onMounted(() => {
       :agent-data="configPanelAgentData"
       :tags="tags"
       @success="handleConfigPanelSuccess"
+      @go-visit="handleGoVisit"
     />
   </div>
 </template>

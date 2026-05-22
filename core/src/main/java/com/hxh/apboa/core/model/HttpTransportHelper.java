@@ -15,20 +15,24 @@ import java.time.Duration;
 public class HttpTransportHelper {
     public static HttpTransport createJdkHttpTransport() {
         return JdkHttpTransport.builder()
-                .config(getHttpTransportConfig())
+                .config(getHttpTransportConfig(10, 60))
                 .build();
     }
 
     public static HttpTransport createOkHttpTransport() {
+        return createOkHttpTransport(10, 60);
+    }
+
+    public static HttpTransport createOkHttpTransport(int connectTimeout, int readTimeout) {
         return OkHttpTransport.builder()
-                .config(getHttpTransportConfig())
+                .config(getHttpTransportConfig(connectTimeout, readTimeout))
                 .build();
     }
 
-    private static HttpTransportConfig getHttpTransportConfig() {
+    private static HttpTransportConfig getHttpTransportConfig(int connectTimeout, int readTimeout) {
         return HttpTransportConfig.builder()
-                .connectTimeout(Duration.ofSeconds(10))
-                .readTimeout(Duration.ofSeconds(60))
+                .connectTimeout(Duration.ofSeconds(connectTimeout))
+                .readTimeout(Duration.ofSeconds(readTimeout))
                 .ignoreSsl(true)
                 .build();
     }

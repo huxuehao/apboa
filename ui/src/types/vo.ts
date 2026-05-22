@@ -199,6 +199,9 @@ export interface ModelConfigVO {
   repeatPenalty: number
   seed: string
   extendConfig: Record<string, any> | null
+  connectivityStatus?: string
+  connectivityMessage?: string
+  lastConnectivityCheck?: string
   enabled: boolean
   createdAt: string
   updatedAt: string
@@ -430,4 +433,12 @@ export interface WorkspaceFileNode {
   lastModifiedTime?: string
   /** 子节点（仅目录有效） */
   children?: WorkspaceFileNode[]
+}
+
+/**
+ *  模型检查结果
+ */
+export interface CheckModelResult {
+  success: boolean
+  message: string
 }

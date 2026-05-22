@@ -196,9 +196,13 @@ watch(
         <div v-if="props.footer !== null" class="apboa-center-footer">
           <slot v-if="hasFooterSlot" name="footer" />
           <template v-else>
-            <AButton v-bind="cancelButtonProps" @click="handleClose">
+            <slot name="footer-left-btn" />
+            <AButton
+              v-bind="cancelButtonProps"
+              @click="handleClose">
               {{ cancelText }}
             </AButton>
+            <slot name="footer-center-btn" />
             <AButton
               :type="okType"
               :loading="confirmLoading"
@@ -207,6 +211,7 @@ watch(
             >
               {{ okText }}
             </AButton>
+            <slot name="footer-right-btn" />
           </template>
         </div>
       </div>

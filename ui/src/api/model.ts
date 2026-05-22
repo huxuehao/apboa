@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { ApiResponse, PageResult } from '@/types'
+import type {ApiResponse, CheckModelResult, PageResult} from '@/types'
 import type { ModelConfigDTO, ModelConfigVO, ModelProviderDTO, ModelProviderVO } from '@/types'
 import type { ModelConfig, ModelProvider } from '@/types'
 
@@ -26,7 +26,7 @@ export function configDetail(id: string) {
  * POST /model/config
  */
 export function configSave(entity: ModelConfig) {
-  return request.post<ApiResponse<boolean>>('/api/model/config', entity)
+  return request.post<ApiResponse<string>>('/api/model/config', entity)
 }
 
 /**
@@ -34,7 +34,7 @@ export function configSave(entity: ModelConfig) {
  * PUT /model/config
  */
 export function configUpdate(entity: ModelConfig) {
-  return request.put<ApiResponse<boolean>>('/api/model/config', entity)
+  return request.put<ApiResponse<string>>('/api/model/config', entity)
 }
 
 /**
@@ -51,6 +51,13 @@ export function configRemove(ids: string[]) {
  */
 export function configUsedWithAgent(ids: string[]) {
   return request.post<ApiResponse<unknown[]>>('/api/model/config/used-with-agent', ids)
+}
+
+/**
+ * 检测模型是否可用
+ */
+export function checkModel(modelId: string) {
+  return request.get<ApiResponse<CheckModelResult>>(`/api/model/config/check/${modelId}`)
 }
 
 /**

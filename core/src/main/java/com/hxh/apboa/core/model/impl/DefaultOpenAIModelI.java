@@ -56,6 +56,25 @@ public class DefaultOpenAIModelI implements IChatModel {
     }
 
     @Override
+    public Model getSimpleModel(ModelConfigWrapper config) {
+        if (config.getProvider() != getProvider()) {
+            throw new IllegalArgumentException("The provider is not supported");
+        }
+
+        OpenAIChatModel.Builder builder = OpenAIChatModel.builder()
+                .apiKey(config.getApiKey())
+                .modelName(config.getModelCode())
+                .stream(config.getStreaming() != null && config.getStreaming())
+                .httpTransport(HttpTransportHelper.createOkHttpTransport(10, 15));
+
+        if (config.getBaseUrl() != null && !config.getBaseUrl().isEmpty()) {
+            builder.baseUrl(config.getBaseUrl());
+        }
+
+        return builder.build();
+    }
+
+    @Override
     public ModelProviderType getProvider() {
         return ModelProviderType.OPEN_AI;
     }
