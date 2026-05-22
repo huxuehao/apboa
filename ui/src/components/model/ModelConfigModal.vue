@@ -228,7 +228,7 @@ async function handleTest(id: string) {
     :open="visible"
     :title="`${providerName} - 配置模型`"
     :default-expanded="true"
-    expandedWidth="100%"
+    defaultWidth="100%"
     :footer="null"
     @cancel="handleClose"
   >
@@ -248,7 +248,7 @@ async function handleTest(id: string) {
 
         <AButton type="primary" @click="handleCreate" v-permission="['EDIT','ADMIN']">新增模型</AButton>
       </div>
-      
+
       <!-- 卡片网格 -->
       <div v-if="modelList.length > 0" class="card-grid">
         <ModelConfigCard
