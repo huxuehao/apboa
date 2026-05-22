@@ -110,8 +110,10 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateAgentDefinition(AgentDefinitionVO vo) {
+        AgentDefinition oldAgent = getById(vo.getId());
         updateById(BeanUtils.copy(vo, AgentDefinition.class));
 
+        // 成立条件：禁用/启用操作
         if (vo.getAgentCode() == null) {
             List<JobInfo> agent = iJobInfoMapper.selectList(
                     new LambdaQueryWrapper<JobInfo>()
@@ -121,10 +123,10 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
                 throw new RuntimeException("请先禁用定时任务");
             }
             if (vo.getEnabled()) {
-                messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(vo.getId()));
+                messagePublisher.publishAfterCommit(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(vo.getId()));
             } else {
                 AgentDefinition agentDefinition = getById(vo.getId());
-                messagePublisher.publish(RedisChannelTopic.AGENT_UNREGISTER_CHANNEL, agentDefinition.getAgentCode());
+                messagePublisher.publishAfterCommit(RedisChannelTopic.AGENT_UNREGISTER_CHANNEL, agentDefinition.getAgentCode());
             }
 
             return true;
@@ -132,7 +134,12 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
 
         saveSubItems(vo);
 
-        messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(vo.getId()));
+        // Agent Code 发生变化，将旧的 Agent 注销
+        if (!oldAgent.getAgentCode().equals(vo.getAgentCode())) {
+            messagePublisher.publish(RedisChannelTopic.AGENT_UNREGISTER_CHANNEL, oldAgent.getAgentCode());
+        }
+
+        messagePublisher.publishAfterCommit(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(vo.getId()));
         return true;
     }
 
@@ -186,7 +193,7 @@ public class AgentDefinitionServiceImpl extends ServiceImpl<AgentDefinitionMappe
         agentCodeExecutionService.deleteAgentCodeExecution(ids);
 
         for (AgentDefinition agent_ : agents) {
-            messagePublisher.publish(RedisChannelTopic.AGENT_UNREGISTER_CHANNEL, agent_.getAgentCode());
+            messagePublisher.publishAfterCommit(RedisChannelTopic.AGENT_UNREGISTER_CHANNEL, agent_.getAgentCode());
         }
 
         return Boolean.TRUE;

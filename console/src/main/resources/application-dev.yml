@@ -24,7 +24,7 @@ spring:
     redis:
       host: 127.0.0.1
       port: 6379
-      password: "Redis@dhcc123.com"
+      password: YOUR_PASSWORD
       database: 7
       timeout: 2000ms
       lettuce:
@@ -38,7 +38,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/apboa?useSSL=false&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
     username: root
-    password: root123123
+    password: YOUR_PASSWORD
     druid:
       initial-size: 5
       min-idle: 5
@@ -55,23 +55,23 @@ jwt:
   secret: ${JWT_SECRET:ZJr8c2xF0y5b7yM+1H9v9cGZq6nZ5e0k5r3Cw7H8vJQ=}
 
 rag:
-  store: pgvector # pgvector | milvus | qdrant，向量存储类型
+  store:  # pgvector | milvus | qdrant，向量存储类型
   pgvector:
-    url: jdbc:postgresql://192.168.244.61:5432/apboa_vector
+    url: jdbc:postgresql://127.0.0.1:5432/apboa_vector
     username: postgres
-    password: Wbmd@2024#$
+    password: YOUR_PASSWORD
     driver-class-name: org.postgresql.Driver
   milvus:
     host: 127.0.0.1
     port: 19530
-    username:          # Milvus 用户名，自建部署留空
-    password:          # Milvus 密码，自建部署留空
-    token:             # Milvus SaaS 认证 token，与用户名/密码二选一
+    username: YOUR_USERNAME   # Milvus 用户名，自建部署留空
+    password: YOUR_PASSWORD   # Milvus 密码，自建部署留空
+    token: YOUR_TOKEN         # Milvus SaaS 认证 token，与用户名/密码二选一
     database: default  # 默认库名
   qdrant:
     host: localhost
     port: 6334
-    api-key:
+    api-key: YOUR_API_KEY
     collection-prefix: apboa_rag
 
 mybatis-plus:

@@ -96,7 +96,7 @@ public class HookConfigServiceImpl extends ServiceImpl<HookConfigMapper, HookCon
 
     private void publishAgentReregister(List<Long> agentIds) {
         agentIds.forEach(agentId ->
-                messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(agentId)));
+                messagePublisher.publishAfterCommit(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(agentId)));
     }
 
     private List<AgentDefinition> getAgentDefinitions(List<Long> agentIds) {
