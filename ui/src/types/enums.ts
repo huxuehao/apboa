@@ -162,3 +162,13 @@ export enum A2aType {
   WELLKNOWN = 'WELLKNOWN',
   NACOS = 'NACOS'
 }
+
+/**
+ * 模型连接性检测状态
+ */
+export enum ModelConnectivityStatus {
+  NOT_CHECKED = 'NOT_CHECKED',
+  CHECKING = 'CHECKING',
+  CONNECTED = 'CONNECTED',
+  FAILED = 'FAILED'
+}

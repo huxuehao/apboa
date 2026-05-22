@@ -40,6 +40,21 @@ public class DefaultGeminiModelI implements IChatModel {
     }
 
     @Override
+    public Model getSimpleModel(ModelConfigWrapper config) {
+        if (config.getProvider() != getProvider()) {
+            throw new IllegalArgumentException("The provider is not supported");
+        }
+
+        GeminiChatModel.Builder builder = GeminiChatModel.builder()
+                .apiKey(config.getApiKey())
+                .modelName(config.getModelCode())
+                .vertexAI(false)
+                .streamEnabled(false);
+
+        return builder.build();
+    }
+
+    @Override
     public ModelProviderType getProvider() {
         return ModelProviderType.GEMINI;
     }

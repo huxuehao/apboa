@@ -9,9 +9,7 @@ import { Modal, message } from 'ant-design-vue'
 import type {ModelConfigVO, ModelConfigDTO, ModelConfig} from '@/types'
 import * as modelApi from '@/api/model'
 import ModelConfigForm from './ModelConfigForm.vue'
-import { useAccountStore } from '@/stores'
-
-const accountStore = useAccountStore()
+import ModelConfigCard from './ModelConfigCard.vue'
 
 /**
  * Props定义
@@ -33,60 +31,9 @@ const emit = defineEmits<{
 const modelList = ref<ModelConfigVO[]>([])
 const loading = ref<boolean>(false)
 const searchKeyword = ref<string>('')
-const currentPage = ref<number>(1)
-const pageSize = ref<number>(10)
-const total = ref<number>(0)
 
 const formVisible = ref<boolean>(false)
 const currentData = ref<ModelConfigVO | undefined>(undefined)
-
-/**
- * 模型类型显示映射
- */
-const modelTypeLabels: Record<string, string> = {
-  CHAT: '文本',
-  IMAGE: '图像',
-  AUDIO: '音频',
-  VIDEO: '视频'
-}
-
-/**
- * 表格列定义
- */
-const columns:any = [
-  {
-    title: '名称',
-    dataIndex: 'name',
-    key: 'name',
-  },
-  {
-    title: '模型ID',
-    dataIndex: 'modelId',
-    key: 'modelId',
-  },
-  {
-    title: '模型类型',
-    dataIndex: 'modelType',
-    key: 'modelType',
-    width: 220
-  },
-  {
-    title: '是否启用',
-    dataIndex: 'enabled',
-    key: 'enabled',
-    width: 90
-  }
-]
-
-const hasPermission = accountStore.roles.some(role => ['EDIT','ADMIN'].includes(role));
-if (hasPermission) {
-  columns.push({
-    title: '操作',
-    key: 'action',
-    width: 110,
-    fixed: 'right'
-  })
-}
 
 watch(
   () => props.visible,
@@ -100,14 +47,14 @@ watch(
 )
 
 /**
- * 加载模型列表
+ * 加载模型列表（一次性加载全部）
  */
 async function fetchModelList() {
   loading.value = true
   try {
     const query: ModelConfigDTO = {
-      page: currentPage.value,
-      size: pageSize.value,
+      page: 1,
+      size: 500,
       providerId: props.providerId,
       name: searchKeyword.value || undefined
     }
@@ -116,7 +63,6 @@ async function fetchModelList() {
     const result = response.data.data
 
     modelList.value = result.records || []
-    total.value = result.total
   } catch (error) {
     console.error('加载模型列表失败:', error)
   } finally {
@@ -128,16 +74,6 @@ async function fetchModelList() {
  * 处理搜索
  */
 function handleSearch() {
-  currentPage.value = 1
-  fetchModelList()
-}
-
-/**
- * 处理分页变化
- */
-function handlePageChange(page: number, size: number) {
-  currentPage.value = page
-  pageSize.value = size
   fetchModelList()
 }
 
@@ -146,7 +82,6 @@ function handlePageChange(page: number, size: number) {
  */
 function resetSearch() {
   searchKeyword.value = ''
-  currentPage.value = 1
   modelList.value = []
 }
 
@@ -161,8 +96,8 @@ function handleCreate() {
 /**
  * 处理编辑
  */
-async function handleEdit(record: ModelConfigVO) {
-  const response = await modelApi.configDetail(record.id as string)
+async function handleEdit(id: string) {
+  const response = await modelApi.configDetail(id)
   currentData.value = response.data.data
   formVisible.value = true
 }
@@ -170,15 +105,19 @@ async function handleEdit(record: ModelConfigVO) {
 /**
  * 处理删除
  */
-async function handleDelete(record: ModelConfigVO) {
-  const used = await checkUsedWithAgent(record.id as string)
+async function handleDelete(id: string) {
+  const record = modelList.value.find((x) => x.id === id)
+  if (!record) return
+
+  const used = await checkUsedWithAgent(id)
   if (used.length > 0) {
     Modal.confirm({
       title: '二次确认',
       content: `该模型正在被 [ ${used.join('、')} ] 智能体引用，删除后可能会影响上述智能体的正常使用！`,
       okText: '确认并继续删除',
       onOk: async () => {
-        await modelApi.configRemove([record.id] as string[])
+        await modelApi.configRemove([id] as string[])
+        message.success('删除成功')
         await fetchModelList()
       }
     })
@@ -189,7 +128,7 @@ async function handleDelete(record: ModelConfigVO) {
     title: '确认删除',
     content: '删除后无法恢复,是否继续?',
     onOk: async () => {
-      await modelApi.configRemove([record.id] as string[])
+      await modelApi.configRemove([id] as string[])
       message.success('删除成功')
       await fetchModelList()
     }
@@ -218,9 +157,9 @@ function handleClose() {
   emit('update:visible', false)
 }
 
-const enableLoading = ref<boolean>(false)
+const enableLoading = ref<Set<string>>(new Set())
 /**
- * 切换状态
+ * 切换启用状态
  */
 async function handleEnable(id: string) {
   const item = modelList.value.find((x) => x.id === id)
@@ -247,11 +186,39 @@ async function handleEnable(id: string) {
   }
 
   try {
-    enableLoading.value = true
+    enableLoading.value.add(id)
     await modelApi.configUpdate({ id, enabled: !enabled } as ModelConfig)
     item.enabled = !enabled
   } finally {
-    enableLoading.value = false
+    enableLoading.value.delete(id)
+  }
+}
+
+const testing = ref<Set<string>>(new Set())
+/**
+ * 测试模型连接
+ */
+async function handleTest(id: string) {
+  if (testing.value.has(id)) return
+
+  const item = modelList.value.find((x) => x.id === id)
+  if (!item) return
+
+  // 立即更新前端状态为检测中
+  item.connectivityStatus = 'CHECKING'
+
+  try {
+    testing.value.add(id)
+    await modelApi.checkModel(id)
+    // if (res.data.data.success) {
+    //   message.success('测试成功')
+    // } else {
+    //   message.error(res.data.data.message)
+    // }
+    // 重新加载列表以获取服务端持久化的最新状态
+    await fetchModelList()
+  } finally {
+    testing.value.delete(id)
   }
 }
 </script>
@@ -260,11 +227,13 @@ async function handleEnable(id: string) {
   <ApboaModal
     :open="visible"
     :title="`${providerName} - 配置模型`"
-    defaultWidth="1000px"
+    :default-expanded="true"
+    expandedWidth="100%"
     :footer="null"
     @cancel="handleClose"
   >
     <div class="model-config-modal">
+      <!-- 工具栏 -->
       <div class="modal-toolbar flex items-center justify-between mb-md">
         <AInput
           v-model:value="searchKeyword"
@@ -279,67 +248,24 @@ async function handleEnable(id: string) {
 
         <AButton type="primary" @click="handleCreate" v-permission="['EDIT','ADMIN']">新增模型</AButton>
       </div>
+      
+      <!-- 卡片网格 -->
+      <div v-if="modelList.length > 0" class="card-grid">
+        <ModelConfigCard
+          v-for="item in modelList"
+          :key="item.id"
+          :data="item"
+          @edit="handleEdit"
+          @delete="handleDelete"
+          @enable="handleEnable"
+          @test="handleTest"
+        />
+      </div>
 
-      <ATable
-        :columns="columns"
-        :data-source="modelList"
-        :loading="loading"
-        :pagination="{
-          current: currentPage,
-          pageSize: pageSize,
-          total: total,
-          showSizeChanger: true,
-          showTotal: (total: number) => `共 ${total} 条`
-        }"
-        size="small"
-        :scroll="{ x: 800 }"
-        row-key="id"
-        @change="(pagination: any) => handlePageChange(pagination.current, pagination.pageSize)"
-      >
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'name'">
-            <span
-              style="color: #0F74FF; cursor: pointer"
-              @click="handleEdit(record)"
-              v-permission="['EDIT','ADMIN']">{{ record.name }}</span>
-            <span v-permission="['READ_ONLY']">{{ record.name }}</span>
-          </template>
-
-          <template v-if="column.key === 'modelType'">
-            <ASpace v-if="Array.isArray(record.modelType)" :size="4">
-              <ATag v-for="t in record.modelType" :key="t" color="default" :bordered="false">
-                {{ modelTypeLabels[t] || t }}
-              </ATag>
-            </ASpace>
-            <ATag v-else color="default" :bordered="false">
-              {{ modelTypeLabels[record.modelType] || record.modelType }}
-            </ATag>
-          </template>
-
-          <template v-if="column.key === 'enabled'">
-            <ASwitch
-              :loading="enableLoading"
-              v-model:checked="record.enabled"
-              @change="handleEnable(record.id)"
-              v-permission="['EDIT','ADMIN']"
-            />
-            <ATag :color="record.enabled ? 'success' : 'default'" :bordered="false" v-permission="['READ_ONLY']">
-              {{ record.enabled ? '启用' : '禁用' }}
-            </ATag>
-          </template>
-
-          <template v-if="column.key === 'action'" v-permission="['EDIT','ADMIN']">
-            <ASpace>
-              <AButton type="link" size="small" @click="handleEdit(record)">编辑</AButton>
-              <AButton type="link" size="small" danger @click="handleDelete(record)">删除</AButton>
-            </ASpace>
-          </template>
-        </template>
-
-        <template #emptyText>
-          <AEmpty description="暂未配置模型,点击'新增模型'添加" />
-        </template>
-      </ATable>
+      <!-- 空状态 -->
+      <div v-else class="flex-center" style="padding: 60px 0">
+        <AEmpty :description="loading ? '正在加载模型列表...' : `暂未配置模型,点击「新增模型」添加`" />
+      </div>
     </div>
 
     <ModelConfigForm
@@ -354,9 +280,18 @@ async function handleEnable(id: string) {
 
 <style scoped lang="scss">
 .model-config-modal {
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-md);
+  min-height: 100%;
+
   .modal-toolbar {
     padding-bottom: var(--spacing-md);
-    //border-bottom: 1px solid var(--color-border-light);
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: var(--spacing-md);
   }
 }
 </style>

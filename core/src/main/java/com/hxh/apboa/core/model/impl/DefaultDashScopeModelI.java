@@ -46,6 +46,25 @@ public class DefaultDashScopeModelI implements IChatModel {
     }
 
     @Override
+    public Model getSimpleModel(ModelConfigWrapper config) {
+        if (config.getProvider() != getProvider()) {
+            throw new IllegalArgumentException("The provider is not supported");
+        }
+
+        DashScopeChatModel.Builder builder = DashScopeChatModel.builder()
+                .apiKey(config.getApiKey())
+                .modelName(config.getModelCode())
+                .stream(false)
+                .httpTransport(HttpTransportHelper.createOkHttpTransport(10, 15));
+
+        if (config.getBaseUrl() != null && !config.getBaseUrl().isEmpty()) {
+            builder.baseUrl(config.getBaseUrl());
+        }
+
+        return builder.build();
+    }
+
+    @Override
     public ModelProviderType getProvider() {
         return ModelProviderType.DASH_SCOPE;
     }

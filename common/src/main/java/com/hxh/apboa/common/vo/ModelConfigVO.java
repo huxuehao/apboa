@@ -32,6 +32,9 @@ public class ModelConfigVO implements SerializableEnable {
     private Double repeatPenalty;
     private Long seed;
     private JsonNode extendConfig;
+    private String connectivityStatus;
+    private String connectivityMessage;
+    private LocalDateTime lastConnectivityCheck;
     private Boolean enabled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -25,26 +25,39 @@ public class DefaultOllamaModelI implements IChatModel {
             throw new IllegalArgumentException("The provider is not supported");
         }
 
-        if (config.getBaseUrl() == null) {
+        if (config.getBaseUrl() == null || config.getBaseUrl().isEmpty()) {
             throw new IllegalArgumentException("Base URL is null");
         }
 
         OllamaChatModel.Builder builder = OllamaChatModel.builder()
+                .baseUrl(config.getBaseUrl())
                 .modelName(config.getModelCode())
                 .httpTransport(HttpTransportHelper.createOkHttpTransport())
                 .defaultOptions(OllamaOptions.fromGenerateOptions(GenerateOptionsHelper.create(config)));
-
-        if (config.getBaseUrl() != null && !config.getBaseUrl().isEmpty()) {
-            builder.baseUrl(config.getBaseUrl());
-        } else {
-            throw new IllegalArgumentException("Base URL is null");
-        }
 
         if (config.isMulti()) {
             builder.formatter(new OllamaMultiAgentFormatter());
         } else {
             builder.formatter(new OllamaChatFormatter());
         }
+
+        return builder.build();
+    }
+
+    @Override
+    public Model getSimpleModel(ModelConfigWrapper config) {
+        if (config.getProvider() != getProvider()) {
+            throw new IllegalArgumentException("The provider is not supported");
+        }
+
+        if (config.getBaseUrl() == null || config.getBaseUrl().isEmpty()) {
+            throw new IllegalArgumentException("Base URL is null");
+        }
+
+        OllamaChatModel.Builder builder = OllamaChatModel.builder()
+                .baseUrl(config.getBaseUrl())
+                .modelName(config.getModelCode())
+                .httpTransport(HttpTransportHelper.createOkHttpTransport(10, 15));
 
         return builder.build();
     }
