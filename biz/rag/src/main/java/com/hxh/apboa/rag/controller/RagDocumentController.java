@@ -1,6 +1,7 @@
 package com.hxh.apboa.rag.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.hxh.apboa.common.config.auth.RoleNeed;
 import com.hxh.apboa.common.entity.KnowledgeBaseConfig;
 import com.hxh.apboa.common.entity.RagDocument;
@@ -8,6 +9,7 @@ import com.hxh.apboa.common.entity.RagDocumentChunk;
 import com.hxh.apboa.common.enums.KbType;
 import com.hxh.apboa.common.enums.RagDocumentStatus;
 import com.hxh.apboa.common.enums.Role;
+import com.hxh.apboa.common.util.JsonUtils;
 import com.hxh.apboa.common.r.R;
 import com.hxh.apboa.common.vo.RagDocumentChunkVO;
 import com.hxh.apboa.core.rag.DocumentParser;
@@ -30,6 +32,7 @@ import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +59,14 @@ public class RagDocumentController {
     @PostMapping("/upload")
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Long> upload(@RequestParam("file") MultipartFile file,
-                          @RequestParam("knowledgeBaseConfigId") Long kbConfigId) {
+                          @RequestParam("knowledgeBaseConfigId") Long kbConfigId,
+                          @RequestParam(value = "parserType", required = false) String parserType,
+                          @RequestParam(value = "chunkStrategy", required = false) String chunkStrategy,
+                          @RequestParam(value = "chunkSize", required = false) Integer chunkSize,
+                          @RequestParam(value = "overlap", required = false) Integer overlap,
+                          @RequestParam(value = "chunkOverlap", required = false) Integer chunkOverlap,
+                          @RequestParam(value = "chunkDelimiters", required = false) String chunkDelimiters,
+                          @RequestParam(value = "separators", required = false) String separators) {
         KnowledgeBaseConfig kbConfig = knowledgeBaseConfigService.getById(kbConfigId);
         if (kbConfig == null) {
             return R.fail("知识库配置不存在");
@@ -90,7 +100,8 @@ public class RagDocumentController {
             ragDocumentMapper.insert(document);
 
             // 异步处理文档，从已保存的附件中读取文件流
-            localRagService.reprocessDocument(document, attach, kbConfig);
+            localRagService.reprocessDocument(document, attach,
+                    mergeProcessingOptions(kbConfig, parserType, chunkStrategy, chunkSize, overlap, chunkOverlap, chunkDelimiters, separators));
 
             return R.data(document.getId());
         } catch (Exception e) {
@@ -234,7 +245,14 @@ public class RagDocumentController {
     @PostMapping("/re-upload/{id}")
     @RoleNeed({Role.ADMIN, Role.EDIT})
     public R<Boolean> reUpload(@PathVariable("id") Long id,
-                               @RequestParam("file") MultipartFile file) {
+                               @RequestParam("file") MultipartFile file,
+                               @RequestParam(value = "parserType", required = false) String parserType,
+                               @RequestParam(value = "chunkStrategy", required = false) String chunkStrategy,
+                               @RequestParam(value = "chunkSize", required = false) Integer chunkSize,
+                               @RequestParam(value = "overlap", required = false) Integer overlap,
+                               @RequestParam(value = "chunkOverlap", required = false) Integer chunkOverlap,
+                               @RequestParam(value = "chunkDelimiters", required = false) String chunkDelimiters,
+                               @RequestParam(value = "separators", required = false) String separators) {
         RagDocument document = ragDocumentMapper.selectById(id);
         if (document == null) {
             return R.fail("文档不存在");
@@ -274,7 +292,8 @@ public class RagDocumentController {
             ragDocumentMapper.updateById(document);
 
             // 异步重新处理文档，从已保存的附件中读取文件流
-            localRagService.reprocessDocument(document, newAttach, kbConfig);
+            localRagService.reprocessDocument(document, newAttach,
+                    mergeProcessingOptions(kbConfig, parserType, chunkStrategy, chunkSize, overlap, chunkOverlap, chunkDelimiters, separators));
 
             return R.data(true);
         } catch (Exception e) {
@@ -287,7 +306,8 @@ public class RagDocumentController {
      */
     @PostMapping("/re-chunk/{id}")
     @RoleNeed({Role.ADMIN, Role.EDIT})
-    public R<Boolean> reChunk(@PathVariable("id") Long id) {
+    public R<Boolean> reChunk(@PathVariable("id") Long id,
+                              @RequestBody(required = false) Map<String, Object> params) {
         RagDocument document = ragDocumentMapper.selectById(id);
         if (document == null) {
             return R.fail("文档不存在");
@@ -315,7 +335,17 @@ public class RagDocumentController {
             ragDocumentMapper.updateById(document);
 
             // 异步重新处理文档
-            localRagService.reprocessDocument(document, attach, kbConfig);
+            localRagService.reprocessDocument(document, attach,
+                    mergeProcessingOptions(
+                            kbConfig,
+                            getString(params, "parserType"),
+                            getString(params, "chunkStrategy"),
+                            getInteger(params, "chunkSize"),
+                            getInteger(params, "overlap"),
+                            getInteger(params, "chunkOverlap"),
+                            getString(params, "chunkDelimiters"),
+                            getSeparators(params)
+                    ));
 
             return R.data(true);
         } catch (Exception e) {
@@ -332,5 +362,97 @@ public class RagDocumentController {
             return "unknown";
         }
         return fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+    }
+
+    private KnowledgeBaseConfig mergeProcessingOptions(KnowledgeBaseConfig source,
+                                                       String parserType,
+                                                       String chunkStrategy,
+                                                       Integer chunkSize,
+                                                       Integer overlap,
+                                                       Integer chunkOverlap,
+                                                       String chunkDelimiters,
+                                                       String separators) {
+        KnowledgeBaseConfig copy = new KnowledgeBaseConfig();
+        copy.setId(source.getId());
+        copy.setName(source.getName());
+        copy.setKbType(source.getKbType());
+        copy.setRagMode(source.getRagMode());
+        copy.setDescription(source.getDescription());
+        copy.setConnectionConfig(source.getConnectionConfig());
+        copy.setEndpointConfig(source.getEndpointConfig());
+        copy.setRerankingConfig(source.getRerankingConfig());
+        copy.setQueryRewriteConfig(source.getQueryRewriteConfig());
+        copy.setMetadataFilters(source.getMetadataFilters());
+        copy.setHttpConfig(source.getHttpConfig());
+        copy.setHealthStatus(source.getHealthStatus());
+        copy.setLastSyncTime(source.getLastSyncTime());
+        copy.setCreatedAt(source.getCreatedAt());
+        copy.setUpdatedAt(source.getUpdatedAt());
+        copy.setCreatedBy(source.getCreatedBy());
+        copy.setUpdatedBy(source.getUpdatedBy());
+
+        Map<String, Object> retrieval = new HashMap<>();
+        JsonNode current = source.getRetrievalConfig();
+        if (current != null && !current.isNull()) {
+            Map<String, Object> existing = JsonUtils.parse(current.toString(), Map.class);
+            if (existing != null) {
+                retrieval.putAll(existing);
+            }
+        }
+
+        putIfHasText(retrieval, "parserType", parserType);
+        putIfHasText(retrieval, "chunkStrategy", chunkStrategy);
+        putIfPresent(retrieval, "chunkSize", chunkSize);
+        putIfPresent(retrieval, "overlap", overlap);
+        putIfPresent(retrieval, "chunkOverlap", chunkOverlap != null ? chunkOverlap : overlap);
+        putIfHasText(retrieval, "chunkDelimiters", chunkDelimiters);
+        if (separators != null && !separators.isBlank()) {
+            retrieval.put("separators", separators.split(","));
+        }
+
+        copy.setRetrievalConfig(JsonUtils.toJsonNode(retrieval));
+        return copy;
+    }
+
+    private void putIfHasText(Map<String, Object> target, String key, String value) {
+        if (value != null && !value.isBlank()) {
+            target.put(key, value.trim());
+        }
+    }
+
+    private void putIfPresent(Map<String, Object> target, String key, Integer value) {
+        if (value != null) {
+            target.put(key, value);
+        }
+    }
+
+    private String getString(Map<String, Object> params, String key) {
+        if (params == null) {
+            return null;
+        }
+        Object value = params.get(key);
+        return value == null ? null : String.valueOf(value);
+    }
+
+    private Integer getInteger(Map<String, Object> params, String key) {
+        if (params == null || params.get(key) == null) {
+            return null;
+        }
+        Object value = params.get(key);
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+        return Integer.parseInt(String.valueOf(value));
+    }
+
+    private String getSeparators(Map<String, Object> params) {
+        if (params == null) {
+            return null;
+        }
+        Object value = params.get("separators");
+        if (value instanceof List<?> list) {
+            return list.stream().map(String::valueOf).reduce((left, right) -> left + "," + right).orElse(null);
+        }
+        return getString(params, "separators");
     }
 }

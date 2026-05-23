@@ -180,7 +180,7 @@ watch(() => localConnection.providerType, () => {
  */
 const localRetrieval = reactive({
   chunkSize: 512,
-  chunkOverlap: 64,
+  chunkOverlap: 0,
   chunkDelimiters: '',
   topK: 5,
   scoreThreshold: 0.5
@@ -446,7 +446,7 @@ function resetForm() {
     bufferSizeMb: 50,
     batchSize: 10
   })
-  Object.assign(localRetrieval, { chunkSize: 512, chunkOverlap: 64, chunkDelimiters: '', topK: 5, scoreThreshold: 0.5 })
+  Object.assign(localRetrieval, { chunkSize: 512, chunkOverlap: 0, chunkDelimiters: '', topK: 5, scoreThreshold: 0.5 })
   Object.assign(localReranking, {
     providerType: 'xinference',
     baseUrl: 'http://localhost:9997/v1/rerank',
@@ -903,18 +903,6 @@ function removeMetadataCondition(index: number) {
 
           <!-- 本地RAG检索配置 -->
           <template v-if="formData.kbType === 'LOCAL'">
-            <AFormItem label="分块分隔符">
-              <AInput v-model:value="localRetrieval.chunkDelimiters" placeholder="多个分隔符用逗号分隔，如：\n\n,^|,\n" />
-              <div style="color: var(--color-text-secondary); font-size: 12px; margin-top: 4px;">
-                支持转义字符：\n（换行）、\t（制表符）、\r（回车），多个分隔符用英文逗号分隔。不填则按字符数分块
-              </div>
-            </AFormItem>
-            <AFormItem label="最大块长度(字符数)">
-              <AInputNumber v-model:value="localRetrieval.chunkSize" :min="128" :max="8192" style="width: 100%" />
-            </AFormItem>
-            <AFormItem label="分块重叠(字符数)">
-              <AInputNumber v-model:value="localRetrieval.chunkOverlap" :min="0" :max="1024" style="width: 100%" />
-            </AFormItem>
             <AFormItem label="Top K">
               <AInputNumber v-model:value="localRetrieval.topK" :min="1" :max="100" style="width: 100%" />
             </AFormItem>

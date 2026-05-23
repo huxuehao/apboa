@@ -1,14 +1,28 @@
 import request from '@/utils/request'
 import type { ApiResponse } from '@/types'
-import type { RagDocument, RagDocumentChunk } from '@/types'
+import type { RagDocument, RagDocumentChunk, RagDocumentProcessOptions } from '@/types'
+
+function appendProcessOptions(formData: FormData, options?: RagDocumentProcessOptions) {
+  if (!options) return
+
+  Object.entries(options).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return
+    if (Array.isArray(value)) {
+      formData.append(key, JSON.stringify(value))
+      return
+    }
+    formData.append(key, String(value))
+  })
+}
 
 /**
  * 上传文档到知识库
  */
-export function uploadDocument(file: File, knowledgeBaseConfigId: string) {
+export function uploadDocument(file: File, knowledgeBaseConfigId: string, options?: RagDocumentProcessOptions) {
   const formData = new FormData()
   formData.append('file', file)
   formData.append('knowledgeBaseConfigId', knowledgeBaseConfigId)
+  appendProcessOptions(formData, options)
   return request.post<ApiResponse<number>>('/api/rag/document/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   })
@@ -58,9 +72,10 @@ export function downloadDocument(documentId: string) {
 /**
  * 重新上传文档（替换原有文件并重新处理）
  */
-export function reUploadDocument(documentId: string, file: File) {
+export function reUploadDocument(documentId: string, file: File, options?: RagDocumentProcessOptions) {
   const formData = new FormData()
   formData.append('file', file)
+  appendProcessOptions(formData, options)
   return request.post<ApiResponse<boolean>>(`/api/rag/document/re-upload/${documentId}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   })
@@ -69,8 +84,8 @@ export function reUploadDocument(documentId: string, file: File) {
 /**
  * 重新分块处理文档
  */
-export function reChunkDocument(documentId: string) {
-  return request.post<ApiResponse<boolean>>(`/api/rag/document/re-chunk/${documentId}`)
+export function reChunkDocument(documentId: string, options?: RagDocumentProcessOptions) {
+  return request.post<ApiResponse<boolean>>(`/api/rag/document/re-chunk/${documentId}`, options ?? {})
 }
 
 /**

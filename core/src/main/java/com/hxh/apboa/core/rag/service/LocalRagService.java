@@ -30,7 +30,10 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * 本地RAG服务，编排文档解析、分块、向量化、存储的完整流程
@@ -41,9 +44,9 @@ import java.util.List;
 public class LocalRagService {
 
     private static final Logger log = LoggerFactory.getLogger(LocalRagService.class);
-
     private final DocumentParser documentParser;
     private final TextChunker textChunker;
+    private final SemanticChunker semanticChunker;
     private final EmbeddingService embeddingService;
     private final QdrantVectorStore qdrantVectorStore;
     private final RagDocumentMapper ragDocumentMapper;
@@ -54,6 +57,7 @@ public class LocalRagService {
 
     public LocalRagService(DocumentParser documentParser,
                            TextChunker textChunker,
+                           SemanticChunker semanticChunker,
                            EmbeddingService embeddingService,
                            QdrantVectorStore qdrantVectorStore,
                            RagDocumentMapper ragDocumentMapper,
@@ -63,6 +67,7 @@ public class LocalRagService {
                            ReRankService reRankService) {
         this.documentParser = documentParser;
         this.textChunker = textChunker;
+        this.semanticChunker = semanticChunker;
         this.embeddingService = embeddingService;
         this.qdrantVectorStore = qdrantVectorStore;
         this.ragDocumentMapper = ragDocumentMapper;
@@ -90,8 +95,20 @@ public class LocalRagService {
 
             int chunkSize = getChunkSize(config);
             int chunkOverlap = getChunkOverlap(config);
+            SemanticChunker.SemanticOptions semanticOptions = getSemanticOptions(config);
 
-            List<ChunkResult> chunks = doChunk(text, chunkSize, chunkOverlap, config);
+            List<SemanticChunker.StructuredChunk> structuredChunks = semanticChunker.chunkWithMetadata(
+                    text,
+                    document.getFileName(),
+                    getParserType(config),
+                    getChunkStrategy(config),
+                    chunkSize,
+                    chunkOverlap,
+                    getChunkDelimiters(config),
+                    texts -> embeddingService != null ? embeddingService.embed(texts, config) : List.of(),
+                    semanticOptions
+            );
+            List<ChunkResult> chunks = toChunkResults(structuredChunks);
             if (chunks.isEmpty()) {
                 document.setStatus(RagDocumentStatus.FAILED);
                 document.setErrorMessage("文档解析后内容为空");
@@ -108,6 +125,7 @@ public class LocalRagService {
 
             for (int i = 0; i < chunks.size(); i++) {
                 ChunkResult chunk = chunks.get(i);
+                SemanticChunker.StructuredChunk structuredChunk = structuredChunks.get(i);
 
                 RagDocumentChunk chunkEntity = RagDocumentChunk.builder()
                         .id(IdWorker.getId())
@@ -118,6 +136,7 @@ public class LocalRagService {
                         .tokenCount(estimateTokenCount(chunk.content()))
                         .startOffset(chunk.startOffset())
                         .endOffset(chunk.endOffset())
+                        .metadata(buildChunkMetadata(structuredChunk))
                         .createdAt(LocalDateTime.now())
                         .build();
                 chunkEntities.add(chunkEntity);
@@ -338,15 +357,42 @@ public class LocalRagService {
 
     private int getChunkOverlap(KnowledgeBaseConfig config) {
         JsonNode retrievalConfig = config.getRetrievalConfig();
-        return JsonUtils.getIntValue(retrievalConfig, "chunkOverlap", 64);
+        if (retrievalConfig != null && retrievalConfig.has("overlap")) {
+            return JsonUtils.getIntValue(retrievalConfig, "overlap", 0);
+        }
+        return JsonUtils.getIntValue(retrievalConfig, "chunkOverlap", 0);
     }
 
     /**
      * 根据配置执行分块，有分隔符时按分隔符分块，否则按固定大小分块
      */
-    private List<ChunkResult> doChunk(String text, int chunkSize, int chunkOverlap, KnowledgeBaseConfig config) {
-        List<String> delimiters = getChunkDelimiters(config);
-        return textChunker.delimiterChunk(text, chunkSize, chunkOverlap, delimiters);
+    private List<ChunkResult> doChunk(String text, String fileName, int chunkSize, int chunkOverlap, KnowledgeBaseConfig config) {
+        return toChunkResults(semanticChunker.chunkWithMetadata(
+                text,
+                fileName,
+                getParserType(config),
+                getChunkStrategy(config),
+                chunkSize,
+                chunkOverlap,
+                getChunkDelimiters(config),
+                null,
+                getSemanticOptions(config)
+        ));
+    }
+
+    private List<ChunkResult> toChunkResults(List<SemanticChunker.StructuredChunk> structuredChunks) {
+        List<ChunkResult> results = new ArrayList<>();
+        int offset = 0;
+        for (SemanticChunker.StructuredChunk structuredChunk : structuredChunks) {
+            results.add(new ChunkResult(
+                    results.size(),
+                    structuredChunk.content(),
+                    offset,
+                    offset + structuredChunk.content().length()
+            ));
+            offset += structuredChunk.content().length() + 2;
+        }
+        return results;
     }
 
     /**
@@ -368,6 +414,16 @@ public class LocalRagService {
 
     private List<String> getChunkDelimiters(KnowledgeBaseConfig config) {
         JsonNode retrievalConfig = config.getRetrievalConfig();
+        if (retrievalConfig != null && retrievalConfig.has("separators") && retrievalConfig.get("separators").isArray()) {
+            List<String> delimiters = new ArrayList<>();
+            retrievalConfig.get("separators").forEach(node -> {
+                String delimiter = unescapeDelimiter(node.asText());
+                if (!delimiter.isEmpty()) {
+                    delimiters.add(delimiter);
+                }
+            });
+            return delimiters;
+        }
         String delimitersStr = JsonUtils.getStringValue(retrievalConfig, "chunkDelimiters", null);
         if (delimitersStr == null || delimitersStr.isEmpty()) {
             return List.of();
@@ -387,6 +443,59 @@ public class LocalRagService {
                 .replace("\\n", "\n")
                 .replace("\\t", "\t")
                 .replace("\\r", "\r");
+    }
+
+    private String getChunkStrategy(KnowledgeBaseConfig config) {
+        JsonNode retrievalConfig = config.getRetrievalConfig();
+        return normalizeValue(JsonUtils.getStringValue(retrievalConfig, "chunkStrategy", "CHARACTER"), "CHARACTER");
+    }
+
+    private String getParserType(KnowledgeBaseConfig config) {
+        JsonNode retrievalConfig = config.getRetrievalConfig();
+        return normalizeValue(JsonUtils.getStringValue(retrievalConfig, "parserType", "AUTO"), "AUTO");
+    }
+
+    private JsonNode parseMetadataSafely(String metadata) {
+        if (metadata == null || metadata.isBlank()) {
+            return OBJECT_MAPPER.createObjectNode();
+        }
+        try {
+            return OBJECT_MAPPER.readTree(metadata);
+        } catch (Exception ex) {
+            log.warn("解析分块元数据失败，回退为空对象");
+            return OBJECT_MAPPER.createObjectNode();
+        }
+    }
+
+    private String writeMetadataSafely(Map<String, Object> metadata) {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(metadata);
+        } catch (Exception ex) {
+            log.warn("序列化分块元数据失败，回退为空对象");
+            return "{}";
+        }
+    }
+
+    private SemanticChunker.SemanticOptions getSemanticOptions(KnowledgeBaseConfig config) {
+        JsonNode retrievalConfig = config.getRetrievalConfig();
+        int chunkSize = getChunkSize(config);
+        return new SemanticChunker.SemanticOptions(
+                normalizeValue(JsonUtils.getStringValue(retrievalConfig, "semanticThresholdStrategy", "FIXED"), "FIXED"),
+                JsonUtils.getDoubleValue(retrievalConfig, "semanticThresholdValue", 0.6d),
+                Math.max(1, JsonUtils.getIntValue(retrievalConfig, "semanticWindowSize", 1)),
+                Math.max(0, JsonUtils.getIntValue(retrievalConfig, "semanticMinChunkSize", 0)),
+                Math.max(1, JsonUtils.getIntValue(retrievalConfig, "semanticMaxChunkSize", chunkSize))
+        );
+    }
+
+    private String buildChunkMetadata(SemanticChunker.StructuredChunk structuredChunk) {
+        Map<String, Object> metadata = new LinkedHashMap<>();
+        metadata.put("role", structuredChunk.role());
+        return JsonUtils.toJsonStr(metadata);
+    }
+
+    private String normalizeValue(String value, String defaultValue) {
+        return value == null || value.isBlank() ? defaultValue : value.trim().toUpperCase(Locale.ROOT);
     }
 
     private int estimateTokenCount(String text) {

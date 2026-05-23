@@ -470,6 +470,16 @@ export enum RagDocumentStatus {
 /**
  * RAG文档
  */
+export interface RagDocumentProcessOptions {
+  parserType?: string | null
+  chunkStrategy?: string | null
+  chunkSize?: number | null
+  overlap?: number | null
+  chunkOverlap?: number | null
+  separators?: string[] | null
+  chunkDelimiters?: string | null
+}
+
 export interface RagDocument {
   id: string
   knowledgeBaseConfigId: string
@@ -500,4 +510,5 @@ export interface RagDocumentChunk {
   endOffset: number | null
   metadata: string | null
   createdAt: string
+  score?: number
 }
