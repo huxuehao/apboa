@@ -88,8 +88,21 @@ const iconConfigs = [
   { ext: 'pptx', color: '#E5552A' },
   { ext: 'txt', color: '#6B6B6B' },
   { ext: 'js', color: '#E68A2E' },
+  { ext: 'ts', color: '#3178C6' },
   { ext: 'py', color: '#3A91C2' },
   { ext: 'sh', color: '#E54C59' },
+  { ext: 'yaml', color: '#F5A623' },
+  { ext: 'yml', color: '#F5A623' },
+  { ext: 'json', color: '#5B8FF9' },
+  { ext: 'java', color: '#B07219' },
+  { ext: 'go', color: '#00ADD8' },
+  { ext: 'rs', color: '#DEA584' },
+  { ext: 'sql', color: '#4479A1' },
+  { ext: 'css', color: '#1572B6' },
+  { ext: 'html', color: '#E34F26' },
+  { ext: 'xml', color: '#0066CC' },
+  { ext: 'toml', color: '#9C4221' },
+  { ext: 'env', color: '#ECD53F' },
 ]
 
 /** 匹配不到后缀时的默认颜色 */

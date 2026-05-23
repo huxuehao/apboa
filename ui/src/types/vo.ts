@@ -256,11 +256,7 @@ export interface SkillPackageVO {
   id: string | number
   name: string
   description: string
-  skillContent: string
   category: string
-  references: any[] | null
-  examples: any[] | null
-  scripts: any[] | null
   enabled: boolean
   createdAt: string
   updatedAt: string
@@ -268,6 +264,32 @@ export interface SkillPackageVO {
   updatedBy: string
   used: string[]
   tools:string[]
+}
+
+/**
+ * 技能包文件树节点
+ */
+export interface SkillFileTreeNode {
+  /** 文件名或目录名 */
+  name: string
+  /** 相对路径，如 "scripts/helper.py" */
+  path: string
+  /** 是否目录 */
+  directory: boolean
+  /** DB id（入库文件才有，纯文件系统文件为 null） */
+  fileId: string | null
+  /** 文件类型（仅入库文件） */
+  fileType: 'SKILL_MD' | 'REFERENCES' | 'EXAMPLES' | 'SCRIPTS' | null
+  /** 文件扩展名，目录为空 */
+  extension: string
+  /** 文件大小（字节），目录为 0 */
+  fileSize: number
+  /** 子节点 */
+  children: SkillFileTreeNode[]
+  /** 文件内容（前端加载后填充） */
+  content?: string
+  /** 前端状态：是否有未保存修改 */
+  dirty?: boolean
 }
 
 /**

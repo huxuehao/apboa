@@ -10,6 +10,7 @@ public class TableConst {
     public static final String PROMPT = "system_prompt_template";
     public static final String STORAGE = "storage_protocol";
     public static final String SKILL = "skill_package";
+    public static final String SKILL_FILE = "skill_file";
     public static final String SENSITIVE_WORD = "sensitive_word_config";
     public static final String JOB_LOG = "quartz_job_log";
     public static final String JOB_INFO = "quartz_job_info";

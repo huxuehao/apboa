@@ -222,7 +222,8 @@ const formattedTemperature = computed(() => {
   min-height: 180px;
   padding: var(--spacing-md);
   background-color: var(--color-bg-white);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   border-radius: var(--border-radius-lg);
   transition: all var(--transition-base);
   display: flex;

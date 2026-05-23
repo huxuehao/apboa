@@ -228,27 +228,28 @@ async function handleTest(id: string) {
     :open="visible"
     :title="`${providerName} - 配置模型`"
     :default-expanded="true"
-    expandedWidth="100%"
+    defaultWidth="100%"
     :footer="null"
+    :background-color="'#F5F6F8'"
+    class="configure-model"
     @cancel="handleClose"
   >
     <div class="model-config-modal">
       <!-- 工具栏 -->
       <div class="modal-toolbar flex items-center justify-between mb-md">
+        <AButton type="primary" @click="handleCreate" v-permission="['EDIT','ADMIN']">新增模型</AButton>
         <AInput
           v-model:value="searchKeyword"
           placeholder="搜索模型名称"
-          style="width: 300px"
+          style="width: 300px; border: rgba(14,14,14,0.1) solid 1px !important;"
           @pressEnter="handleSearch"
         >
           <template #suffix>
             <AButton type="text" size="small" @click="handleSearch">搜索</AButton>
           </template>
         </AInput>
-
-        <AButton type="primary" @click="handleCreate" v-permission="['EDIT','ADMIN']">新增模型</AButton>
       </div>
-      
+
       <!-- 卡片网格 -->
       <div v-if="modelList.length > 0" class="card-grid">
         <ModelConfigCard
@@ -285,7 +286,12 @@ async function handleTest(id: string) {
   min-height: 100%;
 
   .modal-toolbar {
-    padding-bottom: var(--spacing-md);
+    position: sticky;
+    top: 0px;
+    z-index: 10;
+    background-color: #F5F6F8;
+    margin: calc(-1 * var(--spacing-md)) calc(-1 * var(--spacing-md)) 0;
+    padding: var(--spacing-md);
   }
 
   .card-grid {
