@@ -557,6 +557,15 @@ INDEX `idx_param_key`(`param_key` ASC) USING BTREE,
 INDEX `idx_param_name`(`param_name` ASC) USING BTREE
 ) COMMENT = '参数表';
 
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (1, '访问Token有效期（单位 ms）', 'ACCESS_TOKEN_TTL', '21600000');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (2, '刷新Token有效期（单位 ms）', 'REFRESH_TOKEN_TTL', '64800000');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (3, '单个文件大小限制（单位 MB）', 'SINGLE_FILE_MAX_SIZE', '5');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (4, '支持的图片文件类型', 'ALLOW_IMAGE_FILE_TYPE', 'png,jpeg,png,gif,webp');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (5, '支持的音频文件类型', 'ALLOW_AUDIO_FILE_TYPE', 'mp3,wav,mpeg');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (6, '支持的视频文件类型', 'ALLOW_VIDEO_FILE_TYPE', 'mp4,mpeg');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (7, '技能包文件允许入库的扩展名', 'SKILL_FILE_ALLOWED_EXTENSIONS', 'md,py,sh,js,ts,json,yaml,yml,xml,txt,java,cs,go,rs,rb,php,sql,html,css,scss,less,cfg,conf,toml');
+
+
 -- ----------------------------
 -- Table structure for quartz_job_info
 -- ----------------------------

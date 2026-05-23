@@ -253,6 +253,7 @@ watch([selectedCategory, keyword], () => {
 
 onMounted(() => {
   store.fetchCategories()
+  store.resetAndFetch()
 })
 </script>
 
