@@ -4,6 +4,7 @@ import com.hxh.apboa.common.entity.SkillFile;
 import com.hxh.apboa.common.entity.SkillPackage;
 import com.hxh.apboa.common.enums.SkillFileType;
 import io.agentscope.core.skill.AgentSkill;
+import io.agentscope.core.skill.util.MarkdownSkillParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,7 @@ public class SkillPackageBuilder {
         skillMd.setFileType(SkillFileType.SKILL_MD);
         skillMd.setFileName("SKILL.md");
         skillMd.setFilePath("SKILL.md");
-        skillMd.setContent(agentSkill.getSkillContent());
+        skillMd.setContent(MarkdownSkillParser.generate(agentSkill.getMetadata(), agentSkill.getSkillContent()));
         skillMd.setSort(0);
         skillFiles.add(skillMd);
 
