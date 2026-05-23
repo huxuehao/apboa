@@ -408,7 +408,8 @@ function showCreateModal() {
             style: 'width: 100%',
             options: categories.value.map(c => ({ value: c, label: c })),
             onChange: (val: string) => { category = val },
-          }),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any),
         ]),
       ]),
     okText: '创建',
