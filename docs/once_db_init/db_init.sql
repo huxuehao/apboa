@@ -728,7 +728,7 @@ INDEX `idx_skill_file_type`(`file_type` ASC) USING BTREE,
 INDEX `idx_skill_file_path`(`skill_id` ASC, `file_path`(255) ASC) USING BTREE
 ) COMMENT = '技能包文件表';
 
-INSERT INTO `skill_file` (`id`, `skill_id`, `file_type`, `file_name`, `file_path`, `content`, `sort`, `created_at`, `updated_at`) VALUES (2038859803983978499, 2038859803983978498, 'SKILL_MD', 'SKILL.md', 'SKILL.md', '执行下面的命令获取当前时间\npython skills/doGetCurrentTime/scripts/getCurrentTime.py', 0, '2026-03-31 14:03:52', '2026-05-03 13:28:36');
+INSERT INTO `skill_file` (`id`, `skill_id`, `file_type`, `file_name`, `file_path`, `content`, `sort`, `created_at`, `updated_at`) VALUES (2038859803983978499, 2038859803983978498, 'SKILL_MD', 'SKILL.md', 'SKILL.md', '---\nname: doGetCurrentTime\ndescription: 通过技能你可以获取当前时间\n---\n\n执行下面的命令获取当前时间\npython skills/doGetCurrentTime/scripts/getCurrentTime.py', 0, '2026-03-31 14:03:52', '2026-05-03 13:28:36');
 
 INSERT INTO `skill_file` (`id`, `skill_id`, `file_type`, `file_name`, `file_path`, `content`, `sort`, `created_at`, `updated_at`) VALUES (2038859803983978500, 2038859803983978498, 'SCRIPTS', 'getCurrentTime.py', 'scripts/getCurrentTime.py', 'from datetime import datetime\n\nnow = datetime.now()\nweekdays = [''Monday'', ''Tuesday'', ''Wednesday'', ''Thursday'', ''Friday'', ''Saturday'', ''Sunday'']\n\nprint(f"Current time: {now.strftime(''%Y-%m-%d %H:%M:%S'')}")\nprint(f"Day: {weekdays[now.weekday()]}")', 0, '2026-03-31 14:03:52', '2026-05-03 13:28:36');
 
