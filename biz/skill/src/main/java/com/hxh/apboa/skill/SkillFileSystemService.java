@@ -52,6 +52,15 @@ public class SkillFileSystemService {
     }
 
     /**
+     * 清除扩展名白名单缓存
+     * 由事件监听器调用，当 Params 系统中的 SKILL_FILE_ALLOWED_EXTENSIONS 参数更新时触发
+     */
+    public static void clearExtensionCache() {
+        cachedExtensions = null;
+        log.info("技能文件扩展名白名单缓存已清除");
+    }
+
+    /**
      * 从 Params 表读取白名单，带缓存
      */
     private static Set<String> loadAllowedExtensions() {

@@ -3,6 +3,7 @@ package com.hxh.apboa.skill.imports;
 import com.hxh.apboa.common.entity.SkillFile;
 import com.hxh.apboa.common.entity.SkillPackage;
 import com.hxh.apboa.common.enums.SkillFileType;
+import com.hxh.apboa.skill.SkillFileSystemService;
 import io.agentscope.core.skill.AgentSkill;
 import io.agentscope.core.skill.util.MarkdownSkillParser;
 
@@ -71,6 +72,11 @@ public class SkillPackageBuilder {
 
             // 提取文件名
             String fileName = path.contains("/") ? path.substring(path.lastIndexOf('/') + 1) : path;
+
+            // 仅白名单内文件入库
+            if (!SkillFileSystemService.shouldPersistToDb(path)) {
+                continue;
+            }
 
             SkillFile sf = new SkillFile();
             sf.setFileType(fileType);
