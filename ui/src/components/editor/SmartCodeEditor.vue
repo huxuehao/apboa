@@ -359,7 +359,7 @@ const getCachedThemeExtension = (theme: string) => {
         backgroundColor: "#d1e7ff",
       },
       ".cm-gutters": {
-        backgroundColor: "#f5f5f5",
+        backgroundColor: "#F5F6F8",
         color: "#666",
         borderRight: "1px solid #ddd",
       },
@@ -903,7 +903,6 @@ defineExpose({
   font-family: 'AlimamaFangYuan', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: relative;
 }
 
@@ -967,7 +966,7 @@ defineExpose({
 }
 
 .smart-code-editor.theme-light .editor-toolbar {
-  background: #f5f5f5;
+  background: #F5F6F8;
   border-bottom-color: #e0e0e0;
 }
 
@@ -1088,7 +1087,7 @@ defineExpose({
 
 .smart-code-editor.theme-light .editor-container::-webkit-scrollbar-track,
 .smart-code-editor.theme-light .editor-container :deep(.cm-scroller)::-webkit-scrollbar-track {
-  background: #f5f5f5;
+  background: #F5F6F8;
   border-radius: 5px;
 }
 
@@ -1096,7 +1095,7 @@ defineExpose({
 .smart-code-editor.theme-light .editor-container :deep(.cm-scroller)::-webkit-scrollbar-thumb {
   background: #d0d0d0;
   border-radius: 5px;
-  border: 2px solid #f5f5f5;
+  border: 2px solid #F5F6F8;
 }
 
 .smart-code-editor.theme-light .editor-container::-webkit-scrollbar-thumb:hover,

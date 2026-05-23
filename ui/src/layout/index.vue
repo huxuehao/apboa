@@ -15,6 +15,9 @@ const { getRefresh } =  useAccountStore()
 let isRefresh = computed(() => {
   return getRefresh()
 })
+
+/** 路由 meta.hideFooter 为 true 时隐藏底部 */
+const showFooter = computed(() => !route.meta.hideFooter)
 </script>
 
 <template>
@@ -38,7 +41,7 @@ let isRefresh = computed(() => {
       </router-view>
     </main>
 
-    <footer class="layout-footer">
+    <footer v-if="showFooter" class="layout-footer">
       <AppFooter />
     </footer>
   </div>

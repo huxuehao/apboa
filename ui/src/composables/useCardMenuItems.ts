@@ -18,7 +18,8 @@ import {
   PlayCircleOutlined,
   SettingOutlined,
   StopOutlined,
-  SyncOutlined
+  SyncOutlined,
+  TagOutlined,
 } from '@ant-design/icons-vue'
 
 /** 菜单项类型 */
@@ -128,6 +129,13 @@ export function createToolGovernanceItem(): CardMenuItem {
  */
 export function createConfigPanelItem(): CardMenuItem {
   return { key: 'configPanel', label: '设计', icon: () => h(SettingOutlined) }
+}
+
+/**
+ * 创建「设置分类」菜单项
+ */
+export function createSetCategoryItem(): CardMenuItem {
+  return { key: 'setCategory', label: '分类', icon: () => h(TagOutlined) }
 }
 
 /**

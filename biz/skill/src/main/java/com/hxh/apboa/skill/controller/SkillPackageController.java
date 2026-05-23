@@ -5,8 +5,10 @@ import com.hxh.apboa.common.exception.BusinessException;
 import com.hxh.apboa.common.config.auth.RoleNeed;
 import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.dto.SkillPackageDTO;
+import com.hxh.apboa.common.entity.SkillFile;
 import com.hxh.apboa.common.entity.SkillPackage;
 import com.hxh.apboa.common.enums.Role;
+import com.hxh.apboa.common.enums.SkillFileType;
 import com.hxh.apboa.common.mp.support.MP;
 import com.hxh.apboa.common.mp.support.PageParams;
 import com.hxh.apboa.common.r.R;
@@ -14,13 +16,14 @@ import com.hxh.apboa.common.util.BeanUtils;
 import com.hxh.apboa.common.util.ZipExtractUtils;
 import com.hxh.apboa.common.vo.SkillImportResult;
 import com.hxh.apboa.common.vo.SkillPackageVO;
-import com.hxh.apboa.skill.SkillScriptLoadHelper;
+import com.hxh.apboa.skill.SkillFileSystemService;
 import com.hxh.apboa.skill.imports.SkillImportPathResolver;
 import com.hxh.apboa.skill.imports.SkillImportService;
 import com.hxh.apboa.skill.imports.SkillInstaller;
 import com.hxh.apboa.skill.imports.config.GitImportConfig;
 import com.hxh.apboa.skill.imports.config.LocalImportConfig;
 import com.hxh.apboa.skill.imports.config.UploadImportConfig;
+import com.hxh.apboa.skill.service.SkillFileService;
 import com.hxh.apboa.skill.service.SkillPackageService;
 import com.hxh.apboa.skill.service.SkillToolService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -48,6 +51,7 @@ public class SkillPackageController {
     private final SkillImportService skillImportService;
     private final SkillPackageService skillPackageService;
     private final SkillToolService skillToolService;
+    private final SkillFileService skillFileService;
 
     /**
      * 分页查询
@@ -75,16 +79,27 @@ public class SkillPackageController {
      */
     @PostMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
-    public R<Boolean> save(@RequestBody SkillPackageVO vo) {
+    public R<Long> save(@RequestBody SkillPackageVO vo) {
         SkillPackage entity = BeanUtils.copy(vo, SkillPackage.class);
-        boolean save = skillPackageService.save(entity);
+        skillPackageService.save(entity);
         // 保存技能与工具的关联
         if (vo.getTools() != null && !vo.getTools().isEmpty()) {
             skillToolService.saveSkillTool(entity.getId(), vo.getTools());
         }
-        // 尝试装载脚本到本地
-        SkillScriptLoadHelper.loadScripts(entity);
-        return R.data(save);
+        // 创建技能包目录并写入默认 SKILL.md（带 YAML 头）
+        SkillFileSystemService.buildSkillDir(entity.getName());
+        String initialContent = SkillFileSystemService.buildSkillMdContent(entity.getName(), entity.getDescription());
+        SkillFileSystemService.writeFile(entity.getName(), "SKILL.md", initialContent);
+        // 写入 SKILL.md 文件记录
+        SkillFile skillFile = new SkillFile();
+        skillFile.setSkillId(entity.getId());
+        skillFile.setFileType(SkillFileType.SKILL_MD);
+        skillFile.setFileName("SKILL.md");
+        skillFile.setFilePath("SKILL.md");
+        skillFile.setContent(initialContent);
+        skillFile.setSort(0);
+        skillFileService.save(skillFile);
+        return R.data(entity.getId());
     }
 
     /**
@@ -97,13 +112,6 @@ public class SkillPackageController {
         boolean b = skillPackageService.doUpdate(entity);
         // 更新技能与工具的关联
         skillToolService.saveSkillTool(entity.getId(), vo.getTools());
-        // 尝试装载脚本到本地
-        if (entity.getScripts() == null || entity.getScripts().isNull() || entity.getScripts().isEmpty()) {
-            SkillScriptLoadHelper.removeScripts(entity);
-        } else {
-            SkillScriptLoadHelper.loadScripts(entity);
-        }
-
         return R.data(b);
     }
 
@@ -117,6 +125,10 @@ public class SkillPackageController {
         for (SkillPackage skillPackage : skillPackages) {
             // 卸载技能包目录
             SkillInstaller.uninstall(skillPackage.getName());
+            // 删除文件系统目录
+            SkillFileSystemService.removeSkillDir(skillPackage.getName());
+            // 删除 DB 文件记录
+            skillFileService.deleteBySkillId(skillPackage.getId());
         }
         return R.data(skillPackageService.deleteByIds(ids));
     }

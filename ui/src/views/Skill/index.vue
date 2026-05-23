@@ -6,48 +6,30 @@
 <script setup lang="ts">
 /* eslint-disable vue/multi-word-component-names */
 import { onMounted, ref, computed, h, watch } from 'vue'
-import { Modal, Collapse } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
+import { Modal } from 'ant-design-vue'
 import {SearchOutlined, AppstoreOutlined} from '@ant-design/icons-vue'
 import { useSkillStore } from '@/stores'
 import { storeToRefs } from 'pinia'
 import * as skillApi from '@/api/skill'
-import type { SkillPackageVO } from '@/types'
 import SkillCard from '@/components/skill/SkillCard.vue'
 import CreateCard from '@/components/skill/CreateCard.vue'
-import SkillForm from '@/components/skill/SkillForm.vue'
 import ImportLocalForm from '@/components/skill/ImportLocalForm.vue'
 import ImportGitForm from '@/components/skill/ImportGitForm.vue'
 import ImportUploadForm from '@/components/skill/ImportUploadForm.vue'
 import {ApboaModalApi} from "@/components/common/ApboaModalApi.ts";
 import ApboaInfiniteLoading from '@/components/common/ApboaInfiniteLoading.vue'
 
-/**
- * 资源项接口
- */
-interface ResourceItem {
-  prefix: string
-  name: string
-  content: string
-}
-
 const store = useSkillStore()
+const router = useRouter()
 const { list, categories, selectedCategory, keyword, loading, hasMore } = storeToRefs(store)
-
-const formVisible = ref<boolean>(false)
-const currentData = ref<SkillPackageVO | undefined>(undefined)
 
 const importLocalVisible = ref(false)
 const importGitVisible = ref(false)
 const importUploadVisible = ref(false)
 
-/**
- * 用于强制重建 InfiniteLoading 组件的 key
- */
 const infiniteLoadingKey = ref(0)
 
-/**
- * 分类选项列表
- */
 const categoryOptions = computed(() => {
   const options = categories.value.map(cat => ({
     label: cat,
@@ -59,12 +41,12 @@ const categoryOptions = computed(() => {
   ]
 })
 
-/**
- * 处理新增
- */
 function handleCreate() {
-  currentData.value = undefined
-  formVisible.value = true
+  router.push({ name: 'SkillEditorNew' })
+}
+
+function handleEdit(id: string) {
+  router.push({ name: 'SkillEditor', params: { id } })
 }
 
 /**
@@ -89,51 +71,6 @@ function handleImportUpload() {
 }
 
 /**
- * 渲染折叠面板内容
- */
-function renderCollapseContent(items: ResourceItem[]) {
-  if (!items || items.length === 0) {
-    return h('div', { class: 'text-secondary' }, '暂无数据')
-  }
-
-  return h('div', { class: 'resource-list' },
-    items.map((item, index) =>
-      h('div', {
-        key: index,
-        class: 'resource-item',
-        style: {
-          marginBottom: '12px',
-          padding: '12px',
-          backgroundColor: '#f5f5f5',
-          borderRadius: '4px'
-        }
-      }, [
-        h('div', {
-          style: {
-            fontWeight: 'bold',
-            marginBottom: '8px',
-            color: '#333'
-          }
-        }, `${index + 1}. ${item.name || '未命名'}`),
-        h('pre', {
-          style: {
-            maxHeight: '200px',
-            overflowY: 'auto',
-            background: '#fff',
-            padding: '12px',
-            borderRadius: '4px',
-            overflow: 'auto',
-            margin: 0,
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word'
-          }
-        }, item.content || '')
-      ])
-    )
-  )
-}
-
-/**
  * 处理查看
  */
 async function handleView(id: string) {
@@ -150,59 +87,8 @@ async function handleView(id: string) {
       h('p', {}, [h('strong', '名称: '), data.name]),
       h('p', {}, [h('strong', '描述: '), data.description]),
       h('p', {}, [h('strong', '是否关联工具: '), data.tools?.length ? '是' : '否']),
-      h('div', { style: { marginTop: '16px' } }, [
-        h(Collapse, {
-          defaultActiveKey: []
-        }, {
-          default: () => [
-            h(Collapse.Panel, {
-              key: '1',
-              header: '技能内容'
-            }, {
-              default: () => h('pre', {
-                style: {
-                  background: '#f5f5f5',
-                  maxHeight: '300px',
-                  overflowY: 'auto',
-                  padding: '12px',
-                  borderRadius: '4px',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word'
-                }
-              }, data.skillContent || '')
-            }),
-            h(Collapse.Panel, {
-              key: '2',
-              header: `参考资料 (${(data.references || []).length} 项)`
-            }, {
-              default: () => renderCollapseContent((data.references as ResourceItem[]) || [])
-            }),
-            h(Collapse.Panel, {
-              key: '3',
-              header: `示例代码 (${(data.examples || []).length} 项)`
-            }, {
-              default: () => renderCollapseContent((data.examples as ResourceItem[]) || [])
-            }),
-            h(Collapse.Panel, {
-              key: '4',
-              header: `执行脚本 (${(data.scripts || []).length} 项)`
-            }, {
-              default: () => renderCollapseContent((data.scripts as ResourceItem[]) || [])
-            })
-          ]
-        })
-      ])
     ])
   })
-}
-
-/**
- * 处理编辑
- */
-async function handleEdit(id: string) {
-  const response = await skillApi.detail(id)
-  currentData.value = response.data.data
-  formVisible.value = true
 }
 
 /**
@@ -244,9 +130,9 @@ async function handleDelete(id: string) {
 }
 
 /**
- * 处理表单提交成功
+ * 处理设置分类（刷新分类列表和卡片数据）
  */
-async function handleFormSuccess() {
+async function handleSetCategory() {
   await store.fetchCategories()
   await store.resetAndFetch()
   isFirstLoad.value = true
@@ -413,8 +299,10 @@ onMounted(() => {
           v-for="item in list"
           :key="item.id"
           :data="item"
+          :categories="categories"
           @view="handleView"
           @edit="handleEdit"
+          @set-category="handleSetCategory"
           @enable="handleEnable"
           @delete="handleDelete"
         />
@@ -425,13 +313,6 @@ onMounted(() => {
         @infinite="handleInfiniteLoading"
       />
     </section>
-
-    <SkillForm
-      v-model:visible="formVisible"
-      :data="currentData"
-      :categories="categories"
-      @success="handleFormSuccess"
-    />
 
     <ImportLocalForm
       v-model:visible="importLocalVisible"

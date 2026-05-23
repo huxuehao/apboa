@@ -80,6 +80,26 @@ const bizRoutes: AppRouteRecordRaw[] = [
         },
       },
       {
+        path: RoutePaths.SKILL_NEW,
+        name: RouteNames.SKILL_EDITOR_NEW,
+        component: () => import('@/views/Skill/SkillEditorView.vue'),
+        meta: {
+          title: '新建技能包',
+          hidden: true,
+          hideFooter: true,
+        },
+      },
+      {
+        path: RoutePaths.SKILL_EDIT,
+        name: RouteNames.SKILL_EDITOR,
+        component: () => import('@/views/Skill/SkillEditorView.vue'),
+        meta: {
+          title: '编辑技能包',
+          hidden: true,
+          hideFooter: true,
+        },
+      },
+      {
         path: RoutePaths.MCP,
         name: RouteNames.MCP,
         component: () => import('@/views/Mcp/index.vue'),

@@ -4,14 +4,17 @@
  * @author huxuehao
  */
 <script setup lang="ts">
-import { computed } from 'vue'
-import { EllipsisOutlined, AppstoreOutlined } from '@ant-design/icons-vue'
+import { ref, computed, defineComponent } from 'vue'
+import { EllipsisOutlined, AppstoreOutlined, PlusOutlined } from '@ant-design/icons-vue'
+import { message } from 'ant-design-vue'
 import type { SkillPackageVO } from '@/types'
+import * as skillApi from '@/api/skill'
 import {
   createViewItem,
   createEditItem,
   createEnableItem,
   createDeleteItem,
+  createSetCategoryItem,
   createDivider,
 } from '@/composables/useCardMenuItems'
 
@@ -20,6 +23,7 @@ import {
  */
 const props = defineProps<{
   data: SkillPackageVO
+  categories: string[]
 }>()
 
 /**
@@ -30,6 +34,7 @@ const emit = defineEmits<{
   edit: [id: string]
   delete: [id: string]
   enable: [id: string]
+  setCategory: [id: string, category: string]
 }>()
 
 /**
@@ -53,10 +58,88 @@ const formattedTime = computed(() => {
 const menuItems = computed(() => [
   createViewItem(),
   createEditItem(),
+  createSetCategoryItem(),
   createEnableItem(props.data.enabled),
   createDivider(),
   createDeleteItem(),
 ])
+
+// 分类设置弹窗
+const categoryModalVisible = ref(false)
+const categoryValue = ref('')
+const categorySearchText = ref('')
+const categoryNewName = ref('')
+// 本地分类列表副本，支持运行时新增
+const localCategories = ref<string[]>([...props.categories])
+
+const filteredCategories = computed(() => {
+  if (!categorySearchText.value) {
+    return localCategories.value
+  }
+  const searchLower = categorySearchText.value.toLowerCase()
+  const filtered = localCategories.value.filter(cat =>
+    cat.toLowerCase().includes(searchLower)
+  )
+  if (!filtered.includes(categorySearchText.value)) {
+    filtered.unshift(categorySearchText.value)
+  }
+  return filtered
+})
+
+const VNodes = defineComponent({
+  props: {
+    vnodes: { type: Object, required: true },
+  },
+  render() {
+    return this.vnodes
+  },
+})
+
+function addCategory(e: Event) {
+  e.preventDefault()
+  if (!categoryNewName.value) return
+  if (!localCategories.value.includes(categoryNewName.value)) {
+    localCategories.value.push(categoryNewName.value)
+  }
+  categoryValue.value = categoryNewName.value
+  categoryNewName.value = ''
+}
+
+function openCategoryModal() {
+  categoryValue.value = props.data.category || ''
+  categorySearchText.value = ''
+  categoryNewName.value = ''
+  categoryModalVisible.value = true
+}
+
+async function handleCategoryConfirm() {
+  if (!categoryValue.value.trim()) {
+    message.warning('请选择或输入分类')
+    return
+  }
+  try {
+    const detailRes = await skillApi.detail(String(props.data.id))
+    const vo = detailRes.data.data as SkillPackageVO
+    if (vo) {
+      await skillApi.update({
+        id: String(vo.id),
+        name: vo.name,
+        description: vo.description,
+        category: categoryValue.value,
+        skillContent: '',
+        references: null,
+        examples: null,
+        scripts: null,
+        tools: vo.tools || [],
+      })
+      message.success('分类设置成功')
+      categoryModalVisible.value = false
+      emit('setCategory', String(props.data.id), categoryValue.value)
+    }
+  } catch {
+    message.error('设置分类失败')
+  }
+}
 
 /**
  * 处理菜单点击
@@ -68,6 +151,9 @@ function handleMenuClick({ key }: { key: string }) {
       break
     case 'edit':
       emit('edit', props.data.id as string)
+      break
+    case 'setCategory':
+      openCategoryModal()
       break
     case 'enable':
       emit('enable', props.data.id as string)
@@ -105,6 +191,44 @@ function handleMenuClick({ key }: { key: string }) {
       <div class="card-time text-placeholder text-xs">更新于 {{ formattedTime }}</div>
     </div>
   </div>
+
+  <!-- 分类设置弹窗 -->
+  <a-modal
+    v-model:open="categoryModalVisible"
+    title="设置分类"
+    :ok-text="'确定'"
+    :cancel-text="'取消'"
+    @ok="handleCategoryConfirm"
+    destroyOnClose
+  >
+    <a-form layout="vertical">
+      <a-form-item label="选择分类">
+        <a-select
+          v-model:value="categoryValue"
+          placeholder="选择或输入分类"
+          show-search
+          @search="categorySearchText = $event"
+        >
+          <a-select-option v-for="cat in filteredCategories" :key="cat" :value="cat">
+            {{ cat }}
+          </a-select-option>
+          <template #dropdownRender="{ menuNode: menu }">
+            <VNodes :vnodes="menu" />
+            <a-divider style="margin: 4px 0" />
+            <a-space style="padding: 4px 8px">
+              <a-input v-model:value="categoryNewName" style="width: 260px" placeholder="请输入新分类" />
+              <a-button type="text" @click="addCategory">
+                <template #icon>
+                  <PlusOutlined />
+                </template>
+                添加
+              </a-button>
+            </a-space>
+          </template>
+        </a-select>
+      </a-form-item>
+    </a-form>
+  </a-modal>
 </template>
 
 <style scoped lang="scss">

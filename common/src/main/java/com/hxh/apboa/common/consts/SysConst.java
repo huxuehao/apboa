@@ -2,6 +2,8 @@ package com.hxh.apboa.common.consts;
 
 import com.hxh.apboa.common.util.CryptoUtils;
 
+import java.util.List;
+
 /**
  * 描述：系统常量
  *
@@ -52,4 +54,18 @@ public class SysConst {
 
     // 工作空间钩子错误键
     public static final String WORKSPACE_HOOK_ERROR_KEY = "workspace_hook_error";
+
+    /**
+     * 技能文件允许创建的文件扩展名（白名单）
+     * params 表 key: allowed_skill_extensions
+     */
+    public static final String PARAM_KEY_ALLOWED_SKILL_EXTENSIONS = "allowed_skill_extensions";
+
+    /**
+     * 技能文件默认允许的扩展名
+     */
+    public static final List<String> DEFAULT_ALLOWED_SKILL_EXTENSIONS = List.of(
+            "md", "py", "sh", "js", "ts", "json", "yaml", "yml", "xml", "txt",
+            "java", "cs", "go", "rs", "rb", "php", "sql", "html", "css", "scss", "less", "cfg", "conf", "toml"
+    );
 }
