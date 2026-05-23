@@ -200,10 +200,10 @@ const formattedTemperature = computed(() => {
 
     <div class="card-footer flex items-center justify-between">
       <div class="card-tags flex items-center gap-xs">
-        <ATag :color="data.streaming ? 'blue' : 'default'" :bordered="false">
+        <ATag :bordered="false">
             {{ data.streaming ? '流式' : '非流式' }}
         </ATag>
-        <ATag :color="data.thinking ? 'purple' : 'default'" :bordered="false">
+        <ATag :bordered="false">
             {{ data.thinking ? '思考' : '非思考' }}
         </ATag>
       </div>
