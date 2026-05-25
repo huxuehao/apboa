@@ -41,7 +41,7 @@ SET @rownum = 0;
 -- ----------------------------
 INSERT INTO `skill_file` (`id`, `skill_id`, `file_type`, `file_name`, `file_path`, `content`, `sort`, `created_at`, `updated_at`, `created_by`, `updated_by`, `enabled`)
 SELECT
-    FLOOR(UNIX_TIMESTAMP(NOW(3)) * 1000 + RAND() * 10000 + (@rownum := @rownum + 1)) AS id,
+    FLOOR(UNIX_TIMESTAMP(NOW(3)) * 1000 + @rownum := @rownum + 1 + RAND() * 0) AS id,
     sp.id AS skill_id,
     'REFERENCES' AS file_type,
     JSON_UNQUOTE(JSON_EXTRACT(jt.item, '$.name')) AS file_name,
@@ -69,7 +69,7 @@ WHERE sp.`references` IS NOT NULL
 -- ----------------------------
 INSERT INTO `skill_file` (`id`, `skill_id`, `file_type`, `file_name`, `file_path`, `content`, `sort`, `created_at`, `updated_at`, `created_by`, `updated_by`, `enabled`)
 SELECT
-    FLOOR(UNIX_TIMESTAMP(NOW(3)) * 1000 + RAND() * 10000 + (@rownum := @rownum + 1)) AS id,
+    FLOOR(UNIX_TIMESTAMP(NOW(3)) * 1000 + @rownum := @rownum + 1 + RAND() * 0) AS id,
     sp.id AS skill_id,
     'EXAMPLES' AS file_type,
     JSON_UNQUOTE(JSON_EXTRACT(jt.item, '$.name')) AS file_name,
@@ -97,7 +97,7 @@ WHERE sp.`examples` IS NOT NULL
 -- ----------------------------
 INSERT INTO `skill_file` (`id`, `skill_id`, `file_type`, `file_name`, `file_path`, `content`, `sort`, `created_at`, `updated_at`, `created_by`, `updated_by`, `enabled`)
 SELECT
-    FLOOR(UNIX_TIMESTAMP(NOW(3)) * 1000 + RAND() * 10000 + (@rownum := @rownum + 1)) AS id,
+    FLOOR(UNIX_TIMESTAMP(NOW(3)) * 1000 + @rownum := @rownum + 1 + RAND() * 0) AS id,
     sp.id AS skill_id,
     'SCRIPTS' AS file_type,
     JSON_UNQUOTE(JSON_EXTRACT(jt.item, '$.name')) AS file_name,
@@ -125,7 +125,7 @@ WHERE sp.`scripts` IS NOT NULL
 -- ----------------------------
 INSERT INTO `skill_file` (`id`, `skill_id`, `file_type`, `file_name`, `file_path`, `content`, `sort`, `created_at`, `updated_at`, `created_by`, `updated_by`, `enabled`)
 SELECT
-    FLOOR(UNIX_TIMESTAMP(NOW(3)) * 1000 + RAND() * 10000 + (@rownum := @rownum + 1)) AS id,
+    FLOOR(UNIX_TIMESTAMP(NOW(3)) * 1000 + @rownum := @rownum + 1 + RAND() * 0) AS id,
     sp.id AS skill_id,
     'SKILL_MD' AS file_type,
     'SKILL.md' AS file_name,
