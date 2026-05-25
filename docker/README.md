@@ -205,6 +205,14 @@ VECTOR_STORE_TYPE=milvus
 # 使用 Qdrant
 VECTOR_STORE_TYPE=qdrant
 
+# 使用 Elasticsearch
+VECTOR_STORE_TYPE=elasticsearch
+ELASTICSEARCH_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:8.15.5
+ELASTICSEARCH_URIS=http://apboa-elasticsearch:9200
+
+# 启动 Docker 内置 Elasticsearch
+docker compose --profile elasticsearch up -d apboa-elasticsearch
+
 # 禁用向量库
 VECTOR_STORE_TYPE=
 ```
@@ -236,6 +244,7 @@ docker compose up -d frontend
 | MySQL | 3306 | 数据库 |
 | Redis | 6379 | 缓存 |
 | pgvector | 5432 | 向量库 |
+| Elasticsearch | 9200 | 可选向量库（`--profile elasticsearch`） |
 
 ## 故障排查
 

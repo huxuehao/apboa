@@ -415,7 +415,7 @@ graph TD
 
 ### 7.5 使用外置服务
 
-如果已有外部 MySQL / Redis / pgvector，修改 `.env` 中的 `*_HOST` 为外部地址，并注释 `docker-compose.yml` 中对应服务块。
+如果已有外部 MySQL / Redis / pgvector / Elasticsearch，修改 `.env` 中的 `*_HOST` 或 `ELASTICSEARCH_URIS` 为外部地址，并注释 `docker-compose.yml` 中对应服务块。
 
 ### 7.6 离线部署
 

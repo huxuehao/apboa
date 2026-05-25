@@ -71,6 +71,32 @@ services:
     networks:
       - apboa_network
 
+  # ==================== Elasticsearch（可选向量库） ====================
+  # 使用方式：VECTOR_STORE_TYPE=elasticsearch docker compose --profile elasticsearch up -d
+  apboa-elasticsearch:
+    image: ${ELASTICSEARCH_IMAGE:-docker.elastic.co/elasticsearch/elasticsearch:8.15.5}
+    container_name: apboa-elasticsearch
+    profiles:
+      - elasticsearch
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      TZ: Asia/Shanghai
+    ports:
+      - "${ELASTICSEARCH_PORT:-9200}:9200"
+    volumes:
+      - ${DATA_PATH:-./data}/elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - apboa_network
+
   # ==================== 后端服务 ====================
   apboa-backend:
     build:
@@ -119,6 +145,11 @@ services:
       MILVUS_DATABASE: ${MILVUS_DATABASE}
       QDRANT_HOST: ${QDRANT_HOST}
       QDRANT_PORT: ${QDRANT_PORT}
+      ELASTICSEARCH_URIS: ${ELASTICSEARCH_URIS}
+      ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD}
+      ELASTICSEARCH_API_KEY: ${ELASTICSEARCH_API_KEY}
+      ELASTICSEARCH_INDEX_PREFIX: ${ELASTICSEARCH_INDEX_PREFIX}
       JWT_SECRET: ${JWT_SECRET}
       BACKEND_JAVA_HEAP_PERCENTAGE: ${BACKEND_JAVA_HEAP_PERCENTAGE:-75.0}
       TZ: Asia/Shanghai
