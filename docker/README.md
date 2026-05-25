@@ -207,7 +207,7 @@ VECTOR_STORE_TYPE=qdrant
 
 # 使用 Elasticsearch
 VECTOR_STORE_TYPE=elasticsearch
-ELASTICSEARCH_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:8.15.5
+ELASTICSEARCH_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:8.15.0
 ELASTICSEARCH_URIS=http://apboa-elasticsearch:9200
 
 # 启动 Docker 内置 Elasticsearch

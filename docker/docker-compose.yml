@@ -74,7 +74,7 @@ services:
   # ==================== Elasticsearch（可选向量库） ====================
   # 使用方式：VECTOR_STORE_TYPE=elasticsearch docker compose --profile elasticsearch up -d
   apboa-elasticsearch:
-    image: ${ELASTICSEARCH_IMAGE:-docker.elastic.co/elasticsearch/elasticsearch:8.15.5}
+    image: ${ELASTICSEARCH_IMAGE:-docker.elastic.co/elasticsearch/elasticsearch:8.15.0}
     container_name: apboa-elasticsearch
     profiles:
       - elasticsearch
