@@ -13,6 +13,16 @@ import java.util.UUID;
  **/
 public class CryptoUtils {
 
+    public static String md5(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] digest = md.digest(input.getBytes(StandardCharsets.UTF_8));
+            return toHex(digest);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("MD5 algorithm not available", e);
+        }
+    }
+
     /**
      * 使用默认的加盐值进行MD5加密
      * @param input  原始密码

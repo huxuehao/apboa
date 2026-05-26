@@ -74,8 +74,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
 
         // 验证密码
         String salt = account.getId().toString();
-        String encryptedPassword = CryptoUtils.md5(request.getPassword(), salt);
-        if (!encryptedPassword.equals(account.getPassword())) {
+        if (!passwordMatches(request.getPassword(), salt, account.getPassword())) {
             throw new RuntimeException("用户名或密码错误");
         }
 
@@ -175,8 +174,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
 
         // 验证旧密码
         String salt = account.getId().toString();
-        String encryptedOldPassword = CryptoUtils.md5(request.getOldPassword(), salt);
-        if (!encryptedOldPassword.equals(account.getPassword())) {
+        if (!passwordMatches(request.getOldPassword(), salt, account.getPassword())) {
             throw new RuntimeException("旧密码错误");
         }
 
@@ -354,6 +352,38 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
                 .refreshTokenTTL(currentTime + refreshTokenTtl)
                 .userDetail(userDetail)
                 .build();
+    }
+
+    private boolean passwordMatches(String requestPassword, String salt, String storedPassword) {
+        if (FuncUtils.isEmpty(requestPassword) || FuncUtils.isEmpty(storedPassword)) {
+            return false;
+        }
+
+        if (CryptoUtils.md5(requestPassword, salt).equals(storedPassword)) {
+            return true;
+        }
+
+        String clientMd5Password = CryptoUtils.md5(requestPassword);
+        if (CryptoUtils.md5(clientMd5Password, salt).equals(storedPassword)) {
+            return true;
+        }
+
+        // Compatibility for older seed data that stored only the client-side MD5 value.
+        return clientMd5Password.equals(storedPassword)
+                || (isMd5Hex(requestPassword) && requestPassword.equals(storedPassword));
+    }
+
+    private boolean isMd5Hex(String value) {
+        if (value == null || value.length() != 32) {
+            return false;
+        }
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
