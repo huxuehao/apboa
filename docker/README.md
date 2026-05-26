@@ -47,6 +47,8 @@ cd docker
 docker compose up -d --build
 ```
 
+`docker/.env` 中的 `COMPOSE_PROFILES=${VECTOR_STORE_TYPE}` 会让 Docker Compose 只启用当前向量库对应的 profile。选择 `pgvector` 时只会拉取/启动 pgvector；选择 `elasticsearch` 时只会拉取/启动 Elasticsearch；选择 `milvus` 或 `qdrant` 时默认按外部服务连接，不会拉取或启动其他内置向量库。
+
 ### 3. 访问系统
 
 - 主应用：http://localhost/web/
@@ -197,24 +199,29 @@ docker compose down -v
 ```bash
 # 使用 pgvector（默认）
 VECTOR_STORE_TYPE=pgvector
-docker compose --profile pgvector up -d apboa-pgvector
+COMPOSE_PROFILES=pgvector
+docker compose up -d --build
 
 # 使用 Milvus
 VECTOR_STORE_TYPE=milvus
+COMPOSE_PROFILES=milvus
 
 # 使用 Qdrant
 VECTOR_STORE_TYPE=qdrant
+COMPOSE_PROFILES=qdrant
 
 # 使用 Elasticsearch
 VECTOR_STORE_TYPE=elasticsearch
+COMPOSE_PROFILES=elasticsearch
 ELASTICSEARCH_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:8.15.0
 ELASTICSEARCH_URIS=http://apboa-elasticsearch:9200
 
-# 启动 Docker 内置 Elasticsearch
-docker compose --profile elasticsearch up -d apboa-elasticsearch
+# 启动当前配置。不要同时传多个 --profile，避免拉取或启动其他向量库。
+docker compose up -d --build
 
 # 禁用向量库
 VECTOR_STORE_TYPE=
+COMPOSE_PROFILES=
 ```
 
 ## 自定义前端配置
@@ -244,7 +251,7 @@ docker compose up -d frontend
 | MySQL | 3306 | 数据库 |
 | Redis | 6379 | 缓存 |
 | pgvector | 5432 | 向量库 |
-| Elasticsearch | 9200 | 可选向量库（`--profile elasticsearch`） |
+| Elasticsearch | 9200 | 可选向量库（`COMPOSE_PROFILES=elasticsearch`） |
 
 ## 故障排查
 
