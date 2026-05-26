@@ -188,8 +188,7 @@ docker compose down -v
 ### 外置向量库
 
 1. 修改 `.env` 中 `VECTOR_STORE_TYPE` 及对应连接信息
-2. 注释掉 `pgvector` 服务块
-3. 删除 `backend.depends_on` 中的 `pgvector` 项
+2. 不启用对应向量库 profile 时，Docker Compose 不会启动内置向量库服务
 
 ### 切换向量库类型
 
@@ -198,6 +197,7 @@ docker compose down -v
 ```bash
 # 使用 pgvector（默认）
 VECTOR_STORE_TYPE=pgvector
+docker compose --profile pgvector up -d apboa-pgvector
 
 # 使用 Milvus
 VECTOR_STORE_TYPE=milvus
