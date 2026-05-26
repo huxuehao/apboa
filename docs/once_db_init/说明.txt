@@ -5,4 +5,4 @@
 1. 在 mysql 库中新建数据库 apboa
 2. 导入 db_init.sql 文件
 
-特别注意：apboa使用 postgresql 作为向量数据库，如果您无本地知识库需求。请确保将 yaml 中的 rag.store 置为空
+特别注意：apboa 默认使用 postgresql/pgvector 作为向量数据库，也支持将 rag.store 配置为 milvus、qdrant 或 elasticsearch。如果您无本地知识库需求，请确保将 yaml 中的 rag.store 置为空
