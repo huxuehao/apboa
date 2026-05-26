@@ -24,7 +24,7 @@ spring:
     redis:
       host: 127.0.0.1
       port: 6379
-      password: YOUR_PASSWORD
+      password:
       database: 7
       timeout: 2000ms
       lettuce:
@@ -55,7 +55,7 @@ jwt:
   secret: ${JWT_SECRET:ZJr8c2xF0y5b7yM+1H9v9cGZq6nZ5e0k5r3Cw7H8vJQ=}
 
 rag:
-  store:  # pgvector | milvus | qdrant，向量存储类型
+  store: weaviate # pgvector | milvus | qdrant | weaviate，向量存储类型
   pgvector:
     url: jdbc:postgresql://127.0.0.1:5432/apboa_vector
     username: postgres
@@ -73,6 +73,12 @@ rag:
     port: 6334
     api-key: YOUR_API_KEY
     collection-prefix: apboa_rag
+  weaviate:
+    host: localhost
+    port: 8080
+    scheme: http
+    api-key: YOUR_API_KEY
+    class-prefix: ApboaRag
 
 mybatis-plus:
   mapper-locations: classpath*:com/hxh/apboa/**/mapper/**/*.xml

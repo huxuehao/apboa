@@ -110,6 +110,12 @@
             <artifactId>milvus-sdk-java</artifactId>
             <version>2.6.8</version>
         </dependency>
+        <!--weaviate-->
+        <dependency>
+            <groupId>io.weaviate</groupId>
+            <artifactId>client</artifactId>
+            <version>5.3.0</version>
+        </dependency>
 
         <!-- JGit -->
         <dependency>

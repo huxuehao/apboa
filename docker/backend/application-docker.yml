@@ -68,6 +68,12 @@ rag:
     port: ${QDRANT_PORT:6334}
     api-key:
     collection-prefix: apboa_rag
+  weaviate:
+    host: ${WEAVIATE_HOST:weaviate}
+    port: ${WEAVIATE_PORT:8080}
+    scheme: ${WEAVIATE_SCHEME:http}
+    api-key: ${WEAVIATE_API_KEY:}
+    class-prefix: ${WEAVIATE_CLASS_PREFIX:ApboaRag}
 
 mybatis-plus:
   mapper-locations: classpath*:com/hxh/apboa/**/mapper/**/*.xml
