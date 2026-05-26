@@ -23,6 +23,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   success: []
+  goVisit: [id: string]
 }>()
 
 const currentStep = ref(0)
@@ -184,6 +185,15 @@ async function handleStepChange(step: number) {
 }
 
 /**
+ * 去对话
+ */
+function handleGoVisit() {
+  if (props.agentData?.id) {
+    emit('goVisit', String(props.agentData.id))
+  }
+}
+
+/**
  * 提交表单
  */
 async function handleSubmit() {
@@ -294,7 +304,10 @@ defineExpose({ isDirty })
         <AButton :disabled="currentStep <= 0" @click="handlePrevious">上一步</AButton>
         <AButton :disabled="currentStep >= steps.length - 1" type="primary" @click="handleNext">下一步</AButton>
       </ASpace>
-      <AButton type="primary" :loading="loading" @click="handleSubmit">保存</AButton>
+      <ASpace>
+        <AButton v-if="agentData?.id" @click="handleGoVisit">去对话</AButton>
+        <AButton type="primary" :loading="loading" @click="handleSubmit">保存</AButton>
+      </ASpace>
     </div>
   </div>
 </template>

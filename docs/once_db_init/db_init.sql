@@ -503,6 +503,9 @@ CREATE TABLE `model_config`  (
 `repeat_penalty` decimal(3, 2) NULL DEFAULT 1.10 COMMENT '重复惩罚',
 `seed` bigint NULL DEFAULT 42 COMMENT '随机种子',
 `extend_config` text NULL COMMENT '扩展配置',
+`connectivity_status` enum('NOT_CHECKED','CHECKING','CONNECTED','FAILED') NOT NULL DEFAULT 'NOT_CHECKED' COMMENT '连接性检测状态',
+`connectivity_message` varchar(500) NULL DEFAULT NULL COMMENT '连接性检测消息',
+`last_connectivity_check` datetime NULL DEFAULT NULL COMMENT '最后连接性检测时间',
 `enabled` tinyint(1) NOT NULL DEFAULT 1 COMMENT '是否可用',
 `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -553,6 +556,15 @@ PRIMARY KEY (`id`) USING BTREE,
 INDEX `idx_param_key`(`param_key` ASC) USING BTREE,
 INDEX `idx_param_name`(`param_name` ASC) USING BTREE
 ) COMMENT = '参数表';
+
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (1, '访问Token有效期（单位 ms）', 'ACCESS_TOKEN_TTL', '21600000');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (2, '刷新Token有效期（单位 ms）', 'REFRESH_TOKEN_TTL', '64800000');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (3, '单个文件大小限制（单位 MB）', 'SINGLE_FILE_MAX_SIZE', '5');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (4, '支持的图片文件类型', 'ALLOW_IMAGE_FILE_TYPE', 'png,jpeg,png,gif,webp');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (5, '支持的音频文件类型', 'ALLOW_AUDIO_FILE_TYPE', 'mp3,wav,mpeg');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (6, '支持的视频文件类型', 'ALLOW_VIDEO_FILE_TYPE', 'mp4,mpeg');
+INSERT INTO `params` (`id`, `param_name`, `param_key`, `param_value`) VALUES (7, '技能包文件允许入库的扩展名', 'SKILL_FILE_ALLOWED_EXTENSIONS', 'md,py,sh,js,ts,json,yaml,yml,xml,txt,java,cs,go,rs,rb,php,sql,html,css,scss,less,cfg,conf,toml');
+
 
 -- ----------------------------
 -- Table structure for quartz_job_info
@@ -679,11 +691,7 @@ CREATE TABLE `skill_package`  (
 `id` bigint NOT NULL,
 `name` varchar(500) NOT NULL COMMENT '技能包名称',
 `description` text NOT NULL COMMENT '技能描述',
-`skill_content` text NULL COMMENT '技能内容（概述）',
 `category` varchar(100) NULL DEFAULT NULL COMMENT '技能分类',
-`references` longtext NULL COMMENT '资源列表: [{\"name\": \"api_docs.md\", \"content\": \"...\"}]',
-`examples` longtext NULL COMMENT '示例列表',
-`scripts` longtext NULL COMMENT '脚本列表',
 `enabled` tinyint(1) NOT NULL DEFAULT 1 COMMENT '是否可用',
 `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -695,7 +703,34 @@ INDEX `idx_skill_enabled`(`enabled` ASC) USING BTREE,
 INDEX `idx_skill_category`(`category` ASC) USING BTREE
 ) COMMENT = '技能包表';
 
-INSERT INTO `skill_package` (`id`, `name`, `description`, `skill_content`, `category`, `references`, `examples`, `scripts`, `enabled`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES (2038859803983978498, 'doGetCurrentTime', '通过技能你可以获取当前时间', '执行下面的命令获取当前时间\npython skills/doGetCurrentTime/scripts/getCurrentTime.py', '通用', NULL, NULL, '[{\"prefix\":\"scripts\",\"name\":\"getCurrentTime.py\",\"content\":\"from datetime import datetime\\n\\nnow = datetime.now()\\nweekdays = [\'Monday\', \'Tuesday\', \'Wednesday\', \'Thursday\', \'Friday\', \'Saturday\', \'Sunday\']\\n\\nprint(f\\\"Current time: {now.strftime(\'%Y-%m-%d %H:%M:%S\')}\\\")\\nprint(f\\\"Day: {weekdays[now.weekday()]}\\\")\"}]', 1, '2026-03-31 14:03:52', '2026-05-03 13:28:36', 1111111111111111111, 1111111111111111111);
+INSERT INTO `skill_package` (`id`, `name`, `description`, `category`, `enabled`, `created_at`, `updated_at`, `created_by`, `updated_by`) VALUES (2038859803983978498, 'doGetCurrentTime', '通过技能你可以获取当前时间', '通用', 1, '2026-03-31 14:03:52', '2026-05-03 13:28:36', 1111111111111111111, 1111111111111111111);
+
+-- ----------------------------
+-- Table structure for skill_file
+-- ----------------------------
+DROP TABLE IF EXISTS `skill_file`;
+CREATE TABLE `skill_file`  (
+`id` bigint NOT NULL,
+`skill_id` bigint NOT NULL COMMENT '技能包ID',
+`file_type` enum('SKILL_MD','REFERENCES','EXAMPLES','SCRIPTS') NOT NULL COMMENT '文件类型',
+`file_name` varchar(255) NOT NULL COMMENT '文件名',
+`file_path` varchar(1000) NOT NULL COMMENT '相对路径（相对于技能包根目录）',
+`content` longtext NULL COMMENT '文件内容',
+`sort` int NOT NULL DEFAULT 0 COMMENT '排序',
+`created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+`updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+`created_by` bigint DEFAULT NULL,
+`updated_by` bigint DEFAULT NULL,
+`enabled` tinyint(1) DEFAULT '1' COMMENT '是否可用',
+PRIMARY KEY (`id`) USING BTREE,
+INDEX `idx_skill_file_skill`(`skill_id` ASC) USING BTREE,
+INDEX `idx_skill_file_type`(`file_type` ASC) USING BTREE,
+INDEX `idx_skill_file_path`(`skill_id` ASC, `file_path`(255) ASC) USING BTREE
+) COMMENT = '技能包文件表';
+
+INSERT INTO `skill_file` (`id`, `skill_id`, `file_type`, `file_name`, `file_path`, `content`, `sort`, `created_at`, `updated_at`) VALUES (2038859803983978499, 2038859803983978498, 'SKILL_MD', 'SKILL.md', 'SKILL.md', '---\nname: doGetCurrentTime\ndescription: 通过技能你可以获取当前时间\n---\n\n执行下面的命令获取当前时间\npython skills/doGetCurrentTime/scripts/getCurrentTime.py', 0, '2026-03-31 14:03:52', '2026-05-03 13:28:36');
+
+INSERT INTO `skill_file` (`id`, `skill_id`, `file_type`, `file_name`, `file_path`, `content`, `sort`, `created_at`, `updated_at`) VALUES (2038859803983978500, 2038859803983978498, 'SCRIPTS', 'getCurrentTime.py', 'scripts/getCurrentTime.py', 'from datetime import datetime\n\nnow = datetime.now()\nweekdays = [''Monday'', ''Tuesday'', ''Wednesday'', ''Thursday'', ''Friday'', ''Saturday'', ''Sunday'']\n\nprint(f"Current time: {now.strftime(''%Y-%m-%d %H:%M:%S'')}")\nprint(f"Day: {weekdays[now.weekday()]}")', 0, '2026-03-31 14:03:52', '2026-05-03 13:28:36');
 
 
 -- ----------------------------

@@ -104,4 +104,19 @@ public class ChatModelFactory {
 
         return IChatModel.getModel(configWrapper);
     }
+
+    /**
+     * 获取简单的模型
+     *
+     * @param configWrapper 模型配置
+     * @return 模型
+     */
+    public Model getSimpleModel(ModelConfigWrapper configWrapper) {
+        IChatModel IChatModel = MODEL_MAP.get(configWrapper.getProvider());
+        if (IChatModel == null) {
+            throw new RuntimeException("No chat model found for provider " + configWrapper.getProvider());
+        }
+
+        return IChatModel.getSimpleModel(configWrapper);
+    }
 }

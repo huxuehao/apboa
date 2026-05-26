@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { LoadingOutlined, BulbOutlined } from '@ant-design/icons-vue'
+import { LoadingOutlined, BulbOutlined, CopyOutlined, CheckOutlined } from '@ant-design/icons-vue'
 import MediaPreview from '@/components/common/MediaPreview.vue'
 import type { UploadedFileItem } from '@/types'
 import MediaIcon from '@/components/common/MediaIcon.vue'
@@ -104,6 +104,54 @@ const reasoningExpanded = ref(false)
 // 是否有推理内容
 const hasReasoning = computed(() => !!props.reasoningContent)
 
+// 复制成功状态（2秒内）
+const copied = ref(false)
+
+/**
+ * 待复制的文本内容
+ * 用户消息：文件名列表 + 文本；AI消息：仅正文（不包含推理过程）
+ */
+const copyText = computed(() => {
+  if (isUser.value) {
+    const { files, text } = parsedUserContent.value
+    if (files.length === 0) return text
+    const fileNames = files.map(f => f.name).join('\n')
+    return text ? `${fileNames}\n${text}` : fileNames
+  }
+  return props.content
+})
+
+/**
+ * 复制消息内容到剪贴板
+ * 使用 Clipboard API，失败时降级到 execCommand
+ */
+async function handleCopy() {
+  if (copied.value || !copyText.value) return
+  const text = copyText.value
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text)
+    } else {
+      throw new Error('clipboard unavailable')
+    }
+  } catch {
+    const textarea = document.createElement('textarea')
+    textarea.value = text
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+    document.body.appendChild(textarea)
+    textarea.select()
+    try {
+      document.execCommand('copy')
+    } catch {
+      // 复制失败静默处理
+    }
+    document.body.removeChild(textarea)
+  }
+  copied.value = true
+  setTimeout(() => { copied.value = false }, 2000)
+}
+
 // 推理进行中时自动展开面板
 watch(
   () => props.reasoningStreaming,
@@ -146,6 +194,16 @@ const openPreview = (index: number) => {
             @inputTagPreview="$emit('inputTagPreview', $event)"
             :content="parsedUserContent.text" />
         </span>
+        <!-- 复制按钮：悬浮显现于气泡左侧 -->
+        <span
+          class="msg-copy-btn msg-copy-btn--user"
+          :class="{ 'is-done': copied }"
+          :title="copied ? '已复制' : '复制'"
+          @click="handleCopy"
+        >
+          <CheckOutlined v-if="copied" />
+          <CopyOutlined v-else />
+        </span>
       </div>
     </template>
     <template v-else-if="isAssistant">
@@ -172,6 +230,17 @@ const openPreview = (index: number) => {
         <div v-if="content" class="chat-md-content">
           <MarkdownRenderer :content="content" />
         </div>
+        <!-- 复制按钮：悬浮显现于正文下方 -->
+        <span
+          v-if="content"
+          class="msg-copy-btn msg-copy-btn--assistant"
+          :class="{ 'is-done': copied }"
+          :title="copied ? '已复制' : '复制'"
+          @click="handleCopy"
+        >
+          <CheckOutlined v-if="copied" />
+          <CopyOutlined v-else />
+        </span>
       </div>
     </template>
     <template v-else-if="isTool">
@@ -242,5 +311,54 @@ const openPreview = (index: number) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/**
+ * 复制按钮：悬浮显现 + 图标状态反馈
+ * 常态隐藏，鼠标悬停消息气泡时渐显，点击后图标切换为对勾并保持2秒
+ */
+.msg-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--border-radius-sm);
+  font-size: 13px;
+  color: #a0a4ab;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, color 0.15s ease, background-color 0.15s ease;
+
+  &:hover {
+    color: #4a4f57;
+  }
+
+  &.is-done {
+    color: #52c41a;
+    opacity: 1;
+  }
+}
+
+.msg-copy-btn--user {
+  position: absolute;
+  right: 0;
+  bottom: -25px;
+}
+
+.msg-copy-btn--assistant {
+  position: absolute;
+  left: 10px;
+  bottom: -20px;
+}
+
+/* 确保气泡作为绝对定位参照 */
+.chat-message-assistant .chat-message-bubble {
+  position: relative;
+}
+
+/* 悬停消息气泡时显示复制按钮 */
+.chat-message-bubble:hover .msg-copy-btn {
+  opacity: 1;
 }
 </style>

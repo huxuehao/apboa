@@ -89,11 +89,7 @@ public class SkillPackageServiceImpl extends ServiceImpl<SkillPackageMapper, Ski
         vo.setId(entity.getId());
         vo.setName(entity.getName());
         vo.setDescription(entity.getDescription());
-        vo.setSkillContent(entity.getSkillContent());
         vo.setCategory(entity.getCategory());
-        vo.setReferences(entity.getReferences());
-        vo.setExamples(entity.getExamples());
-        vo.setScripts(entity.getScripts());
         vo.setEnabled(entity.getEnabled());
         vo.setCreatedAt(entity.getCreatedAt());
         vo.setUpdatedAt(entity.getUpdatedAt());
@@ -106,7 +102,7 @@ public class SkillPackageServiceImpl extends ServiceImpl<SkillPackageMapper, Ski
 
     private void publishAgentReregister(List<Long> agentIds) {
         agentIds.forEach(agentId ->
-                messagePublisher.publish(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(agentId)));
+                messagePublisher.publishAfterCommit(RedisChannelTopic.AGENT_REREGISTER_CHANNEL, String.valueOf(agentId)));
     }
 
     private List<AgentDefinition> getAgentDefinitions(List<Long> agentIds) {

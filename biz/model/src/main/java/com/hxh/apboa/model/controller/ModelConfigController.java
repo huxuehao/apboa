@@ -55,8 +55,9 @@ public class ModelConfigController {
      */
     @PostMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
-    public R<Boolean> save(@RequestBody ModelConfig entity) {
-        return R.data(modelConfigService.save(entity));
+    public R<Long> save(@RequestBody ModelConfig entity) {
+        modelConfigService.save(entity);
+        return R.data(entity.getId());
     }
 
     /**
@@ -64,8 +65,9 @@ public class ModelConfigController {
      */
     @PutMapping
     @RoleNeed({Role.ADMIN, Role.EDIT})
-    public R<Boolean> update(@RequestBody ModelConfig entity) {
-        return R.data(modelConfigService.doUpdate(entity));
+    public R<Long> update(@RequestBody ModelConfig entity) {
+        modelConfigService.doUpdate(entity);
+        return R.data(entity.getId());
     }
 
     /**

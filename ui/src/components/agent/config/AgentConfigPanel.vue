@@ -34,6 +34,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:visible': [value: boolean]
   success: []
+  goVisit: [id: string]
 }>()
 
 /**
@@ -131,6 +132,13 @@ function handleSuccess() {
 }
 
 /**
+ * 去对话
+ */
+function handleGoVisit(id: string) {
+  emit('goVisit', id)
+}
+
+/**
  * 智能体ID
  */
 const agentId = computed(() => props.agentData?.id ? String(props.agentData.id) : '')
@@ -175,6 +183,7 @@ const agentCode = computed(() => props.agentData?.agentCode || '')
           :agent-data="agentData"
           :tags="tags"
           @success="handleSuccess"
+          @go-visit="handleGoVisit"
         />
 
         <!-- A2A智能体配置 -->

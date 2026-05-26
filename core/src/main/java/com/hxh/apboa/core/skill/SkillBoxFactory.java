@@ -5,18 +5,16 @@ import com.hxh.apboa.agent.service.CodeExecutionConfigService;
 import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.CodeExecutionConfig;
+import com.hxh.apboa.common.entity.SkillFile;
 import com.hxh.apboa.common.entity.SkillPackage;
-import com.hxh.apboa.common.key.SkillExampleKey;
-import com.hxh.apboa.common.key.SkillReferencesKey;
-import com.hxh.apboa.common.key.SkillScriptKey;
+import com.hxh.apboa.common.enums.SkillFileType;
 import com.hxh.apboa.core.agui.AgentContext;
-import com.hxh.apboa.core.tool.ToolkitFactory;
 import com.hxh.apboa.core.workspace.skills.SearchReplaceSkill;
 import com.hxh.apboa.core.workspace.skills.WorkspaceSkill;
 import com.hxh.apboa.skill.service.AgentSkillPackageService;
+import com.hxh.apboa.skill.service.SkillFileService;
 import com.hxh.apboa.skill.service.SkillPackageService;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.hxh.apboa.skill.service.SkillToolService;
 import io.agentscope.core.skill.AgentSkill;
 import io.agentscope.core.skill.SkillBox;
 import io.agentscope.core.tool.Toolkit;
@@ -36,9 +34,8 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class SkillBoxFactory {
-    private final ToolkitFactory toolkitFactory;
-    private final SkillToolService skillToolService;
     private final SkillPackageService skillPackageService;
+    private final SkillFileService skillFileService;
     private final AgentSkillPackageService agentSkillPackageService;
     private final AgentCodeExecutionService agentCodeExecutionService;
     private final CodeExecutionConfigService codeExecutionConfigService;
@@ -84,49 +81,27 @@ public class SkillBoxFactory {
      * @param skillPackage 技能包
      */
     private void registerSkill(SkillBox skillBox, SkillPackage skillPackage) {
+        // 查询技能包的所有入库文件
+        List<SkillFile> files = skillFileService.listBySkillId(skillPackage.getId());
+
+        // 查找 SKILL.md 文件
+        String skillContent = files.stream()
+                .filter(f -> f.getFileType() == SkillFileType.SKILL_MD)
+                .map(SkillFile::getContent)
+                .findFirst()
+                .orElse("");
+
         AgentSkill.Builder skillBuilder = AgentSkill.builder()
                 .name(skillPackage.getName())
                 .description(skillPackage.getDescription())
-                .skillContent(skillPackage.getSkillContent());
+                .skillContent(skillContent);
 
-        // 添加资源引用
-        addResources(skillBuilder, skillPackage.getReferences(), SkillReferencesKey.prefix,
-                SkillReferencesKey.name, SkillReferencesKey.content);
+        // 添加所有资源引用（references/examples/scripts 类型的文件）
+        files.stream()
+                .filter(f -> f.getFileType() != SkillFileType.SKILL_MD)
+                .forEach(f -> skillBuilder.addResource(f.getFilePath(), f.getContent()));
 
-        // 添加示例
-        addResources(skillBuilder, skillPackage.getExamples(), SkillExampleKey.prefix,
-                SkillExampleKey.name, SkillExampleKey.content);
-
-        // 添加脚本
-        addResources(skillBuilder, skillPackage.getScripts(), SkillScriptKey.prefix,
-                SkillScriptKey.name, SkillScriptKey.content);
-
-        // 获取关联的工具
-        Toolkit toolkit = toolkitFactory.getToolkit(skillToolService.getToolIds(skillPackage.getId()));
-
-        skillBox.registration().skill(skillBuilder.build()).tool(toolkit).apply();
-    }
-
-    /**
-     * 添加资源到技能构建器
-     *
-     * @param skillBuilder 技能构建器
-     * @param resources 资源JSON节点
-     * @param prefixKey 前缀键
-     * @param nameKey 名称键
-     * @param contentKey 内容键
-     */
-    private void addResources(AgentSkill.Builder skillBuilder, JsonNode resources,
-                              String prefixKey, String nameKey, String contentKey) {
-        if (resources == null || resources.isEmpty()) {
-            return;
-        }
-        resources.forEach(resource -> {
-            String prefix = resource.get(prefixKey).asText();
-            String name = resource.get(nameKey).asText();
-            String content = resource.get(contentKey).asText();
-            skillBuilder.addResource(String.format("%s/%s", prefix, name), content);
-        });
+        skillBox.registration().skill(skillBuilder.build()).apply();
     }
 
     /**

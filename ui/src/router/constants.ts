@@ -41,6 +41,8 @@ export const RouteNames = {
 
   // 技能包管理
   SKILL: 'Skill',
+  SKILL_EDITOR: 'SkillEditor',
+  SKILL_EDITOR_NEW: 'SkillEditorNew',
 
   // MCP管理
   MCP: 'Mcp',
@@ -101,6 +103,8 @@ export const RoutePaths = {
 
   // 技能包管理
   SKILL: 'skill',
+  SKILL_NEW: 'skill/new',
+  SKILL_EDIT: 'skill/:id/edit',
 
   // MCP管理
   MCP: 'mcp',

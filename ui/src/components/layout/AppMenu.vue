@@ -69,7 +69,7 @@ const menuItems = computed(() => {
 const selectedValue = computed({
   get: () => route.path.split('/')[1],
   set: (value: string) => {
-    router.push(value)
+    router.push('/' + value)
   },
 })
 </script>

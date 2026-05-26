@@ -2,13 +2,15 @@ package com.hxh.apboa.skill.imports;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hxh.apboa.common.consts.SysConst;
+import com.hxh.apboa.common.entity.SkillFile;
 import com.hxh.apboa.common.entity.SkillPackage;
 import com.hxh.apboa.common.util.FolderUtils;
 import com.hxh.apboa.common.vo.SkillImportResult;
-import com.hxh.apboa.skill.SkillScriptLoadHelper;
+import com.hxh.apboa.skill.SkillFileSystemService;
 import com.hxh.apboa.skill.imports.config.GitImportConfig;
 import com.hxh.apboa.skill.imports.config.LocalImportConfig;
 import com.hxh.apboa.skill.imports.config.UploadImportConfig;
+import com.hxh.apboa.skill.service.SkillFileService;
 import com.hxh.apboa.skill.service.SkillPackageService;
 import io.agentscope.core.skill.AgentSkill;
 import io.agentscope.core.skill.repository.AgentSkillRepository;
@@ -35,6 +37,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SkillImportService {
     private final SkillPackageService skillPackageService;
+    private final SkillFileService skillFileService;
 
     /**
      * 从 Git 导入
@@ -131,22 +134,36 @@ public class SkillImportService {
             }
 
             AgentSkill agentSkill = repo.getSkill(skillName);
-            SkillPackage skillPackage = SkillPackageBuilder.build(agentSkill, category);
+            SkillPackageBuilder.BuildResult buildResult = SkillPackageBuilder.build(agentSkill, category);
+            SkillPackage skillPackage = buildResult.getSkillPackage();
+            List<SkillFile> skillFiles = buildResult.getSkillFiles();
 
             SkillPackage oldSkillPackage = skillPackageService.getOne(
                     new LambdaQueryWrapper<SkillPackage>()
                             .eq(SkillPackage::getName, skillName),
                     false);
 
+            Long skillId;
             if (oldSkillPackage == null) {
                 skillPackageService.save(skillPackage);
+                skillId = skillPackage.getId();
             } else {
                 skillPackage.setId(oldSkillPackage.getId());
                 skillPackage.setEnabled(oldSkillPackage.getEnabled() != null ? oldSkillPackage.getEnabled() : Boolean.TRUE);
                 skillPackageService.updateById(skillPackage);
+                skillId = oldSkillPackage.getId();
+                // 删除旧的文件记录
+                skillFileService.deleteBySkillId(skillId);
             }
 
-            SkillScriptLoadHelper.loadScripts(skillPackage);
+            // 保存技能文件到 DB 并同步到文件系统
+            for (SkillFile sf : skillFiles) {
+                sf.setSkillId(skillId);
+                skillFileService.save(sf);
+                // 同步到文件系统
+                SkillFileSystemService.writeFile(skillPackage.getName(), sf.getFilePath(), sf.getContent());
+            }
+
             importedCount++;
         }
 
