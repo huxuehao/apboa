@@ -110,6 +110,11 @@
             <artifactId>milvus-sdk-java</artifactId>
             <version>2.6.8</version>
         </dependency>
+        <!-- elasticsearch -->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-client</artifactId>
+        </dependency>
         <!--weaviate-->
         <dependency>
             <groupId>io.weaviate</groupId>

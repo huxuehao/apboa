@@ -47,6 +47,8 @@ cd docker
 docker compose up -d --build
 ```
 
+`VECTOR_STORE_TYPE` 控制后端加载哪种向量库组件，`COMPOSE_PROFILES` 只控制 Docker Compose 是否启动内置向量库容器。使用外部向量库时将 `COMPOSE_PROFILES` 设为 `external`，Compose 不会拉取或启动任何内置向量库；需要本地内置 pgvector 或 Elasticsearch 时，才分别设置为 `pgvector` 或 `elasticsearch`。
+
 ### 3. 访问系统
 
 - 主应用：http://localhost/web/
@@ -188,25 +190,48 @@ docker compose down -v
 ### 外置向量库
 
 1. 修改 `.env` 中 `VECTOR_STORE_TYPE` 及对应连接信息
-2. 注释掉 `pgvector` 服务块
-3. 删除 `backend.depends_on` 中的 `pgvector` 项
+2. 不启用对应向量库 profile 时，Docker Compose 不会启动内置向量库服务
 
 ### 切换向量库类型
 
 修改 `.env` 中的 `VECTOR_STORE_TYPE`：
 
 ```bash
-# 使用 pgvector（默认）
+# 使用内置 pgvector（默认）
 VECTOR_STORE_TYPE=pgvector
+COMPOSE_PROFILES=pgvector
+docker compose up -d --build
 
-# 使用 Milvus
+# 使用外部 pgvector
+VECTOR_STORE_TYPE=pgvector
+COMPOSE_PROFILES=external
+PG_HOST=your-pgvector-host
+
+# 使用外部 Milvus
 VECTOR_STORE_TYPE=milvus
+COMPOSE_PROFILES=external
 
-# 使用 Qdrant
+# 使用外部 Qdrant
 VECTOR_STORE_TYPE=qdrant
+COMPOSE_PROFILES=external
+
+# 使用外部 Elasticsearch
+VECTOR_STORE_TYPE=elasticsearch
+COMPOSE_PROFILES=external
+ELASTICSEARCH_URIS=http://your-elasticsearch:9200
+
+# 使用内置 Elasticsearch
+VECTOR_STORE_TYPE=elasticsearch
+COMPOSE_PROFILES=elasticsearch
+ELASTICSEARCH_IMAGE=docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+ELASTICSEARCH_URIS=http://apboa-elasticsearch:9200
+
+# 启动当前配置。不要同时传多个 --profile，避免拉取或启动其他向量库。
+docker compose up -d --build
 
 # 禁用向量库
 VECTOR_STORE_TYPE=
+COMPOSE_PROFILES=external
 ```
 
 ## 自定义前端配置
@@ -236,6 +261,7 @@ docker compose up -d frontend
 | MySQL | 3306 | 数据库 |
 | Redis | 6379 | 缓存 |
 | pgvector | 5432 | 向量库 |
+| Elasticsearch | 9200 | 可选向量库（`COMPOSE_PROFILES=elasticsearch`） |
 
 ## 故障排查
 

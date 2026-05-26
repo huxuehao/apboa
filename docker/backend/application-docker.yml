@@ -68,6 +68,14 @@ rag:
     port: ${QDRANT_PORT:6334}
     api-key:
     collection-prefix: apboa_rag
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:http://apboa-elasticsearch:9200}
+    username: ${ELASTICSEARCH_USERNAME:}
+    password: ${ELASTICSEARCH_PASSWORD:}
+    api-key: ${ELASTICSEARCH_API_KEY:}
+    index-prefix: ${ELASTICSEARCH_INDEX_PREFIX:apboa_rag}
+    connect-timeout: ${ELASTICSEARCH_CONNECT_TIMEOUT:5000}
+    socket-timeout: ${ELASTICSEARCH_SOCKET_TIMEOUT:60000}
   weaviate:
     host: ${WEAVIATE_HOST:weaviate}
     port: ${WEAVIATE_PORT:8080}
