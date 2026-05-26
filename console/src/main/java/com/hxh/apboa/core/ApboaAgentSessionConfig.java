@@ -11,13 +11,17 @@ import io.agentscope.spring.boot.agui.mvc.AguiMvcController;
 import io.agentscope.spring.boot.agui.webflux.AguiWebFluxHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * 配置 MysqlSession 替代 InMemorySession，实现状态持久化
@@ -28,9 +32,6 @@ import javax.sql.DataSource;
 @Configuration
 @ConditionalOnClass({DataSource.class, MysqlSession.class})
 public class ApboaAgentSessionConfig {
-
-    private static final String DATABASE_NAME = "apboa";
-
     /**
      * 创建 MysqlSession Bean
      *
@@ -39,8 +40,12 @@ public class ApboaAgentSessionConfig {
      */
     @Bean
     @Primary
-    public Session agentSession(DataSource dataSource) {
-        return new MysqlSession(dataSource, DATABASE_NAME, TableConst.AGENT_SCOPE_SESSIONS, true);
+    public Session agentSession(DataSource dataSource) throws SQLException {
+        String databaseName = null;
+        try (Connection conn = dataSource.getConnection()) {
+            databaseName = conn.getCatalog();
+        }
+        return new MysqlSession(dataSource, databaseName, TableConst.AGENT_SCOPE_SESSIONS, true);
     }
 
     /**
