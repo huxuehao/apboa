@@ -79,30 +79,43 @@ const props = defineProps({
 })
 
 const iconConfigs = [
-  { ext: 'xls', color: '#289B4F' },
-  { ext: 'xlsx', color: '#289B4F' },
-  { ext: 'md', color: '#2A8BB5' },
-  { ext: 'doc', color: '#3A7FD9' },
-  { ext: 'docx', color: '#3A7FD9' },
-  { ext: 'ppt', color: '#E5552A' },
-  { ext: 'pptx', color: '#E5552A' },
-  { ext: 'txt', color: '#6B6B6B' },
-  { ext: 'js', color: '#E68A2E' },
-  { ext: 'ts', color: '#3178C6' },
-  { ext: 'py', color: '#3A91C2' },
-  { ext: 'sh', color: '#E54C59' },
-  { ext: 'yaml', color: '#F5A623' },
-  { ext: 'yml', color: '#F5A623' },
-  { ext: 'json', color: '#5B8FF9' },
-  { ext: 'java', color: '#B07219' },
-  { ext: 'go', color: '#00ADD8' },
-  { ext: 'rs', color: '#DEA584' },
-  { ext: 'sql', color: '#4479A1' },
-  { ext: 'css', color: '#1572B6' },
-  { ext: 'html', color: '#E34F26' },
-  { ext: 'xml', color: '#0066CC' },
-  { ext: 'toml', color: '#9C4221' },
-  { ext: 'env', color: '#ECD53F' },
+  // 表格类 - 保持绿色系，代表数据/表格
+  { ext: 'xls', color: '#2E7D32' },   // 深绿，稳重
+  { ext: 'xlsx', color: '#43A047' },  // 鲜绿，现代
+
+  // 文档/标记类 - 蓝色系，代表文档/信息
+  { ext: 'md', color: '#0288D1' },    // 天蓝，轻量标记
+  { ext: 'doc', color: '#1E88E5' },   // 经典蓝
+  { ext: 'docx', color: '#1E88E5' },
+  { ext: 'txt', color: '#757575' },   // 灰，纯文本
+
+  // 演示类 - 橙色/红色系，代表演讲/热情
+  { ext: 'ppt', color: '#E64A19' },   // 深橙红
+  { ext: 'pptx', color: '#F4511E' },
+
+  // 脚本/代码类 - 黄/橙/青，代表动态/逻辑
+  { ext: 'js', color: '#F7DF1E' },    // JS黄
+  { ext: 'ts', color: '#3178C6' },    // TS蓝
+  { ext: 'py', color: '#3776AB' },    // Python蓝
+  { ext: 'sh', color: '#4EAA25' },    // 终端绿
+  { ext: 'java', color: '#B07219' },  // Java棕褐
+  { ext: 'go', color: '#00ADD8' },    // Go浅蓝
+  { ext: 'rs', color: '#DEA584' },    // Rust橙褐
+
+  // 配置/数据类 - 紫/金/蓝灰，代表结构化
+  { ext: 'yaml', color: '#CB171E' },  // YAML红（源于官方标识）
+  { ext: 'yml', color: '#CB171E' },
+  { ext: 'json', color: '#F9A825' },  // 琥珀金，数据交换
+  { ext: 'toml', color: '#9C4221' },  // 棕，配置
+  { ext: 'env', color: '#546E7A' },   // 蓝灰，环境变量
+  { ext: 'xml', color: '#FF6600' },   // 橙，标记语言
+
+  // 样式/前端类 - 专用品牌色
+  { ext: 'css', color: '#1572B6' },   // CSS蓝
+  { ext: 'html', color: '#E34F26' },  // HTML橙
+
+  // 数据库类 - 专属蓝
+  { ext: 'sql', color: '#4479A1' },   // SQL蓝灰
 ]
 
 /** 匹配不到后缀时的默认颜色 */
