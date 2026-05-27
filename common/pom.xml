@@ -115,6 +115,12 @@
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-client</artifactId>
         </dependency>
+        <!--weaviate-->
+        <dependency>
+            <groupId>io.weaviate</groupId>
+            <artifactId>client</artifactId>
+            <version>5.3.0</version>
+        </dependency>
 
         <!-- JGit -->
         <dependency>

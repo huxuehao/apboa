@@ -55,7 +55,7 @@ jwt:
   secret: ${JWT_SECRET:ZJr8c2xF0y5b7yM+1H9v9cGZq6nZ5e0k5r3Cw7H8vJQ=}
 
 rag:
-  store:  # pgvector | milvus | qdrant | elasticsearch，向量存储类型
+  store:  # pgvector | milvus | qdrant | elasticsearch |weaviate，向量存储类型
   pgvector:
     url: jdbc:postgresql://127.0.0.1:5432/apboa_vector
     username: postgres
@@ -81,6 +81,12 @@ rag:
     index-prefix: apboa_rag
     connect-timeout: 5000
     socket-timeout: 60000
+  weaviate:
+    host: localhost
+    port: 8080
+    scheme: http
+    api-key: YOUR_API_KEY
+    class-prefix: ApboaRag
 
 mybatis-plus:
   mapper-locations: classpath*:com/hxh/apboa/**/mapper/**/*.xml

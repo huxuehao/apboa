@@ -207,25 +207,25 @@ Skill 和 Tool 模块甚至支持在线编写，编写即生效。
 
 ## 技术栈
 
-| 层级 | 技术选型 | 版本 |
-|------|----------|------|
-| **语言运行时** | Java | 21 LTS |
-| **后端框架** | Spring Boot | 3.4.9 |
-| **AI 框架** | AgentScope | 1.0.12 |
-| **ORM** | MyBatis-Plus | 3.5.7 |
-| **连接池** | Druid | 1.2.19 |
-| **数据库** | MySQL | 8.0 |
-| **缓存/集群** | Redis | 7 |
-| **向量数据库** | pgvector / Milvus / Qdrant / Elasticsearch | 可插拔 |
-| **脚本引擎** | Apache Groovy | 4.0 |
-| **前端框架** | Vue 3 + TypeScript | 3.5 / 5.9 |
-| **UI 组件库** | Ant Design Vue | 4.x |
-| **构建工具** | Vite | 7.x |
-| **状态管理** | Pinia | 3.x |
-| **代码编辑器** | CodeMirror 6 | 6.x |
-| **Markdown 渲染** | marked + highlight.js + KaTeX + Mermaid | - |
-| **图表** | ECharts 6 | - |
-| **容器化** | Docker + Docker Compose | - |
+| 层级 | 技术选型                                          | 版本 |
+|------|-----------------------------------------------|------|
+| **语言运行时** | Java                                          | 21 LTS |
+| **后端框架** | Spring Boot                                   | 3.4.9 |
+| **AI 框架** | AgentScope                                    | 1.0.12 |
+| **ORM** | MyBatis-Plus                                  | 3.5.7 |
+| **连接池** | Druid                                         | 1.2.19 |
+| **数据库** | MySQL                                         | 8.0 |
+| **缓存/集群** | Redis                                         | 7 |
+| **向量数据库** | pgvector / Milvus / Qdrant / Elasticsearch / Weaviate | 可插拔 |
+| **脚本引擎** | Apache Groovy                                 | 4.0 |
+| **前端框架** | Vue 3 + TypeScript                            | 3.5 / 5.9 |
+| **UI 组件库** | Ant Design Vue                                | 4.x |
+| **构建工具** | Vite                                          | 7.x |
+| **状态管理** | Pinia                                         | 3.x |
+| **代码编辑器** | CodeMirror 6                                  | 6.x |
+| **Markdown 渲染** | marked + highlight.js + KaTeX + Mermaid       | - |
+| **图表** | ECharts 6                                     | - |
+| **容器化** | Docker + Docker Compose                       | - |
 
 ---
 
@@ -344,7 +344,7 @@ pnpm run dev
 |------|----------|------|
 | 前后端分离部署 | 开发 / 测试环境 | 前端 Vite 开发服务器 + 后端 Spring Boot 独立运行 |
 | 一体化 JAR 部署 | 单机轻量部署 | 前端打包为静态资源嵌入 JAR，一个文件启动 |
-| Docker Compose 部署 | 生产环境推荐 | 一键启动 MySQL + Redis + pgvector + 前后端全套服务，支持切换 Elasticsearch 向量库 |
+| Docker Compose 部署 | 生产环境推荐 | 一键启动 MySQL + Redis + pgvector + 前后端全套服务 |
 | Dockerfile 自定义 | 私有化定制部署 | 支持离线镜像仓库、资源限制、非 root 用户等安全配置 |
 
 ### Docker Compose 快速部署
