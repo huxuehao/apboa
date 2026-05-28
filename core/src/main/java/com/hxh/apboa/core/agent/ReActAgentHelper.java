@@ -80,22 +80,17 @@ public class ReActAgentHelper {
      */
     public ReActAgent getReActAgent(AgentDefinition definition) {
         Model model = chatModelFactory.getModel(definition);
+        Toolkit toolkit = toolkitFactory.getToolkit(definition);
         ReActAgent.Builder builder = ReActAgent.builder()
                 .name(definition.getAgentCode())
                 .description(FuncUtils.isEmpty(definition.getDescription()) ? definition.getName() : definition.getDescription())
                 .maxIters(definition.getMaxIterations())
                 .model(model)
-                .sysPrompt(agentSysPromptFactory.getAgentSysPrompt(definition));
-
-        SkillBox skillBox = skillBoxFactory.getSkillBox(definition);
-        if (skillBox != null) {
-            builder.skillBox(skillBox);
-        }
-
-        Toolkit toolkit = toolkitFactory.getToolkit(definition);
-        if (toolkit != null) {
-            builder.toolkit(toolkit);
-        }
+                .sysPrompt(agentSysPromptFactory.getAgentSysPrompt(definition))
+                .toolkit(toolkit)
+                .skillBox(toolkit != null
+                        ? skillBoxFactory.getSkillBox(definition, toolkit)
+                        : skillBoxFactory.getSkillBox(definition));
 
         KnowledgeWrapper knowledgeWrapper = knowledgeFactory.getKnowledge(definition);
         if (knowledgeWrapper != null) {
@@ -179,12 +174,6 @@ public class ReActAgentHelper {
         builder.toolExecutionContext(context);
 
         // 构建reActAgent
-        ReActAgent reActAgent = builder.build();
-
-        if (skillBox != null) {
-            skillBoxFactory.configureCodeExecution(skillBox, definition.getId());
-        }
-
-        return reActAgent;
+        return builder.build();
     }
 }

@@ -47,7 +47,17 @@ public class SkillBoxFactory {
      * @return SkillBox
      */
     public SkillBox getSkillBox(AgentDefinition agentDefinition) {
-        SkillBox skillBox = new SkillBox(new Toolkit());
+        return getSkillBox(agentDefinition, new Toolkit());
+    }
+
+    /**
+     * 获取SkillBox
+     *
+     * @param agentDefinition 智能体定义
+     * @return SkillBox
+     */
+    public SkillBox getSkillBox(AgentDefinition agentDefinition, Toolkit toolkit) {
+        SkillBox skillBox = new SkillBox(toolkit);
 
         // 注册技能包
         List<Long> skillPackageIds = agentSkillPackageService.getSkillPackageIds(agentDefinition.getId());
@@ -56,6 +66,8 @@ public class SkillBoxFactory {
         }
 
         registerSkills(skillBox, skillPackageIds);
+
+        configureCodeExecution(skillBox, agentDefinition.getId());
 
         return skillBox;
     }
