@@ -54,7 +54,7 @@ public class KnowledgeBaseConfigServiceImpl extends ServiceImpl<KnowledgeBaseCon
             return null;
         }
 
-        return knowledgeBaseConfigs.getFirst();
+        return knowledgeBaseConfigs.get(0);
     }
 
     @Override

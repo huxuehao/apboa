@@ -34,7 +34,7 @@ public class ChatModelFactory {
                     // 降序
                     models.sort((o1, o2) -> o2.order() - o1.order());
                     // 获取优先级最高的实现
-                    MODEL_MAP.put(provider, models.getFirst());
+                    MODEL_MAP.put(provider, models.get(0));
                 });
     }
 

@@ -103,7 +103,7 @@ public class AguiRequestProcessor {
                 boolean isUserMsg = "user".equalsIgnoreCase(
                         input.getMessages().isEmpty()
                                 ? "none"
-                                : input.getMessages().getFirst().getRole());
+                                : input.getMessages().get(0).getRole());
                 // 成立条件：是用户消息且记忆不为空
                 if (isUserMsg && reActAgent.getMemory() != null) {
                     reActAgent.getMemory().clear();
@@ -151,7 +151,7 @@ public class AguiRequestProcessor {
             return null;
         }
 
-        String agent_definition_sql = String.format("SELECT * FROM %s WHERE id = %s", TableConst.AGENT, chatSessions.getFirst().getAgentId());
+        String agent_definition_sql = String.format("SELECT * FROM %s WHERE id = %s", TableConst.AGENT, chatSessions.get(0).getAgentId());
         List<AgentDefinition> AgentDefinitions = jdbcTemplate.query(agent_definition_sql, (rs, rowNum) -> {
             AgentDefinition agentDefinition = new AgentDefinition();
             // 手动映射字段
@@ -164,7 +164,7 @@ public class AguiRequestProcessor {
             return null;
         }
 
-        return AgentDefinitions.getFirst();
+        return AgentDefinitions.get(0);
     }
 
     /**

@@ -272,8 +272,8 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
 
         accountRoleService.saveBatch(accountRoles);
 
-        AuthInterceptor.setUserRole(id, roles.getFirst());
-        senRoleChangeNoticeUseWs(String.valueOf(id), roles.getFirst());
+        AuthInterceptor.setUserRole(id, roles.get(0));
+        senRoleChangeNoticeUseWs(String.valueOf(id), roles.get(0));
 
         return true;
     }

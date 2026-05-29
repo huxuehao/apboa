@@ -179,16 +179,25 @@ public class R<T> implements Serializable {
     }
 
     private static boolean arrayEquals(Object o1, Object o2) {
-        return switch (o1) {
-            case Object[] objects when o2 instanceof Object[] -> Arrays.equals(objects, (Object[]) o2);
-            case boolean[] booleans when o2 instanceof boolean[] -> Arrays.equals(booleans, (boolean[]) o2);
-            case byte[] bytes when o2 instanceof byte[] -> Arrays.equals(bytes, (byte[]) o2);
-            case char[] chars when o2 instanceof char[] -> Arrays.equals(chars, (char[]) o2);
-            case double[] doubles when o2 instanceof double[] -> Arrays.equals(doubles, (double[]) o2);
-            case float[] floats when o2 instanceof float[] -> Arrays.equals(floats, (float[]) o2);
-            case int[] ints when o2 instanceof int[] -> Arrays.equals(ints, (int[]) o2);
-            case long[] longs when o2 instanceof long[] -> Arrays.equals(longs, (long[]) o2);
-            default -> o1 instanceof short[] && o2 instanceof short[] && Arrays.equals((short[]) o1, (short[]) o2);
-        };
+        if (o1 instanceof Object[] && o2 instanceof Object[]) {
+            return Arrays.equals((Object[]) o1, (Object[]) o2);
+        } else if (o1 instanceof boolean[] && o2 instanceof boolean[]) {
+            return Arrays.equals((boolean[]) o1, (boolean[]) o2);
+        } else if (o1 instanceof byte[] && o2 instanceof byte[]) {
+            return Arrays.equals((byte[]) o1, (byte[]) o2);
+        } else if (o1 instanceof char[] && o2 instanceof char[]) {
+            return Arrays.equals((char[]) o1, (char[]) o2);
+        } else if (o1 instanceof double[] && o2 instanceof double[]) {
+            return Arrays.equals((double[]) o1, (double[]) o2);
+        } else if (o1 instanceof float[] && o2 instanceof float[]) {
+            return Arrays.equals((float[]) o1, (float[]) o2);
+        } else if (o1 instanceof int[] && o2 instanceof int[]) {
+            return Arrays.equals((int[]) o1, (int[]) o2);
+        } else if (o1 instanceof long[] && o2 instanceof long[]) {
+            return Arrays.equals((long[]) o1, (long[]) o2);
+        } else if (o1 instanceof short[] && o2 instanceof short[]) {
+            return Arrays.equals((short[]) o1, (short[]) o2);
+        }
+        return false;
     }
 }

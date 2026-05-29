@@ -24,7 +24,7 @@ public class AgentSysPromptFactory {
         // 降序
         implementations.sort((o1, o2) -> o2.order() - o1.order());
         // 获取优先级最高的实现
-        this.primaryAgentSysPrompt = implementations.getFirst();
+        this.primaryAgentSysPrompt = implementations.get(0);
     }
 
     public String getAgentSysPrompt(AgentDefinition agentDefinition) {

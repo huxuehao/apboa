@@ -97,7 +97,7 @@ public class StorageProtocolServiceImpl extends ServiceImpl<StorageProtocolMappe
         if (FuncUtils.isEmpty(list) || list.size() > 1) {
             throw new RuntimeException("存储配置不存在唯一一个有效的配置");
         }
-        return list.getFirst();
+        return list.get(0);
     }
 
     /**

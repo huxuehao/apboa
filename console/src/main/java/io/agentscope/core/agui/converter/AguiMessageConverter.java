@@ -140,7 +140,7 @@ public class AguiMessageConverter {
     public List<Msg> toMsgList(List<AguiMessage> aguiMessages) {
         List<Msg> message = aguiMessages.stream().map(this::toMsg).collect(Collectors.toList());
 
-        if ("user".equals(aguiMessages.getLast().getRole())) {
+        if ("user".equals(aguiMessages.get(aguiMessages.size() - 1).getRole())) {
             fullMultimodalMsg(message);
         }
 
@@ -203,7 +203,7 @@ public class AguiMessageConverter {
             });
 
             // 移除 message 中最后一条消息，并构建新的文本 ContentBlock
-            String content = message.removeLast().getTextContent();
+            String content = message.remove(message.size() - 1).getTextContent();
             if (content != null && !content.isEmpty()) {
                 // 去除
                 String[] split = content.split("@==##::::##==@", 2);
