@@ -423,9 +423,9 @@ docker compose up -d
 
 ## 社区交流
 
-| Apboa 交流群 1（已满） | Apboa 交流群 2 | Apboa 交流群 3 |
+| Apboa 交流群 1（已满） | Apboa 交流群 2（已满） | Apboa 交流群 3 |
 |:--:|:--:|:--:|
-| ![交流群1](image/image-20260508235150666.png) | ![交流群2](image/image-20260521093906069.png) | ![交流群3](image/image-20260521093957855.png) |
+| ![交流群1](image/image-20260508235150666.png) | ![交流群2](image/image-20260521093906069.png) | ![image-20260529085603098](image/image-20260529085603098.png) |
 
 ---
 

@@ -26,7 +26,6 @@ import io.agentscope.core.model.Model;
 import io.agentscope.core.state.StatePersistence;
 import io.agentscope.core.plan.PlanNotebook;
 import io.agentscope.core.rag.model.RetrieveConfig;
-import io.agentscope.core.skill.SkillBox;
 import io.agentscope.core.studio.StudioManager;
 import io.agentscope.core.studio.StudioMessageHook;
 import io.agentscope.core.tool.ToolExecutionContext;
