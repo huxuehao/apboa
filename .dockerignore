@@ -1,0 +1,14 @@
+.git
+.gitnexus
+.agents
+.claude
+
+**/node_modules
+**/.pnpm-store
+**/dist
+**/dist-main
+**/dist-doc
+**/target
+
+docker/data
+docker/logs
