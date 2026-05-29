@@ -128,6 +128,17 @@ public class AgentDefinition extends BaseEntity {
     private JsonNode memoryCompressionConfig;
 
     /**
+     * 是否启用长期记忆（Mem0）
+     */
+    private Boolean enableLongTermMemory;
+
+    /**
+     * 长期记忆配置（JSON格式）
+     */
+    @TableField(typeHandler = JsonNodeTypeHandler.class)
+    private JsonNode longTermMemoryConfig;
+
+    /**
      * 是否启用结构化输出
      */
     private Boolean structuredOutputEnabled;

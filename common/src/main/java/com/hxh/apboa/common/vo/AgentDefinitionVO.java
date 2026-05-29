@@ -50,6 +50,8 @@ public class AgentDefinitionVO implements SerializableEnable {
     private Boolean enableMemory;
     private Boolean enableMemoryCompression;
     private JsonNode memoryCompressionConfig;
+    private Boolean enableLongTermMemory;
+    private JsonNode longTermMemoryConfig;
     private Boolean structuredOutputEnabled;
     private StructuredOutputReminder structuredOutputReminder;
     private JsonNode structuredOutputSchema;

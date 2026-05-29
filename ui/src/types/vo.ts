@@ -72,6 +72,8 @@ export interface AgentDefinitionVO {
   enableMemoryCompression: boolean
   showToolProcess: boolean
   memoryCompressionConfig: Record<string, unknown> | null
+  enableLongTermMemory: boolean
+  longTermMemoryConfig: Record<string, unknown> | null
   structuredOutputEnabled: boolean
   structuredOutputSchema: Record<string, unknown> | null
   structuredOutputReminder: 'PROMPT' | 'TOOL_CHOICE'

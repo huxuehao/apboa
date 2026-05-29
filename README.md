@@ -14,7 +14,7 @@
 </p>
 <p align="center">
   可视化智能体构建 · 多模型统一接入 · 全生命周期管理<br/>
-  Tool · Skill · MCP · RAG · Hook · A2A · Human-in-the-Loop<br/>
+  Tool · Skill · MCP · RAG · Hook · A2A · Long-Term Memory · Human-in-the-Loop<br/>
   多节点集群 · API Key · 容器化隔离部署
 </p>
 
@@ -116,6 +116,17 @@ Skill 和 Tool 模块甚至支持在线编写，编写即生效。
 | **MCP** | 接入 MCP 生态工具 | HTTP / SSE / STDIO 三传输协议 |
 | **RAG** | 知识增强生成 | 本地知识库 / 百炼 / Dify / RagFlow |
 | **Hook** | 生命周期钩子控制 | 硬编码 / 在线编写热更新 |
+| **Long-Term Memory** | 跨会话持久化记忆 | Mem0 / ReMe（阿里通义千问）/ 百炼记忆库 |
+
+### 长期记忆（Long-Term Memory）
+
+智能体可启用跨会话持久化记忆，在多次对话间保持对用户偏好、历史交互的持续记忆。支持三种记忆服务：
+
+- **Mem0**：开源长期记忆框架，支持 Platform 和 Self-hosted 两种部署方式
+- **ReMe**：基于阿里通义千问的记忆服务
+- **百炼记忆库**：基于阿里云百炼平台的记忆库服务
+
+记忆类型通过策略模式可插拔扩展，用户标识从登录上下文自动获取，无需额外配置。
 
 ### 原生 Markdown 渲染引擎
 
