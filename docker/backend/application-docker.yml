@@ -82,6 +82,19 @@ rag:
     scheme: ${WEAVIATE_SCHEME:http}
     api-key: ${WEAVIATE_API_KEY:}
     class-prefix: ${WEAVIATE_CLASS_PREFIX:ApboaRag}
+  multimodal-parser:
+    enabled: ${RAG_MULTIMODAL_PARSER_ENABLED:false}
+    base-url: ${RAG_MULTIMODAL_PARSER_BASE_URL:}
+    api-key: ${RAG_MULTIMODAL_PARSER_API_KEY:}
+    env-var-name: ${RAG_MULTIMODAL_PARSER_ENV_VAR_NAME:}
+    model: ${RAG_MULTIMODAL_PARSER_MODEL:}
+    prompt: ${RAG_MULTIMODAL_PARSER_PROMPT:}
+    max-images-per-document: ${RAG_MULTIMODAL_PARSER_MAX_IMAGES:8}
+    max-pdf-pages: ${RAG_MULTIMODAL_PARSER_MAX_PDF_PAGES:4}
+    max-ppt-slides: ${RAG_MULTIMODAL_PARSER_MAX_PPT_SLIDES:8}
+    image-max-width: ${RAG_MULTIMODAL_PARSER_IMAGE_MAX_WIDTH:1600}
+    timeout-seconds: ${RAG_MULTIMODAL_PARSER_TIMEOUT_SECONDS:60}
+    buffer-size-mb: ${RAG_MULTIMODAL_PARSER_BUFFER_SIZE_MB:20}
 
 mybatis-plus:
   mapper-locations: classpath*:com/hxh/apboa/**/mapper/**/*.xml

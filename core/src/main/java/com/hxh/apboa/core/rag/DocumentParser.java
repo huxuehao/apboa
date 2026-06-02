@@ -5,13 +5,17 @@ import com.hxh.apboa.core.rag.parser.impl.PptParser;
 import com.hxh.apboa.core.rag.parser.impl.TikaParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
 /**
- * 描述：文档解析器入口，根据文件类型路由到对应的专用解析器
+ * 文档解析入口，根据文件类型路由到专用解析器，并在配置启用时追加多模态解析结果。
  *
  * @author huxuehao
  */
@@ -27,11 +31,20 @@ public class DocumentParser {
     );
 
     private final PptParser pptParser = new PptParser();
-    private final ExcelParser excelParser = new ExcelParser();
     private final TikaParser tikaParser = new TikaParser();
+    private final MultimodalDocumentParser multimodalDocumentParser;
+
+    public DocumentParser() {
+        this.multimodalDocumentParser = null;
+    }
+
+    @Autowired
+    public DocumentParser(ObjectProvider<MultimodalDocumentParser> multimodalDocumentParserProvider) {
+        this.multimodalDocumentParser = multimodalDocumentParserProvider.getIfAvailable();
+    }
 
     /**
-     * 判断文件类型是否受支持
+     * 判断文件类型是否受支持。
      */
     public boolean isNotSupported(String fileName) {
         String ext = extractExtension(fileName);
@@ -39,10 +52,10 @@ public class DocumentParser {
     }
 
     /**
-     * 解析文档输入流，提取纯文本内容
+     * 解析文档输入流，提取可用于 RAG 的文本内容。
      *
      * @param inputStream 文档输入流
-     * @param fileName    文件名（用于日志和类型推断）
+     * @param fileName    文件名
      * @return 解析后的文本内容
      */
     public String parse(InputStream inputStream, String fileName) {
@@ -50,34 +63,64 @@ public class DocumentParser {
     }
 
     /**
-     * 解析文档输入流，提取纯文本内容
+     * 解析文档输入流，提取可用于 RAG 的文本内容。
      *
-     * @param inputStream   文档输入流
-     * @param fileName      文件名（用于日志和类型推断）
-     * @param rowDelimiter  行分隔符，用于 Excel 等表格文档，在每行后追加此分隔符以便后续分块
+     * @param inputStream  文档输入流
+     * @param fileName     文件名
+     * @param rowDelimiter 行分隔符，用于 Excel 等表格文档
      * @return 解析后的文本内容
      */
     public String parse(InputStream inputStream, String fileName, String rowDelimiter) {
+        byte[] fileBytes = readAllBytes(inputStream, fileName);
         String ext = extractExtension(fileName);
         if (ext == null || !SUPPORTED_TYPES.contains(ext)) {
             throw new RuntimeException("不支持的文件类型: " + fileName);
         }
 
         try {
+            String text;
             if (EXCEL_TYPES.contains(ext)) {
+                ExcelParser excelParser = new ExcelParser();
                 excelParser.setRowDelimiter(rowDelimiter);
-                return excelParser.parse(inputStream, fileName, tikaParser::parse);
+                text = excelParser.parse(new ByteArrayInputStream(fileBytes), fileName,
+                        (fallbackStream, fallbackFileName) -> tikaParser.parse(
+                                new ByteArrayInputStream(fileBytes), fallbackFileName, null));
             } else if (PPT_TYPES.contains(ext)) {
-                return pptParser.parse(inputStream, fileName, tikaParser::parse);
+                text = pptParser.parse(new ByteArrayInputStream(fileBytes), fileName,
+                        (fallbackStream, fallbackFileName) -> tikaParser.parse(
+                                new ByteArrayInputStream(fileBytes), fallbackFileName, null));
             } else {
-                return tikaParser.parse(inputStream, fileName, null);
+                text = tikaParser.parse(new ByteArrayInputStream(fileBytes), fileName, null);
             }
+            return appendMultimodalContent(fileBytes, fileName, text);
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
             log.error("文档解析失败, fileName={}", fileName, e);
             throw new RuntimeException("文档解析失败: " + fileName, e);
         }
+    }
+
+    private byte[] readAllBytes(InputStream inputStream, String fileName) {
+        try {
+            return inputStream.readAllBytes();
+        } catch (IOException e) {
+            throw new RuntimeException("读取文档失败: " + fileName, e);
+        }
+    }
+
+    private String appendMultimodalContent(byte[] fileBytes, String fileName, String text) {
+        if (multimodalDocumentParser == null || !multimodalDocumentParser.isEnabled()) {
+            return text;
+        }
+        String multimodalText = multimodalDocumentParser.parse(fileBytes, fileName);
+        if (multimodalText == null || multimodalText.isBlank()) {
+            return text;
+        }
+        if (text == null || text.isBlank()) {
+            return multimodalText;
+        }
+        return text + "\n\n---\n\n" + multimodalText;
     }
 
     private String extractExtension(String fileName) {
