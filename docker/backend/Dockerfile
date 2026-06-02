@@ -18,6 +18,7 @@ COPY console/pom.xml ./console/
 COPY core/pom.xml ./core/
 COPY job/pom.xml ./job/
 COPY ui/pom.xml ./ui/
+COPY security/pom.xml ./security/
 COPY websocket/pom.xml ./websocket/
 # 二级模块 pom（biz 子模块）
 COPY biz/a2a/pom.xml ./biz/a2a/
@@ -36,6 +37,7 @@ COPY biz/sk/pom.xml ./biz/sk/
 COPY biz/skill/pom.xml ./biz/skill/
 COPY biz/studio/pom.xml ./biz/studio/
 COPY biz/tool/pom.xml ./biz/tool/
+COPY security/script-security/pom.xml ./security/script-security/
 
 # 复制 Maven 私有仓库配置（在线模式为空壳，离线模式用户编辑）
 COPY docker/maven/settings.xml /root/.m2/settings.xml
