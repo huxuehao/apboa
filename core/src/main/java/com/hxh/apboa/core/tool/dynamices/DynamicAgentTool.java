@@ -85,8 +85,8 @@ public class DynamicAgentTool implements AgentTool {
     public Mono<ToolResultBlock> callAsync(ToolCallParam param) {
         return Mono.fromCallable(() -> {
             try {
-                // 获取工具执行参数
-                List<Object> args = getObjects(param);
+                // 获取工具执行参数（Map<String, Object> 形式，按参数名取值）
+                Map<String, Object> params = getParams(param);
 
                 // 拿到动态工具的实例
                 IDynamicAgentTool dynamicAgentTool = ToolInstanceLoadFactory
@@ -98,9 +98,9 @@ public class DynamicAgentTool implements AgentTool {
                 if (needsAgentContext(dynamicAgentTool)) {
                     // 获取 AgentContext
                     AgentContext agentContext = param.getContext().get(AgentContext.class);
-                    result = dynamicAgentTool.execute(agentContext, args.toArray());
+                    result = dynamicAgentTool.execute(agentContext, params);
                 } else {
-                    result = dynamicAgentTool.execute(args.toArray());
+                    result = dynamicAgentTool.execute(params);
                 }
 
                 return ToolResultBlock.of(
@@ -122,7 +122,7 @@ public class DynamicAgentTool implements AgentTool {
     private boolean needsAgentContext(IDynamicAgentTool tool) {
         try {
             // 检查是否重写了带 AgentContext 的方法
-            Method method = tool.getClass().getMethod("execute", AgentContext.class, Object[].class);
+            Method method = tool.getClass().getMethod("execute", AgentContext.class, Map.class);
             // 如果方法声明的类不是 IDynamicAgentTool 接口，说明被重写了
             return method.getDeclaringClass() != IDynamicAgentTool.class;
         } catch (NoSuchMethodException e) {
@@ -131,25 +131,33 @@ public class DynamicAgentTool implements AgentTool {
     }
 
     /**
-     * 获取工具执行参数
+     * 获取工具执行参数（Map 形式，按参数名取值）
      *
      * @param param 工具调用参数
-     * @return 工具执行参数
+     * @return 工具执行参数 Map
      */
-    private List<Object> getObjects(ToolCallParam param) {
-        List<Object> args = new LinkedList<>();
+    private Map<String, Object> getParams(ToolCallParam param) {
+        Map<String, Object> params = new HashMap<>();
         Map<String, Object> input = param.getInput();
         JsonNode inputSchema = toolConfig.getInputSchema();
 
-        if (input != null && !input.isEmpty() && inputSchema != null && !inputSchema.isEmpty()) {
+        if (inputSchema != null && !inputSchema.isEmpty()) {
             inputSchema.forEach(jsonNode -> {
                 if (jsonNode.has("name") && !jsonNode.get("name").asText().trim().isEmpty()) {
                     String name = jsonNode.get("name").textValue();
-                    args.add(input.getOrDefault(name, null));
+
+                    // 如果请求参数中包含该参数，则使用请求中的值
+                    if (input != null && input.containsKey(name)) {
+                        params.put(name, input.get(name));
+                    } else if (JsonUtils.getBooleanValue(jsonNode, "required", false)) {
+                        // 如果该参数被定义为必传字段，但请求参数中不包含该参数，则使用默认值
+                        String defaultValue = JsonUtils.getStringValue(jsonNode, "defaultValue", false);
+                        params.put(name, defaultValue);
+                    }
                 }
             });
         }
 
-        return args;
+        return params;
     }
 }

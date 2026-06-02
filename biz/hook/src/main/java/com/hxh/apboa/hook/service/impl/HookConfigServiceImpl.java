@@ -40,6 +40,7 @@ public class HookConfigServiceImpl extends ServiceImpl<HookConfigMapper, HookCon
     public void SyncConfigToDatabase(List<HookConfigWrapper> configWrappers) {
         lambdaUpdate().notIn(HookConfig::getClassPath, configWrappers.stream().map(HookConfigWrapper::getClassPath).toList())
                 .isNotNull(HookConfig::getClassPath)
+                .eq(HookConfig::getHookType, HookType.BUILTIN)
                 .remove();
         configWrappers.forEach(configWrapper -> {
             List<HookConfig> list = lambdaQuery().eq(HookConfig::getClassPath, configWrapper.getClassPath()).list();
