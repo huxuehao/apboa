@@ -546,7 +546,7 @@ const addItem = (e: Event) => {
               <PlusOutlined />
               添加参数
             </AButton>
-            <div v-if="formData.inputSchema.length > 1" class="text-placeholder">注意：参数顺序需要和代码中接收顺序保持一致</div>
+            <div v-if="formData.inputSchema.length > 1" class="text-placeholder">注意：参数名就是方法参数 param 的 key</div>
           </div>
         </AFormItem>
 
@@ -555,7 +555,7 @@ const addItem = (e: Event) => {
             v-if="isEdit"
             style="margin-bottom: 15px"
             type="warning"
-            message="点击新增卡片，参考模板代码中 execute 参数的写法，尽快修改当前方法参数。目前对旧写法将继续兼容，但已弃用"
+            message="点击新增卡片，参考模板代码中 execute 第二个参数的写法，Object... args 写法不再兼容。"
             banner
             closable
           />
