@@ -50,22 +50,15 @@ public class EndPoint {
             IDynamicAgentTool dynamicAgentTool = ToolInstanceLoadFactory
                     .getInstanceLoader(toolConfig.getLanguage()).loadInstance(toolConfig.getCode());
 
-            List<Object> args_ = new LinkedList<>();
-            if (!args.isEmpty()) {
-                args.forEach((key, value) -> {
-                    args_.add(value);
-                });
-            }
-
             Object result;
 
             // 判断是否需要传递 agentContext
             if (needsAgentContext(dynamicAgentTool)) {
                 AgentContext agentContext = new AgentContext();
                 agentContext.setParams(Map.of());
-                result = dynamicAgentTool.execute(agentContext, args_.toArray());
+                result = dynamicAgentTool.execute(agentContext, args);
             } else {
-                result = dynamicAgentTool.execute(args_.toArray());
+                result = dynamicAgentTool.execute(args);
             }
 
             return R.data(result);
@@ -76,7 +69,7 @@ public class EndPoint {
     private boolean needsAgentContext(IDynamicAgentTool tool) {
         try {
             // 检查是否重写了带 AgentContext 的方法
-            Method method = tool.getClass().getMethod("execute", AgentContext.class, Object[].class);
+            Method method = tool.getClass().getMethod("execute", AgentContext.class, Map.class);
             // 如果方法声明的类不是 IDynamicAgentTool 接口，说明被重写了
             return method.getDeclaringClass() != IDynamicAgentTool.class;
         } catch (NoSuchMethodException e) {

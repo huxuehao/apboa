@@ -63,8 +63,8 @@
 在线工具目前支持同步工具。异步或流式工具请自行在 `com.hxh.apboa.core.tool.builtins` 包下编写。
 :::
 
-:::warning 重要
-在线编写工具时，**输入参数的顺序必须与 `execute` 方法中接收参数的顺序保持一致**。参数将按照定义的顺序依次传入 `args` 数组。
+:::tip 参数取值方式
+自定义工具的 `execute` 方法接收 `Map<String, Object> params` 参数，通过参数名（Key）取值，不依赖参数定义顺序。非必填参数未传入时，`params.get("参数名")` 返回 `null`。
 :::
 
 ### 其他操作
@@ -118,26 +118,28 @@
 
 ## 自定义工具开发
 
-### 参数顺序说明
+### 参数取值方式
 
-输入参数的顺序必须与 `execute` 方法中接收参数的顺序保持一致。
+自定义工具的 `execute` 方法接收 `Map<String, Object> params` 参数，通过参数名（Key）取值，不依赖参数定义顺序。
 
 **示例：**
 
-假设定义了以下参数 Schema（按顺序）：
-1. `num1` - 第一个数字
-2. `num2` - 第二个数字
-3. `operator` - 运算符
+假设定义了以下参数 Schema：
+- `num1` - 第一个数字
+- `num2` - 第二个数字
+- `operator` - 运算符
 
 在 `execute` 方法中：
 ```java
-public Object execute(Object... args) {
-    String num1Str = args[0].toString();   // 对应第一个参数
-    String num2Str = args[1].toString();   // 对应第二个参数
-    String operator = args[2].toString();  // 对应第三个参数
+public Object execute(Map<String, Object> params) {
+    String num1Str = (String) params.get("num1");
+    String num2Str = (String) params.get("num2");
+    String operator = (String) params.get("operator");
     // ...
 }
 ```
+
+> 非必填参数未传入时，`params.get("参数名")` 返回 `null`，请自行做空值判断。
 
 ### 完整示例：数学计算器
 
@@ -148,20 +150,20 @@ import java.util.*;
 public class MathCalculator implements IDynamicAgentTool {
 
     @Override
-    public Object execute(Object... args) {
+    public Object execute(Map<String, Object> params) {
         // 参数验证
-        if (args == null || args.length < 3) {
+        if (params == null || !params.containsKey("num1") || !params.containsKey("num2") || !params.containsKey("operator")) {
             Map<String, Object> errorMap = new HashMap<>();
-            errorMap.put("error", "参数不足，需要3个参数：数字1、数字2、运算符");
-            errorMap.put("required_format", "第一个参数: 数字1(字符串), 第二个参数: 数字2(字符串), 第三个参数: 运算符(字符串)");
+            errorMap.put("error", "参数不足，需要3个参数：num1、num2、operator");
+            errorMap.put("required_params", "num1(数字), num2(数字), operator(运算符)");
             return errorMap;
         }
 
         try {
-            // 获取参数（都是字符串类型）
-            String num1Str = args[0].toString();
-            String num2Str = args[1].toString();
-            String operator = args[2].toString();
+            // 通过参数名获取参数值
+            String num1Str = params.get("num1").toString();
+            String num2Str = params.get("num2").toString();
+            String operator = params.get("operator").toString();
 
             // 转换为数字
             double num1 = Double.parseDouble(num1Str);

@@ -96,6 +96,16 @@ rag:
     timeout-seconds: ${RAG_MULTIMODAL_PARSER_TIMEOUT_SECONDS:60}
     buffer-size-mb: ${RAG_MULTIMODAL_PARSER_BUFFER_SIZE_MB:20}
 
+# Toolkit 配置
+apboa:
+  tool:
+    # 是否允许并行执行多个工具，默认 false
+    parallel: ${TOOL_PARALLEL:false}
+    # 是否允许删除工具，默认 false
+    allow-tool-deletion: ${TOOL_ALLOW_DELETION:false}
+    # 工具执行超时时间（秒），默认 60 秒
+    execution-timeout-seconds: ${TOOL_EXECUTION_TIMEOUT_SECONDS:60}
+
 mybatis-plus:
   mapper-locations: classpath*:com/hxh/apboa/**/mapper/**/*.xml
   type-aliases-package: com.hxh.apboa.**.entity
