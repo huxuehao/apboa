@@ -110,7 +110,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     @Override
     public List<WorkspaceFileNode> listFiles(String sessionId) {
-        Path workspaceDir = getWorkspaceDir(sessionId);
+        validateSessionId(sessionId);
+        Path workspaceDir = Paths.get(SysConst.WORKSPACE_PATH, sessionId).toAbsolutePath().normalize();
         if (!Files.exists(workspaceDir)) {
             return Collections.emptyList();
         }

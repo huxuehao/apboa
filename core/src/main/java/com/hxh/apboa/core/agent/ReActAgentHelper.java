@@ -19,6 +19,8 @@ import com.hxh.apboa.core.tool.ToolkitFactory;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.hook.Hook;
 import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.memory.LongTermMemory;
+import io.agentscope.core.memory.LongTermMemoryMode;
 import io.agentscope.core.memory.autocontext.AutoContextConfig;
 import io.agentscope.core.memory.autocontext.AutoContextHook;
 import io.agentscope.core.memory.autocontext.AutoContextMemory;
@@ -151,10 +153,10 @@ public class ReActAgentHelper {
         }
 
         // 配置长期记忆
-        io.agentscope.core.memory.LongTermMemory longTermMemory = longTermMemoryFactory.createLongTermMemory(definition);
+        LongTermMemory longTermMemory = longTermMemoryFactory.createLongTermMemory(definition);
         if (longTermMemory != null) {
             builder.longTermMemory(longTermMemory);
-            io.agentscope.core.memory.LongTermMemoryMode memoryMode = longTermMemoryFactory.getMemoryMode(definition);
+            LongTermMemoryMode memoryMode = longTermMemoryFactory.getMemoryMode(definition);
             if (memoryMode != null) {
                 builder.longTermMemoryMode(memoryMode);
             }
