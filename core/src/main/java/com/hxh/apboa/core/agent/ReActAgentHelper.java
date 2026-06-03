@@ -10,6 +10,7 @@ import com.hxh.apboa.common.wrapper.KnowledgeWrapper;
 import com.hxh.apboa.core.agui.AgentContext;
 import com.hxh.apboa.core.hook.HooksFactory;
 import com.hxh.apboa.core.knowledge.KnowledgeFactory;
+import com.hxh.apboa.core.memory.LongTermMemoryFactory;
 import com.hxh.apboa.core.model.ChatModelFactory;
 import com.hxh.apboa.core.prompt.AgentSysPromptFactory;
 import com.hxh.apboa.core.skill.SkillBoxFactory;
@@ -51,6 +52,7 @@ public class ReActAgentHelper {
     private final ToolkitFactory toolkitFactory;
     private final KnowledgeFactory knowledgeFactory;
     private final StudioService studioService;
+    private final LongTermMemoryFactory longTermMemoryFactory;
 
     /**
      * 获取 ReActAgent
@@ -146,6 +148,18 @@ public class ReActAgentHelper {
                             .memoryManaged(true)
                             .planNotebookManaged(definition.getEnablePlanning() && isPlanActive)
                             .build());
+        }
+
+        // 配置长期记忆
+        io.agentscope.core.memory.LongTermMemory longTermMemory = longTermMemoryFactory.createLongTermMemory(definition);
+        if (longTermMemory != null) {
+            builder.longTermMemory(longTermMemory);
+            io.agentscope.core.memory.LongTermMemoryMode memoryMode = longTermMemoryFactory.getMemoryMode(definition);
+            if (memoryMode != null) {
+                builder.longTermMemoryMode(memoryMode);
+            }
+            // 异步记录长期记忆，避免阻塞主流程
+            builder.longTermMemoryAsyncRecord(true);
         }
 
         // 配置Studio

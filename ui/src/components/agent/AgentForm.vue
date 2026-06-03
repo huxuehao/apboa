@@ -83,6 +83,8 @@ const formData = ref({
     showToolProcess: true,
     enableMemoryCompression: false,
     memoryCompressionConfig: null as Record<string, unknown> | null,
+    enableLongTermMemory: false,
+    longTermMemoryConfig: null as Record<string, unknown> | null,
     structuredOutputEnabled: false,
     structuredOutputReminder: 'TOOL_CHOICE' as "TOOL_CHOICE" | "PROMPT",
     structuredOutputSchema: '',
@@ -128,6 +130,50 @@ const currentFormRef = computed(() => {
 })
 
 /**
+ * 获取指定记忆类型的默认配置
+ */
+function getDefaultMemoryConfig(type: string): Record<string, unknown> {
+  switch (type) {
+    case 'MEM0':
+      return {
+        memoryType: 'MEM0',
+        apiBaseUrl: 'https://api.mem0.ai',
+        apiKey: '',
+        apiType: 'platform',
+        memoryMode: 'BOTH'
+      }
+    case 'REME':
+      return {
+        memoryType: 'REME',
+        apiBaseUrl: 'https://localhost:8002',
+        memoryMode: 'BOTH',
+        timeout: 30
+      }
+    case 'BAILIAN':
+      return {
+        memoryType: 'BAILIAN',
+        apiKey: '',
+        memoryLibraryId: '',
+        projectId: '',
+        memoryMode: 'BOTH',
+        topK: 5,
+        minScore: 0.5,
+        enableRerank: false,
+        enableJudge: false,
+        enableRewrite: false
+      }
+    default:
+      return {
+        memoryType: 'MEM0',
+        apiBaseUrl: 'https://api.mem0.ai',
+        apiKey: '',
+        apiType: 'platform',
+        memoryMode: 'BOTH'
+      }
+  }
+}
+
+/**
  * 初始化表单数据
  */
 watch(
@@ -163,6 +209,18 @@ watch(
           mcpBindings: props.data.mcpBindings || [],
           subAgent: props.data.subAgent || []
         }
+        // 使用后端返回的 longTermMemoryConfig（已是按类型存储的嵌套格式），
+        // 如果为空则初始化为默认嵌套结构
+        let longTermMemoryConfig = props.data.longTermMemoryConfig
+        if (!longTermMemoryConfig) {
+          longTermMemoryConfig = {
+            MEM0: getDefaultMemoryConfig('MEM0'),
+            REME: getDefaultMemoryConfig('REME'),
+            BAILIAN: getDefaultMemoryConfig('BAILIAN'),
+            memoryType: 'MEM0'
+          }
+        }
+
         formData.value.advanced = {
           enablePlanning: props.data.enablePlanning,
           maxIterations: props.data.maxIterations || 50,
@@ -172,6 +230,8 @@ watch(
           showToolProcess: props.data.showToolProcess,
           enableMemoryCompression: props.data.enableMemoryCompression,
           memoryCompressionConfig: props.data.memoryCompressionConfig || null,
+          enableLongTermMemory: props.data.enableLongTermMemory || false,
+          longTermMemoryConfig: longTermMemoryConfig as Record<string, unknown> | null,
           structuredOutputEnabled: props.data.structuredOutputEnabled,
           structuredOutputReminder: props.data.structuredOutputReminder || 'TOOL_CHOICE',
           structuredOutputSchema: props.data.structuredOutputSchema ? JSON.stringify(props.data.structuredOutputSchema, null, 2) : '',
@@ -228,6 +288,8 @@ function resetForm() {
       showToolProcess: true,
       enableMemoryCompression: false,
       memoryCompressionConfig: null,
+      enableLongTermMemory: false,
+      longTermMemoryConfig: null,
       structuredOutputEnabled: false,
       structuredOutputReminder: 'TOOL_CHOICE',
       structuredOutputSchema: '',
@@ -308,6 +370,11 @@ async function handleSubmit() {
       enableMemory: formData.value.advanced.enableMemory,
       enableMemoryCompression: formData.value.advanced.enableMemoryCompression,
       memoryCompressionConfig: formData.value.advanced.memoryCompressionConfig,
+      enableLongTermMemory: formData.value.advanced.enableLongTermMemory,
+      // 发送完整的嵌套结构，包含所有类型的配置和 memoryType 字段
+      longTermMemoryConfig: formData.value.advanced.enableLongTermMemory && formData.value.advanced.longTermMemoryConfig
+        ? formData.value.advanced.longTermMemoryConfig
+        : null,
       structuredOutputEnabled: formData.value.advanced.structuredOutputEnabled,
       structuredOutputReminder: formData.value.advanced.structuredOutputReminder,
       structuredOutputSchema: formData.value.advanced.structuredOutputEnabled && formData.value.advanced.structuredOutputSchema

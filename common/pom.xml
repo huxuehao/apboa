@@ -28,10 +28,10 @@
             <groupId>com.hxh.apboa</groupId>
             <artifactId>script-security</artifactId>
         </dependency>
-        <!--agentscope核心包-->
+        <!--agentscope聚合包（包含core、mem0、reme、bailian等所有扩展）-->
         <dependency>
             <groupId>io.agentscope</groupId>
-            <artifactId>agentscope-core</artifactId>
+            <artifactId>agentscope</artifactId>
             <version>${agentscope.version}</version>
         </dependency>
         <!--agui扩展-->
@@ -57,6 +57,12 @@
         <dependency>
             <groupId>io.agentscope</groupId>
             <artifactId>agentscope-extensions-studio</artifactId>
+            <version>${agentscope.version}</version>
+        </dependency>
+        <!--mem0 长期记忆扩展-->
+        <dependency>
+            <groupId>io.agentscope</groupId>
+            <artifactId>agentscope-extensions-mem0</artifactId>
             <version>${agentscope.version}</version>
         </dependency>
         <!--模型依赖-->
