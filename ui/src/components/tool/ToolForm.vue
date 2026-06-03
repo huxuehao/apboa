@@ -135,7 +135,7 @@ import org.springframework.stereotype.Component;
 public class CustomTool implements IDynamicAgentTool {
 
     @Override
-    public Object execute(AgentContext context, Object... args) {
+    public Object execute(AgentContext context, Map<String,Object> param) {
         // 返回结果Map
         Map<String, Object> resMap = new HashMap<>();
 

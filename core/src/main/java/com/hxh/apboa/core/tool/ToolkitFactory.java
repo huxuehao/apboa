@@ -17,11 +17,9 @@ import com.hxh.apboa.core.tool.dynamices.DynamicAgentTool;
 import com.hxh.apboa.core.workspace.tool.SearchReplaceFileTool;
 import com.hxh.apboa.tool.service.AgentToolService;
 import com.hxh.apboa.tool.service.ToolService;
-import io.agentscope.core.model.ExecutionConfig;
 import io.agentscope.core.tool.Toolkit;
 import io.agentscope.core.tool.ToolkitConfig;
 import io.agentscope.core.tool.subagent.SubAgentConfig;
-import java.time.Duration;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -44,6 +42,7 @@ public class ToolkitFactory {
     private final AgentDefinitionService agentDefinitionService;
     private final AgentCodeExecutionService agentCodeExecutionService;
     private final CodeExecutionConfigService codeExecutionConfigService;
+    private final CustomToolkitConfig customToolkitConfig;
 
     public ToolkitFactory(ToolService toolService,
                           AgentToolService agentToolService,
@@ -55,7 +54,8 @@ public class ToolkitFactory {
                           McpClientFactory mcpClientFactory,
                           AgentCodeExecutionService agentCodeExecutionService,
                           CodeExecutionConfigService codeExecutionConfigService,
-                          AgentDefinitionService agentDefinitionService) {
+                          AgentDefinitionService agentDefinitionService,
+                          CustomToolkitConfig customToolkitConfig) {
         this.toolService = toolService;
         this.agentToolService = agentToolService;
         this.agentSubAgentService = agentSubAgentService;
@@ -65,6 +65,7 @@ public class ToolkitFactory {
         this.agentCodeExecutionService = agentCodeExecutionService;
         this.codeExecutionConfigService = codeExecutionConfigService;
         this.agentDefinitionService = agentDefinitionService;
+        this.customToolkitConfig = customToolkitConfig;
     }
 
     public Toolkit getToolkit(AgentDefinition agentDefinition) {
@@ -117,12 +118,12 @@ public class ToolkitFactory {
     public Toolkit getToolkit(List<Long> toolIds) {
         Toolkit toolkit = new Toolkit(
                 ToolkitConfig.builder()
-                        // 禁止并行执行多个工具
-                        .parallel(false)
-                        // 禁止删除工具
-                        .allowToolDeletion(false)
-                        // 设置工具执行超时时间为 60 秒
-                        .executionConfig(ExecutionConfig.builder().timeout(Duration.ofSeconds(60)).build())
+                        // 是否允许并行执行多个工具
+                        .parallel(customToolkitConfig.isParallel())
+                        // 是否允许删除工具
+                        .allowToolDeletion(customToolkitConfig.isAllowToolDeletion())
+                        // 设置工具执行超时时间
+                        .executionConfig(customToolkitConfig.toExecutionConfig())
                         .build());
         if (!toolIds.isEmpty()) {
             // 获取是否开启记忆
