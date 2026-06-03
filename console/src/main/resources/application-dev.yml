@@ -87,6 +87,19 @@ rag:
     scheme: http
     api-key: YOUR_API_KEY
     class-prefix: ApboaRag
+  multimodal-parser:
+    enabled: false
+    base-url: http://127.0.0.1:8000
+    api-key:
+    env-var-name:
+    model: Qwen/Qwen3-VL-8B-Instruct
+    prompt:
+    max-images-per-document: 8
+    max-pdf-pages: 4
+    max-ppt-slides: 8
+    image-max-width: 1600
+    timeout-seconds: 60
+    buffer-size-mb: 20
 
 mybatis-plus:
   mapper-locations: classpath*:com/hxh/apboa/**/mapper/**/*.xml
