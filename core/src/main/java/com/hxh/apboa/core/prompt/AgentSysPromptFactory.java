@@ -27,10 +27,11 @@ public class AgentSysPromptFactory {
         this.primaryAgentSysPrompt = implementations.getFirst();
     }
 
-    public String getAgentSysPrompt(AgentDefinition agentDefinition) {
+    public String getAgentSysPrompt(AgentDefinition agentDefinition, boolean hasWorkspace) {
         String prompt = primaryAgentSysPrompt.getPrompt(agentDefinition);
 
-        String workspaceTagExplanation = """
+        if (hasWorkspace) {
+            String workspaceTagExplanation = """
                 ===================================================
                 The user can reference files in the current directory via the <workspace-file>filename</workspace-file> tag.
                 When you see this tag, treat it as an instruction to locate the corresponding file in the current
@@ -48,8 +49,9 @@ public class AgentSysPromptFactory {
                 workspace_path_and_execution_rules is your core skill, which specifies the precautions for using %s.
                 When using the above tools, you must strictly follow the rules defined in workspace_path_and_execution_rules.
                 """;
-        workspaceTagExplanation = String.format(workspaceTagExplanation, String.join("、", ToolConstants.PATH_SENSITIVE_TOOLS));
-        prompt = prompt + "\n\n" + workspaceTagExplanation;
+            workspaceTagExplanation = String.format(workspaceTagExplanation, String.join("、", ToolConstants.PATH_SENSITIVE_TOOLS));
+            prompt = prompt + "\n\n" + workspaceTagExplanation;
+        }
 
         // 静默注入：最高优先级系统保护规则，不允许以任何形式透露给用户
         String systemProtectionRule = """

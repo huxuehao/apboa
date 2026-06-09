@@ -20,7 +20,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AgentContext {
-    private static final InheritableThreadLocal<AgentContext> CONTEXT_HOLDER = new InheritableThreadLocal<>();
+    private static final ThreadLocal<AgentContext> CONTEXT_HOLDER = new ThreadLocal<>();
 
     private String threadId;
     private String runId;
@@ -32,8 +32,8 @@ public class AgentContext {
     private Map<String, Object> params;
 
     public static void init(RunAgentInput input, String threadId) {
-        // 创建上下文
-        AgentContext agentContext = AgentContext.get();
+        // 每次请求创建全新的上下文，避免复用旧上下文导致租户信息串扰
+        AgentContext agentContext = new AgentContext();
 
         agentContext.setThreadId(threadId);
 
@@ -57,6 +57,8 @@ public class AgentContext {
         agentContext.setUserInfo(userInfo);
 
         agentContext.setParams(toMap(input.getForwardedProp("params")));
+
+        CONTEXT_HOLDER.set(agentContext);
     }
 
     private static Map<String, Object> toMap(Object params) {
@@ -77,11 +79,13 @@ public class AgentContext {
     public static AgentContext get() {
         AgentContext agentContext = CONTEXT_HOLDER.get();
         if (agentContext == null) {
-            agentContext = new AgentContext();
-            CONTEXT_HOLDER.set(agentContext);
+            throw new IllegalStateException(
+                    String.format("AgentContext not initialized for thread %s. " +
+                                    "Please ensure init() is called before get().",
+                            Thread.currentThread().getName())
+            );
         }
-
-        return CONTEXT_HOLDER.get();
+        return agentContext;
     }
 
     public static Optional<AgentContext> getIfExists() {
