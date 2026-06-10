@@ -1,7 +1,5 @@
 package com.hxh.apboa.core.skill;
 
-import com.hxh.apboa.agent.service.AgentCodeExecutionService;
-import com.hxh.apboa.agent.service.CodeExecutionConfigService;
 import com.hxh.apboa.common.consts.SysConst;
 import com.hxh.apboa.common.entity.AgentDefinition;
 import com.hxh.apboa.common.entity.CodeExecutionConfig;
@@ -37,27 +35,29 @@ public class SkillBoxFactory {
     private final SkillPackageService skillPackageService;
     private final SkillFileService skillFileService;
     private final AgentSkillPackageService agentSkillPackageService;
-    private final AgentCodeExecutionService agentCodeExecutionService;
-    private final CodeExecutionConfigService codeExecutionConfigService;
 
     /**
      * 获取SkillBox
      *
      * @param agentDefinition 智能体定义
+     * @param codeExecutionConfig   代码执行配置
      * @return SkillBox
      */
-    public SkillBox getSkillBox(AgentDefinition agentDefinition) {
-        return getSkillBox(agentDefinition, new Toolkit());
+    public SkillBox getSkillBox(AgentDefinition agentDefinition, CodeExecutionConfig codeExecutionConfig) {
+        return getSkillBox(agentDefinition, new Toolkit(), codeExecutionConfig);
     }
 
     /**
      * 获取SkillBox
      *
      * @param agentDefinition 智能体定义
+     * @param codeExecutionConfig   代码执行配置
      * @return SkillBox
      */
-    public SkillBox getSkillBox(AgentDefinition agentDefinition, Toolkit toolkit) {
+    public SkillBox getSkillBox(AgentDefinition agentDefinition, Toolkit toolkit, CodeExecutionConfig codeExecutionConfig) {
         SkillBox skillBox = new SkillBox(toolkit);
+
+        configureCodeExecution(skillBox, codeExecutionConfig);
 
         // 注册技能包
         List<Long> skillPackageIds = agentSkillPackageService.getSkillPackageIds(agentDefinition.getId());
@@ -66,8 +66,6 @@ public class SkillBoxFactory {
         }
 
         registerSkills(skillBox, skillPackageIds);
-
-        configureCodeExecution(skillBox, agentDefinition.getId());
 
         return skillBox;
     }
@@ -120,15 +118,10 @@ public class SkillBoxFactory {
      * 配置代码执行环境
      *
      * @param skillBox SkillBox
-     * @param agentDefinitionId 智能体定义ID
+     * @param config   代码执行配置
      */
-    public void configureCodeExecution(SkillBox skillBox, Long agentDefinitionId) {
-        if (skillBox == null) {
-            return;
-        }
-        // 获取代码执行配置
-        CodeExecutionConfig config = getCodeExecutionConfig(agentDefinitionId);
-        if (config == null) {
+    public void configureCodeExecution(SkillBox skillBox, CodeExecutionConfig config) {
+        if (skillBox == null || config == null) {
             return;
         }
 
@@ -161,20 +154,6 @@ public class SkillBoxFactory {
         }
 
         codeExecutionBuilder.enable();
-    }
-
-    /**
-     * 获取代码执行配置
-     *
-     * @param agentDefinitionId 智能体定义ID
-     * @return 代码执行配置
-     */
-    private CodeExecutionConfig getCodeExecutionConfig(Long agentDefinitionId) {
-        Long codeExecutionId = agentCodeExecutionService.getCodeExecutionIdByAgentId(agentDefinitionId);
-        if (codeExecutionId == null) {
-            return null;
-        }
-        return codeExecutionConfigService.getById(codeExecutionId);
     }
 
     /**

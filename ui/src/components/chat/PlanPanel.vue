@@ -143,7 +143,7 @@ onBeforeUnmount(() => {
       </div>
       <div class="plan-panel-header-right">
         <span class="plan-panel-count">
-          {{ activeCount }}/{{ plan.subtasks.length }} tasks
+          {{ plan.subtasks.length - activeCount }}/{{ plan.subtasks.length }} Tasks
         </span>
         <span class="plan-panel-arrow">
           <DownOutlined v-if="isExpanded" />

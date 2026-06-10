@@ -24,7 +24,7 @@ spring:
     redis:
       host: 127.0.0.1
       port: 6379
-      password: YOUR_PASSWORD
+      password: Redis@dhcc123.com
       database: 7
       timeout: 2000ms
       lettuce:
@@ -38,7 +38,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/apboa?useSSL=false&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
     username: root
-    password: YOUR_PASSWORD
+    password: root123123
     druid:
       initial-size: 5
       min-idle: 5

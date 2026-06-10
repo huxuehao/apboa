@@ -1,8 +1,11 @@
 package com.hxh.apboa.core.agent;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.hxh.apboa.agent.service.AgentCodeExecutionService;
 import com.hxh.apboa.agent.service.AgentDefinitionService;
+import com.hxh.apboa.agent.service.CodeExecutionConfigService;
 import com.hxh.apboa.common.entity.AgentDefinition;
+import com.hxh.apboa.common.entity.CodeExecutionConfig;
 import com.hxh.apboa.common.enums.AgentType;
 import com.hxh.apboa.common.util.FuncUtils;
 import com.hxh.apboa.common.util.JsonUtils;
@@ -19,6 +22,8 @@ import com.hxh.apboa.core.tool.ToolkitFactory;
 import io.agentscope.core.ReActAgent;
 import io.agentscope.core.hook.Hook;
 import io.agentscope.core.memory.InMemoryMemory;
+import io.agentscope.core.memory.LongTermMemory;
+import io.agentscope.core.memory.LongTermMemoryMode;
 import io.agentscope.core.memory.autocontext.AutoContextConfig;
 import io.agentscope.core.memory.autocontext.AutoContextHook;
 import io.agentscope.core.memory.autocontext.AutoContextMemory;
@@ -53,6 +58,8 @@ public class ReActAgentHelper {
     private final KnowledgeFactory knowledgeFactory;
     private final StudioService studioService;
     private final LongTermMemoryFactory longTermMemoryFactory;
+    private final AgentCodeExecutionService agentCodeExecutionService;
+    private final CodeExecutionConfigService codeExecutionConfigService;
 
     /**
      * 获取 ReActAgent
@@ -82,16 +89,17 @@ public class ReActAgentHelper {
     public ReActAgent getReActAgent(AgentDefinition definition) {
         Model model = chatModelFactory.getModel(definition);
         Toolkit toolkit = toolkitFactory.getToolkit(definition);
+        CodeExecutionConfig codeExecutionConfig = getCodeExecutionConfig(definition.getId());
         ReActAgent.Builder builder = ReActAgent.builder()
                 .name(definition.getAgentCode())
                 .description(FuncUtils.isEmpty(definition.getDescription()) ? definition.getName() : definition.getDescription())
                 .maxIters(definition.getMaxIterations())
                 .model(model)
-                .sysPrompt(agentSysPromptFactory.getAgentSysPrompt(definition))
+                .sysPrompt(agentSysPromptFactory.getAgentSysPrompt(definition, codeExecutionConfig != null))
                 .toolkit(toolkit)
                 .skillBox(toolkit != null
-                        ? skillBoxFactory.getSkillBox(definition, toolkit)
-                        : skillBoxFactory.getSkillBox(definition));
+                        ? skillBoxFactory.getSkillBox(definition, toolkit, codeExecutionConfig)
+                        : skillBoxFactory.getSkillBox(definition, codeExecutionConfig));
 
         KnowledgeWrapper knowledgeWrapper = knowledgeFactory.getKnowledge(definition);
         if (knowledgeWrapper != null) {
@@ -151,10 +159,10 @@ public class ReActAgentHelper {
         }
 
         // 配置长期记忆
-        io.agentscope.core.memory.LongTermMemory longTermMemory = longTermMemoryFactory.createLongTermMemory(definition);
+        LongTermMemory longTermMemory = longTermMemoryFactory.createLongTermMemory(definition);
         if (longTermMemory != null) {
             builder.longTermMemory(longTermMemory);
-            io.agentscope.core.memory.LongTermMemoryMode memoryMode = longTermMemoryFactory.getMemoryMode(definition);
+            LongTermMemoryMode memoryMode = longTermMemoryFactory.getMemoryMode(definition);
             if (memoryMode != null) {
                 builder.longTermMemoryMode(memoryMode);
             }
@@ -188,5 +196,19 @@ public class ReActAgentHelper {
 
         // 构建reActAgent
         return builder.build();
+    }
+
+    /**
+     * 获取代码执行配置
+     *
+     * @param agentDefinitionId 智能体定义ID
+     * @return 代码执行配置
+     */
+    private CodeExecutionConfig getCodeExecutionConfig(Long agentDefinitionId) {
+        Long codeExecutionId = agentCodeExecutionService.getCodeExecutionIdByAgentId(agentDefinitionId);
+        if (codeExecutionId == null) {
+            return null;
+        }
+        return codeExecutionConfigService.getById(codeExecutionId);
     }
 }
