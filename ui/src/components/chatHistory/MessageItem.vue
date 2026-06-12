@@ -182,6 +182,7 @@ const openPreview = (index: number) => {
     </template>
     <!-- 媒体预览组件 -->
     <MediaPreview
+      v-if="previewVisible"
       v-model:visible="previewVisible"
       :items="parsedUserContent.files"
       :current-index="previewCurrentIndex"
