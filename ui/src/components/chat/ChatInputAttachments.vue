@@ -79,6 +79,7 @@ const handleRemove = (item: UploadedFileItem) => {
     </div>
 
     <MediaPreview
+      v-if="previewVisible"
       v-model:visible="previewVisible"
       :items="files"
       :current-index="previewCurrentIndex"
