@@ -423,9 +423,15 @@ docker compose up -d
 
 ## 社区交流
 
-| Apboa 交流群 1（已满） | Apboa 交流群 2（已满） | Apboa 交流群 3 |
-|:--:|:--:|:--:|
-| ![交流群1](image/image-20260508235150666.png) | ![交流群2](image/image-20260521093906069.png) | ![image-20260610234639342](image/image-20260610234639342.png) |
+<table>
+  <tr>
+    <td align="center"><strong>入群交流（备注 apboa）</strong></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="image/image-20260617193446946.png" width="200" alt="入群二维码"/></td>
+  </tr>
+</table>
+
 
 ---
 
