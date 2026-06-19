@@ -5,6 +5,28 @@
   </p>
 </p>
 
+---
+
+<h3 align="center">🚀🚀🚀 Apboa-Next 已正式发布！🚀🚀🚀</h3>
+
+<p align="center">
+  <strong>Apboa 的全面升级版 —— <a href="https://gitee.com/studioustiger/apboa-next">Apboa-Next</a> 现已开源！</strong>
+</p>
+
+<p align="center">
+  全新架构设计 · 更强性能表现 · 更丰富功能特性 · 更优开发体验
+</p>
+
+<p align="center">
+  <a href="https://gitee.com/studioustiger/apboa-next"><strong>👉 立即前往 Apboa-Next 仓库 →</strong></a>
+</p>
+
+<p align="center">
+  <em>新项目建议直接使用 Apboa-Next，当前仓库将继续维护但不再新增功能。</em>
+</p>
+
+---
+
 <p align="center">
   <a href="https://gitee.com/studioustiger/apboa/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" /></a>
   <img src="https://img.shields.io/badge/Java-21-orange.svg" alt="Java 21" />
