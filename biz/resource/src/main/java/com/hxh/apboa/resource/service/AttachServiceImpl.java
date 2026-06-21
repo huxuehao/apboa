@@ -244,12 +244,16 @@ public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> impleme
         FileBase64Wrapper wrapper = new FileBase64Wrapper();
 
         String extension = attach.getExtension();
-        String resultType = switch (extension) {
-            case String ext when paramsAdapter.getValue("ALLOW_IMAGE_FILE_TYPE").contains(ext) -> "IMAGE";
-            case String ext when paramsAdapter.getValue("ALLOW_AUDIO_FILE_TYPE").contains(ext) -> "AUDIO";
-            case String ext when paramsAdapter.getValue("ALLOW_VIDEO_FILE_TYPE").contains(ext) -> "VIDEO";
-            default -> null;
-        };
+        String resultType;
+        if (paramsAdapter.getValue("ALLOW_IMAGE_FILE_TYPE").contains(extension)) {
+            resultType = "IMAGE";
+        } else if (paramsAdapter.getValue("ALLOW_AUDIO_FILE_TYPE").contains(extension)) {
+            resultType = "AUDIO";
+        } else if (paramsAdapter.getValue("ALLOW_VIDEO_FILE_TYPE").contains(extension)) {
+            resultType = "VIDEO";
+        } else {
+            resultType = null;
+        }
 
         if (resultType != null) {
             wrapper.setModelType(ModelType.valueOf(resultType));
@@ -302,8 +306,8 @@ public class AttachServiceImpl extends ServiceImpl<AttachMapper, Attach> impleme
             if (protocols.size() != 1) {
                 throw new RuntimeException("所选附件存存在多种存储协议");
             }
-            if (!storageService.getProtocol().equals(protocols.getFirst())) {
-                throw new RuntimeException("所选文件存储协议为" + protocols.getFirst() + "，与当前启用的存储配置不匹配");
+            if (!storageService.getProtocol().equals(protocols.get(0))) {
+                throw new RuntimeException("所选文件存储协议为" + protocols.get(0) + "，与当前启用的存储配置不匹配");
             }
 
             // 下载附件并打成压缩包

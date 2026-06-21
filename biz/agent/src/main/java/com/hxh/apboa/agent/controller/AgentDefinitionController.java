@@ -85,7 +85,7 @@ public class AgentDefinitionController {
                         .eq(JobInfo::getType, "AGENT")
                         .eq(JobInfo::getBizId, String.valueOf(id)));
         if (agent.size() == 1) {
-            vo.setJobInfo(agent.getFirst());
+            vo.setJobInfo(agent.get(0));
         }
 
         return R.data(vo);
