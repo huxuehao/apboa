@@ -20,6 +20,7 @@ import io.agentscope.core.tool.coding.ShellCommandTool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -100,18 +101,54 @@ public class SkillBoxFactory {
                 .map(SkillFile::getContent)
                 .findFirst()
                 .orElse("");
+        List<SkillFile> resourceFiles = files.stream()
+                .filter(f -> f.getFileType() != SkillFileType.SKILL_MD)
+                .toList();
 
-        AgentSkill.Builder skillBuilder = AgentSkill.builder()
+        AgentSkill baseSkill = AgentSkill.builder()
                 .name(skillPackage.getName())
                 .description(skillPackage.getDescription())
-                .skillContent(skillContent);
+                .skillContent(skillContent)
+                .build();
+        AgentSkill.Builder skillBuilder = baseSkill.toBuilder()
+                .skillContent(appendResourceUsageHint(baseSkill, resourceFiles));
 
         // 添加所有资源引用（references/examples/scripts 类型的文件）
-        files.stream()
-                .filter(f -> f.getFileType() != SkillFileType.SKILL_MD)
+        resourceFiles.stream()
                 .forEach(f -> skillBuilder.addResource(f.getFilePath(), f.getContent()));
 
         skillBox.registration().skill(skillBuilder.build()).apply();
+    }
+
+    static String appendResourceUsageHint(AgentSkill baseSkill, List<SkillFile> resourceFiles) {
+        if (resourceFiles == null || resourceFiles.isEmpty()) {
+            return baseSkill.getSkillContent();
+        }
+
+        List<String> resourcePaths = resourceFiles.stream()
+                .filter(f -> f.getFileType() != SkillFileType.SKILL_MD)
+                .map(SkillFile::getFilePath)
+                .filter(path -> path != null && !path.isBlank())
+                .map(path -> path.replace('\\', '/'))
+                .distinct()
+                .sorted(Comparator.naturalOrder())
+                .toList();
+        if (resourcePaths.isEmpty()) {
+            return baseSkill.getSkillContent();
+        }
+
+        String skillContent = baseSkill.getSkillContent();
+        StringBuilder hint = new StringBuilder(skillContent == null ? "" : skillContent);
+        hint.append("\n\n---\n\n")
+                .append("## Skill Resources\n\n")
+                .append("When this skill refers to files in this directory, examples/, references/, or scripts/, ")
+                .append("treat them as skill resources, not workspace files. Load them with:\n\n")
+                .append("`load_skill_through_path(skillId=\"")
+                .append(baseSkill.getSkillId())
+                .append("\", path=\"<resource-path>\")`\n\n")
+                .append("Available resource paths:\n");
+        resourcePaths.forEach(path -> hint.append("- `").append(path).append("`\n"));
+        return hint.toString();
     }
 
     /**
